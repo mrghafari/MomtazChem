@@ -540,7 +540,7 @@ export default function CustomerProfileEdit() {
                     name="firstName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>نام</FormLabel>
+                        <FormLabel className="required-field">نام <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="نام" />
                         </FormControl>
@@ -553,7 +553,7 @@ export default function CustomerProfileEdit() {
                     name="lastName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>نام خانوادگی</FormLabel>
+                        <FormLabel className="required-field">نام خانوادگی <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="نام خانوادگی" />
                         </FormControl>
@@ -570,9 +570,9 @@ export default function CustomerProfileEdit() {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-2">
+                        <FormLabel className="flex items-center gap-2 required-field">
                           <Phone className="h-4 w-4" />
-                          شماره تلفن
+                          شماره تلفن <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <Input {...field} readOnly={!isCreateMode} className={isCreateMode ? "" : "bg-gray-50"} placeholder={isCreateMode ? "شماره تلفن" : ""} />
@@ -627,7 +627,7 @@ export default function CustomerProfileEdit() {
                       name="country"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>کشور</FormLabel>
+                          <FormLabel className="required-field">کشور <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
                             <Input {...field} placeholder="کشور" />
                           </FormControl>
@@ -640,7 +640,7 @@ export default function CustomerProfileEdit() {
                     name="province"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Province / محافظة</FormLabel>
+                        <FormLabel className="required-field">Province / محافظة <span className="text-red-500">*</span></FormLabel>
                         <Select 
                           onValueChange={(value) => {
                             console.log('🏛️ Province changing to:', value);
@@ -678,7 +678,7 @@ export default function CustomerProfileEdit() {
                     name="city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>City / مدينة</FormLabel>
+                        <FormLabel className="required-field">City / مدينة <span className="text-red-500">*</span></FormLabel>
                         <Select 
                           onValueChange={field.onChange} 
                           value={field.value}
@@ -707,9 +707,9 @@ export default function CustomerProfileEdit() {
                     name="address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-2">
+                        <FormLabel className="flex items-center gap-2 required-field">
                           <MapPin className="h-4 w-4" />
-                          آدرس کامل
+                          آدرس کامل <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <Textarea {...field} placeholder="آدرس کامل" rows={3} />
