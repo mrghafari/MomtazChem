@@ -43072,7 +43072,8 @@ momtazchem.com
       const suitableVehicles = vehicles.filter(vehicle => {
         // For multi-vehicle approach, any vehicle with positive capacity is potentially useful
         const weightOk = needsMultiVehicleApproach ? parseFloat(vehicle.maxWeightKg) > 0 : parseFloat(vehicle.maxWeightKg) >= finalWeightKg;
-        const volumeOk = parseFloat(vehicle.maxVolumeM3 || '999999') >= (Math.min(finalWeightKg, parseFloat(vehicle.maxWeightKg)) / 100); // Rough estimate
+        // Very lenient volume check - most chemicals don't need much volume
+        const volumeOk = parseFloat(vehicle.maxVolumeM3 || '0.1') >= 0.01; // Almost always true unless vehicle has no volume capacity
         
         // Check special requirements
         let specialOk = true;
@@ -43081,16 +43082,15 @@ momtazchem.com
         if (isRefrigerated && !vehicle.hasRefrigeration) specialOk = false;
         if (isFragile && !vehicle.canTransportFragile) specialOk = false;
         
-        // Check route type compatibility
+        // Check route type compatibility - be more lenient
         let routeOk = true;
-        if (vehicle.allowedRoutes) {
+        if (vehicle.allowedRoutes && vehicle.allowedRoutes.length > 0) {
           const allowedRoutes = Array.isArray(vehicle.allowedRoutes) 
             ? vehicle.allowedRoutes 
             : vehicle.allowedRoutes.split(',');
           routeOk = allowedRoutes.includes(routeType);
         }
         
-
         return weightOk && volumeOk && specialOk && routeOk;
       });
 
@@ -43147,24 +43147,90 @@ momtazchem.com
         
         // Weight utilization efficiency (prefer vehicles that use capacity well)
         const weightUtilization = finalWeightKg / parseFloat(vehicle.maxWeightKg);
-        score += weightUtilization * 40; // 40% weight for capacity utilization
         
-        // Cost efficiency (lower cost per unit is better)
-        const costPerKg = totalCost > 0 ? totalCost / finalWeightKg : 0;
-        score += costPerKg > 0 ? (1000 / costPerKg) * 30 : 10; // 30% weight for cost efficiency
+        // Give higher score for better weight utilization, but penalize over-capacity vehicles heavily
+        if (weightUtilization > 1) {
+          score = 0; // Cannot use vehicle that's over capacity
+        } else if (weightUtilization > 0.7) {
+          score += 50; // Excellent utilization
+        } else if (weightUtilization > 0.3) {
+          score += 35; // Good utilization  
+        } else if (weightUtilization > 0.1) {
+          score += 20; // Fair utilization
+        } else {
+          score += 5; // Poor utilization - heavily penalize over-sized vehicles
+        }
+        
+        // Cost efficiency - prefer lower total cost for small loads
+        const costScore = totalCost > 0 ? Math.max(0, 100 - (totalCost / 1000)) : 0;
+        score += costScore * 0.3;
+        
+        // Size appropriateness bonus - penalize vehicles that are too big for small loads
+        const maxCapacity = parseFloat(vehicle.maxWeightKg);
+        if (finalWeightKg < 100 && maxCapacity > 1000) {
+          score -= 20; // Heavy penalty for using large vehicles for tiny loads
+        } else if (finalWeightKg < 500 && maxCapacity > 5000) {
+          score -= 15; // Moderate penalty
+        } else if (finalWeightKg < 1000 && maxCapacity > 10000) {
+          score -= 10; // Light penalty
+        }
+        
+        // Vehicle type appropriateness for weight range and distance
+        const vehicleName = vehicle.name?.toLowerCase() || '';
+        
+        // Distance-based restrictions
+        if (distance > 100) {
+          // Long distance trips - motorcycles not suitable
+          if (vehicleName.includes('موتور')) {
+            score -= 100; // Very heavy penalty for long distance motorcycle usage
+          }
+        } else if (distance > 50) {
+          // Medium distance - moderate penalty for motorcycles
+          if (vehicleName.includes('موتور')) {
+            score -= 30;
+          }
+        }
+        
+        if (finalWeightKg < 50) {
+          // Very small loads - prefer small vehicles but consider distance
+          if (distance <= 50) {
+            // Short distance - motorcycles OK for very light loads
+            if (vehicleName.includes('موتور')) {
+              score += 30;
+            } else if (vehicleName.includes('پیکاپ') || vehicleName.includes('ون')) {
+              score += 20;
+            }
+          } else {
+            // Medium to long distance - prefer vans/pickups over motorcycles
+            if (vehicleName.includes('پیکاپ') || vehicleName.includes('ون')) {
+              score += 25;
+            } else if (vehicleName.includes('موتور')) {
+              score += 5; // Minimal bonus, already penalized above for long distance
+            }
+          }
+          
+          if (vehicleName.includes('کامیون') || vehicleName.includes('تانکر') || vehicleName.includes('اتوبوس')) {
+            score -= 25;
+          }
+        } else if (finalWeightKg < 500) {
+          // Small loads - prefer medium vehicles
+          if (vehicleName.includes('ون') || vehicleName.includes('پیکاپ')) {
+            score += 20;
+          } else if (vehicleName.includes('تانکر') || vehicleName.includes('اتوبوس')) {
+            score -= 15;
+          }
+          // Motorcycles not suitable for loads > 50kg regardless of distance
+          if (vehicleName.includes('موتور')) {
+            score -= 30;
+          }
+        }
         
         // Fuel efficiency bonus
         const fuelEfficiency = parseFloat(vehicle.fuelConsumptionL100km || '20');
-        score += (30 - fuelEfficiency) * 1; // Bonus for better fuel economy
+        score += Math.max(0, (30 - fuelEfficiency)) * 0.5;
         
         // Priority bonus from template
-        score += parseFloat(vehicle.priority || '0') * 5;
-        
-        // Speed bonus for urgent deliveries
-        const maxSpeed = parseFloat(vehicle.maxSpeedKmh || '80');
-        if (routeType === 'highway') {
-          score += maxSpeed * 0.1;
-        }
+        score += parseFloat(vehicle.priority || '0') * 2;
         
         // Special capability bonus
         if (isHazardous && vehicle.canTransportHazardous) score += 10;
@@ -43179,7 +43245,7 @@ momtazchem.com
           weightCost: weightCost,
           score: Math.round(score * 100) / 100,
           weightUtilization: Math.round(weightUtilization * 100),
-          costPerKg: Math.round(costPerKg * 100) / 100
+          costPerKg: Math.round((totalCost / finalWeightKg) * 100) / 100
         };
       });
 
