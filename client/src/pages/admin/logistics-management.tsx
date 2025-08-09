@@ -657,6 +657,12 @@ const LogisticsManagement = () => {
   const handleVehicleAssignment = async (order: LogisticsOrder) => {
     try {
       console.log('🚚 [ENHANCED VEHICLE ASSIGNMENT] Starting for order:', order.orderNumber);
+      console.log('🚚 [ORDER DETAILS] Weight:', order.calculatedWeight || order.totalWeight, 'kg');
+      
+      // Reset state first
+      setAvailableFleetVehicles([]);
+      setSelectedVehicleDetails(null);
+      setSuitableVehiclesData(null);
       
       // Get all suitable vehicles identified during checkout
       const suitableVehiclesResponse = await fetch(`/api/orders/${order.customerOrderId}/suitable-vehicles`, {
@@ -697,7 +703,7 @@ const LogisticsManagement = () => {
       let readyVehicles = [];
       if (readyVehiclesResponse.ok) {
         const readyVehiclesData = await readyVehiclesResponse.json();
-        readyVehicles = readyVehiclesData.vehicles || [];
+        readyVehicles = readyVehiclesData.vehicles || readyVehiclesData.data || [];
         console.log('🚛 [READY VEHICLES] Found ready vehicles:', readyVehicles.length);
         
         // Filter by weight capacity and availability
@@ -709,6 +715,18 @@ const LogisticsManagement = () => {
         
         setAvailableFleetVehicles(availableVehicles);
         console.log('✅ [FILTERED VEHICLES] Available vehicles for', orderWeight, 'kg:', availableVehicles.length);
+      } else {
+        console.error('🚫 [READY VEHICLES API ERROR]', readyVehiclesResponse.status);
+        if (readyVehiclesResponse.status === 401) {
+          toast({
+            title: "خطای احراز هویت",
+            description: "لطفاً مجدداً وارد سیستم شوید",
+            variant: "destructive"
+          });
+          return;
+        }
+        setAvailableFleetVehicles([]);
+        console.log('⚠️ [FALLBACK] No vehicles available due to API error');
         
         // Enhanced vehicle matching based on checkout selection
         if (checkoutVehicleDetails) {
@@ -4400,7 +4418,15 @@ const LogisticsManagement = () => {
                 {availableFleetVehicles.length === 0 ? (
                   <div className="text-center py-8">
                     <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-orange-400" />
-                    <p className="text-orange-600">هیچ خودروی مناسبی از این نوع در دسترس نیست</p>
+                    <p className="text-orange-600 mb-4">هیچ خودروی مناسبی از این نوع در دسترس نیست</p>
+                    <div className="text-sm text-gray-500 space-y-1">
+                      <p>دلایل احتمالی:</p>
+                      <ul className="list-disc list-inside text-right">
+                        <li>تمام خودروهای این نوع در حال استفاده هستند</li>
+                        <li>ظرفیت بارگیری خودروهای آماده کمتر از وزن محموله است</li>
+                        <li>نیاز به اضافه کردن خودروی جدید به ناوگان شرکت</li>
+                      </ul>
+                    </div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

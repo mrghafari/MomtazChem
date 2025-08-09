@@ -33520,13 +33520,17 @@ momtazchem.com
       const mappedVehicles = vehicles.map(vehicle => ({
         id: vehicle.id,
         vehicleTemplateId: vehicle.vehicleTemplateId,
-        vehicleType: vehicle.vehicleTemplateName, // For backward compatibility
+        vehicleType: vehicle.vehicleType || vehicle.vehicleTemplateName, // Use actual vehicle type
+        vehicleName: vehicle.vehicleTemplateName, // Display name
         vehicleTemplateName: vehicle.vehicleTemplateName,
         vehicleTemplateNameEn: vehicle.vehicleTemplateNameEn,
         licensePlate: vehicle.licensePlate,
+        plateNumber: vehicle.licensePlate, // Alias for backward compatibility
         driverName: vehicle.driverName,
+        driverPhone: vehicle.driverMobile, // Alias for backward compatibility
         driverMobile: vehicle.driverMobile,
         loadCapacity: parseFloat(vehicle.loadCapacity || '0'),
+        maxWeight: parseFloat(vehicle.loadCapacity || '0'), // Alias for backward compatibility
         isAvailable: vehicle.isAvailable,
         currentLocation: vehicle.currentLocation,
         notes: vehicle.notes,
@@ -33536,7 +33540,7 @@ momtazchem.com
         updatedAt: vehicle.updatedAt.toISOString()
       }));
 
-      res.json({ success: true, data: mappedVehicles });
+      res.json({ success: true, vehicles: mappedVehicles, data: mappedVehicles });
     } catch (error) {
       console.error('Error fetching ready vehicles:', error);
       res.status(500).json({ success: false, message: 'Failed to fetch ready vehicles' });
