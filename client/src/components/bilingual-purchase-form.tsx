@@ -1727,53 +1727,58 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                             )}
                             {formatCurrency(discountedPrice)} {t.each}
                           </p>
-                          {/* Bulk purchase indicator */}
-                          {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && 
-                           quantity >= product.bulkPurchaseThreshold && (
-                            <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                              خرید عمده {product.bulkPurchaseDiscount}% تخفیف
-                            </Badge>
-                          )}
+
                         </div>
                       </div>
                       
-                      {/* Quantity Controls */}
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, quantity - 1)}
-                          className="h-7 w-7 p-0"
-                          title={t.decreaseQuantity}
-                          disabled={quantity <= 1}
-                        >
-                          <Minus className="w-3 h-3" />
-                        </Button>
-                        <span className="w-8 text-center text-sm font-medium">{quantity}</span>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            // Check stock availability before allowing increase
-                            if (!product.inStock || (product.stockQuantity || 0) <= 0) return;
-                            if (quantity >= (product.stockQuantity || 0)) return;
-                            onUpdateQuantity && onUpdateQuantity(product.id, quantity + 1);
-                          }}
-                          className="h-7 w-7 p-0"
-                          title={t.increaseQuantity}
-                          disabled={!product.inStock || (product.stockQuantity || 0) <= 0 || quantity >= (product.stockQuantity || 0)}
-                        >
-                          <Plus className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => onRemoveItem && onRemoveItem(product.id)}
-                          className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                          title={t.removeItem}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
+                      {/* Middle Section with Bulk Indicator and Quantity Controls */}
+                      <div className="flex flex-col items-center gap-2">
+                        {/* Bulk Purchase Indicator in Middle */}
+                        {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && 
+                         quantity >= product.bulkPurchaseThreshold && (
+                          <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1">
+                            🎉 خرید عمده
+                          </Badge>
+                        )}
+                        
+                        {/* Quantity Controls */}
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, quantity - 1)}
+                            className="h-7 w-7 p-0"
+                            title={t.decreaseQuantity}
+                            disabled={quantity <= 1}
+                          >
+                            <Minus className="w-3 h-3" />
+                          </Button>
+                          <span className="w-8 text-center text-sm font-medium">{quantity}</span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              // Check stock availability before allowing increase
+                              if (!product.inStock || (product.stockQuantity || 0) <= 0) return;
+                              if (quantity >= (product.stockQuantity || 0)) return;
+                              onUpdateQuantity && onUpdateQuantity(product.id, quantity + 1);
+                            }}
+                            className="h-7 w-7 p-0"
+                            title={t.increaseQuantity}
+                            disabled={!product.inStock || (product.stockQuantity || 0) <= 0 || quantity >= (product.stockQuantity || 0)}
+                          >
+                            <Plus className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => onRemoveItem && onRemoveItem(product.id)}
+                            className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            title={t.removeItem}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                     
