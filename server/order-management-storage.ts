@@ -697,12 +697,27 @@ export class OrderManagementStorage implements IOrderManagementStorage {
           phone: row.customerPhone,
         },
         
-        // Delivery Address information
+        // Delivery Address information - Extract from JSON if recipient fields are empty  
         shippingAddress: row.shippingAddress,
         billingAddress: row.billingAddress,
-        recipientName: row.recipientName,
-        recipientPhone: row.recipientPhone,
-        recipientAddress: row.recipientAddress,
+        recipientName: (() => {
+          if (row.recipientName) return row.recipientName;
+          try {
+            return row.shippingAddress ? JSON.parse(row.shippingAddress).name : null;
+          } catch { return null; }
+        })(),
+        recipientPhone: (() => {
+          if (row.recipientPhone) return row.recipientPhone;
+          try {
+            return row.shippingAddress ? JSON.parse(row.shippingAddress).phone : null;
+          } catch { return null; }
+        })(),
+        recipientAddress: (() => {
+          if (row.recipientAddress) return row.recipientAddress;
+          try {
+            return row.shippingAddress ? JSON.parse(row.shippingAddress).address : null;
+          } catch { return null; }
+        })(),
         deliveryNotes: row.deliveryNotes,
         
         // GPS Location data for distribution partner coordination
