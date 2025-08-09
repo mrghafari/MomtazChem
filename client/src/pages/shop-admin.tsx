@@ -67,6 +67,10 @@ export default function ShopAdmin() {
   const [reminderHour, setReminderHour] = useState("10");
   const [smsTemplateId, setSmsTemplateId] = useState("");
   const [emailTemplateId, setEmailTemplateId] = useState("");
+  
+  // State for editing reminders
+  const [editingReminder, setEditingReminder] = useState<any>(null);
+  const [isEditReminderDialogOpen, setIsEditReminderDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
@@ -274,6 +278,47 @@ export default function ShopAdmin() {
       toast({
         title: "خطا", 
         description: error.message || "خطا در حذف یادآوری",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update reminder mutation
+  const updateReminderMutation = useMutation({
+    mutationFn: async () => {
+      if (!editingReminder) return;
+      return apiRequest(`/api/shop/proforma-reminders/${editingReminder.id}`, {
+        method: "PUT",
+        body: {
+          reminderHour: parseInt(reminderHour),
+          daysBefore: parseInt(reminderDays),
+          messageTemplate: `یادآوری: مهلت پرداخت حواله شما ${reminderDays === "0" ? "امروز" : `${reminderDays} روز دیگر`} به پایان می‌رسد.`,
+          messageSubject: `یادآوری پرداخت حواله - ${reminderDays === "0" ? "روز پایان مهلت" : `${reminderDays} روز مانده`}`,
+          notificationMethod: "email",
+          isActive: true,
+          priority: parseInt(reminderDays) + 1,
+          smsTemplateId: smsTemplateId || null,
+          emailTemplateId: emailTemplateId || null
+        }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/proforma-reminders"] });
+      setEditingReminder(null);
+      setIsEditReminderDialogOpen(false);
+      setReminderDays("1");
+      setReminderHour("10");
+      setSmsTemplateId("");
+      setEmailTemplateId("");
+      toast({
+        title: "موفق",
+        description: "یادآوری با موفقیت بروزرسانی شد",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا",
+        description: error.message || "خطا در بروزرسانی یادآوری",
         variant: "destructive",
       });
     },
@@ -897,15 +942,32 @@ export default function ShopAdmin() {
                               </div>
                             )}
                           </div>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="text-red-600 hover:text-red-700"
-                            onClick={() => deleteReminderMutation.mutate(schedule.id)}
-                            disabled={deleteReminderMutation.isPending}
-                          >
-                            {deleteReminderMutation.isPending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                          </Button>
+                          <div className="flex items-center space-x-2 space-x-reverse">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-blue-600 hover:text-blue-700"
+                              onClick={() => {
+                                setEditingReminder(schedule);
+                                setReminderDays(schedule.days_before.toString());
+                                setReminderHour(schedule.reminder_hour.toString());
+                                setSmsTemplateId(schedule.sms_template_id ? schedule.sms_template_id.toString() : "");
+                                setEmailTemplateId(schedule.email_template_id ? schedule.email_template_id.toString() : "");
+                                setIsEditReminderDialogOpen(true);
+                              }}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => deleteReminderMutation.mutate(schedule.id)}
+                              disabled={deleteReminderMutation.isPending}
+                            >
+                              {deleteReminderMutation.isPending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                            </Button>
+                          </div>
                         </div>
                       ))}
                       
@@ -924,6 +986,113 @@ export default function ShopAdmin() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Edit Reminder Dialog */}
+            <Dialog open={isEditReminderDialogOpen} onOpenChange={setIsEditReminderDialogOpen}>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Edit className="w-5 h-5" />
+                    ویرایش یادآوری پرداخت
+                  </DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-reminder-days">روز قبل از پایان مهلت:</Label>
+                      <Input
+                        id="edit-reminder-days"
+                        type="number"
+                        min="0"
+                        max="10"
+                        value={reminderDays}
+                        onChange={(e) => setReminderDays(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-reminder-hour">ساعت ارسال:</Label>
+                      <Input
+                        id="edit-reminder-hour"
+                        type="number"
+                        min="0"
+                        max="23"
+                        value={reminderHour}
+                        onChange={(e) => setReminderHour(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-sms-template">قالب پیامک:</Label>
+                    <Select value={smsTemplateId} onValueChange={setSmsTemplateId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="انتخاب قالب پیامک" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">بدون قالب</SelectItem>
+                        {Array.isArray(smsTemplates) && smsTemplates.map((template: any) => (
+                          <SelectItem key={template.id} value={template.id.toString()}>
+                            {template.templateNumber} - {template.templateName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-email-template">قالب ایمیل:</Label>
+                    <Select value={emailTemplateId} onValueChange={setEmailTemplateId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="انتخاب قالب ایمیل" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">بدون قالب</SelectItem>
+                        {Array.isArray(emailTemplates) && emailTemplates.map((template: any) => (
+                          <SelectItem key={template.id} value={template.id.toString()}>
+                            {template.name} ({template.category})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2 space-x-reverse pt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsEditReminderDialogOpen(false);
+                        setEditingReminder(null);
+                        setReminderDays("1");
+                        setReminderHour("10");
+                        setSmsTemplateId("");
+                        setEmailTemplateId("");
+                      }}
+                    >
+                      انصراف
+                    </Button>
+                    <Button
+                      onClick={() => updateReminderMutation.mutate()}
+                      disabled={updateReminderMutation.isPending}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {updateReminderMutation.isPending ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin ml-2" />
+                          در حال بروزرسانی...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4 ml-2" />
+                          بروزرسانی
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+
           </TabsContent>
 
           {/* Inventory Tab */}
