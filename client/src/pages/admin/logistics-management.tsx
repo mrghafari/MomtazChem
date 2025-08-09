@@ -675,6 +675,12 @@ const LogisticsManagement = () => {
       setSelectedVehicleDetails(null);
       setSuitableVehiclesData(null);
       
+      // Set the selected order for vehicle assignment IMMEDIATELY
+      setSelectedOrderForVehicle(order);
+      
+      // Open the vehicle assignment dialog immediately
+      setIsVehicleAssignmentOpen(true);
+      
       // Get all suitable vehicles identified during checkout
       const suitableVehiclesResponse = await fetch(`/api/orders/${order.customerOrderId}/suitable-vehicles`, {
         credentials: 'include'
