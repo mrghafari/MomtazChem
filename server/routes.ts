@@ -7647,16 +7647,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             default_value = EXCLUDED.default_value,
             updated_at = NOW()
         `, [
-          setting.settingKey,
-          setting.settingValue,
-          setting.settingType,
-          setting.displayName,
-          setting.displayNameEn,
+          setting.setting_key || setting.settingKey,
+          setting.setting_value || setting.settingValue,
+          setting.setting_type || setting.settingType,
+          setting.display_name || setting.displayName,
+          setting.display_name_en || setting.displayNameEn,
           setting.description,
           setting.category,
-          setting.isPublic,
-          setting.validationRule,
-          setting.defaultValue
+          setting.is_public || setting.isPublic,
+          setting.validation_rule || setting.validationRule,
+          setting.default_value || setting.defaultValue
         ]);
       }
 
