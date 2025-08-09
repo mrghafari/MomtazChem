@@ -42409,6 +42409,8 @@ momtazchem.com
   app.post("/api/logistics/select-optimal-vehicle", async (req, res) => {
     try {
       const { 
+        orderNumber,
+        weightKg,
         orderWeightKg, 
         destinationCity, 
         routeType = 'urban',
@@ -42418,42 +42420,26 @@ momtazchem.com
         distanceKm = 0
       } = req.body;
 
+      // Handle both weightKg and orderWeightKg parameters
+      const finalWeightKg = weightKg || orderWeightKg;
+
       console.log('🚚 [SMART VEHICLE] Selection request:', {
-        orderWeightKg,
-        destinationCity,
+        orderNumber,
+        finalWeightKg,
         routeType,
-        isHazardous,
-        isRefrigerated,
-        isFragile,
         distanceKm
       });
 
       // Validate required fields
-      if (!orderWeightKg || !destinationCity) {
+      if (!finalWeightKg || !distanceKm) {
         return res.status(400).json({ 
           success: false, 
-          message: "وزن سفارش و شهر مقصد الزامی است" 
+          message: "وزن سفارش و مسافت الزامی است" 
         });
       }
 
-      // Get destination city info for distance calculation
-      let distance = distanceKm;
-      if (!distance && destinationCity) {
-        const destCity = await db.select()
-          .from(iraqiCities)
-          .where(
-            or(
-              eq(iraqiCities.nameEnglish, destinationCity),
-              eq(iraqiCities.nameArabic, destinationCity),
-              eq(iraqiCities.name, destinationCity)
-            )
-          )
-          .limit(1);
-        
-        if (destCity.length > 0) {
-          distance = parseFloat(destCity[0].distanceFromErbilKm || '0');
-        }
-      }
+      // Use provided distance directly
+      const distance = distanceKm;
 
       // Get all active vehicle templates
       const vehicles = await db.select().from(vehicleTemplates)
@@ -42471,8 +42457,8 @@ momtazchem.com
 
       // Filter suitable vehicles based on capacity and capabilities
       const suitableVehicles = vehicles.filter(vehicle => {
-        const weightOk = parseFloat(vehicle.maxWeightKg) >= orderWeightKg;
-        const volumeOk = parseFloat(vehicle.maxVolumeM3 || '999999') >= (orderWeightKg / 100); // Rough estimate
+        const weightOk = parseFloat(vehicle.maxWeightKg) >= finalWeightKg;
+        const volumeOk = parseFloat(vehicle.maxVolumeM3 || '999999') >= (finalWeightKg / 100); // Rough estimate
         
         // Check special requirements
         let specialOk = true;
@@ -42505,20 +42491,23 @@ momtazchem.com
       const scoredVehicles = suitableVehicles.map(vehicle => {
         // Calculate total cost
         const basePrice = parseFloat(vehicle.basePrice || '0');
-        const distanceCost = distance * parseFloat(vehicle.pricePerKm || '0');
-        const weightCost = orderWeightKg * parseFloat(vehicle.pricePerKg || '0');
-        const totalCost = basePrice + distanceCost + weightCost;
+        const pricePerKm = parseFloat(vehicle.pricePerKm || '0');
+        const distanceCost = distance * pricePerKm;
+        const weightCost = 0; // Most vehicles don't have weight-based pricing
+        const totalCost = basePrice + distanceCost;
+        
+
         
         // Calculate efficiency score (higher is better)
         let score = 0;
         
         // Weight utilization efficiency (prefer vehicles that use capacity well)
-        const weightUtilization = orderWeightKg / parseFloat(vehicle.maxWeightKg);
+        const weightUtilization = finalWeightKg / parseFloat(vehicle.maxWeightKg);
         score += weightUtilization * 40; // 40% weight for capacity utilization
         
         // Cost efficiency (lower cost per unit is better)
-        const costPerKg = totalCost / orderWeightKg;
-        score += (1000 / costPerKg) * 30; // 30% weight for cost efficiency
+        const costPerKg = totalCost > 0 ? totalCost / finalWeightKg : 0;
+        score += costPerKg > 0 ? (1000 / costPerKg) * 30 : 10; // 30% weight for cost efficiency
         
         // Fuel efficiency bonus
         const fuelEfficiency = parseFloat(vehicle.fuelConsumptionL100km || '20');
@@ -42543,7 +42532,7 @@ momtazchem.com
           totalCost: Math.round(totalCost * 100) / 100,
           basePrice,
           distanceCost: Math.round(distanceCost * 100) / 100,
-          weightCost: Math.round(weightCost * 100) / 100,
+          weightCost: weightCost,
           score: Math.round(score * 100) / 100,
           weightUtilization: Math.round(weightUtilization * 100),
           costPerKg: Math.round(costPerKg * 100) / 100
@@ -42565,12 +42554,10 @@ momtazchem.com
 
       // Save selection to history (optional - only if user is authenticated)
       try {
-        const orderNumber = `QUOTE-${Date.now()}`; // Generate a quote number for non-order selections
-        
         const selectionData = {
-          orderNumber,
+          orderNumber: orderNumber || `QUOTE-${Date.now()}`,
           customerId: null, // Will be null for guest selections
-          orderWeightKg: orderWeightKg.toString(),
+          orderWeightKg: finalWeightKg.toString(),
           routeType,
           distanceKm: distance.toString(),
           isHazardous,
@@ -42589,12 +42576,12 @@ momtazchem.com
             totalCost: v.totalCost 
           })),
           selectionAlgorithm: 'smart_optimization',
-          selectionCriteria: `Weight: ${orderWeightKg}kg, Distance: ${distance}km, Route: ${routeType}`
+          selectionCriteria: `Weight: ${finalWeightKg}kg, Distance: ${distance}km, Route: ${routeType}`
         };
 
         console.log('🚚 [SMART VEHICLE] Attempting to save selection data:', JSON.stringify(selectionData, null, 2));
         await db.insert(vehicleSelectionHistory).values(selectionData);
-        console.log('🚚 [SMART VEHICLE] Selection saved to history:', orderNumber);
+        console.log('🚚 [SMART VEHICLE] Selection saved to history:', selectionData.orderNumber);
       } catch (historyError) {
         console.log('🚚 [SMART VEHICLE] History save failed (non-critical):', historyError.message);
         console.log('🚚 [SMART VEHICLE] Full error:', historyError);
@@ -42626,13 +42613,27 @@ momtazchem.com
           weightUtilization: v.weightUtilization
         })),
         selectionCriteria: {
-          orderWeightKg,
-          destinationCity,
+          orderWeightKg: finalWeightKg,
           distanceKm: distance,
           routeType,
           isHazardous,
           isRefrigerated,
           isFragile
+        },
+        data: {
+          selectedVehicle: {
+            id: selectedVehicle.id,
+            vehicleName: selectedVehicle.name,
+            vehicleType: selectedVehicle.type,
+            totalCost: selectedVehicle.totalCost,
+            basePrice: selectedVehicle.basePrice,
+            distanceCost: selectedVehicle.distanceCost,
+            weightCost: selectedVehicle.weightCost,
+            score: selectedVehicle.score,
+            weightUtilization: selectedVehicle.weightUtilization,
+            maxWeightKg: selectedVehicle.maxWeightKg,
+            maxVolumeM3: selectedVehicle.maxVolumeM3
+          }
         }
       });
 
