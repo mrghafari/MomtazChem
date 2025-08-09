@@ -247,6 +247,7 @@ function Router() {
           <Route path="/admin/warehouse-orders" component={WarehouseOrders} />
           <Route path="/admin/logistics-orders" component={LogisticsOrders} />
           <Route path="/admin/logistics-management" component={LogisticsManagement} />
+          <Route path="/admin/logistics" component={LogisticsManagement} />
           <Route path="/admin/delivered-orders" component={DeliveredOrders} />
           <Route path="/admin/financial-workflow" component={FinancialWorkflowDashboard} />
           <Route path="/payment-options" component={PaymentOptions} />

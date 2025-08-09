@@ -706,15 +706,58 @@ const LogisticsManagement = () => {
         readyVehicles = readyVehiclesData.vehicles || readyVehiclesData.data || [];
         console.log('🚛 [READY VEHICLES] Found ready vehicles:', readyVehicles.length);
         
-        // Filter by weight capacity and availability
         const orderWeight = order.calculatedWeight || order.totalWeight || 0;
-        const availableVehicles = readyVehicles.filter((vehicle: any) => 
+        console.log('📦 [ORDER DETAILS] Weight:', orderWeight, 'kg');
+        
+        let availableVehicles = readyVehicles.filter((vehicle: any) => 
           vehicle.isAvailable && 
           vehicle.loadCapacity >= orderWeight
         );
         
+        // 🎯 ENHANCED TEMPLATE MATCHING: Match customer's template selection to available physical vehicles
+        if (checkoutVehicleDetails && checkoutVehicleDetails.vehicleType) {
+          console.log('🔍 [TEMPLATE MATCHING] Customer selected template:', checkoutVehicleDetails.vehicleType);
+          console.log('🔍 [TEMPLATE MATCHING] Available vehicles before template filter:', availableVehicles.length);
+          
+          // First try exact template match
+          const exactTemplateMatches = availableVehicles.filter((vehicle: any) => 
+            vehicle.vehicleTemplateName === checkoutVehicleDetails.vehicleType ||
+            vehicle.vehicleName === checkoutVehicleDetails.vehicleType ||
+            vehicle.vehicleType === checkoutVehicleDetails.vehicleType
+          );
+          
+          // If no exact matches, try partial matches
+          const partialTemplateMatches = availableVehicles.filter((vehicle: any) => 
+            vehicle.vehicleTemplateName?.includes(checkoutVehicleDetails.vehicleType) ||
+            checkoutVehicleDetails.vehicleType.includes(vehicle.vehicleTemplateName || '') ||
+            vehicle.vehicleType?.includes(checkoutVehicleDetails.vehicleType) ||
+            checkoutVehicleDetails.vehicleType.includes(vehicle.vehicleType || '')
+          );
+          
+          console.log('✅ [TEMPLATE EXACT] Found exact template matches:', exactTemplateMatches.length);
+          console.log('🔍 [TEMPLATE PARTIAL] Found partial template matches:', partialTemplateMatches.length);
+          
+          // Prioritize exact matches, then partial, then all available
+          if (exactTemplateMatches.length > 0) {
+            availableVehicles = exactTemplateMatches.map((v: any) => ({ ...v, templateMatchType: 'exact', priority: 1 }));
+            console.log('🎯 [TEMPLATE SUCCESS] Using exact template matches');
+          } else if (partialTemplateMatches.length > 0) {
+            availableVehicles = partialTemplateMatches.map((v: any) => ({ ...v, templateMatchType: 'partial', priority: 2 }));
+            console.log('🔄 [TEMPLATE FALLBACK] Using partial template matches');
+          } else {
+            availableVehicles = availableVehicles.map((v: any) => ({ ...v, templateMatchType: 'none', priority: 3 }));
+            console.log('⚠️ [TEMPLATE WARNING] No template matches found, showing all compatible vehicles');
+          }
+          
+          // Sort by priority, then by capacity
+          availableVehicles.sort((a: any, b: any) => {
+            if (a.priority !== b.priority) return a.priority - b.priority;
+            return b.loadCapacity - a.loadCapacity;
+          });
+        }
+        
         setAvailableFleetVehicles(availableVehicles);
-        console.log('✅ [FILTERED VEHICLES] Available vehicles for', orderWeight, 'kg:', availableVehicles.length);
+        console.log('✅ [FINAL VEHICLES] Available vehicles after template matching:', availableVehicles.length);
       } else {
         console.error('🚫 [READY VEHICLES API ERROR]', readyVehiclesResponse.status);
         if (readyVehiclesResponse.status === 401) {
@@ -5132,8 +5175,12 @@ const LogisticsManagement = () => {
                       {availableFleetVehicles.map((vehicle: any) => (
                         <div 
                           key={vehicle.id} 
-                          className={`bg-white rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer hover:shadow-lg ${
-                            vehicle.isCheckoutSuggested 
+                          className={`bg-white rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer hover:shadow-lg relative ${
+                            vehicle.templateMatchType === 'exact'
+                              ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200 shadow-lg' 
+                              : vehicle.templateMatchType === 'partial'
+                              ? 'border-yellow-500 bg-yellow-50 ring-2 ring-yellow-200 shadow-md'
+                              : vehicle.isCheckoutSuggested 
                               ? 'border-green-500 bg-green-50 ring-2 ring-green-200 shadow-lg' 
                               : 'border-orange-300 hover:border-orange-500'
                           }`}
@@ -5142,14 +5189,38 @@ const LogisticsManagement = () => {
                             console.log('انتخاب خودرو آماده:', vehicle);
                           }}
                         >
+                          {/* Template Match Indicator */}
+                          {vehicle.templateMatchType === 'exact' && (
+                            <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-3 py-1 rounded-full shadow-md">
+                              تطابق دقیق ✨
+                            </div>
+                          )}
+                          {vehicle.templateMatchType === 'partial' && (
+                            <div className="absolute -top-2 -right-2 bg-yellow-600 text-white text-xs px-3 py-1 rounded-full shadow-md">
+                              تطابق جزئی 🔄
+                            </div>
+                          )}
+                          
                           <div className="flex items-center justify-between mb-3">
                             <h4 className={`font-semibold ${
+                              vehicle.templateMatchType === 'exact' ? 'text-blue-800' :
+                              vehicle.templateMatchType === 'partial' ? 'text-yellow-800' :
                               vehicle.isCheckoutSuggested ? 'text-green-800' : 'text-gray-800'
                             }`}>
-                              {vehicle.vehicleType || vehicle.vehicleName}
+                              {vehicle.vehicleTemplateName || vehicle.vehicleName || vehicle.vehicleType}
                             </h4>
                             <div className="flex gap-2">
-                              {vehicle.isCheckoutSuggested && (
+                              {vehicle.templateMatchType === 'exact' && (
+                                <Badge className="bg-blue-600 text-white">
+                                  ✨ انتخاب مشتری
+                                </Badge>
+                              )}
+                              {vehicle.templateMatchType === 'partial' && (
+                                <Badge className="bg-yellow-600 text-white">
+                                  🔄 مشابه انتخاب مشتری
+                                </Badge>
+                              )}
+                              {vehicle.isCheckoutSuggested && !vehicle.templateMatchType && (
                                 <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white animate-pulse">
                                   🎯 پیشنهاد سیستم
                                 </Badge>
@@ -5158,7 +5229,25 @@ const LogisticsManagement = () => {
                             </div>
                           </div>
                           
-                          {vehicle.isCheckoutSuggested && (
+                          {vehicle.templateMatchType === 'exact' && (
+                            <div className="bg-blue-100 border border-blue-300 rounded-lg p-3 mb-4">
+                              <div className="flex items-center gap-2 text-blue-800 text-sm font-medium">
+                                <CheckCircle className="w-4 h-4" />
+                                ✨ تطابق کامل با قالب انتخابی مشتری - اولویت اول
+                              </div>
+                            </div>
+                          )}
+                          
+                          {vehicle.templateMatchType === 'partial' && (
+                            <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 mb-4">
+                              <div className="flex items-center gap-2 text-yellow-800 text-sm font-medium">
+                                <AlertTriangle className="w-4 h-4" />
+                                🔄 تطابق جزئی با قالب انتخابی مشتری - اولویت دوم
+                              </div>
+                            </div>
+                          )}
+                          
+                          {!vehicle.templateMatchType && vehicle.isCheckoutSuggested && (
                             <div className="bg-green-100 border border-green-300 rounded-lg p-3 mb-4">
                               <div className="flex items-center gap-2 text-green-800 text-sm font-medium">
                                 <CheckCircle className="w-4 h-4" />
