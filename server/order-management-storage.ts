@@ -476,12 +476,12 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       console.log('🏋️ [WEIGHT] Calculating weight for customer order:', customerOrderId);
       
       const items = await db.select({
-        itemId: orderItems.itemId,
+        productId: orderItems.productId,
         quantity: orderItems.quantity,
         productWeight: shopProducts.weight // وزن از جدول shop_products
       })
       .from(orderItems)
-      .leftJoin(shopProducts, eq(orderItems.itemId, shopProducts.id))
+      .leftJoin(shopProducts, eq(orderItems.productId, shopProducts.id))
       .where(eq(orderItems.orderId, customerOrderId));
       
       let totalWeight = 0;
@@ -491,7 +491,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         const quantity = item.quantity;
         const itemTotalWeight = weight * quantity;
         
-        console.log(`🏋️ [WEIGHT] Item ${item.itemId}: ${weight}kg x ${quantity} = ${itemTotalWeight}kg`);
+        console.log(`🏋️ [WEIGHT] Item ${item.productId}: ${weight}kg x ${quantity} = ${itemTotalWeight}kg`);
         totalWeight += itemTotalWeight;
       }
       
@@ -703,19 +703,28 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         recipientName: (() => {
           if (row.recipientName) return row.recipientName;
           try {
-            return row.shippingAddress ? JSON.parse(row.shippingAddress).name : null;
+            const shippingData = typeof row.shippingAddress === 'string' 
+              ? JSON.parse(row.shippingAddress) 
+              : row.shippingAddress;
+            return shippingData?.name || null;
           } catch { return null; }
         })(),
         recipientPhone: (() => {
           if (row.recipientPhone) return row.recipientPhone;
           try {
-            return row.shippingAddress ? JSON.parse(row.shippingAddress).phone : null;
+            const shippingData = typeof row.shippingAddress === 'string' 
+              ? JSON.parse(row.shippingAddress) 
+              : row.shippingAddress;
+            return shippingData?.phone || null;
           } catch { return null; }
         })(),
         recipientAddress: (() => {
           if (row.recipientAddress) return row.recipientAddress;
           try {
-            return row.shippingAddress ? JSON.parse(row.shippingAddress).address : null;
+            const shippingData = typeof row.shippingAddress === 'string' 
+              ? JSON.parse(row.shippingAddress) 
+              : row.shippingAddress;
+            return shippingData?.address || null;
           } catch { return null; }
         })(),
         deliveryNotes: row.deliveryNotes,
@@ -767,7 +776,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     }
 
     // Determine initial status based on payment method
-    let initialStatus: OrderStatus = 'pending';
+    let initialStatus = 'pending' as OrderStatus;
     
     // For wallet payments that are already paid, set to payment_uploaded for immediate financial review
     if ((customerOrder.paymentMethod === 'wallet_full' || customerOrder.paymentMethod === 'wallet_partial') 
