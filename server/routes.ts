@@ -42544,7 +42544,8 @@ momtazchem.com
         
         // Check special requirements
         let specialOk = true;
-        if (isHazardous && !vehicle.canTransportHazardous) specialOk = false;
+
+        if (isHazardous && !vehicle.supportsHazardous) specialOk = false;
         if (isRefrigerated && !vehicle.hasRefrigeration) specialOk = false;
         if (isFragile && !vehicle.canTransportFragile) specialOk = false;
         
