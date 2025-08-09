@@ -42405,6 +42405,81 @@ momtazchem.com
     }
   });
 
+  // Helper function to find optimal combination of vehicles for heavy loads
+  function findOptimalVehicleCombination(vehicles: any[], totalWeight: number, distance: number, routeType: string, isHazardous: boolean, isRefrigerated: boolean, isFragile: boolean) {
+    console.log(`🚛 [MULTI-VEHICLE] Finding combination for ${totalWeight}kg load`);
+    
+    // Sort vehicles by capacity (largest first) for greedy algorithm
+    const sortedVehicles = [...vehicles].sort((a, b) => parseFloat(b.maxWeightKg) - parseFloat(a.maxWeightKg));
+    
+    const combination = [];
+    let remainingWeight = totalWeight;
+    let totalCost = 0;
+    
+    while (remainingWeight > 0 && sortedVehicles.length > 0) {
+      // Find the best vehicle for remaining weight
+      let bestVehicle = null;
+      let bestEfficiency = 0;
+      
+      for (const vehicle of sortedVehicles) {
+        const capacity = parseFloat(vehicle.maxWeightKg || '0');
+        const basePrice = parseFloat(vehicle.basePrice || '0');
+        const pricePerKm = parseFloat(vehicle.pricePerKm || '0');
+        const vehicleCost = basePrice + (distance * pricePerKm);
+        
+        // Calculate how much this vehicle can carry
+        const loadWeight = Math.min(remainingWeight, capacity);
+        const efficiency = loadWeight / vehicleCost; // kg per dinar efficiency
+        
+        if (efficiency > bestEfficiency && loadWeight > 0) {
+          bestEfficiency = efficiency;
+          bestVehicle = {
+            ...vehicle,
+            loadWeight,
+            vehicleCost,
+            efficiency
+          };
+        }
+      }
+      
+      if (!bestVehicle) {
+        console.log(`🚛 [MULTI-VEHICLE] No suitable vehicle found for remaining ${remainingWeight}kg`);
+        break;
+      }
+      
+      combination.push(bestVehicle);
+      remainingWeight -= bestVehicle.loadWeight;
+      totalCost += bestVehicle.vehicleCost;
+      
+      console.log(`🚛 [MULTI-VEHICLE] Added ${bestVehicle.name}: ${bestVehicle.loadWeight}kg, Cost: ${bestVehicle.vehicleCost}, Remaining: ${remainingWeight}kg`);
+    }
+    
+    if (remainingWeight > 0) {
+      console.log(`🚛 [MULTI-VEHICLE] Could not handle all weight. Remaining: ${remainingWeight}kg`);
+      return null;
+    }
+    
+    console.log(`🚛 [MULTI-VEHICLE] Solution found: ${combination.length} vehicles, Total cost: ${totalCost}`);
+    
+    return {
+      vehicles: combination.map(v => ({
+        id: v.id,
+        name: v.name,
+        loadWeight: v.loadWeight,
+        maxWeight: v.maxWeightKg,
+        basePrice: v.basePrice,
+        pricePerKm: v.pricePerKm,
+        totalCost: v.vehicleCost,
+        efficiency: Math.round(v.efficiency * 100) / 100
+      })),
+      totalVehicles: combination.length,
+      totalWeight: totalWeight,
+      totalCost: Math.round(totalCost * 100) / 100,
+      averageCostPerKg: Math.round((totalCost / totalWeight) * 100) / 100,
+      summary: `${combination.length} خودرو برای حمل ${totalWeight} کیلوگرم با هزینه کل ${Math.round(totalCost)} دینار`
+    };
+  }
+
   // Smart vehicle selection for checkout (enhanced algorithm)
   app.post("/api/logistics/select-optimal-vehicle", async (req, res) => {
     try {
@@ -42455,10 +42530,17 @@ momtazchem.com
 
       console.log('🚚 [SMART VEHICLE] Found vehicles:', vehicles.length);
 
-      // Filter suitable vehicles based on capacity and capabilities
+      // First check if any single vehicle can handle the load
+      const maxSingleCapacity = Math.max(...vehicles.map(v => parseFloat(v.maxWeightKg || '0')));
+      const needsMultiVehicleApproach = finalWeightKg > maxSingleCapacity;
+      
+      console.log(`🚚 [CAPACITY PRE-CHECK] Weight: ${finalWeightKg}kg, Max single: ${maxSingleCapacity}kg, Multi needed: ${needsMultiVehicleApproach}`);
+
+      // Filter suitable vehicles based on capabilities (relaxed weight check for multi-vehicle)
       const suitableVehicles = vehicles.filter(vehicle => {
-        const weightOk = parseFloat(vehicle.maxWeightKg) >= finalWeightKg;
-        const volumeOk = parseFloat(vehicle.maxVolumeM3 || '999999') >= (finalWeightKg / 100); // Rough estimate
+        // For multi-vehicle approach, any vehicle with positive capacity is potentially useful
+        const weightOk = needsMultiVehicleApproach ? parseFloat(vehicle.maxWeightKg) > 0 : parseFloat(vehicle.maxWeightKg) >= finalWeightKg;
+        const volumeOk = parseFloat(vehicle.maxVolumeM3 || '999999') >= (Math.min(finalWeightKg, parseFloat(vehicle.maxWeightKg)) / 100); // Rough estimate
         
         // Check special requirements
         let specialOk = true;
@@ -42475,6 +42557,7 @@ momtazchem.com
           routeOk = allowedRoutes.includes(routeType);
         }
         
+
         return weightOk && volumeOk && specialOk && routeOk;
       });
 
@@ -42486,6 +42569,34 @@ momtazchem.com
       }
 
       console.log('🚚 [SMART VEHICLE] Suitable vehicles:', suitableVehicles.length);
+
+      // Check if load exceeds single vehicle capacity - need multi-vehicle solution
+      const maxSingleVehicleCapacity = Math.max(...suitableVehicles.map(v => parseFloat(v.maxWeightKg || '0')));
+      const needsMultiVehicle = finalWeightKg > maxSingleVehicleCapacity;
+      
+      console.log(`🚚 [CAPACITY CHECK] Order weight: ${finalWeightKg}kg, Max single capacity: ${maxSingleVehicleCapacity}kg, Multi-vehicle needed: ${needsMultiVehicle}`);
+
+      if (needsMultiVehicle) {
+        // Find optimal combination of vehicles for heavy loads
+        const multiVehicleSolution = findOptimalVehicleCombination(suitableVehicles, finalWeightKg, distance, routeType, isHazardous, isRefrigerated, isFragile);
+        
+        if (multiVehicleSolution) {
+          return res.json({
+            success: true,
+            multiVehicleRequired: true,
+            solution: multiVehicleSolution,
+            selectionCriteria: {
+              orderWeightKg: finalWeightKg,
+              distanceKm: distance,
+              routeType,
+              isHazardous,
+              isRefrigerated,
+              isFragile,
+              requiresMultipleVehicles: true
+            }
+          });
+        }
+      }
 
       // Calculate cost and score for each suitable vehicle
       const scoredVehicles = suitableVehicles.map(vehicle => {
