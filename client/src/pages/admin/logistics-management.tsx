@@ -2005,16 +2005,16 @@ const LogisticsManagement = () => {
         <div class="section-title">آدرس تحویل</div>
         <div class="info-grid">
           <div class="info-item">
-            <span class="label">نام گیرنده:</span>
-            <span class="value">${orderDetails.shippingAddress.name || 'نامشخص'}</span>
+            <span class="label">نام گیرنده (برای پست):</span>
+            <span class="value" style="font-size: 16px; font-weight: bold; color: #000;">${orderDetails.shippingAddress.name || 'نامشخص'}</span>
           </div>
           <div class="info-item">
-            <span class="label">تلفن:</span>
-            <span class="value">${orderDetails.shippingAddress.phone || 'نامشخص'}</span>
+            <span class="label">تلفن گیرنده:</span>
+            <span class="value" style="font-size: 16px; font-weight: bold; color: #000;">${orderDetails.shippingAddress.phone || 'نامشخص'}</span>
           </div>
           <div class="info-item" style="grid-column: 1 / -1;">
-            <span class="label">آدرس:</span>
-            <span class="value">${orderDetails.shippingAddress.address || 'نامشخص'}</span>
+            <span class="label">آدرس گیرنده (برای پست):</span>
+            <span class="value" style="font-size: 18px; font-weight: bold; color: #000; line-height: 1.4;">${orderDetails.shippingAddress.address || 'نامشخص'}</span>
           </div>
           <div class="info-item">
             <span class="label">شهر:</span>
