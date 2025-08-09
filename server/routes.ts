@@ -33489,6 +33489,7 @@ momtazchem.com
 
   // Get all ready vehicles
   app.get('/api/logistics/ready-vehicles', async (req, res) => {
+    console.log('🚚 [API] Ready vehicles endpoint called');
     try {
       const { readyVehicles, vehicleTemplates } = await import('../shared/schema');
       
