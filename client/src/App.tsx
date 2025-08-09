@@ -142,6 +142,7 @@ import PaymentCallback from "@/pages/payment-callback";
 import OrderSuccess from "@/pages/order-success";
 import AdminAbandonedOrders from "@/pages/admin-abandoned-orders";
 import FooterManagement from "@/pages/admin/footer-management";
+import ShopManagement from "@/pages/admin/shop-management";
 
 import NotFound from "@/pages/not-found";
 
@@ -257,6 +258,7 @@ function Router() {
           <Route path="/admin/content-management" component={ContentManagement} />
           <Route path="/content-management" component={ContentManagement} />
           <Route path="/admin/footer-management" component={FooterManagement} />
+          <Route path="/admin/shop-management" component={ShopManagement} />
           <Route path="/admin/email-templates" component={EmailTemplatesFixed} />
           <Route path="/admin/email-templates-fixed" component={EmailTemplatesFixed} />
           <Route path="/admin/email-templates-central" component={EmailTemplatesCentral} />

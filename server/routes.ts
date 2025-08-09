@@ -7585,6 +7585,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Shop Settings endpoints
+  app.get("/api/shop/settings", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT id, setting_key, setting_value, setting_type, display_name, 
+               display_name_en, description, category, is_public, 
+               validation_rule, default_value, created_at, updated_at
+        FROM shop_settings
+        ORDER BY category, display_name
+      `);
+
+      res.json({
+        success: true,
+        data: result.rows
+      });
+    } catch (error) {
+      console.error('❌ [SHOP SETTINGS] Error fetching settings:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در بارگذاری تنظیمات فروشگاه"
+      });
+    }
+  });
+
+  app.post("/api/shop/settings", requireAuth, async (req, res) => {
+    try {
+      const { settings } = req.body;
+      
+      if (!settings || !Array.isArray(settings)) {
+        return res.status(400).json({
+          success: false,
+          message: "تنظیمات الزامی است"
+        });
+      }
+
+      const { pool } = await import('./db');
+      
+      console.log(`🏪 [SHOP SETTINGS] Saving ${settings.length} settings...`);
+
+      // Use upsert for each setting
+      for (const setting of settings) {
+        await pool.query(`
+          INSERT INTO shop_settings (
+            setting_key, setting_value, setting_type, display_name, 
+            display_name_en, description, category, is_public, 
+            validation_rule, default_value, updated_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+          ON CONFLICT (setting_key) 
+          DO UPDATE SET 
+            setting_value = EXCLUDED.setting_value,
+            setting_type = EXCLUDED.setting_type,
+            display_name = EXCLUDED.display_name,
+            display_name_en = EXCLUDED.display_name_en,
+            description = EXCLUDED.description,
+            category = EXCLUDED.category,
+            is_public = EXCLUDED.is_public,
+            validation_rule = EXCLUDED.validation_rule,
+            default_value = EXCLUDED.default_value,
+            updated_at = NOW()
+        `, [
+          setting.settingKey,
+          setting.settingValue,
+          setting.settingType,
+          setting.displayName,
+          setting.displayNameEn,
+          setting.description,
+          setting.category,
+          setting.isPublic,
+          setting.validationRule,
+          setting.defaultValue
+        ]);
+      }
+
+      console.log(`✅ [SHOP SETTINGS] Successfully saved ${settings.length} settings`);
+
+      res.json({
+        success: true,
+        message: "تنظیمات فروشگاه با موفقیت ذخیره شد"
+      });
+    } catch (error) {
+      console.error('❌ [SHOP SETTINGS] Error saving settings:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ذخیره تنظیمات فروشگاه"
+      });
+    }
+  });
+
+  // Get public shop settings (for frontend)
+  app.get("/api/public/shop/settings", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT setting_key, setting_value, setting_type
+        FROM shop_settings
+        WHERE is_public = true
+        ORDER BY setting_key
+      `);
+
+      const settings = {};
+      result.rows.forEach(row => {
+        settings[row.setting_key] = row.setting_value;
+      });
+
+      res.json({
+        success: true,
+        data: settings
+      });
+    } catch (error) {
+      console.error('❌ [PUBLIC SHOP SETTINGS] Error fetching public settings:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در بارگذاری تنظیمات عمومی"
+      });
+    }
+  });
+
   // Send SMS to users
   app.post("/api/admin/send-sms", requireAuth, async (req, res) => {
     try {

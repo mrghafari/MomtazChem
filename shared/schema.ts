@@ -1458,5 +1458,35 @@ export const insertPaymentMethodSettingsSchema = createInsertSchema(paymentMetho
 export type InsertPaymentMethodSettings = z.infer<typeof insertPaymentMethodSettingsSchema>;
 export type PaymentMethodSettings = typeof paymentMethodSettings.$inferSelect;
 
+// =============================================================================
+// SHOP MANAGEMENT SETTINGS SCHEMA
+// =============================================================================
+
+// Shop Settings table for general shop configuration
+export const shopSettings = pgTable("shop_settings", {
+  id: serial("id").primaryKey(),
+  settingKey: text("setting_key").notNull().unique(), // 'proforma_deadline_days', 'currency', 'timezone', etc.
+  settingValue: text("setting_value").notNull(), // The value as string
+  settingType: text("setting_type").notNull().default("text"), // 'text', 'number', 'boolean', 'date'
+  displayName: text("display_name").notNull(), // Display name in Persian/Arabic
+  displayNameEn: text("display_name_en"), // Display name in English
+  description: text("description"), // Description for admin panel
+  category: text("category").notNull().default("general"), // 'general', 'payment', 'shipping', 'notifications'
+  isPublic: boolean("is_public").default(false), // Whether this setting can be accessed by frontend
+  validationRule: text("validation_rule"), // Validation pattern or constraints
+  defaultValue: text("default_value"), // Default value for the setting
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertShopSettingsSchema = createInsertSchema(shopSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertShopSettings = z.infer<typeof insertShopSettingsSchema>;
+export type ShopSettings = typeof shopSettings.$inferSelect;
+
 // Re-export marketing schema
 export * from './marketing-schema';
