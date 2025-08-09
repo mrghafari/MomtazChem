@@ -390,9 +390,7 @@ const LogisticsManagement = () => {
       loadCapacity: parseFloat(formData.get('loadCapacity') as string),
       currentLocation: formData.get('currentLocation') as string,
       notes: formData.get('notes') as string,
-      isAvailable: formData.get('isAvailable') === 'true',
-      supportsFlammable: formData.get('supportsFlammable') === 'true',
-      notAllowedFlammable: formData.get('notAllowedFlammable') === 'true'
+      isAvailable: formData.get('isAvailable') === 'true'
     };
 
     createReadyVehicleMutation.mutate(vehicleData);
@@ -419,9 +417,7 @@ const LogisticsManagement = () => {
       loadCapacity: parseFloat(formData.get('loadCapacity') as string),
       currentLocation: formData.get('currentLocation') as string,
       notes: formData.get('notes') as string,
-      isAvailable: formData.get('isAvailable') === 'true',
-      supportsFlammable: formData.get('supportsFlammable') === 'true',
-      notAllowedFlammable: formData.get('notAllowedFlammable') === 'true'
+      isAvailable: formData.get('isAvailable') === 'true'
     };
 
     updateReadyVehicleMutation.mutate(vehicleData);
