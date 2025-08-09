@@ -249,16 +249,20 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet' | 'wallet_full' | 'wallet_partial' | 'wallet_combined' | 'bank_transfer_grace' | 'bank_receipt'>('online_payment');
 
   // Fetch available payment methods from admin settings (public endpoint)
-  const { data: availablePaymentMethods = [] } = useQuery<any[]>({
+  const { data: paymentMethodsResponse, isLoading: isLoadingPaymentMethods } = useQuery<{success: boolean, data: any[]}>({
     queryKey: ['/api/public/payment-methods'],
   });
 
+  const availablePaymentMethods = paymentMethodsResponse?.data || [];
+
   // Debug payment methods
   useEffect(() => {
+    console.log('🔍 [PAYMENT METHODS DEBUG] Response:', paymentMethodsResponse);
     console.log('🔍 [PAYMENT METHODS DEBUG] Available methods:', availablePaymentMethods);
     console.log('🔍 [PAYMENT METHODS DEBUG] Is array:', Array.isArray(availablePaymentMethods));
     console.log('🔍 [PAYMENT METHODS DEBUG] Length:', availablePaymentMethods?.length);
-  }, [availablePaymentMethods]);
+    console.log('🔍 [PAYMENT METHODS DEBUG] Loading:', isLoadingPaymentMethods);
+  }, [paymentMethodsResponse, availablePaymentMethods, isLoadingPaymentMethods]);
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
@@ -2132,8 +2136,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     }
                     return null;
                   })
-                ) : (
+                ) : isLoadingPaymentMethods ? (
                   <div className="text-gray-500 text-sm">در حال بارگذاری روش‌های پرداخت...</div>
+                ) : (
+                  <div className="text-red-500 text-sm">خطا در بارگذاری روش‌های پرداخت</div>
                 )}
                 
                 {/* دوم: پرداخت از کیف پول (تمام یا بخش از آن) */}
