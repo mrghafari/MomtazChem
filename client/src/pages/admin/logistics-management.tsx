@@ -1094,6 +1094,7 @@ const LogisticsManagement = () => {
                       <TableHead>حجم</TableHead>
                       <TableHead>مواد خطرناک و آتش زا</TableHead>
                       <TableHead>قیمت پایه</TableHead>
+                      <TableHead>قیمت/کیلومتر</TableHead>
                       <TableHead>وضعیت</TableHead>
                       <TableHead>عملیات</TableHead>
                     </TableRow>
@@ -1101,11 +1102,11 @@ const LogisticsManagement = () => {
                   <TableBody>
                     {vehiclesLoading ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8">در حال بارگذاری...</TableCell>
+                        <TableCell colSpan={9} className="text-center py-8">در حال بارگذاری...</TableCell>
                       </TableRow>
                     ) : vehicles.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8">هیچ الگوی خودرویی یافت نشد</TableCell>
+                        <TableCell colSpan={9} className="text-center py-8">هیچ الگوی خودرویی یافت نشد</TableCell>
                       </TableRow>
                     ) : (
                       vehicles.map((vehicle: any) => (
@@ -1127,6 +1128,7 @@ const LogisticsManagement = () => {
                             </div>
                           </TableCell>
                           <TableCell>{parseInt(vehicle.basePrice)} دینار</TableCell>
+                          <TableCell>{parseInt(vehicle.pricePerKm)} دینار</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <Badge variant={vehicle.isActive ? "default" : "secondary"}>
