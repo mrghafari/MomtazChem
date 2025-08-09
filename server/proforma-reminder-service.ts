@@ -258,9 +258,14 @@ export class ProformaReminderService {
           order_id INTEGER NOT NULL,
           schedule_id INTEGER NOT NULL,
           customer_email TEXT NOT NULL,
-          sent_at TIMESTAMP NOT NULL DEFAULT NOW(),
-          UNIQUE(order_id, schedule_id, DATE(sent_at))
+          sent_at TIMESTAMP NOT NULL DEFAULT NOW()
         )
+      `);
+      
+      // Create unique index separately
+      await pool.query(`
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_proforma_reminder_logs_daily
+        ON proforma_reminder_logs (order_id, schedule_id, DATE(sent_at))
       `);
       
       console.log('✅ [PROFORMA REMINDER] Log table initialized');

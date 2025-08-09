@@ -7715,7 +7715,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         messageSubject, 
         notificationMethod,
         isActive,
-        priority 
+        priority,
+        smsTemplateId,
+        emailTemplateId
       } = req.body;
 
       if (reminderHour === undefined || !daysBefore || !messageTemplate || !messageSubject) {
@@ -48972,6 +48974,59 @@ momtazchem.com
     } catch (error) {
       console.error('❌ [TEST ORDER COUNT] Error:', error);
       res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // =============================================================================
+  // TEMPLATE MANAGEMENT ENDPOINTS (EMAIL AND SMS)
+  // =============================================================================
+
+  // Get all email templates for shop admin
+  app.get('/api/shop/email-templates', async (req, res) => {
+    try {
+      const { customerDb } = await import('./customer-db');
+      const { emailTemplates } = await import('../shared/customer-schema');
+      
+      const templates = await customerDb.select({
+        id: emailTemplates.id,
+        name: emailTemplates.name,
+        category: emailTemplates.category,
+        subject: emailTemplates.subject
+      })
+      .from(emailTemplates)
+      .where(eq(emailTemplates.isActive, true))
+      .orderBy(emailTemplates.createdAt);
+
+      res.json({ success: true, data: templates });
+    } catch (error) {
+      console.error('Error fetching email templates:', error);
+      res.status(500).json({ success: false, message: 'خطا در بارگذاری قالب‌های ایمیل' });
+    }
+  });
+
+  // Get all SMS templates for shop admin
+  app.get('/api/shop/sms-templates', async (req, res) => {
+    try {
+      const { customerPool } = await import('./customer-db');
+      
+      const result = await customerPool.query(`
+        SELECT id, template_number, template_name, category_id 
+        FROM sms_templates 
+        WHERE is_active = true 
+        ORDER BY created_at
+      `);
+
+      const templates = result.rows.map(row => ({
+        id: row.id,
+        templateNumber: row.template_number,
+        templateName: row.template_name,
+        categoryId: row.category_id
+      }));
+
+      res.json({ success: true, data: templates });
+    } catch (error) {
+      console.error('Error fetching SMS templates:', error);
+      res.status(500).json({ success: false, message: 'خطا در بارگذاری قالب‌های پیامک' });
     }
   });
 

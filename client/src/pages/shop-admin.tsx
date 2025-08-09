@@ -72,6 +72,18 @@ export default function ShopAdmin() {
   const [, setLocation] = useLocation();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
 
+  // Fetch email templates for reminder configuration
+  const { data: emailTemplates = [] } = useQuery({
+    queryKey: ['/api/shop/email-templates'],
+    enabled: isAuthenticated
+  });
+
+  // Fetch SMS templates for reminder configuration
+  const { data: smsTemplates = [] } = useQuery({
+    queryKey: ['/api/shop/sms-templates'],
+    enabled: isAuthenticated
+  });
+
   // Authentication check
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -821,26 +833,34 @@ export default function ShopAdmin() {
                         />
                       </div>
                       <div className="flex items-center space-x-2 space-x-reverse">
-                        <Label htmlFor="sms-template">شماره قالب پیامک:</Label>
-                        <Input
-                          id="sms-template"
-                          type="text"
-                          value={smsTemplateId}
-                          onChange={(e) => setSmsTemplateId(e.target.value)}
-                          placeholder="مثال: 12345"
-                          className="w-24"
-                        />
+                        <Label htmlFor="sms-template">قالب پیامک:</Label>
+                        <Select value={smsTemplateId} onValueChange={setSmsTemplateId}>
+                          <SelectTrigger className="w-64">
+                            <SelectValue placeholder="انتخاب قالب پیامک" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {smsTemplates.map((template: any) => (
+                              <SelectItem key={template.id} value={template.id.toString()}>
+                                {template.templateNumber} - {template.templateName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="flex items-center space-x-2 space-x-reverse">
-                        <Label htmlFor="email-template">شماره قالب ایمیل:</Label>
-                        <Input
-                          id="email-template"
-                          type="text"
-                          value={emailTemplateId}
-                          onChange={(e) => setEmailTemplateId(e.target.value)}
-                          placeholder="مثال: EM-001"
-                          className="w-24"
-                        />
+                        <Label htmlFor="email-template">قالب ایمیل:</Label>
+                        <Select value={emailTemplateId} onValueChange={setEmailTemplateId}>
+                          <SelectTrigger className="w-64">
+                            <SelectValue placeholder="انتخاب قالب ایمیل" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {emailTemplates.map((template: any) => (
+                              <SelectItem key={template.id} value={template.id.toString()}>
+                                {template.name} ({template.category})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <Button 
                         size="sm" 
