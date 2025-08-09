@@ -16317,7 +16317,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // 🏦 [BANK_PAYMENTS] Route all bank-related payments to active gateway
-      if (finalPaymentMethod === 'online_payment' || finalPaymentMethod === 'bank' || finalPaymentMethod === 'bank_transfer') {
+      if (finalPaymentMethod === 'online_payment' || finalPaymentMethod === 'bank' || finalPaymentMethod === 'bank_transfer' || finalPaymentMethod === 'bank_transfer_grace') {
         
         // For hybrid payment (wallet + bank gateway), return special response
         if (remainingAmount > 0 && walletAmountUsed > 0) {
@@ -16413,6 +16413,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           responseData.redirectToPayment = true;
           responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${Math.round(remainingAmount) > 0 ? Math.round(remainingAmount) : Math.round(totalAmount)}&method=${finalPaymentMethod}`;
           console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${Math.round(remainingAmount) > 0 ? Math.round(remainingAmount) : Math.round(totalAmount)} IQD (method: ${finalPaymentMethod})`);
+          return res.json(responseData);
+        }
+        
+        // 🏦 [BANK_TRANSFER_GRACE] Handle grace period bank transfer with receipt upload
+        if (finalPaymentMethod === 'bank_transfer_grace') {
+          console.log(`🕒 [GRACE PERIOD] Order ${orderNumber} created with grace period for bank receipt upload`);
+          
+          responseData = {
+            ...responseData,
+            message: "سفارش ثبت شد - لطفاً رسید بانکی خود را آپلود کنید",
+            requiresBankReceipt: true,
+            gracePeriodOrder: true,
+            uploadReceiptUrl: `/customers/orders/${order.id}/upload-receipt`,
+            gracePeriodExpires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() // 3 days from now
+          };
+          
           return res.json(responseData);
         }
       }
