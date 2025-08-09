@@ -1724,7 +1724,25 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         >
                           <Minus className="w-3 h-3" />
                         </Button>
-                        <span className="w-8 text-center text-sm font-medium">{quantity}</span>
+                        
+                        {/* Direct quantity input field */}
+                        <Input
+                          type="number"
+                          min="1"
+                          max={product.stockQuantity || 999999}
+                          value={quantity}
+                          onChange={(e) => {
+                            const newQuantity = parseInt(e.target.value) || 1;
+                            const maxQuantity = product.stockQuantity || 999999;
+                            const validQuantity = Math.max(1, Math.min(newQuantity, maxQuantity));
+                            if (onUpdateQuantity) {
+                              onUpdateQuantity(product.id, validQuantity);
+                            }
+                          }}
+                          className="h-7 w-16 text-center text-sm font-medium px-1 py-0"
+                          title="تغییر مستقیم تعداد"
+                        />
+                        
                         <Button
                           size="sm"
                           variant="outline"
