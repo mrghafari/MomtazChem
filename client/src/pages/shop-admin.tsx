@@ -72,6 +72,9 @@ export default function ShopAdmin() {
   // State for editing reminders
   const [editingReminder, setEditingReminder] = useState<any>(null);
   const [isEditReminderDialogOpen, setIsEditReminderDialogOpen] = useState(false);
+  
+  // State for proforma to invoice conversion
+  const [isConvertingInvoice, setIsConvertingInvoice] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
@@ -412,6 +415,52 @@ export default function ShopAdmin() {
     },
   });
 
+  // Convert proforma to invoice mutation
+  const convertToInvoiceMutation = useMutation({
+    mutationFn: async (orderNumber: string) => {
+      return await apiRequest(`/api/admin/orders/${orderNumber}/convert-to-invoice`, { 
+        method: 'POST' 
+      });
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/orders"] });
+      toast({
+        title: "موفقیت",
+        description: data.message || "سفارش با موفقیت از پیش‌فاکتور به فاکتور تبدیل شد",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا",
+        description: error?.message || "خطا در تبدیل پیش‌فاکتور به فاکتور",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Convert all shipped proformas to invoices
+  const convertAllShippedProformasMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('/api/admin/orders/convert-all-shipped-proformas', { 
+        method: 'POST' 
+      });
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/orders"] });
+      toast({
+        title: "موفقیت",
+        description: data.message || "تمام پیش‌فاکتورهای ارسال شده با موفقیت تبدیل شدند",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا", 
+        description: error?.message || "خطا در تبدیل دسته‌ای پیش‌فاکتورها",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Returns handlers
   const handleDeleteReturn = async (returnId: number) => {
     try {
@@ -530,10 +579,29 @@ export default function ShopAdmin() {
           <TabsContent value="orders" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingCart className="w-5 h-5" />
-                  Order Management
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <ShoppingCart className="w-5 h-5" />
+                    Order Management
+                  </CardTitle>
+                  <Button
+                    variant="default"
+                    onClick={() => {
+                      if (confirm('آیا می‌خواهید تمام سفارشات ارسال شده که هنوز پیش‌فاکتور هستند را به فاکتور تبدیل کنید؟')) {
+                        convertAllShippedProformasMutation.mutate();
+                      }
+                    }}
+                    disabled={convertAllShippedProformasMutation.isPending}
+                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                  >
+                    {convertAllShippedProformasMutation.isPending ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <FileText className="w-4 h-4" />
+                    )}
+                    {convertAllShippedProformasMutation.isPending ? 'در حال تبدیل...' : 'تبدیل همه پیش‌فاکتورها'}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 {/* Orders filters and search */}
@@ -585,10 +653,13 @@ export default function ShopAdmin() {
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                             Status
                           </th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                            Invoice Type
+                          </th>
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                             Date
                           </th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
                             Actions
                           </th>
                         </tr>
@@ -632,26 +703,54 @@ export default function ShopAdmin() {
                                  order.status}
                               </Badge>
                             </td>
+                            <td className="px-3 py-2 text-sm text-gray-900 w-24">
+                              <Badge 
+                                variant={order.invoiceType === 'invoice' ? 'default' : 'secondary'} 
+                                className={`text-xs ${order.invoiceType === 'invoice' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}`}
+                              >
+                                {order.invoiceType === 'invoice' ? 'فاکتور' : 'پیش‌فاکتور'}
+                              </Badge>
+                            </td>
                             <td className="px-3 py-2 text-sm text-gray-900 w-32">
                               <div className="truncate">
                                 {new Date(order.createdAt).toLocaleDateString('fa-IR')}
                               </div>
                             </td>
-                            <td className="px-3 py-2 text-sm text-gray-900 w-24">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setSelectedOrder(order)}
-                                className="flex items-center gap-1 text-xs px-2 py-1"
-                              >
-                                <Eye className="w-3 h-3" />
-                                جزئیات
-                              </Button>
+                            <td className="px-3 py-2 text-sm text-gray-900 w-40">
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setSelectedOrder(order)}
+                                  className="flex items-center gap-1 text-xs px-2 py-1"
+                                >
+                                  <Eye className="w-3 h-3" />
+                                  جزئیات
+                                </Button>
+                                {/* Convert to Invoice Button */}
+                                {(order.status === 'shipped' || order.status === 'delivered') && order.invoiceType === 'proforma' && (
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    onClick={() => convertToInvoiceMutation.mutate(order.orderNumber || order.id.toString())}
+                                    disabled={convertToInvoiceMutation.isPending}
+                                    className="flex items-center gap-1 text-xs px-2 py-1 bg-green-600 hover:bg-green-700"
+                                    title="تبدیل پیش‌فاکتور به فاکتور"
+                                  >
+                                    <FileText className="w-3 h-3" />
+                                    {convertToInvoiceMutation.isPending ? (
+                                      <RefreshCw className="w-3 h-3 animate-spin" />
+                                    ) : (
+                                      'فاکتور'
+                                    )}
+                                  </Button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         )) : (
                           <tr>
-                            <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
+                            <td colSpan={9} className="px-6 py-4 text-center text-gray-500">
                               هیچ سفارشی یافت نشد
                             </td>
                           </tr>

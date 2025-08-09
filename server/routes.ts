@@ -45,6 +45,7 @@ import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { gpsDeliveryConfirmations } from "@shared/gps-delivery-schema";
+import ProformaInvoiceConverter from "./proforma-invoice-converter";
 
 import { 
   vehicleTemplates, 
@@ -49057,6 +49058,88 @@ momtazchem.com
   const { setupWebRTCSocket } = await import("./webrtc-socket");
   setupWebRTCSocket(httpServer);
   console.log("🔌 [WebRTC] Routes and Socket initialized");
+
+  // =============================================================================
+  // PROFORMA TO INVOICE CONVERSION ENDPOINTS
+  // =============================================================================
+
+  // Convert single order from proforma to invoice
+  app.post("/api/admin/orders/:orderNumber/convert-to-invoice", requireAuth, requireDepartment(['warehouse', 'logistics', 'superadmin']), async (req, res) => {
+    try {
+      const { orderNumber } = req.params;
+      
+      console.log(`🧾 [CONVERT API] Converting order ${orderNumber} from proforma to invoice`);
+      
+      const success = await ProformaInvoiceConverter.convertProformaToInvoice(orderNumber);
+      
+      if (success) {
+        res.json({
+          success: true,
+          message: `سفارش ${orderNumber} با موفقیت از پیش‌فاکتور به فاکتور تبدیل شد`,
+          data: { orderNumber, converted: true }
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: `خطا در تبدیل سفارش ${orderNumber}`
+        });
+      }
+    } catch (error) {
+      console.error(`💥 [CONVERT API] Error converting order:`, error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در تبدیل پیش‌فاکتور به فاکتور"
+      });
+    }
+  });
+
+  // Convert all shipped proforma orders to invoices (batch operation)
+  app.post("/api/admin/orders/convert-all-shipped-proformas", requireAuth, requireDepartment(['superadmin']), async (req, res) => {
+    try {
+      console.log(`🧾 [BATCH CONVERT] Converting all shipped proforma orders to invoices`);
+      
+      const convertedCount = await ProformaInvoiceConverter.convertAllShippedProformas();
+      
+      res.json({
+        success: true,
+        message: `${convertedCount} سفارش با موفقیت از پیش‌فاکتور به فاکتور تبدیل شد`,
+        data: { convertedCount }
+      });
+    } catch (error) {
+      console.error(`💥 [BATCH CONVERT] Error in batch conversion:`, error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در تبدیل دسته‌ای پیش‌فاکتورها"
+      });
+    }
+  });
+
+  // Get invoice status for an order
+  app.get("/api/admin/orders/:orderNumber/invoice-status", requireAuth, async (req, res) => {
+    try {
+      const { orderNumber } = req.params;
+      
+      const status = await ProformaInvoiceConverter.getInvoiceStatus(orderNumber);
+      
+      if (status) {
+        res.json({
+          success: true,
+          data: status
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+    } catch (error) {
+      console.error(`💥 [INVOICE STATUS] Error getting status:`, error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت وضعیت فاکتور"
+      });
+    }
+  });
 
   // Catch-all for unmatched API routes - return JSON 404 (must be last)
   app.all('/api/*', (req, res) => {
