@@ -1727,23 +1727,22 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                             )}
                             {formatCurrency(discountedPrice)} {t.each}
                           </p>
-
+                          
+                          {/* خرید عمده در همان سطح قیمت */}
+                          {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && (
+                            <div className="flex justify-center">
+                              <div className="px-3 py-1 bg-gradient-to-r from-blue-100 to-green-100 border-2 border-blue-300 rounded-full shadow-sm">
+                                <span className="text-xs font-semibold text-blue-800">
+                                  خرید عمده
+                                </span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                       
-                      {/* Middle Section with Bulk Indicator and Quantity Controls */}
+                      {/* Middle Section with Quantity Controls */}
                       <div className="flex flex-col items-center gap-2">
-                        {/* خرید عمده با کادر زیبا */}
-                        {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && (
-                          <div className="mb-2">
-                            <div className="px-3 py-1 bg-gradient-to-r from-blue-100 to-green-100 border-2 border-blue-300 rounded-full shadow-sm">
-                              <span className="text-xs font-semibold text-blue-800">
-                                خرید عمده
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                        
                         {/* Quantity Controls */}
                         <div className="flex items-center gap-2">
                           <Button
