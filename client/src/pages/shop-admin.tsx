@@ -48,6 +48,7 @@ import SalesReport from "@/pages/sales-report";
 import InvoiceManagement from "@/pages/admin/invoice-management";
 import ShopInvoiceManagement from "@/components/ShopInvoiceManagement";
 import PaymentMethodBadge from "@/components/PaymentMethodBadge";
+import BulkPurchaseProductCard from "@/components/BulkPurchaseProductCard";
 
 export default function ShopAdmin() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
@@ -287,10 +288,11 @@ export default function ShopAdmin() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="orders">Orders</TabsTrigger>
-            <TabsTrigger value="inventory">Inventory</TabsTrigger>
             <TabsTrigger value="discounts">Discount Settings</TabsTrigger>
+            <TabsTrigger value="bulk-purchases">Bulk Purchases</TabsTrigger>
+            <TabsTrigger value="inventory">Inventory</TabsTrigger>
             <TabsTrigger value="invoices">Invoice Management</TabsTrigger>
             <TabsTrigger value="returns">Returned Items</TabsTrigger>
             <TabsTrigger value="reports">Sales Reports</TabsTrigger>
@@ -537,6 +539,74 @@ export default function ShopAdmin() {
                       </div>
                     ))
                   )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Bulk Purchases Tab */}
+          <TabsContent value="bulk-purchases" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="w-5 h-5" />
+                  Bulk Purchase Configuration
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {products.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p>No products available</p>
+                      <p className="text-sm">Add products to configure bulk purchases</p>
+                    </div>
+                  ) : (
+                    products.map((product: any) => (
+                      <BulkPurchaseProductCard 
+                        key={product.id} 
+                        product={product}
+                        onUpdate={() => {
+                          queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
+                          toast({
+                            title: "Success",
+                            description: "Bulk purchase settings updated successfully",
+                          });
+                        }}
+                      />
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Inventory Tab */}
+          <TabsContent value="inventory" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="w-5 h-5" />
+                  Inventory Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4">
+                  {products.map((product: any) => (
+                    <div key={product.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <h3 className="font-medium">{product.name}</h3>
+                        <p className="text-sm text-gray-600">SKU: {product.sku}</p>
+                        <p className="text-sm text-gray-600">Price: ${product.unitPrice}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium">Stock: {product.stockQuantity}</p>
+                        <Badge variant={product.stockQuantity > 10 ? 'default' : 'destructive'}>
+                          {product.stockQuantity > 10 ? 'In Stock' : 'Low Stock'}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>

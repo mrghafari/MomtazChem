@@ -38,7 +38,7 @@ export default function ShopManagement() {
   const [timezone, setTimezone] = useState("Asia/Baghdad");
   const [businessHours, setBusinessHours] = useState("8:00-17:00");
   const [isUpdating, setIsUpdating] = useState(false);
-
+  
   // Authentication check
   useEffect(() => {
     const checkAuth = async () => {
@@ -62,6 +62,8 @@ export default function ShopManagement() {
       return response.data || [];
     },
   });
+
+
 
   // Load existing settings
   useEffect(() => {
@@ -100,6 +102,8 @@ export default function ShopManagement() {
       setIsUpdating(false);
     },
   });
+
+
 
   const handleSaveSettings = () => {
     setIsUpdating(true);
@@ -246,6 +250,8 @@ export default function ShopManagement() {
             </CardContent>
           </Card>
         </TabsContent>
+
+
 
         <TabsContent value="general" className="space-y-6">
           <Card>

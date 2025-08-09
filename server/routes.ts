@@ -7705,6 +7705,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update bulk purchase settings for products
+  app.post("/api/shop/products/bulk-purchases/update", requireAuth, async (req, res) => {
+    try {
+      const { updates } = req.body;
+      
+      if (!updates || !Array.isArray(updates)) {
+        return res.status(400).json({
+          success: false,
+          message: "به‌روزرسانی‌ها الزامی است"
+        });
+      }
+
+      const { pool } = await import('./db');
+      
+      console.log(`🏪 [BULK PURCHASES] Updating ${updates.length} products...`);
+
+      // Update each product's bulk purchase settings
+      for (const update of updates) {
+        await pool.query(`
+          UPDATE shop_products 
+          SET 
+            bulk_purchase_enabled = $2,
+            bulk_purchase_minimum_quantity = $3,
+            bulk_purchase_description = $4
+          WHERE id = $1
+        `, [
+          update.productId,
+          update.enabled,
+          update.minQuantity || 0,
+          update.notes || null
+        ]);
+      }
+
+      console.log(`✅ [BULK PURCHASES] Successfully updated ${updates.length} products`);
+
+      res.json({
+        success: true,
+        message: "تنظیمات خریدهای عمده با موفقیت به‌روزرسانی شد"
+      });
+    } catch (error) {
+      console.error('❌ [BULK PURCHASES] Error updating bulk purchase settings:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در به‌روزرسانی تنظیمات خریدهای عمده"
+      });
+    }
+  });
+
+  // Update individual product bulk purchase settings
+  app.put("/api/shop/products/:productId/bulk-purchase", requireAuth, async (req, res) => {
+    try {
+      const { productId } = req.params;
+      const { bulk_purchase_enabled, bulk_purchase_minimum_quantity, bulk_purchase_description } = req.body;
+      
+      const { pool } = await import('./db');
+      
+      console.log(`🏪 [BULK PURCHASE] Updating product ${productId}...`);
+
+      // Update the product's bulk purchase settings
+      await pool.query(`
+        UPDATE shop_products 
+        SET 
+          bulk_purchase_enabled = $2,
+          bulk_purchase_minimum_quantity = $3,
+          bulk_purchase_description = $4
+        WHERE id = $1
+      `, [
+        productId,
+        bulk_purchase_enabled,
+        bulk_purchase_minimum_quantity,
+        bulk_purchase_description
+      ]);
+
+      console.log(`✅ [BULK PURCHASE] Successfully updated product ${productId}`);
+
+      res.json({
+        success: true,
+        message: "Bulk purchase settings updated successfully"
+      });
+    } catch (error) {
+      console.error('❌ [BULK PURCHASE] Error updating bulk purchase settings:', error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to update bulk purchase settings"
+      });
+    }
+  });
+
   // Send SMS to users
   app.post("/api/admin/send-sms", requireAuth, async (req, res) => {
     try {
