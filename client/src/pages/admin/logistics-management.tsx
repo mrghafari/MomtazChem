@@ -1549,25 +1549,38 @@ const LogisticsManagement = () => {
             .info-grid { 
               display: grid; 
               grid-template-columns: 1fr 1fr; 
-              gap: 12px;
+              gap: 15px;
               margin: 0;
             }
             .info-item { 
               margin: 0; 
-              padding: 10px;
+              padding: 12px;
               background: white;
-              border: 1px solid #ccc;
-              border-radius: 4px;
+              border: 2px solid #333;
+              border-radius: 8px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             }
             .info-item[style*="grid-column"] {
               grid-column: 1 / -1;
+            }
+            .info-item.address-item {
+              border: 3px solid #e53e3e;
+              background: #fef5e7;
+              padding: 20px;
             }
             .label { 
               font-weight: bold; 
               color: #000; 
               display: block;
-              margin-bottom: 5px;
-              font-size: 13px;
+              margin-bottom: 8px;
+              font-size: 14px;
+              text-transform: uppercase;
+            }
+            .label.address-label {
+              font-size: 16px;
+              color: #e53e3e;
+              border-bottom: 2px solid #e53e3e;
+              padding-bottom: 4px;
             }
             .value { 
               color: #000;
@@ -1575,6 +1588,24 @@ const LogisticsManagement = () => {
               display: block;
               word-wrap: break-word;
               margin: 0;
+              line-height: 1.5;
+            }
+            .value.address-value {
+              font-size: 20px;
+              font-weight: bold;
+              color: #000;
+              line-height: 1.8;
+              padding: 15px;
+              background: #fff8f0;
+              border: 3px dashed #e53e3e;
+              border-radius: 8px;
+              text-align: center;
+              box-shadow: inset 0 2px 4px rgba(229, 62, 62, 0.1);
+            }
+            .value.phone-value {
+              font-size: 16px;
+              font-weight: bold;
+              color: #2563eb;
             }
             @media print {
               body { 
@@ -1598,16 +1629,43 @@ const LogisticsManagement = () => {
                 margin-bottom: 20px;
               }
               .info-item {
-                border: 1px solid #000 !important;
+                border: 2px solid #000 !important;
                 background: white !important;
-                padding: 8px;
-                margin-bottom: 5px;
+                padding: 10px;
+                margin-bottom: 8px;
+                box-shadow: none !important;
+              }
+              .info-item.address-item {
+                border: 3px solid #000 !important;
+                background: #f0f0f0 !important;
+                padding: 15px;
               }
               .info-grid {
-                gap: 8px;
+                gap: 10px;
               }
               .label, .value {
                 color: #000 !important;
+              }
+              .label.address-label {
+                color: #000 !important;
+                border-bottom: 2px solid #000 !important;
+              }
+              .value.address-value {
+                font-size: 18px !important;
+                font-weight: bold !important;
+                border: 3px solid #000 !important;
+                background: #f8f8f8 !important;
+                padding: 12px !important;
+                text-align: center !important;
+                line-height: 1.6 !important;
+              }
+              .value.phone-value {
+                font-size: 14px !important;
+                font-weight: bold !important;
+              }
+              .info-item .value[style*="font-size: 16px"] {
+                font-size: 14px !important;
+                font-weight: bold !important;
               }
               .section h3 {
                 font-size: 14px;
@@ -1646,8 +1704,8 @@ const LogisticsManagement = () => {
             <h3>📍 آدرس تحویل</h3>
             <div class="info-grid">
               <div class="info-item">
-                <span class="label">گیرنده:</span>
-                <span class="value">${(() => {
+                <span class="label">👤 نام گیرنده:</span>
+                <span class="value" style="font-size: 16px; font-weight: bold;">${(() => {
                   if (selectedOrder.recipientName) return selectedOrder.recipientName;
                   if (selectedOrder.shippingAddress) {
                     const addr = typeof selectedOrder.shippingAddress === 'string' 
@@ -1659,8 +1717,8 @@ const LogisticsManagement = () => {
                 })()}</span>
               </div>
               <div class="info-item">
-                <span class="label">تلفن گیرنده:</span>
-                <span class="value" style="font-size: 20px; font-weight: bold; color: #2563eb;">${(() => {
+                <span class="label">📞 تلفن گیرنده:</span>
+                <span class="value phone-value">${(() => {
                   if (selectedOrder.recipientPhone) return selectedOrder.recipientPhone;
                   if (selectedOrder.shippingAddress) {
                     const addr = typeof selectedOrder.shippingAddress === 'string' 
@@ -1671,9 +1729,9 @@ const LogisticsManagement = () => {
                   return 'ثبت نشده';
                 })()}</span>
               </div>
-              <div class="info-item" style="grid-column: 1 / -1;">
-                <span class="label">آدرس کامل:</span>
-                <span class="value" style="font-size: 18px; font-weight: bold; color: #059669; line-height: 1.5;">${(() => {
+              <div class="info-item address-item" style="grid-column: 1 / -1;">
+                <span class="label address-label">🏠 آدرس کامل تحویل</span>
+                <span class="value address-value">${(() => {
                   if (selectedOrder.recipientAddress) return selectedOrder.recipientAddress;
                   if (selectedOrder.shippingAddress) {
                     const addr = typeof selectedOrder.shippingAddress === 'string' 
