@@ -1041,6 +1041,7 @@ const LogisticsManagement = () => {
                         <Label htmlFor="averageSpeedKmh">سرعت متوسط (کیلومتر/ساعت)</Label>
                         <Input id="averageSpeedKmh" name="averageSpeedKmh" type="number" defaultValue="50" />
                       </div>
+
                     </div>
                     <DialogFooter>
                       <Button type="button" variant="outline" onClick={() => setIsCreateVehicleDialogOpen(false)}>انصراف</Button>
@@ -1257,17 +1258,7 @@ const LogisticsManagement = () => {
                           className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-supportsFlammable">مجاز برای حمل مواد آتش زا</Label>
-                        <select 
-                          name="supportsFlammable" 
-                          defaultValue={editingVehicle.supportsFlammable ? "true" : "false"}
-                          className="w-full p-2 border rounded"
-                        >
-                          <option value="false">❌ غیرمجاز</option>
-                          <option value="true">✅ مجاز</option>
-                        </select>
-                      </div>
+
 
                       <div className="space-y-2 col-span-2">
                         <div className="flex items-center space-x-2">
