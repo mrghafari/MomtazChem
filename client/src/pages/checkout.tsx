@@ -464,19 +464,21 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         cartProducts: cartItems.map(item => ({ id: item.id, name: item.name, isFlammable: item.isFlammable }))
       });
       
-      // Use the flammable-aware calculate-delivery-cost API instead of old vehicle selection
-      const response = await fetch('/api/calculate-delivery-cost', {
+      // Use the enhanced multi-vehicle smart selection API
+      const response = await fetch('/api/logistics/select-optimal-vehicle', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          weight: weight,
+          orderNumber: `CART-${Date.now()}`,
+          weightKg: weight,
+          routeType: 'highway',
+          distanceKm: 200, // Default distance for calculation
           destinationCity: destination,
-          destinationProvince: destination,
-          originCity: 'اربیل',
-          cart: Object.fromEntries(Object.entries(cart).map(([id, qty]) => [id, qty])),
-          useSecondaryAddress: false
+          isHazardous: containsFlammableProducts,
+          isRefrigerated: false,
+          isFragile: false
         })
       });
 
@@ -488,64 +490,49 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       const result = await response.json();
       console.log('🚚 [CHECKOUT] API Response:', result);
       
-      if (result.success && result.data) {
-        // Handle intercity bus response
-        if (result.data.transportMethod === 'intercity_bus' && result.data.selectedOption) {
-          const busOption = result.data.selectedOption;
+      if (result.success) {
+        // Handle multi-vehicle response from new API
+        if (result.multiVehicleRequired && result.solution) {
+          const multiSolution = result.solution;
+          
           setSelectedVehicle({
-            name: busOption.transportName,
-            type: 'intercity_bus',
-            cost: busOption.totalCost,
-            restrictions: busOption.restrictions
+            name: `${multiSolution.totalVehicles} × تانکر - چندین خودرو`,
+            type: 'multiple',
+            cost: multiSolution.totalCost,
+            totalVehicles: multiSolution.totalVehicles,
+            vehicles: multiSolution.vehicles,
+            weightUtilization: ((multiSolution.totalWeight / (multiSolution.totalVehicles * 23000)) * 100),
+            estimatedTime: 120 // Default estimate for multi-vehicle
           });
           
-          console.log('🚌 [CHECKOUT] Intercity bus selected:', {
-            option: busOption.transportName,
-            cost: busOption.totalCost,
-            restrictions: busOption.restrictions
+          console.log('🚛 [CHECKOUT] Multi-vehicle solution:', {
+            solution: `${multiSolution.totalVehicles} vehicles`,
+            totalCost: multiSolution.totalCost,
+            totalVehicles: multiSolution.totalVehicles,
+            vehicleBreakdown: multiSolution.vehicles?.map((v: any) => `${v.name} (${v.loadWeight}kg)`) || []
           });
           
-          return busOption.totalCost;
+          return multiSolution.totalCost;
         }
         
-        // Handle optimal vehicle response
-        if (result.data.optimalVehicle) {
-          const vehicleInfo = result.data.optimalVehicle;
+        // Handle single vehicle response from new API
+        if (result.selectedVehicle) {
+          const vehicleInfo = result.selectedVehicle;
           
-          // Check if it's a multi-vehicle solution
-          if (vehicleInfo.vehicleType === 'multiple' && vehicleInfo.vehicles) {
-            setSelectedVehicle({
-              name: vehicleInfo.vehicleName,
-              type: 'multiple',
-              cost: vehicleInfo.totalCost,
-              totalVehicles: vehicleInfo.totalVehicles,
-              vehicles: vehicleInfo.vehicles,
-              estimatedTime: vehicleInfo.estimatedTime,
-              weightUtilization: vehicleInfo.weightUtilization
-            });
-            
-            console.log('🚛 [CHECKOUT] Multi-vehicle solution selected:', {
-              solution: vehicleInfo.vehicleName,
-              totalCost: vehicleInfo.totalCost,
-              totalVehicles: vehicleInfo.totalVehicles,
-              vehicleBreakdown: vehicleInfo.vehicles.map((v: any) => `${v.vehicleName} (${v.weight}kg)`)
-            });
-          } else {
-            // Single vehicle solution
-            setSelectedVehicle({
-              name: vehicleInfo.vehicleName,
-              type: vehicleInfo.vehicleType,
-              cost: vehicleInfo.totalCost,
-              maxWeight: vehicleInfo.maxWeight,
-              estimatedTime: vehicleInfo.estimatedTime
-            });
-            
-            console.log('🚚 [CHECKOUT] Single vehicle selected:', {
-              vehicle: vehicleInfo.vehicleName,
-              totalCost: vehicleInfo.totalCost,
-              vehicleType: vehicleInfo.vehicleType
-            });
-          }
+          setSelectedVehicle({
+            name: vehicleInfo.vehicleName,
+            type: vehicleInfo.vehicleType || 'single',
+            cost: vehicleInfo.totalCost,
+            maxWeight: vehicleInfo.maxWeightKg,
+            maxVolume: vehicleInfo.maxVolumeM3,
+            estimatedTime: 90 // Default estimate
+          });
+          
+          console.log('🚚 [CHECKOUT] Single vehicle:', {
+            vehicle: vehicleInfo.vehicleName,
+            totalCost: vehicleInfo.totalCost,
+            vehicleType: vehicleInfo.vehicleType
+          });
           
           return vehicleInfo.totalCost;
         }
