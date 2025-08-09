@@ -745,6 +745,13 @@ const LogisticsManagement = () => {
           setSuitableVehiclesData(suitableVehiclesData.data);
           console.log('✅ [SUITABLE VEHICLES] Found vehicles:', suitableVehiclesData.data.suitableVehicles.length);
           console.log('🔍 [VEHICLE DETAILS] First 3 vehicles:', suitableVehiclesData.data.suitableVehicles.slice(0, 3));
+          
+          // Set the fleet vehicles from the suitable vehicles response
+          if (suitableVehiclesData.data.availableFleetVehicles) {
+            setAvailableFleetVehicles(suitableVehiclesData.data.availableFleetVehicles);
+            console.log('🚛 [FLEET VEHICLES] Set from suitable vehicles API:', suitableVehiclesData.data.availableFleetVehicles.length);
+          }
+          
           setSelectedOrderForVehicle(order);
           setIsSuitableVehiclesOpen(true);
           return;
