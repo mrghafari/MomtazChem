@@ -1258,7 +1258,34 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         credentials: 'include',
         body: JSON.stringify({
           orderNumber: `CART-${Date.now()}`,
-          finalWeightKg: totalWeight || 1, // Use fallback weight if calculation failed
+          finalWeightKg: (() => {
+            // Force weight calculation if totalWeight is undefined
+            if (!totalWeight || totalWeight <= 0) {
+              let calculatedWeight = 0;
+              if (cart && products && products.length > 0) {
+                Object.entries(cart).forEach(([productId, quantity]) => {
+                  const product = products.find(p => p.id === parseInt(productId));
+                  if (product) {
+                    const grossWeight = parseFloat(String(product.grossWeight || '0'));
+                    const netWeight = parseFloat(String(product.netWeight || '0'));
+                    const weight = parseFloat(String(product.weight || '0'));
+                    const productWeight = grossWeight || netWeight || weight || 1;
+                    calculatedWeight += productWeight * quantity;
+                    console.log('🔍 [INLINE WEIGHT] Product:', {
+                      productId,
+                      quantity,
+                      productWeight,
+                      contribution: productWeight * quantity,
+                      runningTotal: calculatedWeight
+                    });
+                  }
+                });
+              }
+              console.log('🔍 [INLINE WEIGHT] Final calculated weight:', calculatedWeight);
+              return calculatedWeight || 1;
+            }
+            return totalWeight;
+          })(),
           routeType: estimatedDistance > 100 ? 'highway' : 'urban', // Choose route type based on distance
           distanceKm: estimatedDistance,
           isHazardous: false, // TODO: Determine based on cart contents if needed
@@ -1363,7 +1390,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       totalWeight
     });
 
-    if (finalDestinationCity && finalDestinationProvince && totalWeight > 0 && products.length > 0 && Object.keys(cart).length > 0) {
+    if (finalDestinationCity && finalDestinationProvince && products.length > 0 && Object.keys(cart).length > 0) {
       const debounceTimer = setTimeout(() => {
         calculateSmartDeliveryCost(finalDestinationCity, finalDestinationProvince);
       }, 1000); // 1 second debounce
@@ -1382,6 +1409,17 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         cartData: cart,
         productsData: products.slice(0, 2) // Show first 2 products for debugging
       });
+      
+      // Force display message when waiting for address
+      if (!finalDestinationCity && !finalDestinationProvince) {
+        setSmartDeliveryError('در انتظار انتخاب آدرس مقصد');
+        setOptimalVehicle(null);
+        setAlternativeVehicles([]);
+      } else if (products.length === 0 || Object.keys(cart).length === 0) {
+        setSmartDeliveryError('در انتظار بارگیری اطلاعات سبد خرید');
+        setOptimalVehicle(null);
+        setAlternativeVehicles([]);
+      }
     }
   }, [showSecondAddress, secondCity, secondProvince, form.watch('city'), totalWeight, cart, crmCustomerData?.cityRegion, crmCustomerData?.province, customerData?.customer?.cityRegion, customerData?.customer?.province]);
 
