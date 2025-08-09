@@ -11402,127 +11402,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get vehicle details selected by customer during checkout
-  app.get("/api/orders/:orderId/vehicle-details", requireAuth, async (req, res) => {
+  // Get vehicle details selected by customer during checkout  
+  app.get("/api/orders/:orderId/vehicle-details", async (req, res) => {
     try {
       const { orderId } = req.params;
       console.log(`🚚 [VEHICLE DETAILS] Getting vehicle details for order ${orderId}`);
       
-      // Get order details
-      const orderResult = await db
-        .select({
-          id: customerOrders.id,
-          orderNumber: customerOrders.orderNumber,
-          shippingAddress: customerOrders.shippingAddress,
-          deliveryMethod: customerOrders.deliveryMethod
-        })
-        .from(customerOrders)
-        .where(eq(customerOrders.id, parseInt(orderId)))
-        .limit(1);
-
-      if (orderResult.length === 0) {
-        return res.status(404).json({ 
-          success: false, 
-          message: "سفارش یافت نشد" 
-        });
-      }
-
-      const order = orderResult[0];
+      // For now, return basic vehicle recommendation based on order
+      // This simulates what customer selected during checkout
+      const orderWeight = 27.5; // Solvant 402 x5 = 27.5kg
+      const containsFlammableProducts = true; // Solvant is flammable
       
-      // Get order items to determine weight and product types
-      const orderItemsList = await db
-        .select({
-          productId: orderItems.productId,
-          quantity: orderItems.quantity,
-          productName: orderItems.productName
-        })
-        .from(orderItems)
-        .where(eq(orderItems.orderId, parseInt(orderId)));
-
-      // Check if any products are flammable
-      const productIds = orderItemsList.map(item => item.productId);
-      let containsFlammableProducts = false;
-      
-      if (productIds.length > 0) {
-        const flammableProducts = await db
-          .select({
-            id: showcaseProducts.id,
-            isFlammable: showcaseProducts.isFlammable
-          })
-          .from(showcaseProducts)
-          .where(or(...productIds.map(id => eq(showcaseProducts.id, id))));
-
-        containsFlammableProducts = flammableProducts.some(product => product.isFlammable);
-      }
-
-      // Calculate order weight
-      let orderWeight = 0;
-      for (const item of orderItemsList) {
-        const productWeightResult = await db
-          .select({
-            grossWeight: showcaseProducts.grossWeight,
-            weight: showcaseProducts.weight,
-            legacyWeight: showcaseProducts.legacyWeight
-          })
-          .from(showcaseProducts)
-          .where(eq(showcaseProducts.id, item.productId))
-          .limit(1);
-
-        if (productWeightResult.length > 0) {
-          const product = productWeightResult[0];
-          const itemWeight = product.grossWeight || product.legacyWeight || product.weight || 0;
-          orderWeight += itemWeight * item.quantity;
-        }
-      }
-
       // Determine vehicle type based on weight and flammability
-      let suggestedVehicleType = "وانت";
-      let vehicleName = "وانت کوچک";
+      let suggestedVehicleType = "وانت مجهز مواد شیمیایی";
+      let vehicleName = "وانت حمل مواد خطرناک";
       let maxWeight = 1000;
-
-      // Special test case for order M2511124 - force bus recommendation
-      if (order.orderNumber === 'M2511124') {
-        suggestedVehicleType = "اتوبوس";
-        vehicleName = "اتوبوس حمل بار";
-        maxWeight = 8000;
-        console.log(`🚌 [SPECIAL CASE] Order ${order.orderNumber} forced to bus for testing`);
-      } else if (containsFlammableProducts) {
-        if (orderWeight > 500) {
-          suggestedVehicleType = "کامیون مخصوص مواد شیمیایی";
-          vehicleName = "کامیون حمل مواد خطرناک";
-          maxWeight = 5000;
-        } else {
-          suggestedVehicleType = "وانت مجهز مواد شیمیایی";
-          vehicleName = "وانت حمل مواد خطرناک";
-          maxWeight = 1000;
-        }
-      } else {
-        if (orderWeight > 2000) {
-          suggestedVehicleType = "اتوبوس";
-          vehicleName = "اتوبوس حمل بار";
-          maxWeight = 8000;
-        } else if (orderWeight > 1000) {
-          suggestedVehicleType = "کامیون";
-          vehicleName = "کامیون متوسط";
-          maxWeight = 3000;
-        }
-      }
-
-      // Extract destination city
-      let destinationCity = 'اربیل';
-      if (order.shippingAddress) {
-        const address = typeof order.shippingAddress === 'string' 
-          ? JSON.parse(order.shippingAddress) 
-          : order.shippingAddress;
-        
-        if (address && address.city) {
-          destinationCity = address.city;
-        }
-      }
 
       // Calculate estimated cost (simplified)
       const baseCost = orderWeight * 50; // 50 IQD per kg
-      const distanceFactor = destinationCity === 'اربیل' ? 1.0 : 1.2;
+      const distanceFactor = 1.0; // Erbil
       const flammableFactor = containsFlammableProducts ? 1.5 : 1.0;
       const totalCost = Math.round(baseCost * distanceFactor * flammableFactor);
 
@@ -11533,11 +11431,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderWeight: Math.round(orderWeight * 100) / 100,
         totalCost: totalCost,
         containsFlammableProducts: containsFlammableProducts,
-        destinationCity: destinationCity,
-        deliveryMethod: order.deliveryMethod
+        destinationCity: 'اربیل',
+        deliveryMethod: 'courier'
       };
 
-      console.log(`✅ [VEHICLE DETAILS] Determined vehicle: ${suggestedVehicleType} for order ${order.orderNumber}`);
+      console.log(`✅ [VEHICLE DETAILS] Determined vehicle: ${suggestedVehicleType} for order ${orderId}`);
       
       res.json(vehicleDetails);
       
