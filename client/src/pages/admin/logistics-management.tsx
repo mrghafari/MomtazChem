@@ -44,7 +44,8 @@ import {
   DollarSign,
   Clock,
   RefreshCw,
-  LogIn
+  LogIn,
+  Info
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import PostalServicesTab from '@/components/PostalServicesTab';
@@ -445,7 +446,7 @@ const LogisticsManagement = () => {
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
-  const user = adminUser?.user;
+  const user = (adminUser as any)?.user;
 
   // Company information query for logo
   const { data: companyInfo } = useQuery({
@@ -747,17 +748,57 @@ const LogisticsManagement = () => {
           console.log('✅ [TEMPLATE EXACT] Found exact template matches:', exactTemplateMatches.length);
           console.log('🔍 [TEMPLATE PARTIAL] Found partial template matches:', partialTemplateMatches.length);
           
-          // Prioritize exact matches, then partial, then all available
+          // 🎯 ENHANCED PRIORITY SYSTEM: Exact template matches get highest priority
+          let prioritizedVehicles = [];
+          
           if (exactTemplateMatches.length > 0) {
-            availableVehicles = exactTemplateMatches.map((v: any) => ({ ...v, templateMatchType: 'exact', priority: 1 }));
-            console.log('🎯 [TEMPLATE SUCCESS] Using exact template matches');
-          } else if (partialTemplateMatches.length > 0) {
-            availableVehicles = partialTemplateMatches.map((v: any) => ({ ...v, templateMatchType: 'partial', priority: 2 }));
-            console.log('🔄 [TEMPLATE FALLBACK] Using partial template matches');
-          } else {
-            availableVehicles = availableVehicles.map((v: any) => ({ ...v, templateMatchType: 'none', priority: 3 }));
-            console.log('⚠️ [TEMPLATE WARNING] No template matches found, showing all compatible vehicles');
+            // Priority 1: Exact template matches
+            prioritizedVehicles.push(...exactTemplateMatches.map((v: any) => ({ 
+              ...v, 
+              templateMatchType: 'exact', 
+              priority: 1,
+              isCheckoutSuggested: true,
+              matchType: 'exact',
+              matchReason: `انطباق کامل با الگوی "${checkoutVehicleDetails.vehicleType}" انتخاب شده توسط مشتری`
+            })));
+            console.log('🎯 [TEMPLATE SUCCESS] Added exact template matches with priority 1');
           }
+          
+          if (partialTemplateMatches.length > 0) {
+            // Priority 2: Partial template matches
+            const filteredPartialMatches = partialTemplateMatches.filter((v: any) => 
+              !exactTemplateMatches.some((exact: any) => exact.id === v.id)
+            );
+            prioritizedVehicles.push(...filteredPartialMatches.map((v: any) => ({ 
+              ...v, 
+              templateMatchType: 'partial', 
+              priority: 2,
+              isCheckoutSuggested: true,
+              matchType: 'partial',
+              matchReason: `انطباق نزدیک با الگوی "${checkoutVehicleDetails.vehicleType}" انتخاب شده توسط مشتری`
+            })));
+            console.log('🔄 [TEMPLATE PARTIAL] Added partial template matches with priority 2');
+          }
+          
+          // Priority 3: Other compatible vehicles (as alternative options)
+          const otherCompatibleVehicles = availableVehicles.filter((v: any) => 
+            !exactTemplateMatches.some((exact: any) => exact.id === v.id) &&
+            !partialTemplateMatches.some((partial: any) => partial.id === v.id)
+          );
+          
+          if (otherCompatibleVehicles.length > 0) {
+            prioritizedVehicles.push(...otherCompatibleVehicles.map((v: any) => ({ 
+              ...v, 
+              templateMatchType: 'alternative', 
+              priority: 3,
+              isCheckoutSuggested: false,
+              matchType: 'alternative',
+              matchReason: `خودروی جایگزین با ظرفیت مناسب (الگوی مشتری: "${checkoutVehicleDetails.vehicleType}")`
+            })));
+            console.log('⚠️ [TEMPLATE ALTERNATIVE] Added alternative vehicles with priority 3');
+          }
+          
+          availableVehicles = prioritizedVehicles;
           
           // Sort by priority, then by capacity
           availableVehicles.sort((a: any, b: any) => {
@@ -4546,20 +4587,29 @@ const LogisticsManagement = () => {
                           </div>
                         </div>
                         
-                        {vehicle.isCheckoutSuggested && (
+                        {vehicle.matchReason && (
                           <div className={`border rounded-lg p-3 mb-4 ${
                             vehicle.matchType === 'exact' 
                               ? 'bg-green-100 border-green-300' 
-                              : 'bg-yellow-50 border-yellow-300'
+                              : vehicle.matchType === 'partial'
+                              ? 'bg-yellow-50 border-yellow-300'
+                              : 'bg-blue-50 border-blue-300'
                           }`}>
-                            <div className={`flex items-center gap-2 text-sm font-medium ${
-                              vehicle.matchType === 'exact' ? 'text-green-800' : 'text-yellow-800'
+                            <div className={`flex items-start gap-2 text-xs ${
+                              vehicle.matchType === 'exact' 
+                                ? 'text-green-800' 
+                                : vehicle.matchType === 'partial'
+                                ? 'text-yellow-800'
+                                : 'text-blue-800'
                             }`}>
-                              <CheckCircle className="w-4 h-4" />
-                              {vehicle.matchType === 'exact' 
-                                ? 'انطباق کامل با انتخاب مشتری در checkout' 
-                                : 'انطباق نزدیک با انتخاب مشتری در checkout'
-                              }
+                              {vehicle.matchType === 'exact' ? (
+                                <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                              ) : vehicle.matchType === 'partial' ? (
+                                <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                              ) : (
+                                <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                              )}
+                              <span className="leading-relaxed">{vehicle.matchReason}</span>
                             </div>
                           </div>
                         )}
@@ -4585,9 +4635,11 @@ const LogisticsManagement = () => {
                         
                         <Button 
                           className={`w-full transition-all duration-300 ${
-                            vehicle.isCheckoutSuggested 
-                              ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg' 
-                              : 'bg-orange-600 hover:bg-orange-700'
+                            vehicle.matchType === 'exact'
+                              ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg border-2 border-green-400' 
+                              : vehicle.matchType === 'partial'
+                              ? 'bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 shadow-lg border-2 border-yellow-400'
+                              : 'bg-blue-600 hover:bg-blue-700 border-2 border-blue-400'
                           } text-white`}
                           onClick={() => assignVehicleToOrder(
                             vehicle.id, 
@@ -4596,8 +4648,22 @@ const LogisticsManagement = () => {
                             vehicle.driverMobile || vehicle.driverPhone
                           )}
                         >
-                          <CheckCircle className="w-4 h-4 mr-2" />
-                          {vehicle.isCheckoutSuggested ? 'اختصاص خودروی پیشنهادی' : 'اختصاص این خودرو'}
+                          {vehicle.matchType === 'exact' ? (
+                            <>
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              🎯 اختصاص خودروی کاملاً مطابق
+                            </>
+                          ) : vehicle.matchType === 'partial' ? (
+                            <>
+                              <AlertTriangle className="w-4 h-4 mr-2" />
+                              🔍 اختصاص خودروی مشابه
+                            </>
+                          ) : (
+                            <>
+                              <Info className="w-4 h-4 mr-2" />
+                              🚛 اختصاص خودروی جایگزین
+                            </>
+                          )}
                         </Button>
                       </div>
                     ))}
