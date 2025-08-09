@@ -139,9 +139,7 @@ export default function BulkPurchaseProductCard({ product, onUpdate }: BulkPurch
               <Label htmlFor={`bulk-enabled-${product.id}`} className="text-sm font-medium">
                 Enable Bulk Purchases
               </Label>
-              <p className="text-xs text-gray-500">
-                Allow customers to purchase this product in bulk quantities
-              </p>
+
             </div>
             <Switch
               id={`bulk-enabled-${product.id}`}
@@ -153,7 +151,7 @@ export default function BulkPurchaseProductCard({ product, onUpdate }: BulkPurch
 
           {bulkEnabled && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <Label htmlFor={`min-quantity-${product.id}`} className="text-sm font-medium">
                     Minimum Quantity *
@@ -168,17 +166,9 @@ export default function BulkPurchaseProductCard({ product, onUpdate }: BulkPurch
                     disabled={!isEditing}
                     className="mt-1"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Minimum quantity required for bulk purchases
-                  </p>
+
                 </div>
-                <div>
-                  <Label className="text-sm font-medium">Current Settings</Label>
-                  <div className="mt-1 p-2 bg-blue-50 rounded text-xs">
-                    <p><strong>Status:</strong> {product.bulk_purchase_enabled ? "Enabled" : "Disabled"}</p>
-                    <p><strong>Min Qty:</strong> {product.bulk_purchase_minimum_quantity || "Not set"}</p>
-                  </div>
-                </div>
+
               </div>
 
               <div>
@@ -194,9 +184,7 @@ export default function BulkPurchaseProductCard({ product, onUpdate }: BulkPurch
                   className="mt-1"
                   rows={3}
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  This description will be shown to customers on the product page
-                </p>
+
               </div>
             </>
           )}

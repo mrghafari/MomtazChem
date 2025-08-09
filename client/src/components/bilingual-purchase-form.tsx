@@ -2297,10 +2297,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 {/* Second Address Option - Only show for CRM customers */}
                 {hasCrmData && (
                   <div className="space-y-3 p-4 bg-blue-50 rounded-lg border">
-                    {/* Instruction text */}
-                    <div className={`text-sm text-blue-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
-                      <span className="font-medium">📍 {t.secondAddressInstruction}</span>
-                    </div>
+
                     
                     <div className="flex items-center justify-between">
                       <label className={`text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
@@ -2456,10 +2453,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 {/* Recipient Mobile Number - Only show for CRM customers */}
                 {hasCrmData && (
                   <div className="space-y-3 p-4 bg-purple-50 rounded-lg border">
-                    {/* Instruction text */}
-                    <div className={`text-sm text-purple-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
-                      <span className="font-medium">📱 {t.recipientMobileInstruction}</span>
-                    </div>
+
                     
                     <div className="flex items-center justify-between">
                       <label className={`text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
