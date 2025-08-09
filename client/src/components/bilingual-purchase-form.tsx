@@ -249,12 +249,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet' | 'wallet_full' | 'wallet_partial' | 'wallet_combined' | 'bank_transfer_grace' | 'bank_receipt'>('online_payment');
 
   // Fetch available payment methods from admin settings (public endpoint)
-  const { data: availablePaymentMethods = [] } = useQuery({
+  const { data: availablePaymentMethods = [] } = useQuery<any[]>({
     queryKey: ['/api/public/payment-methods'],
-    queryFn: async () => {
-      const response = await apiRequest('/api/public/payment-methods');
-      return response.data || [];
-    },
   });
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
@@ -916,7 +912,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     finalShippingCost,
     regularShippingCost: shippingCost,
     smartDeliveryCost: smartDeliveryCost,
+    optimalVehicle: optimalVehicle,
     optimalVehicleCost: optimalVehicle?.totalCost,
+    selectedShippingMethod: selectedShippingMethod,
+    isSmartVehicleSelected: shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod)?.deliveryMethod === 'smart_vehicle',
+    shippingMethodData: shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod),
     totalAmount,
     'Components': `${subtotalAmount} + ${totalTaxAmount} + ${finalShippingCost} = ${totalAmount}`
   });
@@ -1367,7 +1367,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         onOrderComplete();
       }
       // Handle bank transfer - redirect to payment gateway  
-      else if (response.paymentMethod === 'bank_transfer' || (paymentMethod !== 'wallet' && paymentMethod !== 'wallet_full' && paymentMethod !== 'wallet_partial' && paymentMethod !== 'online_payment' && paymentMethod !== 'bank_transfer_grace' && paymentMethod !== 'bank_receipt')) {
+      else if (response.paymentMethod === 'bank_transfer' || (paymentMethod !== 'wallet' && paymentMethod !== 'wallet_full' && paymentMethod !== 'wallet_partial' && paymentMethod !== 'wallet_combined' && paymentMethod !== 'online_payment' && paymentMethod !== 'bank_transfer_grace' && paymentMethod !== 'bank_receipt')) {
         toast({
           title: "انتقال به درگاه بانک",
           description: "در حال هدایت شما به درگاه پرداخت بانکی..."
@@ -1897,6 +1897,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       if (selectedRate && (selectedRate.deliveryMethod === 'smart_vehicle' || selectedRate.delivery_method === 'smart_vehicle')) {
                         if (smartDeliveryLoading) {
                           return <span className="text-emerald-600">در حال محاسبه...</span>;
+                        }
+                        if (optimalVehicle?.totalCost && optimalVehicle.totalCost > 0) {
+                          return <span className="text-emerald-600 font-bold">{formatCurrency(optimalVehicle.totalCost)}</span>;
                         }
                         if (finalShippingCost > 0) {
                           return <span className="text-emerald-600 font-bold">{formatCurrency(finalShippingCost)}</span>;
