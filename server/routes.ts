@@ -33488,9 +33488,9 @@ momtazchem.com
   // =============================================================================
 
   // Get all ready vehicles
-  app.get('/api/logistics/ready-vehicles', requireAuth, async (req, res) => {
+  app.get('/api/logistics/ready-vehicles', async (req, res) => {
     try {
-      const { readyVehicles, vehicleTemplates } = await import('../shared/logistics-schema');
+      const { readyVehicles, vehicleTemplates } = await import('../shared/schema');
       
       const vehicles = await db
         .select({
@@ -33550,7 +33550,7 @@ momtazchem.com
   // Create new ready vehicle
   app.post('/api/logistics/ready-vehicles', requireAuth, async (req, res) => {
     try {
-      const { readyVehicles } = await import('../shared/logistics-schema');
+      const { readyVehicles } = await import('../shared/schema');
       
       const vehicleData = {
         vehicleTemplateId: req.body.vehicleTemplateId,
@@ -33607,7 +33607,7 @@ momtazchem.com
   // Update ready vehicle
   app.put('/api/logistics/ready-vehicles/:id', requireAuth, async (req, res) => {
     try {
-      const { readyVehicles } = await import('../shared/logistics-schema');
+      const { readyVehicles } = await import('../shared/schema');
       const vehicleId = parseInt(req.params.id);
       
       if (isNaN(vehicleId)) {
@@ -33673,7 +33673,7 @@ momtazchem.com
   // Delete ready vehicle
   app.delete('/api/logistics/ready-vehicles/:id', requireAuth, async (req, res) => {
     try {
-      const { readyVehicles } = await import('../shared/logistics-schema');
+      const { readyVehicles } = await import('../shared/schema');
       const vehicleId = parseInt(req.params.id);
       
       if (isNaN(vehicleId)) {
