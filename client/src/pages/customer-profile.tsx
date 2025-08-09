@@ -835,6 +835,26 @@ const CustomerProfile = () => {
                               {getStatusLabel(order.status, order.paymentStatus, order)}
                             </Badge>
                             
+                            {/* 🧾 نمایش نوع فاکتور (پیش‌فاکتور یا فاکتور رسمی) */}
+                            {order.invoiceType && (
+                              <div className="mt-2">
+                                <Badge 
+                                  className={
+                                    order.invoiceType === 'official_invoice' 
+                                      ? "bg-green-100 text-green-800 border-green-200" 
+                                      : "bg-blue-100 text-blue-800 border-blue-200"
+                                  }
+                                >
+                                  {order.invoiceType === 'official_invoice' ? '📄 فاکتور رسمی' : '📋 پیش‌فاکتور'}
+                                </Badge>
+                                {order.invoiceType === 'official_invoice' && order.invoiceConvertedAt && (
+                                  <p className="text-xs text-green-600 mt-1">
+                                    تبدیل شده در: {new Date(order.invoiceConvertedAt).toLocaleDateString('fa-IR')}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                            
                             {/* نمایش دلیل رد سفارش از بخش مالی */}
                             {(order.status === 'financial_rejected' || order.status === 'rejected') && order.financialNotes && (
                               <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -980,15 +1000,15 @@ const CustomerProfile = () => {
                             </div>
                           )}
                           
-                          {/* دکمه دانلود فاکتور/پیش فاکتور برای همه سفارشات */}
-                          {(order.status === 'confirmed' || order.paymentStatus === 'paid') ? (
+                          {/* 🧾 دکمه دانلود فاکتور/پیش فاکتور بر اساس نوع فاکتور */}
+                          {order.invoiceType === 'official_invoice' ? (
                             <Button
                               size="sm"
                               onClick={() => window.open(`/download-invoice/${order.id}`, '_blank')}
                               className="bg-green-600 hover:bg-green-700"
                             >
                               <Download className="w-4 h-4 mr-2" />
-                              دانلود فاکتور
+                              دانلود فاکتور رسمی
                             </Button>
                           ) : (
                             <Button
@@ -1209,6 +1229,21 @@ const CustomerProfile = () => {
                       <Badge className={getStatusColor(order.status, order.paymentStatus)}>
                         {getStatusLabel(order.status, order.paymentStatus, order)}
                       </Badge>
+                      
+                      {/* 🧾 نمایش نوع فاکتور در سابقه خرید */}
+                      {order.invoiceType && (
+                        <div className="mt-1">
+                          <Badge 
+                            className={
+                              order.invoiceType === 'official_invoice' 
+                                ? "bg-green-100 text-green-800 border-green-200 text-xs" 
+                                : "bg-blue-100 text-blue-800 border-blue-200 text-xs"
+                            }
+                          >
+                            {order.invoiceType === 'official_invoice' ? '📄 فاکتور رسمی' : '📋 پیش‌فاکتور'}
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1305,15 +1340,15 @@ const CustomerProfile = () => {
                       </Button>
                     )}
                     
-                    {/* دکمه دانلود فاکتور/پیش فاکتور بر اساس تأیید مالی */}
-                    {(order.status === 'confirmed' || order.paymentStatus === 'paid') ? (
+                    {/* 🧾 دکمه دانلود فاکتور/پیش فاکتور بر اساس نوع فاکتور در سابقه خرید */}
+                    {order.invoiceType === 'official_invoice' ? (
                       <Button
                         size="sm"
                         onClick={() => window.open(`/download-invoice/${order.id}`, '_blank')}
                         className="bg-green-600 hover:bg-green-700"
                       >
                         <Download className="w-4 h-4 mr-2" />
-                        دانلود فاکتور
+                        دانلود فاکتور رسمی
                       </Button>
                     ) : (
                       <Button
