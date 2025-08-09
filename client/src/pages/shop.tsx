@@ -1334,15 +1334,7 @@ const Shop = () => {
                         </div>
                         <CardContent className="p-4">
                           <div className="mb-2">
-                            <h3 className="font-semibold text-lg">
-                              {product.name}
-                              {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && (
-                                <span className="text-sm font-medium text-blue-800 mx-2">
-                                  خرید عمده
-                                </span>
-                              )}
-                              {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && " - "}
-                            </h3>
+                            <h3 className="font-semibold text-lg">{product.name}</h3>
                           </div>
                           
                           <p className="text-gray-600 text-sm mb-3 line-clamp-2">
@@ -1766,15 +1758,7 @@ const Shop = () => {
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <div className="mb-2">
-                                <h3 className="font-semibold text-xl">
-                                  {product.name}
-                                  {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && (
-                                    <span className="text-sm font-medium text-blue-800 mx-2">
-                                      خرید عمده
-                                    </span>
-                                  )}
-                                  {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && " - "}
-                                </h3>
+                                <h3 className="font-semibold text-xl">{product.name}</h3>
                               </div>
                               <p className="text-gray-600 mb-4">
                                 {product.description}

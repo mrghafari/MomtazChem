@@ -1714,6 +1714,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           </div>
                           <h4 className="font-medium text-sm truncate flex items-center gap-1">
                             {product.name}
+                            {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && (
+                              <span className="text-xs font-medium text-blue-800 mx-1">
+                                خرید عمده
+                              </span>
+                            )}
+                            {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && " - "}
                             {product.isFlammable && (
                               <Flame className="w-3 h-3 text-orange-500 flex-shrink-0" aria-label="محصول آتش‌زا" />
                             )}
@@ -1734,12 +1740,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       {/* Middle Section with Bulk Indicator and Quantity Controls */}
                       <div className="flex flex-col items-center gap-2">
                         {/* Bulk Purchase Indicator in Middle */}
-                        {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && 
-                         quantity >= product.bulkPurchaseThreshold && (
-                          <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1">
-                            🎉 خرید عمده
-                          </Badge>
-                        )}
+
                         
                         {/* Quantity Controls */}
                         <div className="flex items-center gap-2">
