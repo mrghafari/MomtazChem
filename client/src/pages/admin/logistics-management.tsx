@@ -744,6 +744,7 @@ const LogisticsManagement = () => {
         if (suitableVehiclesData.success) {
           setSuitableVehiclesData(suitableVehiclesData.data);
           console.log('✅ [SUITABLE VEHICLES] Found vehicles:', suitableVehiclesData.data.suitableVehicles.length);
+          console.log('🔍 [VEHICLE DETAILS] First 3 vehicles:', suitableVehiclesData.data.suitableVehicles.slice(0, 3));
           setSelectedOrderForVehicle(order);
           setIsSuitableVehiclesOpen(true);
           return;
@@ -775,6 +776,7 @@ const LogisticsManagement = () => {
         const readyVehiclesData = await readyVehiclesResponse.json();
         readyVehicles = readyVehiclesData.vehicles || readyVehiclesData.data || [];
         console.log('🚛 [READY VEHICLES] Found ready vehicles:', readyVehicles.length);
+        console.log('🔍 [READY VEHICLES DETAILS] First 3:', readyVehicles.slice(0, 3));
         
         const orderWeight = order.calculatedWeight || order.totalWeight || 0;
         console.log('📦 [ORDER DETAILS] Weight:', orderWeight, 'kg');
