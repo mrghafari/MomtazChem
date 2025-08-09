@@ -924,7 +924,7 @@ export default function ShopAdmin() {
                                     <div className="space-y-1">
                                       <p className="font-medium text-sm">محتوای پیامک:</p>
                                       <p className="text-xs text-gray-700 whitespace-pre-wrap">
-                                        {template.templateText || 'محتوای پیامک در دسترس نیست'}
+                                        {getSmsTemplateContent(template.id)}
                                       </p>
                                     </div>
                                   </TooltipContent>
