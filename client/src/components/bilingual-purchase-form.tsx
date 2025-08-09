@@ -1779,17 +1779,21 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     <div className="mt-2 pt-2 border-t space-y-1">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-muted-foreground">Item Total</span>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{formatCurrency(itemTotal)}</span>
-                          {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && quantity >= product.bulkPurchaseThreshold && (
-                            <div className="px-2 py-0.5 bg-gradient-to-r from-blue-100 to-green-100 border border-blue-300 rounded-full shadow-sm">
-                              <span className="text-xs font-semibold text-blue-800">
-                                خرید عمده
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                        <span className="font-medium">{formatCurrency(itemTotal)}</span>
                       </div>
+                      
+                      {/* Bulk Purchase Indicator */}
+                      {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && quantity >= product.bulkPurchaseThreshold && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">خرید عمده</span>
+                          <div className="px-2 py-0.5 bg-gradient-to-r from-blue-100 to-green-100 border border-blue-300 rounded-full shadow-sm">
+                            <span className="text-xs font-semibold text-blue-800">
+                              ✓
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      
                       {discountedPrice < basePrice && (
                         <div className="flex justify-between items-center text-xs text-green-600">
                           <span>{t.discountApplied}</span>
