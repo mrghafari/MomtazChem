@@ -1819,6 +1819,40 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 <span className="text-primary">{formatCurrency(subtotalAmount + totalTaxAmount)}</span>
               </div>
               
+              {/* Bulk Purchase Shipping Recommendation */}
+              {(() => {
+                const hasBulkPurchase = Object.entries(cart).some(([productId, quantity]) => {
+                  const product = products.find(p => p.id === parseInt(productId));
+                  return product?.bulkPurchaseThreshold && 
+                         product?.bulkPurchaseDiscount && 
+                         quantity >= product.bulkPurchaseThreshold;
+                });
+                
+                if (hasBulkPurchase) {
+                  return (
+                    <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+                      <div className="flex items-start gap-3">
+                        <Truck className="w-5 h-5 text-green-600 mt-0.5" />
+                        <div className="flex-1">
+                          <h4 className="text-sm font-semibold text-green-800 mb-1">
+                            💡 پیشنهاد ویژه خرید عمده
+                          </h4>
+                          <p className="text-sm text-green-700 mb-2">
+                            با توجه به اینکه سفارش شما خرید عمده است، پیشنهاد می‌دهیم:
+                          </p>
+                          <ul className="text-sm text-green-700 space-y-1 mr-4">
+                            <li>• خودرو خودتان را بیاورید و هزینه حمل صرفه‌جویی کنید</li>
+                            <li>• از گزینه "حمل توسط خودم" استفاده کنید</li>
+                            <li>• با تیم لجستیک برای هماهنگی تماس بگیرید</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
               {/* Delivery Method Selection */}
               <div className="space-y-3 border-t pt-3">
                 <div className="flex justify-between items-center">
@@ -1855,11 +1889,23 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           );
                         }
                         
-                        // Handle self_pickup option specially
+                        // Handle self_pickup option specially (highlight for bulk purchases)
                         if (rate.deliveryMethod === 'self_pickup' || rate.delivery_method === 'self_pickup') {
+                          const hasBulkPurchase = Object.entries(cart).some(([productId, quantity]) => {
+                            const product = products.find(p => p.id === parseInt(productId));
+                            return product?.bulkPurchaseThreshold && 
+                                   product?.bulkPurchaseDiscount && 
+                                   quantity >= product.bulkPurchaseThreshold;
+                          });
+                          
                           return (
-                            <option key={rate.id} value={rate.id} style={{backgroundColor: '#dbeafe', color: '#1d4ed8'}}>
-                              🚶‍♂️ حمل توسط خودم - رایگان
+                            <option key={rate.id} value={rate.id} 
+                              style={{
+                                backgroundColor: hasBulkPurchase ? '#dcfce7' : '#dbeafe', 
+                                color: hasBulkPurchase ? '#166534' : '#1d4ed8',
+                                fontWeight: hasBulkPurchase ? 'bold' : 'normal'
+                              }}>
+                              🚶‍♂️ حمل توسط خودم - رایگان {hasBulkPurchase ? ' ⭐ پیشنهاد ویژه خرید عمده' : ''}
                             </option>
                           );
                         }
