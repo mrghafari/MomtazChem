@@ -1041,13 +1041,6 @@ const LogisticsManagement = () => {
                         <Label htmlFor="averageSpeedKmh">سرعت متوسط (کیلومتر/ساعت)</Label>
                         <Input id="averageSpeedKmh" name="averageSpeedKmh" type="number" defaultValue="50" />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="supportsFlammable">مجاز برای حمل مواد آتش زا</Label>
-                        <select name="supportsFlammable" className="w-full p-2 border rounded">
-                          <option value="false">❌ غیرمجاز</option>
-                          <option value="true">✅ مجاز</option>
-                        </select>
-                      </div>
                     </div>
                     <DialogFooter>
                       <Button type="button" variant="outline" onClick={() => setIsCreateVehicleDialogOpen(false)}>انصراف</Button>
@@ -1070,7 +1063,6 @@ const LogisticsManagement = () => {
                       <TableHead>حداکثر وزن</TableHead>
                       <TableHead>حجم</TableHead>
                       <TableHead>قیمت پایه</TableHead>
-                      <TableHead>مجاز برای حمل مواد آتش زا</TableHead>
                       <TableHead>وضعیت</TableHead>
                       <TableHead>عملیات</TableHead>
                     </TableRow>
@@ -1078,11 +1070,11 @@ const LogisticsManagement = () => {
                   <TableBody>
                     {vehiclesLoading ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8">در حال بارگذاری...</TableCell>
+                        <TableCell colSpan={7} className="text-center py-8">در حال بارگذاری...</TableCell>
                       </TableRow>
                     ) : vehicles.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8">هیچ الگوی خودرویی یافت نشد</TableCell>
+                        <TableCell colSpan={7} className="text-center py-8">هیچ الگوی خودرویی یافت نشد</TableCell>
                       </TableRow>
                     ) : (
                       vehicles.map((vehicle: any) => (
@@ -1092,11 +1084,6 @@ const LogisticsManagement = () => {
                           <TableCell>{parseInt(vehicle.maxWeightKg)} کیلوگرم</TableCell>
                           <TableCell>{parseInt(vehicle.maxVolumeM3) || 0} متر مکعب</TableCell>
                           <TableCell>{parseInt(vehicle.basePrice)} دینار</TableCell>
-                          <TableCell>
-                            <Badge variant={vehicle.supportsFlammable ? "default" : "destructive"} className="text-xs">
-                              {vehicle.supportsFlammable ? "✅ مجاز" : "❌ غیرمجاز"}
-                            </Badge>
-                          </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <Badge variant={vehicle.isActive ? "default" : "secondary"}>
