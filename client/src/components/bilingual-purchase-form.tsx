@@ -399,6 +399,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [secondCity, setSecondCity] = useState('');
   const [secondPostalCode, setSecondPostalCode] = useState('');
 
+  // 🆕 Order number management state
+  const [reservedOrderNumber, setReservedOrderNumber] = useState<string | null>(null);
+  const [isReservingOrderNumber, setIsReservingOrderNumber] = useState(false);
+
   // Fetch Iraqi provinces for second address dropdowns
   const { data: provinces, isLoading: isLoadingProvinces } = useQuery({
     queryKey: ['/api/iraqi-provinces'],
@@ -1073,7 +1077,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         },
         credentials: 'include',
         body: JSON.stringify({
-          orderNumber: `CART-${Date.now()}`,
+          orderNumber: reservedOrderNumber || `PENDING-${Date.now()}`, // Use reserved number if available
           weightKg: totalWeight,
           routeType: estimatedDistance > 100 ? 'highway' : 'urban', // Choose route type based on distance
           distanceKm: estimatedDistance,
@@ -1190,7 +1194,72 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
   }, [showSecondAddress, secondCity, secondProvince, form.watch('city'), totalWeight, cart, crmCustomerData?.cityRegion, crmCustomerData?.province, customerData?.customer?.cityRegion, customerData?.customer?.province]);
 
+  // 🆕 Reserve order number function
+  const reserveOrderNumber = async () => {
+    if (reservedOrderNumber || isReservingOrderNumber) {
+      console.log('🔒 [ORDER NUMBER] Already reserved or in progress:', reservedOrderNumber);
+      return reservedOrderNumber;
+    }
 
+    setIsReservingOrderNumber(true);
+    
+    try {
+      console.log('🔒 [ORDER NUMBER] Reserving new order number...');
+      
+      const response = await fetch('/api/orders/reserve-number', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+      
+      if (data.success && data.orderNumber) {
+        setReservedOrderNumber(data.orderNumber);
+        console.log(`✅ [ORDER NUMBER] Reserved: ${data.orderNumber}`);
+        return data.orderNumber;
+      } else {
+        throw new Error(data.message || 'Failed to reserve order number');
+      }
+    } catch (error) {
+      console.error('❌ [ORDER NUMBER] Error reserving:', error);
+      throw error;
+    } finally {
+      setIsReservingOrderNumber(false);
+    }
+  };
+
+  // 🆕 Release unused order number function
+  const releaseOrderNumber = async (orderNumber: string) => {
+    try {
+      console.log(`🔓 [ORDER NUMBER] Releasing: ${orderNumber}`);
+      
+      const response = await fetch('/api/orders/release-number', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ orderNumber })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log(`✅ [ORDER NUMBER] Released: ${orderNumber}`);
+        setReservedOrderNumber(null);
+        return true;
+      } else {
+        console.warn(`⚠️ [ORDER NUMBER] Could not release: ${orderNumber} - ${data.message}`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`❌ [ORDER NUMBER] Error releasing ${orderNumber}:`, error);
+      return false;
+    }
+  };
 
   // Submit order mutation
   const submitOrderMutation = useMutation({
@@ -1389,8 +1458,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         onOrderComplete();
       }
     },
-    onError: (error: any) => {
+    onError: async (error: any) => {
       console.error('❌ [ORDER ERROR] Order submission failed:', error);
+      
+      // 🆕 Release reserved order number on failure
+      if (reservedOrderNumber) {
+        console.log('🔓 [ORDER ERROR] Releasing reserved order number due to failed order...');
+        await releaseOrderNumber(reservedOrderNumber);
+      }
       
       // Show specific error message for bank payment failures
       const errorMessage = error.message || t.orderError;
@@ -1403,7 +1478,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
   });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     console.log('🚀 [SUBMIT DEBUG] onSubmit function called');
     console.log('🚀 [SUBMIT DEBUG] Form data received:', data);
     console.log('🚀 [SUBMIT DEBUG] Selected shipping method:', selectedShippingMethod);
@@ -1418,6 +1493,20 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       toast({
         title: language === 'ar' ? "روش ارسال اجباری است" : "Shipping method is required",
         description: language === 'ar' ? "لطفاً روش ارسال را انتخاب کنید" : "Please select a shipping method",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // 🆕 Reserve order number first (no more temporary numbers)
+    try {
+      const orderNumber = await reserveOrderNumber();
+      console.log('✅ [ORDER NUMBER] Reserved for submission:', orderNumber);
+    } catch (error) {
+      console.error('❌ [ORDER NUMBER] Failed to reserve:', error);
+      toast({
+        title: "خطا در تولید شماره سفارش",
+        description: "لطفاً دوباره تلاش کنید",
         variant: "destructive"
       });
       return;
@@ -1462,6 +1551,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       paymentMethod,
       walletAmountUsed: Math.round(walletAmount), // Use actual wallet amount in integer format
       remainingAmount: Math.round(Math.max(0, totalAmount - walletAmount)), // Calculate remaining in integer format
+      
+      // 🆕 Use reserved order number (no more temporary numbers)
+      orderNumber: reservedOrderNumber,
       
       // Enhanced delivery information
       secondDeliveryAddress: showSecondAddress ? secondAddress : null,

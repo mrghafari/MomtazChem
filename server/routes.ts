@@ -8057,6 +8057,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // ORDER NUMBER MANAGEMENT ENDPOINTS (NEW SYSTEM)
+  // =============================================================================
+
+  // Reserve order number immediately (no more temporary numbers)
+  app.post("/api/orders/reserve-number", async (req, res) => {
+    try {
+      console.log('🔒 [API] Reserving order number...');
+      
+      const reservedNumber = await storage.reserveOrderNumber();
+      
+      res.json({
+        success: true,
+        orderNumber: reservedNumber,
+        message: "شماره سفارش reserve شد"
+      });
+    } catch (error) {
+      console.error('❌ [API] Error reserving order number:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در reserve کردن شماره سفارش"
+      });
+    }
+  });
+
+  // Release unused order number (for failed payments)
+  app.post("/api/orders/release-number", async (req, res) => {
+    try {
+      const { orderNumber } = req.body;
+      
+      if (!orderNumber) {
+        return res.status(400).json({
+          success: false,
+          message: "شماره سفارش ارسال نشده"
+        });
+      }
+
+      console.log(`🔓 [API] Releasing order number: ${orderNumber}`);
+      
+      const released = await storage.releaseOrderNumber(orderNumber);
+      
+      if (released) {
+        res.json({
+          success: true,
+          message: "شماره سفارش آزاد شد"
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: "امکان آزاد کردن شماره سفارش وجود ندارد"
+        });
+      }
+    } catch (error) {
+      console.error('❌ [API] Error releasing order number:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در آزاد کردن شماره سفارش"
+      });
+    }
+  });
+
+  // =============================================================================
   // FACTORY MANAGEMENT ENDPOINTS
   // =============================================================================
 
