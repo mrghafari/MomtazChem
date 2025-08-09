@@ -129,6 +129,10 @@ export default function ShopAdmin() {
   const { data: shopSettings = [], isLoading: settingsLoading } = useQuery({
     queryKey: ['/api/shop/settings'],
     enabled: isAuthenticated,
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache for debugging  
+    refetchOnMount: true,
+    refetchOnWindowFocus: true
   });
 
   // Load existing proforma deadline settings
@@ -166,10 +170,14 @@ export default function ShopAdmin() {
     },
     onSuccess: () => {
       toast({
-        title: "Success",
+        title: "Success", 
         description: "Proforma deadline updated successfully",
       });
+      // Force refresh the settings data
       queryClient.invalidateQueries({ queryKey: ['/api/shop/settings'] });
+      queryClient.refetchQueries({ queryKey: ['/api/shop/settings'] });
+      // Also invalidate related queries that might use this setting
+      queryClient.invalidateQueries({ queryKey: ['/api/public/payment-methods'] });
     },
     onError: (error: any) => {
       toast({
