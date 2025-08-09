@@ -766,7 +766,7 @@ const LogisticsManagement = () => {
       }
       
       // Get all ready vehicles (آماده به کار)
-      const readyVehiclesResponse = await fetch('/api/logistics/ready-vehicles', {
+      const readyVehiclesResponse = await fetch('/api/ready-vehicles', {
         credentials: 'include'
       });
       
