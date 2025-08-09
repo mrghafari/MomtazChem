@@ -523,22 +523,6 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
             restrictions: busOption.restrictions
           });
           
-          // Apply bulk purchase shipping discount if applicable
-          const hasBulkPurchase = cartItems.some(item => 
-            item.hasBulkDiscount && item.bulkDiscountPercent > 0
-          );
-          
-          if (hasBulkPurchase) {
-            const shippingDiscount = 0.15; // 15% shipping discount for bulk purchases
-            const discountedCost = busOption.totalCost * (1 - shippingDiscount);
-            console.log('🎁 [BULK SHIPPING] Applied 15% bus shipping discount:', {
-              originalCost: busOption.totalCost,
-              discountedCost,
-              savings: busOption.totalCost - discountedCost
-            });
-            return discountedCost;
-          }
-          
           return busOption.totalCost;
         }
         
@@ -559,22 +543,6 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
             vehicleType: vehicleInfo.vehicleType,
             safetyCompliant: true
           });
-          
-          // Apply bulk purchase shipping discount if applicable
-          const hasBulkPurchase = cartItems.some(item => 
-            item.hasBulkDiscount && item.bulkDiscountPercent > 0
-          );
-          
-          if (hasBulkPurchase) {
-            const shippingDiscount = 0.15; // 15% shipping discount for bulk purchases
-            const discountedCost = vehicleInfo.totalCost * (1 - shippingDiscount);
-            console.log('🎁 [BULK SHIPPING] Applied 15% shipping discount:', {
-              originalCost: vehicleInfo.totalCost,
-              discountedCost,
-              savings: vehicleInfo.totalCost - discountedCost
-            });
-            return discountedCost;
-          }
           
           return vehicleInfo.totalCost;
         }
@@ -3148,27 +3116,9 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     <span>جمع کالاها:</span>
                     <span>{subtotal.toLocaleString()} IQD</span>
                   </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between">
-                      <span>هزینه ارسال:</span>
-                      <span>{shippingCost === 0 ? "رایگان" : `${shippingCost.toLocaleString()} IQD`}</span>
-                    </div>
-                    {(() => {
-                      const hasBulkPurchase = cartItems.some(item => 
-                        item.hasBulkDiscount && item.bulkDiscountPercent > 0
-                      );
-                      if (hasBulkPurchase && shippingCost > 0) {
-                        const originalShippingCost = shippingCost / 0.85; // Reverse the 15% discount
-                        const savings = originalShippingCost - shippingCost;
-                        return (
-                          <div className="flex justify-between text-xs text-green-600">
-                            <span>تخفیف حمل خرید عمده (15%):</span>
-                            <span>-{savings.toLocaleString()} IQD</span>
-                          </div>
-                        );
-                      }
-                      return null;
-                    })()}
+                  <div className="flex justify-between">
+                    <span>هزینه ارسال:</span>
+                    <span>{shippingCost === 0 ? "رایگان" : `${shippingCost.toLocaleString()} IQD`}</span>
                   </div>
                   {vatAmount > 0 && (
                     <div className="flex justify-between">

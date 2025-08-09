@@ -427,7 +427,7 @@ export default function ShopAdmin() {
             <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="inventory">Inventory</TabsTrigger>
             <TabsTrigger value="discounts">Discount Settings</TabsTrigger>
-            <TabsTrigger value="bulk-purchases">Bulk Purchases</TabsTrigger>
+            <TabsTrigger value="bulk-purchases">خریدهای عمده</TabsTrigger>
             <TabsTrigger value="invoices">Invoice Management</TabsTrigger>
             <TabsTrigger value="returns">Returned Items</TabsTrigger>
             <TabsTrigger value="reports">Sales Reports</TabsTrigger>
@@ -685,7 +685,7 @@ export default function ShopAdmin() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calculator className="w-5 h-5" />
-                  Bulk Purchase Settings
+                  تنظیمات خریدهای عمده
                 </CardTitle>
               </CardHeader>
               <CardContent>

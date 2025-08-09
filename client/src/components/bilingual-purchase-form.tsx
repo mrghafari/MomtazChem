@@ -1727,58 +1727,53 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                             )}
                             {formatCurrency(discountedPrice)} {t.each}
                           </p>
-
+                          {/* Bulk purchase indicator */}
+                          {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && 
+                           quantity >= product.bulkPurchaseThreshold && (
+                            <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                              خرید عمده {product.bulkPurchaseDiscount}% تخفیف
+                            </Badge>
+                          )}
                         </div>
                       </div>
                       
-                      {/* Middle Section with Bulk Indicator and Quantity Controls */}
-                      <div className="flex flex-col items-center gap-2">
-                        {/* Bulk Purchase Indicator in Middle */}
-                        {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && 
-                         quantity >= product.bulkPurchaseThreshold && (
-                          <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1">
-                            🎉 خرید عمده
-                          </Badge>
-                        )}
-                        
-                        {/* Quantity Controls */}
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, quantity - 1)}
-                            className="h-7 w-7 p-0"
-                            title={t.decreaseQuantity}
-                            disabled={quantity <= 1}
-                          >
-                            <Minus className="w-3 h-3" />
-                          </Button>
-                          <span className="w-8 text-center text-sm font-medium">{quantity}</span>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              // Check stock availability before allowing increase
-                              if (!product.inStock || (product.stockQuantity || 0) <= 0) return;
-                              if (quantity >= (product.stockQuantity || 0)) return;
-                              onUpdateQuantity && onUpdateQuantity(product.id, quantity + 1);
-                            }}
-                            className="h-7 w-7 p-0"
-                            title={t.increaseQuantity}
-                            disabled={!product.inStock || (product.stockQuantity || 0) <= 0 || quantity >= (product.stockQuantity || 0)}
-                          >
-                            <Plus className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => onRemoveItem && onRemoveItem(product.id)}
-                            className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                            title={t.removeItem}
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
+                      {/* Quantity Controls */}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, quantity - 1)}
+                          className="h-7 w-7 p-0"
+                          title={t.decreaseQuantity}
+                          disabled={quantity <= 1}
+                        >
+                          <Minus className="w-3 h-3" />
+                        </Button>
+                        <span className="w-8 text-center text-sm font-medium">{quantity}</span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            // Check stock availability before allowing increase
+                            if (!product.inStock || (product.stockQuantity || 0) <= 0) return;
+                            if (quantity >= (product.stockQuantity || 0)) return;
+                            onUpdateQuantity && onUpdateQuantity(product.id, quantity + 1);
+                          }}
+                          className="h-7 w-7 p-0"
+                          title={t.increaseQuantity}
+                          disabled={!product.inStock || (product.stockQuantity || 0) <= 0 || quantity >= (product.stockQuantity || 0)}
+                        >
+                          <Plus className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => onRemoveItem && onRemoveItem(product.id)}
+                          className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          title={t.removeItem}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
                       </div>
                     </div>
                     
@@ -1824,40 +1819,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 <span className="text-primary">{formatCurrency(subtotalAmount + totalTaxAmount)}</span>
               </div>
               
-              {/* Bulk Purchase Shipping Recommendation */}
-              {(() => {
-                const hasBulkPurchase = Object.entries(cart).some(([productId, quantity]) => {
-                  const product = products.find(p => p.id === parseInt(productId));
-                  return product?.bulkPurchaseThreshold && 
-                         product?.bulkPurchaseDiscount && 
-                         quantity >= product.bulkPurchaseThreshold;
-                });
-                
-                if (hasBulkPurchase) {
-                  return (
-                    <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
-                      <div className="flex items-start gap-3">
-                        <Truck className="w-5 h-5 text-green-600 mt-0.5" />
-                        <div className="flex-1">
-                          <h4 className="text-sm font-semibold text-green-800 mb-1">
-                            💡 پیشنهاد ویژه خرید عمده
-                          </h4>
-                          <p className="text-sm text-green-700 mb-2">
-                            با توجه به اینکه سفارش شما خرید عمده است، پیشنهاد می‌دهیم:
-                          </p>
-                          <ul className="text-sm text-green-700 space-y-1 mr-4">
-                            <li>• خودرو خودتان را بیاورید و هزینه حمل صرفه‌جویی کنید</li>
-                            <li>• از گزینه "حمل توسط خودم" استفاده کنید</li>
-                            <li>• با تیم لجستیک برای هماهنگی تماس بگیرید</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-                return null;
-              })()}
-
               {/* Delivery Method Selection */}
               <div className="space-y-3 border-t pt-3">
                 <div className="flex justify-between items-center">
@@ -1894,23 +1855,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           );
                         }
                         
-                        // Handle self_pickup option specially (highlight for bulk purchases)
+                        // Handle self_pickup option specially
                         if (rate.deliveryMethod === 'self_pickup' || rate.delivery_method === 'self_pickup') {
-                          const hasBulkPurchase = Object.entries(cart).some(([productId, quantity]) => {
-                            const product = products.find(p => p.id === parseInt(productId));
-                            return product?.bulkPurchaseThreshold && 
-                                   product?.bulkPurchaseDiscount && 
-                                   quantity >= product.bulkPurchaseThreshold;
-                          });
-                          
                           return (
-                            <option key={rate.id} value={rate.id} 
-                              style={{
-                                backgroundColor: hasBulkPurchase ? '#dcfce7' : '#dbeafe', 
-                                color: hasBulkPurchase ? '#166534' : '#1d4ed8',
-                                fontWeight: hasBulkPurchase ? 'bold' : 'normal'
-                              }}>
-                              🚶‍♂️ حمل توسط خودم - رایگان {hasBulkPurchase ? ' ⭐ پیشنهاد ویژه خرید عمده' : ''}
+                            <option key={rate.id} value={rate.id} style={{backgroundColor: '#dbeafe', color: '#1d4ed8'}}>
+                              🚶‍♂️ حمل توسط خودم - رایگان
                             </option>
                           );
                         }
