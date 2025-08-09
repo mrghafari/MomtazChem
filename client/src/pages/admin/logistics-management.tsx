@@ -4621,6 +4621,43 @@ const LogisticsManagement = () => {
                   </div>
                 )}
                 
+                {/* Test Vehicle - Hardcoded for debugging */}
+                <div className="mb-4 p-4 border-2 border-green-500 rounded-lg bg-green-50">
+                  <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
+                    <div className="text-center">
+                      <Truck className="w-8 h-8 mx-auto mb-2 text-green-600" />
+                      <p className="text-sm font-semibold text-green-800">ع ب ل 1234</p>
+                      <p className="text-xs text-gray-600">پلاک</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-600">راننده</Label>
+                      <p className="font-medium">أحمد محمد كاظم</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-600">ظرفیت</Label>
+                      <p className="font-medium">1200 کیلوگرم</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-600">نوع</Label>
+                      <p className="font-medium">ون حمل مواد شیمیایی</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-600">وضعیت</Label>
+                      <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                        آماده به کار
+                      </span>
+                    </div>
+                    <div>
+                      <Button 
+                        onClick={() => console.log('Vehicle selected!')}
+                        className="w-full bg-green-600 hover:bg-green-700"
+                      >
+                        انتخاب خودرو
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                
                 {availableFleetVehicles.length === 0 ? (
                   <div className="text-center py-8">
                     <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-orange-400" />
