@@ -1238,8 +1238,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     setSmartDeliveryError('');
     
     try {
-      // Calculate estimated distance
-      const estimatedDistance = calculateDistanceBetweenCities('اربیل', destinationCity);
+      // Calculate estimated distance (with fallback)
+      let estimatedDistance = calculateDistanceBetweenCities('اربیل', destinationCity);
+      
+      // If distance calculation fails, use a reasonable default
+      if (!estimatedDistance || estimatedDistance <= 0) {
+        console.log('🚚 [DISTANCE FALLBACK] Using default distance for city:', destinationCity);
+        estimatedDistance = 200; // Default 200km for unknown cities
+      }
       
       console.log('🚚 [SMART DELIVERY] Calculating cost for:', {
         weight: totalWeight,
