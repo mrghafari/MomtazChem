@@ -248,6 +248,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet' | 'wallet_full' | 'wallet_partial' | 'wallet_combined' | 'bank_transfer_grace' | 'bank_receipt'>('online_payment');
 
+  // Debug cart sync issue
+  console.log('🛒 [PURCHASE FORM DEBUG] Cart received as prop:', cart);
+  console.log('🛒 [PURCHASE FORM DEBUG] Cart total items:', Object.values(cart).reduce((sum, qty) => sum + qty, 0));
+
   // Fetch available payment methods from admin settings (public endpoint)
   const { data: availablePaymentMethods = [] } = useQuery<any[]>({
     queryKey: ['/api/public/payment-methods'],
