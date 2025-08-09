@@ -833,17 +833,17 @@ const LogisticsManagement = () => {
         if (checkoutVehicleDetails) {
           console.log('🔍 [CHECKOUT DETAILS] Customer selected:', checkoutVehicleDetails);
           console.log('🔍 [MATCHING TEST] Checking vehicle type:', checkoutVehicleDetails.vehicleType);
-          console.log('🔍 [AVAILABLE VEHICLES] Total available vehicles:', availableVehicles.length);
-          availableVehicles.forEach((v: any, i: number) => {
+          console.log('🔍 [AVAILABLE VEHICLES] Total available vehicles:', availableFleetVehicles.length);
+          availableFleetVehicles.forEach((v: any, i: number) => {
             console.log(`🚛 [VEHICLE ${i+1}] Type: "${v.vehicleType}", Plate: "${v.plateNumber || v.licensePlate}", Match: ${v.vehicleType === checkoutVehicleDetails.vehicleType ? '✅ EXACT' : '❌ NO'}`);
           });
           
           // Find exact matches and close matches
-          const exactMatches = availableVehicles.filter((vehicle: any) => 
+          const exactMatches = availableFleetVehicles.filter((vehicle: any) => 
             vehicle.vehicleType === checkoutVehicleDetails.vehicleType
           );
           
-          const closeMatches = availableVehicles.filter((vehicle: any) => 
+          const closeMatches = availableFleetVehicles.filter((vehicle: any) => 
             vehicle.vehicleType !== checkoutVehicleDetails.vehicleType && (
               vehicle.vehicleType.includes(checkoutVehicleDetails.vehicleType) ||
               checkoutVehicleDetails.vehicleType.includes(vehicle.vehicleType)
@@ -864,7 +864,7 @@ const LogisticsManagement = () => {
           });
           
           // Sort vehicles to prioritize suggested ones
-          availableVehicles.sort((a: any, b: any) => {
+          availableFleetVehicles.sort((a: any, b: any) => {
             // First sort by suggestion priority (exact matches first)
             if (a.suggestionPriority && b.suggestionPriority) {
               return a.suggestionPriority - b.suggestionPriority;
@@ -877,7 +877,7 @@ const LogisticsManagement = () => {
           });
           
           console.log('🎯 [ENHANCED MATCHING] Exact matches:', exactMatches.length, 'Close matches:', closeMatches.length);
-          console.log('🚛 [SORTED VEHICLES] First 3 vehicles:', availableVehicles.slice(0, 3).map((v: any) => ({
+          console.log('🚛 [SORTED VEHICLES] First 3 vehicles:', availableFleetVehicles.slice(0, 3).map((v: any) => ({
             name: v.vehicleName,
             type: v.vehicleType,
             plate: v.plateNumber,
