@@ -64,8 +64,9 @@ export class ProformaReminderService {
       const currentHour = now.getHours();
       const currentMinutes = now.getMinutes();
       
-      // Only process reminders at the scheduled hour (within 15 minutes window)
-      if (Math.abs(currentHour - schedule.reminder_hour) > 0 || currentMinutes > 15) {
+      // Process reminders at the scheduled hour (with tolerance for manual triggers)
+      if (currentHour !== schedule.reminder_hour && Math.abs(currentHour - schedule.reminder_hour) > 1) {
+        console.log(`⏰ [PROFORMA REMINDER] Skipping schedule ${schedule.id}: current ${currentHour}:${currentMinutes}, scheduled ${schedule.reminder_hour}:00`);
         return [];
       }
 
@@ -78,16 +79,18 @@ export class ProformaReminderService {
       nextDay.setDate(nextDay.getDate() + 1);
 
       const result = await pool.query(`
-        SELECT DISTINCT om.id, om.order_number, om.customer_email, om.customer_name,
-               om.payment_deadline, om.total_amount, om.created_at
-        FROM order_management om
-        WHERE om.payment_method = 'bank_transfer_grace'
+        SELECT DISTINCT co.id, co.order_number, co.guest_email as customer_email, 
+               co.guest_name as customer_name, om.payment_grace_period_end as payment_deadline, 
+               co.total_amount, co.created_at
+        FROM customer_orders co
+        JOIN order_management om ON co.id = om.customer_order_id
+        WHERE co.payment_method = 'bank_transfer_grace'
           AND om.current_status = 'finance_pending'
-          AND om.payment_deadline >= $1
-          AND om.payment_deadline < $2
-          AND om.customer_email IS NOT NULL
-          AND om.customer_email != ''
-        ORDER BY om.payment_deadline ASC
+          AND om.payment_grace_period_end >= $1
+          AND om.payment_grace_period_end < $2
+          AND co.guest_email IS NOT NULL
+          AND co.guest_email != ''
+        ORDER BY om.payment_grace_period_end ASC
       `, [targetDate.toISOString(), nextDay.toISOString()]);
 
       return result.rows;
@@ -126,14 +129,13 @@ export class ProformaReminderService {
   /**
    * Log that a reminder was sent
    */
-  private async logReminderSent(orderId: number, scheduleId: number, customerEmail: string): Promise<void> {
+  private async logReminderSent(orderId: number, scheduleId: number, customerEmail: string, notificationType: string = 'email'): Promise<void> {
     try {
       await pool.query(`
-        INSERT INTO proforma_reminder_logs (order_id, schedule_id, customer_email, sent_at)
-        VALUES ($1, $2, $3, NOW())
-        ON CONFLICT (order_id, schedule_id, DATE(sent_at)) 
-        DO UPDATE SET sent_at = NOW()
-      `, [orderId, scheduleId, customerEmail]);
+        INSERT INTO proforma_reminder_logs (order_id, schedule_id, customer_email, notification_type, sent_at)
+        VALUES ($1, $2, $3, $4, NOW())
+      `, [orderId, scheduleId, customerEmail, notificationType]);
+      console.log(`📝 [PROFORMA REMINDER] Logged ${notificationType} reminder for order ${orderId}, schedule ${scheduleId}`);
     } catch (error) {
       console.error('❌ [PROFORMA REMINDER] Error logging reminder:', error);
     }
@@ -182,12 +184,17 @@ export class ProformaReminderService {
         emailOptions.templateId = schedule.email_template_id;
       }
 
-      const emailResult = await emailService.sendEmail(emailOptions);
+      const emailResult = await emailService.sendEmail(emailOptions, 'admin');
 
-      if (emailResult.success) {
+      console.log(`📧 [PROFORMA REMINDER] Email send result:`, emailResult);
+      
+      if (emailResult) {
         console.log(`✅ [PROFORMA REMINDER] Sent email reminder for order ${order.order_number} to ${order.customer_email}${schedule.email_template_id ? ` (Template: ${schedule.email_template_id})` : ''}`);
+        return true;
+      } else {
+        console.log(`❌ [PROFORMA REMINDER] Failed to send email to ${order.customer_email}`);
+        return false;
       }
-      return emailResult.success;
     } catch (error) {
       console.error('❌ [PROFORMA REMINDER] Error sending email:', error);
       return false;
@@ -235,8 +242,11 @@ export class ProformaReminderService {
           const success = await this.sendReminderEmail(order, schedule);
           
           if (success) {
-            await this.logReminderSent(order.id, schedule.id, order.customer_email);
+            await this.logReminderSent(order.id, schedule.id, order.customer_email, 'email');
             totalSent++;
+            console.log(`✅ [PROFORMA REMINDER] Successfully sent and logged reminder for order ${order.order_number}`);
+          } else {
+            console.log(`❌ [PROFORMA REMINDER] Failed to send reminder for order ${order.order_number}`);
           }
         }
       }

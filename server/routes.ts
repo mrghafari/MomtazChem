@@ -49030,6 +49030,29 @@ momtazchem.com
     }
   });
 
+  // Manual trigger for proforma reminders (admin only)
+  app.post('/api/admin/trigger-proforma-reminders', async (req, res) => {
+    try {
+      console.log('🔔 [MANUAL TRIGGER] Starting proforma reminder processing...');
+      
+      const { ProformaReminderService } = await import('./proforma-reminder-service');
+      await ProformaReminderService.getInstance().processReminders();
+      
+      res.json({ 
+        success: true, 
+        message: 'پردازش یادآوری‌ها با موفقیت انجام شد',
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ [MANUAL TRIGGER] Error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در پردازش یادآوری‌ها',
+        error: error.message 
+      });
+    }
+  });
+
   // Initialize WebRTC Socket
   const { setupWebRTCSocket } = await import("./webrtc-socket");
   setupWebRTCSocket(httpServer);
