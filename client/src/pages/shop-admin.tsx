@@ -133,9 +133,12 @@ export default function ShopAdmin() {
 
   // Load existing proforma deadline settings
   useEffect(() => {
+    console.log('📄 [PROFORMA DEADLINE] Loading settings from shopSettings:', shopSettings);
     if (Array.isArray(shopSettings) && shopSettings.length > 0) {
       const proformaDeadline = shopSettings.find((s: any) => s.settingKey === 'proforma_deadline_days');
+      console.log('📄 [PROFORMA DEADLINE] Found setting:', proformaDeadline);
       if (proformaDeadline) {
+        console.log('📄 [PROFORMA DEADLINE] Setting state to:', proformaDeadline.settingValue);
         setProformaDeadlineDays(proformaDeadline.settingValue);
       }
     }
@@ -144,6 +147,7 @@ export default function ShopAdmin() {
   // Save proforma deadline mutation
   const saveProformaDeadlineMutation = useMutation({
     mutationFn: async (days: string) => {
+      console.log('💾 [PROFORMA DEADLINE] Saving days:', days);
       const settings = [{
         settingKey: 'proforma_deadline_days',
         settingValue: days,
@@ -155,7 +159,10 @@ export default function ShopAdmin() {
         validationRule: 'min:1,max:30',
         defaultValue: '3'
       }];
-      return await apiRequest('/api/shop/settings', { method: 'POST', body: { settings } });
+      console.log('💾 [PROFORMA DEADLINE] Settings to save:', settings);
+      const result = await apiRequest('/api/shop/settings', { method: 'POST', body: { settings } });
+      console.log('💾 [PROFORMA DEADLINE] Save result:', result);
+      return result;
     },
     onSuccess: () => {
       toast({
