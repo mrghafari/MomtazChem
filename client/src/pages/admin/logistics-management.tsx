@@ -4461,7 +4461,7 @@ const LogisticsManagement = () => {
                     <Truck className="w-5 h-5 mr-2" />
                     خودروهای آماده از ناوگان شرکت
                   </h3>
-                  {!user && (
+                  {(!user || (adminUser?.success === false && adminUser?.message?.includes('Access denied'))) && (
                     <Button
                       onClick={() => window.location.href = '/admin/login'}
                       size="sm"
@@ -4469,7 +4469,7 @@ const LogisticsManagement = () => {
                       className="text-xs border-orange-300 text-orange-700 hover:bg-orange-100"
                     >
                       <LogIn className="w-4 h-4 ml-2" />
-                      ورود برای مشاهده خودروها
+                      {!user ? 'ورود برای مشاهده خودروها' : 'ورود مدیریت'}
                     </Button>
                   )}
                 </div>
@@ -4487,18 +4487,20 @@ const LogisticsManagement = () => {
                     <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-orange-400" />
                     <p className="text-orange-600 mb-4">
                       {!user 
-                        ? "برای مشاهده خودروهای فیزیکی آماده، لطفاً ابتدا وارد سیستم شوید" 
+                        ? "برای مشاهده خودروهای فیزیکی آماده، لطفاً با حساب مدیریت وارد سیستم شوید" 
+                        : adminUser?.success === false && adminUser?.message?.includes('Access denied')
+                        ? "دسترسی محدود: لطفاً با حساب مدیر سیستم وارد شوید تا خودروهای فیزیکی آماده را مشاهده کنید"
                         : "هیچ خودروی مناسبی از این نوع در دسترس نیست"
                       }
                     </p>
-                    {!user ? (
+                    {(!user || (adminUser?.success === false && adminUser?.message?.includes('Access denied'))) ? (
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <div className="text-sm text-blue-700 space-y-2 text-right">
-                          <p className="font-medium">💡 راهنمای ورود:</p>
+                          <p className="font-medium">💡 راهنمای ورود مدیریت:</p>
                           <ul className="list-disc list-inside space-y-1">
-                            <li>بر روی دکمه "ورود برای مشاهده خودروها" کلیک کنید</li>
-                            <li>با اطلاعات مدیریت سیستم وارد شوید</li>
-                            <li>پس از ورود، خودروهای فیزیکی آماده نمایش داده می‌شوند</li>
+                            <li>خروج از حساب مشتری و ورود با حساب مدیریت</li>
+                            <li>یا از صفحه اصلی به بخش مدیریت سیستم بروید</li>
+                            <li>پس از ورود مدیریت، خودروهای فیزیکی آماده نمایش داده می‌شوند</li>
                           </ul>
                         </div>
                       </div>
