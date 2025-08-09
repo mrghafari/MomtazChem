@@ -449,10 +449,16 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Get dynamic proforma deadline from shop settings
   const proformaDeadlineDays = useMemo(() => {
+    console.log('🛒 [BILINGUAL FORM] Shop settings:', shopSettings);
     if (shopSettings && Array.isArray(shopSettings)) {
-      const deadlineSetting = shopSettings.find(setting => setting.settingKey === 'proforma_deadline_days');
-      return deadlineSetting ? parseInt(deadlineSetting.settingValue) : 3;
+      console.log('🛒 [BILINGUAL FORM] Settings array length:', shopSettings.length);
+      const deadlineSetting = shopSettings.find(setting => setting.setting_key === 'proforma_deadline_days');
+      console.log('🛒 [BILINGUAL FORM] Found deadline setting:', deadlineSetting);
+      const days = deadlineSetting ? parseInt(deadlineSetting.setting_value) : 3;
+      console.log('🛒 [BILINGUAL FORM] Proforma deadline days:', days);
+      return days;
     }
+    console.log('🛒 [BILINGUAL FORM] No settings, returning default 3 days');
     return 3; // fallback to 3 days
   }, [shopSettings]);
 
