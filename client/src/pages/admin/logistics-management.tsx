@@ -472,14 +472,23 @@ const LogisticsManagement = () => {
   
   const logisticsOrders = (logisticsOrdersResponse as any)?.orders || [];
   
-  // Debug: Log first order to check orderNumber field
+  // Debug: Log first order to check recipient data
   if (logisticsOrders.length > 0) {
-    console.log('🔍 [LOGISTICS MGMT] First order data:', {
-      id: logisticsOrders[0].id,
-      customerOrderId: logisticsOrders[0].customerOrderId,
-      orderNumber: logisticsOrders[0].orderNumber,
-      hasOrderNumber: !!logisticsOrders[0].orderNumber,
-      allFields: Object.keys(logisticsOrders[0])
+    const firstOrder = logisticsOrders[0];
+    console.log('🔍 [LOGISTICS MGMT] Frontend query recipient data:', {
+      id: firstOrder.id,
+      customerOrderId: firstOrder.customerOrderId,
+      orderNumber: firstOrder.orderNumber,
+      recipientName: firstOrder.recipientName,
+      recipientPhone: firstOrder.recipientPhone,
+      recipientAddress: firstOrder.recipientAddress,
+      shippingAddress: firstOrder.shippingAddress,
+      hasShippingAddress: !!firstOrder.shippingAddress,
+      allRecipientFields: {
+        recipientName: firstOrder.recipientName,
+        recipientPhone: firstOrder.recipientPhone,
+        recipientAddress: firstOrder.recipientAddress
+      }
     });
   }
   
@@ -1486,17 +1495,124 @@ const LogisticsManagement = () => {
         <head>
           <title>جزئیات سفارش ${selectedOrder.orderNumber}</title>
           <style>
-            body { font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; }
-            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-            .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
-            .section h3 { color: #333; margin-bottom: 10px; }
-            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-            .info-item { margin-bottom: 8px; }
-            .label { font-weight: bold; color: #555; }
-            .value { margin-right: 10px; }
+            * { box-sizing: border-box; }
+            body { 
+              font-family: 'Segoe UI', Arial, sans-serif; 
+              direction: rtl; 
+              text-align: right; 
+              margin: 0;
+              padding: 15mm;
+              font-size: 14px;
+              line-height: 1.4;
+              color: #000;
+              background: white;
+            }
+            .header { 
+              text-align: center; 
+              margin-bottom: 25px; 
+              border-bottom: 3px solid #000; 
+              padding-bottom: 15px;
+              page-break-inside: avoid;
+            }
+            .header h1 { 
+              font-size: 22px; 
+              margin: 0 0 10px 0; 
+              color: #000;
+              font-weight: bold;
+            }
+            .header h2 { 
+              font-size: 18px; 
+              margin: 5px 0; 
+              color: #000;
+            }
+            .header p {
+              font-size: 12px;
+              margin: 5px 0;
+              color: #555;
+            }
+            .section { 
+              margin-bottom: 20px; 
+              padding: 15px; 
+              border: 2px solid #000; 
+              border-radius: 8px;
+              background: #f9f9f9;
+              page-break-inside: avoid;
+            }
+            .section h3 { 
+              color: #000; 
+              margin: 0 0 15px 0; 
+              font-size: 16px;
+              font-weight: bold;
+              border-bottom: 1px solid #000;
+              padding-bottom: 5px;
+            }
+            .info-grid { 
+              display: grid; 
+              grid-template-columns: 1fr 1fr; 
+              gap: 12px;
+              margin: 0;
+            }
+            .info-item { 
+              margin: 0; 
+              padding: 10px;
+              background: white;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+            }
+            .info-item[style*="grid-column"] {
+              grid-column: 1 / -1;
+            }
+            .label { 
+              font-weight: bold; 
+              color: #000; 
+              display: block;
+              margin-bottom: 5px;
+              font-size: 13px;
+            }
+            .value { 
+              color: #000;
+              font-weight: normal;
+              display: block;
+              word-wrap: break-word;
+              margin: 0;
+            }
             @media print {
-              body { margin: 0; }
-              .no-print { display: none; }
+              body { 
+                margin: 0; 
+                padding: 10mm;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                font-size: 12px;
+              }
+              .no-print { display: none !important; }
+              .section { 
+                page-break-inside: avoid; 
+                margin-bottom: 15px;
+                border: 2px solid #000 !important;
+                background: white !important;
+                padding: 12px;
+              }
+              .header { 
+                page-break-after: avoid;
+                border-bottom: 3px solid #000 !important;
+                margin-bottom: 20px;
+              }
+              .info-item {
+                border: 1px solid #000 !important;
+                background: white !important;
+                padding: 8px;
+                margin-bottom: 5px;
+              }
+              .info-grid {
+                gap: 8px;
+              }
+              .label, .value {
+                color: #000 !important;
+              }
+              .section h3 {
+                font-size: 14px;
+                border-bottom: 1px solid #000 !important;
+              }
             }
           </style>
         </head>
@@ -1531,23 +1647,66 @@ const LogisticsManagement = () => {
             <div class="info-grid">
               <div class="info-item">
                 <span class="label">گیرنده:</span>
-                <span class="value">${selectedOrder.recipientName || (selectedOrder.shippingAddress as any)?.name || 'ثبت نشده'}</span>
+                <span class="value">${(() => {
+                  if (selectedOrder.recipientName) return selectedOrder.recipientName;
+                  if (selectedOrder.shippingAddress) {
+                    const addr = typeof selectedOrder.shippingAddress === 'string' 
+                      ? JSON.parse(selectedOrder.shippingAddress) 
+                      : selectedOrder.shippingAddress;
+                    return addr?.name || 'ثبت نشده';
+                  }
+                  return 'ثبت نشده';
+                })()}</span>
               </div>
               <div class="info-item">
                 <span class="label">تلفن گیرنده:</span>
-                <span class="value" style="font-size: 20px; font-weight: bold; color: #2563eb;">${selectedOrder.recipientPhone || (selectedOrder.shippingAddress as any)?.phone || 'ثبت نشده'}</span>
+                <span class="value" style="font-size: 20px; font-weight: bold; color: #2563eb;">${(() => {
+                  if (selectedOrder.recipientPhone) return selectedOrder.recipientPhone;
+                  if (selectedOrder.shippingAddress) {
+                    const addr = typeof selectedOrder.shippingAddress === 'string' 
+                      ? JSON.parse(selectedOrder.shippingAddress) 
+                      : selectedOrder.shippingAddress;
+                    return addr?.phone || 'ثبت نشده';
+                  }
+                  return 'ثبت نشده';
+                })()}</span>
               </div>
               <div class="info-item" style="grid-column: 1 / -1;">
                 <span class="label">آدرس کامل:</span>
-                <span class="value" style="font-size: 18px; font-weight: bold; color: #059669; line-height: 1.5;">${selectedOrder.recipientAddress || (selectedOrder.shippingAddress as any)?.address || 'ثبت نشده'}</span>
+                <span class="value" style="font-size: 18px; font-weight: bold; color: #059669; line-height: 1.5;">${(() => {
+                  if (selectedOrder.recipientAddress) return selectedOrder.recipientAddress;
+                  if (selectedOrder.shippingAddress) {
+                    const addr = typeof selectedOrder.shippingAddress === 'string' 
+                      ? JSON.parse(selectedOrder.shippingAddress) 
+                      : selectedOrder.shippingAddress;
+                    return addr?.address || 'ثبت نشده';
+                  }
+                  return 'ثبت نشده';
+                })()}</span>
               </div>
               <div class="info-item">
                 <span class="label">شهر:</span>
-                <span class="value">${(selectedOrder.shippingAddress as any)?.city || 'ثبت نشده'}</span>
+                <span class="value">${(() => {
+                  if (selectedOrder.shippingAddress) {
+                    const addr = typeof selectedOrder.shippingAddress === 'string' 
+                      ? JSON.parse(selectedOrder.shippingAddress) 
+                      : selectedOrder.shippingAddress;
+                    return addr?.city || 'ثبت نشده';
+                  }
+                  return 'ثبت نشده';
+                })()}</span>
               </div>
               <div class="info-item">
                 <span class="label">کد پستی:</span>
-                <span class="value">${(selectedOrder.shippingAddress as any)?.postalCode || 'ثبت نشده'}</span>
+                <span class="value">${(() => {
+                  if (selectedOrder.shippingAddress) {
+                    const addr = typeof selectedOrder.shippingAddress === 'string' 
+                      ? JSON.parse(selectedOrder.shippingAddress) 
+                      : selectedOrder.shippingAddress;
+                    return addr?.postalCode || 'ثبت نشده';
+                  }
+                  return 'ثبت نشده';
+                })()}</span>
               </div>
             </div>
           </div>
