@@ -22,7 +22,7 @@ const createEditProfileSchema = (t: any) => z.object({
   firstName: z.string().min(1, t.firstName + " is required"),
   lastName: z.string().min(1, t.lastName + " is required"),
   phone: z.string().min(1, t.phone + " is required"),
-  email: z.string().email("Invalid email").optional(),
+  email: z.string().min(1, "Email is required").email("Invalid email"),
   company: z.string().optional(),
   country: z.string().min(1, t.country + " is required"),
   province: z.string().min(1, "Province is required"),
@@ -586,9 +586,9 @@ export default function CustomerProfileEdit() {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-2">
+                        <FormLabel className="flex items-center gap-2 required-field">
                           <Mail className="h-4 w-4" />
-                          ایمیل
+                          ایمیل <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <Input {...field} type="email" placeholder="آدرس ایمیل" readOnly={!isCreateMode} className={isCreateMode ? "" : "bg-gray-50"} />
