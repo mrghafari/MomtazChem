@@ -368,49 +368,22 @@ const upload = multer({
   }
 });
 
-// Admin authentication middleware
+// Admin authentication middleware - only checks admin session
 const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
-  console.log(`🔐 [AUTH DEBUG] ${req.method} ${req.path}`);
-  console.log(`🔐 [AUTH DEBUG] Session:`, {
+  console.log(`🔐 [ADMIN AUTH] ${req.method} ${req.path}`);
+  console.log(`🔐 [ADMIN AUTH] Session:`, {
     exists: !!req.session,
     isAuthenticated: req.session?.isAuthenticated,
     adminId: req.session?.adminId,
-    customerId: req.session?.customerId,
     sessionID: req.sessionID
   });
 
-  // Check for valid authentication - either admin or custom user
-  if (req.session && req.session.isAuthenticated === true) {
-    if (req.session.adminId) {
-      console.log(`✅ Admin authentication successful for admin ${req.session.adminId}`);
-      console.log(`🔄 Dual session mode: Admin=${req.session.adminId}, Customer=${req.session.customerId || 'none'}`);
-      next();
-    } else if (req.session.customerId) {
-      console.log(`✅ Custom user authentication successful for user ${req.session.customerId}`);
-      next();
-    } else {
-      console.log('❌ Authentication failed - no valid user ID in session');
-      res.status(401).json({ 
-        success: false, 
-        message: "احراز هویت مورد نیاز است" 
-      });
-    }
+  // Check for valid admin authentication only
+  if (req.session && req.session.isAuthenticated === true && req.session.adminId) {
+    console.log(`✅ Admin authentication successful for admin ${req.session.adminId}`);
+    next();
   } else {
     console.log('❌ Admin authentication failed for:', req.path);
-    console.log('❌ Session details:', {
-      isAuthenticated: req.session?.isAuthenticated,
-      adminId: req.session?.adminId,
-      customerId: req.session?.customerId
-    });
-    
-    // If only customer session exists, show specific error
-    if (req.session?.customerId && !req.session?.adminId) {
-      return res.status(403).json({ 
-        success: false, 
-        message: "دسترسی به بخش مدیریت نیاز به ورود مدیر دارد" 
-      });
-    }
-    
     res.status(401).json({ 
       success: false, 
       message: "احراز هویت مدیریت مورد نیاز است" 
@@ -418,30 +391,20 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-// Customer authentication middleware with improved error handling  
+// Customer authentication middleware - checks customer session only
 const requireCustomerAuth = (req: Request, res: Response, next: NextFunction) => {
-  try {
-    console.log('📊 [CSV EXPORT] Called with query:', req.query);
-    console.log('🔐 [CSV AUTH] Session check:', {
-      sessionExists: !!req.session,
-      customerId: req.session?.customerId,
-      adminId: req.session?.adminId,
-      isAuthenticated: req.session?.isAuthenticated
-    });
-    
-    if (req.session && req.session.customerId) {
-      console.log('✅ [CSV AUTH] Customer authentication successful for customer:', req.session.customerId);
-      next();
-    } else {
-      console.log('❌ [CSV EXPORT] Unauthorized access attempt');
-      res.status(401).json({ success: false, message: "احراز هویت مشتری مورد نیاز است" });
-    }
-  } catch (error) {
-    console.error('Customer authentication middleware error:', error);
-    res.status(500).json({
-      success: false,
-      message: "خطا در احراز هویت مشتری"
-    });
+  console.log('🔐 [CUSTOMER AUTH] Session check:', {
+    sessionExists: !!req.session,
+    customerId: req.session?.customerId,
+    isAuthenticated: req.session?.isAuthenticated
+  });
+  
+  if (req.session && req.session.customerId && req.session.isAuthenticated) {
+    console.log('✅ [CUSTOMER AUTH] Customer authentication successful for customer:', req.session.customerId);
+    next();
+  } else {
+    console.log('❌ [CUSTOMER AUTH] Unauthorized access attempt');
+    res.status(401).json({ success: false, message: "احراز هویت نشده - لطفاً وارد شوید" });
   }
 };
 
