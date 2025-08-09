@@ -297,14 +297,20 @@ const LogisticsManagement = () => {
 
   // Fleet vehicles API integration (previously "ready vehicles")
   const { data: fleetVehiclesData, isLoading: loadingFleetVehicles } = useQuery({
-    queryKey: ['/api/logistics/ready-vehicles'],
+    queryKey: ['/api/ready-vehicles'],
     enabled: activeTab === 'fleet-vehicles'
   });
 
   // Vehicle templates API integration
   const { data: vehicleTemplatesData, isLoading: loadingVehicleTemplates } = useQuery({
-    queryKey: ['/api/logistics/vehicle-templates'],
+    queryKey: ['/api/vehicle-templates'],
     enabled: activeTab === 'vehicle-templates'
+  });
+
+  // Vehicle selection history API integration
+  const { data: vehicleHistoryData, isLoading: loadingVehicleHistory } = useQuery({
+    queryKey: ['/api/vehicle-selection-history'],
+    enabled: activeTab === 'vehicle-history'
   });
 
   const fleetVehicles = (fleetVehiclesData as any)?.data || [];
@@ -327,16 +333,16 @@ const LogisticsManagement = () => {
 
   // Create ready vehicle mutation
   const createReadyVehicleMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/logistics/ready-vehicles', { method: 'POST', body: data }),
+    mutationFn: (data: any) => apiRequest('/api/ready-vehicles', { method: 'POST', body: data }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ready-vehicles'] });
       setIsCreateReadyVehicleDialogOpen(false);
-      toast({ title: "موفقیت", description: "خودرو آماده کار با موفقیت ایجاد شد" });
+      toast({ title: "موفقیت", description: "خودرو فیزیکی با موفقیت ایجاد شد" });
     },
     onError: (error: any) => {
       toast({ 
         title: "خطا", 
-        description: error?.response?.data?.message || "خطا در ایجاد خودرو آماده کار", 
+        description: error?.response?.data?.message || "خطا در ایجاد خودرو فیزیکی", 
         variant: "destructive" 
       });
     }
@@ -344,17 +350,17 @@ const LogisticsManagement = () => {
 
   // Update ready vehicle mutation
   const updateReadyVehicleMutation = useMutation({
-    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/logistics/ready-vehicles/${id}`, { method: 'PUT', body: data }),
+    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/ready-vehicles/${id}`, { method: 'PUT', body: data }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ready-vehicles'] });
       setIsEditReadyVehicleDialogOpen(false);
       setSelectedReadyVehicle(null);
-      toast({ title: "موفقیت", description: "خودرو آماده کار با موفقیت بروزرسانی شد" });
+      toast({ title: "موفقیت", description: "خودرو فیزیکی با موفقیت بروزرسانی شد" });
     },
     onError: (error: any) => {
       toast({ 
         title: "خطا", 
-        description: error?.response?.data?.message || "خطا در بروزرسانی خودرو آماده کار", 
+        description: error?.response?.data?.message || "خطا در بروزرسانی خودرو فیزیکی", 
         variant: "destructive" 
       });
     }
@@ -362,15 +368,62 @@ const LogisticsManagement = () => {
 
   // Delete ready vehicle mutation
   const deleteReadyVehicleMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/logistics/ready-vehicles/${id}`, { method: 'DELETE' }),
+    mutationFn: (id: number) => apiRequest(`/api/ready-vehicles/${id}`, { method: 'DELETE' }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
-      toast({ title: "موفقیت", description: "خودرو آماده کار با موفقیت حذف شد" });
+      queryClient.invalidateQueries({ queryKey: ['/api/ready-vehicles'] });
+      toast({ title: "موفقیت", description: "خودرو فیزیکی با موفقیت حذف شد" });
     },
     onError: (error: any) => {
       toast({ 
         title: "خطا", 
-        description: error?.response?.data?.message || "خطا در حذف خودرو آماده کار", 
+        description: error?.response?.data?.message || "خطا در حذف خودرو فیزیکی", 
+        variant: "destructive" 
+      });
+    }
+  });
+
+  // Vehicle template mutations
+  const createVehicleTemplateMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('/api/vehicle-templates', { method: 'POST', body: data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicle-templates'] });
+      toast({ title: "موفقیت", description: "الگوی خودرو با موفقیت ایجاد شد" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "خطا", 
+        description: error?.response?.data?.message || "خطا در ایجاد الگوی خودرو", 
+        variant: "destructive" 
+      });
+    }
+  });
+
+  const updateVehicleTemplateMutation = useMutation({
+    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/vehicle-templates/${id}`, { method: 'PUT', body: data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicle-templates'] });
+      setEditingVehicle(null);
+      toast({ title: "موفقیت", description: "الگوی خودرو با موفقیت بروزرسانی شد" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "خطا", 
+        description: error?.response?.data?.message || "خطا در بروزرسانی الگوی خودرو", 
+        variant: "destructive" 
+      });
+    }
+  });
+
+  const deleteVehicleTemplateMutation = useMutation({
+    mutationFn: (id: number) => apiRequest(`/api/vehicle-templates/${id}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicle-templates'] });
+      toast({ title: "موفقیت", description: "الگوی خودرو با موفقیت حذف شد" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "خطا", 
+        description: error?.response?.data?.message || "خطا در حذف الگوی خودرو", 
         variant: "destructive" 
       });
     }

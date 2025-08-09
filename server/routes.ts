@@ -11886,16 +11886,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // VEHICLE TEMPLATES MANAGEMENT ENDPOINTS
   // =============================================================================
 
-  // Get all vehicle templates
-  app.get("/api/vehicle-templates", requireAuth, async (req, res) => {
+  // Get all vehicle templates (public access for UI)
+  app.get("/api/vehicle-templates", async (req, res) => {
     try {
       const { isActive, vehicleType } = req.query;
       
-      const filters: any = {};
-      if (isActive !== undefined) filters.isActive = isActive === 'true';
-      if (vehicleType) filters.vehicleType = vehicleType as string;
+      let query = db.select().from(vehicleTemplates);
       
-      const templates = await logisticsStorage.getVehicleTemplates(filters);
+      if (isActive === 'true') {
+        query = query.where(eq(vehicleTemplates.isActive, true));
+      }
+      if (vehicleType) {
+        query = query.where(eq(vehicleTemplates.vehicleType, vehicleType as string));
+      }
+      
+      const templates = await query;
       
       res.json({
         success: true,
@@ -11972,17 +11977,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // READY VEHICLES MANAGEMENT ENDPOINTS
   // =============================================================================
 
-  // Get all ready vehicles
-  app.get("/api/ready-vehicles", requireAuth, async (req, res) => {
+  // Get all ready vehicles (public access for UI)
+  app.get("/api/ready-vehicles", async (req, res) => {
     try {
       const { isAvailable, vehicleTemplateId, currentLocation } = req.query;
       
-      const filters: any = {};
-      if (isAvailable !== undefined) filters.isAvailable = isAvailable === 'true';
-      if (vehicleTemplateId) filters.vehicleTemplateId = parseInt(vehicleTemplateId as string);
-      if (currentLocation) filters.currentLocation = currentLocation as string;
+      let query = db.select({
+        id: readyVehicles.id,
+        licensePlate: readyVehicles.licensePlate,
+        driverName: readyVehicles.driverName,
+        driverMobile: readyVehicles.driverMobile,
+        vehicleTemplateId: readyVehicles.vehicleTemplateId,
+        loadCapacity: readyVehicles.loadCapacity,
+        isAvailable: readyVehicles.isAvailable,
+        currentLocation: readyVehicles.currentLocation,
+        notes: readyVehicles.notes,
+        createdAt: readyVehicles.createdAt,
+        templateName: vehicleTemplates.name,
+        vehicleType: vehicleTemplates.vehicleType
+      }).from(readyVehicles)
+       .leftJoin(vehicleTemplates, eq(readyVehicles.vehicleTemplateId, vehicleTemplates.id));
       
-      const vehicles = await logisticsStorage.getReadyVehicles(filters);
+      if (isAvailable !== undefined) {
+        query = query.where(eq(readyVehicles.isAvailable, isAvailable === 'true'));
+      }
+      if (vehicleTemplateId) {
+        query = query.where(eq(readyVehicles.vehicleTemplateId, parseInt(vehicleTemplateId as string)));
+      }
+      if (currentLocation) {
+        query = query.where(eq(readyVehicles.currentLocation, currentLocation as string));
+      }
+      
+      const vehicles = await query;
       
       res.json({
         success: true,
@@ -12081,17 +12107,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // VEHICLE SELECTION HISTORY ENDPOINTS
   // =============================================================================
 
-  // Get vehicle selection history
-  app.get("/api/vehicle-selection-history", requireAuth, async (req, res) => {
+  // Get vehicle selection history (public access for UI)
+  app.get("/api/vehicle-selection-history", async (req, res) => {
     try {
       const { orderNumber, customerId, vehicleTemplateId } = req.query;
       
-      const filters: any = {};
-      if (orderNumber) filters.orderNumber = orderNumber as string;
-      if (customerId) filters.customerId = parseInt(customerId as string);
-      if (vehicleTemplateId) filters.vehicleTemplateId = parseInt(vehicleTemplateId as string);
+      let query = db.select({
+        id: vehicleSelectionHistory.id,
+        orderNumber: vehicleSelectionHistory.orderNumber,
+        customerId: vehicleSelectionHistory.customerId,
+        selectedVehicleTemplateId: vehicleSelectionHistory.selectedVehicleTemplateId,
+        selectedVehicleName: vehicleSelectionHistory.selectedVehicleName,
+        totalCost: vehicleSelectionHistory.totalCost,
+        distanceKm: vehicleSelectionHistory.distanceKm,
+        selectionAlgorithm: vehicleSelectionHistory.selectionAlgorithm,
+        selectionCriteria: vehicleSelectionHistory.selectionCriteria,
+        createdAt: vehicleSelectionHistory.createdAt,
+        templateName: vehicleTemplates.name,
+        vehicleType: vehicleTemplates.vehicleType
+      }).from(vehicleSelectionHistory)
+       .leftJoin(vehicleTemplates, eq(vehicleSelectionHistory.selectedVehicleTemplateId, vehicleTemplates.id))
+       .orderBy(desc(vehicleSelectionHistory.createdAt));
       
-      const history = await logisticsStorage.getVehicleSelectionHistory(filters);
+      if (orderNumber) {
+        query = query.where(eq(vehicleSelectionHistory.orderNumber, orderNumber as string));
+      }
+      if (customerId) {
+        query = query.where(eq(vehicleSelectionHistory.customerId, parseInt(customerId as string)));
+      }
+      if (vehicleTemplateId) {
+        query = query.where(eq(vehicleSelectionHistory.selectedVehicleTemplateId, parseInt(vehicleTemplateId as string)));
+      }
+      
+      const history = await query;
       
       res.json({
         success: true,

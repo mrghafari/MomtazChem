@@ -77,22 +77,27 @@ export default function VehicleManagement() {
   const [showAssignDialog, setShowAssignDialog] = useState(false);
 
   // Fetch vehicle templates
-  const { data: vehicleTemplates = [], isLoading: templatesLoading } = useQuery({
+  const { data: vehicleTemplatesResponse, isLoading: templatesLoading } = useQuery({
     queryKey: ['/api/vehicle-templates'],
     queryFn: () => apiRequest('/api/vehicle-templates', { method: 'GET' })
   });
 
   // Fetch ready vehicles
-  const { data: readyVehicles = [], isLoading: vehiclesLoading } = useQuery({
+  const { data: readyVehiclesResponse, isLoading: vehiclesLoading } = useQuery({
     queryKey: ['/api/ready-vehicles'],
     queryFn: () => apiRequest('/api/ready-vehicles', { method: 'GET' })
   });
 
   // Fetch vehicle selection history
-  const { data: selectionHistory = [], isLoading: historyLoading } = useQuery({
+  const { data: selectionHistoryResponse, isLoading: historyLoading } = useQuery({
     queryKey: ['/api/vehicle-selection-history'],
     queryFn: () => apiRequest('/api/vehicle-selection-history', { method: 'GET' })
   });
+
+  // Extract data from API responses
+  const vehicleTemplates = vehicleTemplatesResponse?.data || [];
+  const readyVehicles = readyVehiclesResponse?.data || [];
+  const selectionHistory = selectionHistoryResponse?.data || [];
 
   // Vehicle assignment mutation
   const assignVehicleMutation = useMutation({
