@@ -2182,8 +2182,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   return null;
                 })}
                 
-                {/* دوم: پرداخت از کیف پول (تمام یا بخش از آن) */}
-                {canUseWallet && isWalletEnabledInSettings && (
+                {/* Wallet Combined Option - only show if customer has wallet balance */}
+                {customerData?.success && walletBalance > 0 && (
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <RadioGroupItem value="wallet_combined" id="wallet_combined" />
                     <Label htmlFor="wallet_combined" className="flex items-center gap-2 cursor-pointer">
@@ -2215,14 +2215,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   } else if (method.methodKey === 'bank_receipt') {
                     // bank_receipt is not a standalone payment method - it's part of bank transfer
                     return null;
-                  } else if (method.methodKey === 'wallet' && method.enabled) {
-                    // Display wallet option from admin settings if enabled
+                  } else if (method.methodKey === 'wallet' && method.enabled && customerData?.success && walletBalance >= totalAmount) {
+                    // Full wallet payment - only if customer has enough balance
                     return (
                       <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
                         <RadioGroupItem value="wallet" id="wallet" />
                         <Label htmlFor="wallet" className="flex items-center gap-2 cursor-pointer">
                           <Wallet className="w-4 h-4 text-green-600" />
-                          {method.methodName}
+                          <span className="font-semibold">پرداخت کامل از کیف پول ({formatIQDAmount(totalAmount)} IQD)</span>
                         </Label>
                       </div>
                     );
@@ -2240,28 +2240,38 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
               </RadioGroup>
 
-              {/* Partial Payment Amount Input */}
-              {paymentMethod === 'wallet_combined' && (
+              {/* Wallet Payment Calculator - Show for both wallet_combined and wallet */}
+              {(paymentMethod === 'wallet_combined' || paymentMethod === 'wallet') && customerData?.success && walletBalance > 0 && (
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} IQD)</Label>
-                    <Input
-                      id="walletAmount"
-                      type="number"
-                      min="0"
-                      max={Math.min(walletBalance, totalAmount)}
-                      value={walletAmount || ''}
-                      onChange={(e) => {
-                        const value = parseFloat(e.target.value) || 0;
-                        setWalletAmount(Math.min(value, Math.min(walletBalance, totalAmount)));
-                      }}
-                      placeholder="مقدار دلخواه از کیف پول"
-                      className="text-right"
-                    />
-                  </div>
+                  {paymentMethod === 'wallet_combined' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} IQD)</Label>
+                      <Input
+                        id="walletAmount"
+                        type="number"
+                        min="0"
+                        max={Math.min(walletBalance, totalAmount)}
+                        value={walletAmount || ''}
+                        onChange={(e) => {
+                          const value = parseFloat(e.target.value) || 0;
+                          setWalletAmount(Math.min(value, Math.min(walletBalance, totalAmount)));
+                        }}
+                        placeholder="مقدار دلخواه از کیف پول"
+                        className="text-right"
+                      />
+                    </div>
+                  )}
+                  
+                  {paymentMethod === 'wallet' && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-700 font-medium">
+                        پرداخت کامل از کیف پول: {formatIQDAmount(totalAmount)} IQD
+                      </p>
+                    </div>
+                  )}
                   
                   {/* Payment Breakdown Table */}
-                  {walletAmount > 0 && (
+                  {((paymentMethod === 'wallet_combined' && walletAmount > 0) || paymentMethod === 'wallet') && (
                     <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
                       <table className="w-full text-sm">
                         <tbody>
@@ -2276,18 +2286,32 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           {/* Wallet Payment Row */}
                           <tr className="border-b">
                             <td className="px-4 py-3 text-right">مبلغ پرداخت از کیف پول</td>
-                            <td className="px-4 py-3 text-center font-medium">{formatIQDAmount(walletAmount)}</td>
-                            <td className="px-4 py-3 text-right font-medium bg-blue-50">محدودیت کیف پول</td>
+                            <td className="px-4 py-3 text-center font-medium text-green-600">
+                              {formatIQDAmount(paymentMethod === 'wallet' ? totalAmount : walletAmount)}
+                            </td>
+                            <td className="px-4 py-3 text-right font-medium bg-blue-50">موجودی کیف پول</td>
                             <td className="px-4 py-3 text-center font-medium bg-blue-50 text-blue-700">{formatIQDAmount(walletBalance)}</td>
                           </tr>
                           
-                          {/* Bank Payment Row */}
-                          <tr>
-                            <td className="px-4 py-3 text-right">پرداخت کارت بانکی</td>
-                            <td className="px-4 py-3 text-center font-medium text-orange-600">{formatIQDAmount(totalAmount - walletAmount)}</td>
-                            <td className="px-4 py-3 bg-gray-50"></td>
-                            <td className="px-4 py-3 bg-gray-50"></td>
-                          </tr>
+                          {/* Bank Payment Row - only show if partial payment */}
+                          {paymentMethod === 'wallet_combined' && walletAmount < totalAmount && (
+                            <tr>
+                              <td className="px-4 py-3 text-right">مبلغ باقی‌مانده (کارت بانکی)</td>
+                              <td className="px-4 py-3 text-center font-medium text-orange-600">{formatIQDAmount(totalAmount - walletAmount)}</td>
+                              <td className="px-4 py-3 bg-gray-50"></td>
+                              <td className="px-4 py-3 bg-gray-50"></td>
+                            </tr>
+                          )}
+                          
+                          {/* Full wallet payment confirmation */}
+                          {paymentMethod === 'wallet' && (
+                            <tr>
+                              <td className="px-4 py-3 text-right">باقی‌مانده</td>
+                              <td className="px-4 py-3 text-center font-medium text-green-600">0 IQD</td>
+                              <td className="px-4 py-3 text-right bg-green-50">پس از پرداخت</td>
+                              <td className="px-4 py-3 text-center bg-green-50 text-green-700">{formatIQDAmount(walletBalance - totalAmount)} IQD</td>
+                            </tr>
+                          )}
                         </tbody>
                       </table>
                     </div>
