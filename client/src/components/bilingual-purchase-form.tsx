@@ -926,7 +926,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                        (walletData as any)?.wallet ? parseFloat((walletData as any).wallet.balance) : 
                        (walletData as any)?.balance ? parseFloat((walletData as any).balance) : 0;
   // Check if wallet is enabled in admin settings
-  const isWalletEnabledInSettings = availablePaymentMethods.some((method: any) => method.methodKey === 'wallet');
+  const isWalletEnabledInSettings = Array.isArray(availablePaymentMethods) ? availablePaymentMethods.some((method: any) => method.methodKey === 'wallet') : false;
   const canUseWallet = walletBalance > 0 && (existingCustomer || (customerData as any)?.success) && isWalletEnabledInSettings;
   const maxWalletAmount = Math.min(walletBalance, totalAmount);
   const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet' ? totalAmount : 0);
@@ -1945,7 +1945,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               {/* Payment Options */}
               <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as any)} className="space-y-3">
                 {/* Dynamic payment methods based on admin settings */}
-                {availablePaymentMethods.map((method: any) => {
+                {Array.isArray(availablePaymentMethods) ? availablePaymentMethods.map((method: any) => {
                   if (method.methodKey === 'online_payment') {
                     return (
                       <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
@@ -1958,7 +1958,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     );
                   }
                   return null;
-                })}
+                }) : []}
                 
                 {/* دوم: پرداخت از کیف پول (تمام یا بخش از آن) */}
                 {canUseWallet && isWalletEnabledInSettings && (
@@ -1973,7 +1973,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 
                 
                 {/* Dynamic other payment methods */}
-                {availablePaymentMethods.map((method: any) => {
+                {Array.isArray(availablePaymentMethods) ? availablePaymentMethods.map((method: any) => {
                   if (method.methodKey === 'bank_transfer_grace') {
                     return (
                       <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
@@ -2002,7 +2002,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     );
                   }
                   return null;
-                })}
+                }) : []}
 
 
               </RadioGroup>
