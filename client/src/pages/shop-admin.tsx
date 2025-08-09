@@ -125,8 +125,8 @@ export default function ShopAdmin() {
     enabled: isAuthenticated,
   });
 
-  // Fetch shop settings for proforma deadline
-  const { data: shopSettings = [], isLoading: settingsLoading } = useQuery({
+  // Fetch shop settings for proforma deadline - properly type the response
+  const { data: shopSettingsResponse, isLoading: settingsLoading } = useQuery({
     queryKey: ['/api/shop/settings'],
     enabled: isAuthenticated,
     staleTime: 0, // Always fetch fresh data
@@ -135,9 +135,13 @@ export default function ShopAdmin() {
     refetchOnWindowFocus: true
   });
 
+  // Extract the actual settings data from the response
+  const shopSettings = shopSettingsResponse?.data || [];
+
   // Load existing proforma deadline settings
   useEffect(() => {
-    console.log('📄 [PROFORMA DEADLINE] Loading settings from shopSettings:', shopSettings);
+    console.log('📄 [PROFORMA DEADLINE] Raw response:', shopSettingsResponse);
+    console.log('📄 [PROFORMA DEADLINE] Parsed settings:', shopSettings);
     if (Array.isArray(shopSettings) && shopSettings.length > 0) {
       const proformaDeadline = shopSettings.find((s: any) => s.settingKey === 'proforma_deadline_days');
       console.log('📄 [PROFORMA DEADLINE] Found setting:', proformaDeadline);
@@ -146,7 +150,7 @@ export default function ShopAdmin() {
         setProformaDeadlineDays(proformaDeadline.settingValue);
       }
     }
-  }, [shopSettings]);
+  }, [shopSettingsResponse, shopSettings]);
 
   // Save proforma deadline mutation
   const saveProformaDeadlineMutation = useMutation({
