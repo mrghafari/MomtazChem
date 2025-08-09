@@ -1514,6 +1514,14 @@ const LogisticsManagement = () => {
               padding-bottom: 15px;
               page-break-inside: avoid;
             }
+            .header img {
+              max-width: 120px;
+              max-height: 80px;
+              margin-bottom: 15px;
+              display: block;
+              margin-left: auto;
+              margin-right: auto;
+            }
             .header h1 { 
               font-size: 22px; 
               margin: 0 0 10px 0; 
