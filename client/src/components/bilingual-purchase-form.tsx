@@ -1168,7 +1168,20 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           const vehicleInfo = {
             vehicleName: `${multiVehicleData.totalVehicles} خودرو`,
             totalCost: totalCost,
-            summary: multiVehicleData.summary
+            summary: {
+              totalVehicles: multiVehicleData.totalVehicles,
+              totalWeight: multiVehicleData.totalWeight || totalWeight,
+              totalCost: multiVehicleData.totalCost,
+              vehicles: multiVehicleData.vehicles.map((vehicle: any, index: number) => ({
+                vehicleName: vehicle.name || `خودرو ${index + 1}`,
+                loadWeight: vehicle.loadWeight,
+                maxWeight: vehicle.maxWeight,
+                totalCost: vehicle.totalCost,
+                basePrice: vehicle.basePrice,
+                pricePerKm: vehicle.pricePerKm,
+                efficiency: vehicle.efficiency
+              }))
+            }
           };
           
           setOptimalVehicle(vehicleInfo);
@@ -1872,20 +1885,44 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                                   ✓ سیستم بهترین خودرو را بر اساس وزن، مقصد و کمترین هزینه انتخاب می‌کند
                                   {optimalVehicle && (
                                     <div className="mt-1 font-medium">
-                                      {optimalVehicle.vehicleType === 'multiple' ? (
+                                      {optimalVehicle.summary?.vehicles?.length > 1 ? (
                                         <div>
-                                          راه‌حل انتخابی: {optimalVehicle.vehicleName}
-                                          <div className="text-xs mt-1 space-y-1">
-                                            {optimalVehicle.vehicles?.map((vehicle: any, index: number) => (
-                                              <div key={index} className="flex justify-between">
-                                                <span>خودرو {index + 1}: {vehicle.vehicleName}</span>
-                                                <span>{vehicle.weight} کیلو</span>
+                                          <div className="font-semibold text-emerald-700 mb-2">
+                                            🚚 تفکیک {optimalVehicle.summary.totalVehicles} خودرو انتخاب شده:
+                                          </div>
+                                          <div className="text-xs space-y-2 bg-white p-2 rounded border">
+                                            {optimalVehicle.summary.vehicles.map((vehicle: any, index: number) => (
+                                              <div key={index} className="flex justify-between items-center border-b pb-1">
+                                                <div className="flex-1">
+                                                  <span className="font-medium text-blue-700">خودرو {index + 1}:</span>
+                                                  <span className="ml-2 text-gray-700">{vehicle.vehicleName}</span>
+                                                </div>
+                                                <div className="text-right">
+                                                  <div className="font-bold text-orange-600">{vehicle.loadWeight} کیلو</div>
+                                                  <div className="text-xs text-gray-500">{formatCurrency(vehicle.totalCost)}</div>
+                                                </div>
                                               </div>
                                             ))}
+                                            <div className="mt-2 pt-2 border-t flex justify-between font-bold">
+                                              <span>کل وزن بار:</span>
+                                              <span className="text-green-700">{optimalVehicle.summary.totalWeight} کیلو</span>
+                                            </div>
+                                            <div className="flex justify-between font-bold">
+                                              <span>کل هزینه:</span>
+                                              <span className="text-red-600">{formatCurrency(optimalVehicle.summary.totalCost)}</span>
+                                            </div>
                                           </div>
                                         </div>
                                       ) : (
-                                        <span>خودرو انتخابی: {optimalVehicle.vehicleName} - {optimalVehicle.vehicleType}</span>
+                                        <div>
+                                          <span className="text-blue-700">خودرو انتخابی: {optimalVehicle.vehicleName}</span>
+                                          {optimalVehicle.basePrice && (
+                                            <div className="text-xs text-gray-600 mt-1">
+                                              قیمت پایه: {formatCurrency(optimalVehicle.basePrice)} | 
+                                              هزینه مسافت: {formatCurrency(optimalVehicle.distanceCost || 0)}
+                                            </div>
+                                          )}
+                                        </div>
                                       )}
                                     </div>
                                   )}
