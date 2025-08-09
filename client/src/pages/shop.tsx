@@ -2058,10 +2058,7 @@ const Shop = () => {
           <div style={{ position: 'fixed', top: '10px', right: '10px', background: 'red', color: 'white', padding: '10px', zIndex: 9999 }}>
             CHECKOUT MODAL IS OPEN
           </div>
-          {/* Debug: Cart sync working */}
-          <div style={{ position: 'fixed', top: '50px', right: '10px', background: 'green', color: 'white', padding: '10px', zIndex: 9999 }}>
-            ✓ Cart Synced: {Object.values(cart).reduce((sum, qty) => sum + qty, 0)} items
-          </div>
+
           <BilingualPurchaseForm
             cart={cart}
             products={currentProducts}
