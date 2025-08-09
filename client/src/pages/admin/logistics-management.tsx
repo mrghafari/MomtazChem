@@ -43,7 +43,8 @@ import {
   Wallet,
   DollarSign,
   Clock,
-  RefreshCw
+  RefreshCw,
+  LogIn
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import PostalServicesTab from '@/components/PostalServicesTab';
@@ -763,9 +764,10 @@ const LogisticsManagement = () => {
         if (readyVehiclesResponse.status === 401) {
           toast({
             title: "خطای احراز هویت",
-            description: "لطفاً مجدداً وارد سیستم شوید",
+            description: "برای مشاهده خودروهای آماده، لطفاً ابتدا وارد سیستم شوید",
             variant: "destructive"
           });
+          setAvailableFleetVehicles([]);
           return;
         }
         setAvailableFleetVehicles([]);
@@ -4445,10 +4447,23 @@ const LogisticsManagement = () => {
 
               {/* Available Fleet Vehicles */}
               <div className="bg-orange-50 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-orange-800 mb-3 flex items-center">
-                  <Truck className="w-5 h-5 mr-2" />
-                  خودروهای آماده از ناوگان شرکت
-                </h3>
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-lg font-semibold text-orange-800 flex items-center">
+                    <Truck className="w-5 h-5 mr-2" />
+                    خودروهای آماده از ناوگان شرکت
+                  </h3>
+                  {!user && (
+                    <Button
+                      onClick={() => window.location.href = '/admin/login'}
+                      size="sm"
+                      variant="outline"
+                      className="text-xs border-orange-300 text-orange-700 hover:bg-orange-100"
+                    >
+                      <LogIn className="w-4 h-4 ml-2" />
+                      ورود برای مشاهده خودروها
+                    </Button>
+                  )}
+                </div>
                 {selectedVehicleDetails && (
                   <div className="bg-blue-100 border border-blue-300 rounded-lg p-3 mb-4">
                     <div className="flex items-center gap-2 text-blue-800 text-sm font-medium">
@@ -4461,15 +4476,33 @@ const LogisticsManagement = () => {
                 {availableFleetVehicles.length === 0 ? (
                   <div className="text-center py-8">
                     <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-orange-400" />
-                    <p className="text-orange-600 mb-4">هیچ خودروی مناسبی از این نوع در دسترس نیست</p>
-                    <div className="text-sm text-gray-500 space-y-1">
-                      <p>دلایل احتمالی:</p>
-                      <ul className="list-disc list-inside text-right">
-                        <li>تمام خودروهای این نوع در حال استفاده هستند</li>
-                        <li>ظرفیت بارگیری خودروهای آماده کمتر از وزن محموله است</li>
-                        <li>نیاز به اضافه کردن خودروی جدید به ناوگان شرکت</li>
-                      </ul>
-                    </div>
+                    <p className="text-orange-600 mb-4">
+                      {!user 
+                        ? "برای مشاهده خودروهای فیزیکی آماده، لطفاً ابتدا وارد سیستم شوید" 
+                        : "هیچ خودروی مناسبی از این نوع در دسترس نیست"
+                      }
+                    </p>
+                    {!user ? (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="text-sm text-blue-700 space-y-2 text-right">
+                          <p className="font-medium">💡 راهنمای ورود:</p>
+                          <ul className="list-disc list-inside space-y-1">
+                            <li>بر روی دکمه "ورود برای مشاهده خودروها" کلیک کنید</li>
+                            <li>با اطلاعات مدیریت سیستم وارد شوید</li>
+                            <li>پس از ورود، خودروهای فیزیکی آماده نمایش داده می‌شوند</li>
+                          </ul>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-sm text-gray-500 space-y-1">
+                        <p>دلایل احتمالی:</p>
+                        <ul className="list-disc list-inside text-right">
+                          <li>تمام خودروهای این نوع در حال استفاده هستند</li>
+                          <li>ظرفیت بارگیری خودروهای آماده کمتر از وزن محموله است</li>
+                          <li>نیاز به اضافه کردن خودروی جدید به ناوگان شرکت</li>
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
