@@ -411,6 +411,104 @@ class EmailService {
     }
   }
 
+  async sendAdditionalDocumentsRequest(
+    to: string, 
+    orderData: { orderNumber: string; documentsRequired: string; customerName: string }
+  ): Promise<boolean> {
+    try {
+      const subject = `درخواست مدارک تکمیلی سفارش ${orderData.orderNumber} - Momtaz Chemistry`;
+      
+      const htmlContent = `
+        <div style="font-family: 'Tahoma', Arial, sans-serif; direction: rtl; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+          <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #f59e0b; margin-bottom: 10px;">درخواست مدارک تکمیلی</h1>
+              <h2 style="color: #2563eb; font-size: 18px;">شرکت ممتاز شیمی</h2>
+            </div>
+            
+            <div style="background-color: #fef3c7; padding: 20px; border-right: 4px solid #f59e0b; margin-bottom: 20px;">
+              <h3 style="color: #f59e0b; margin-top: 0;">نیاز به مدارک بیشتر</h3>
+              <p style="margin: 0; color: #666;">شماره سفارش: <strong style="color: #333;">${orderData.orderNumber}</strong></p>
+            </div>
+
+            <p style="line-height: 1.8; color: #333; font-size: 16px;">
+              ${orderData.customerName} عزیز،
+            </p>
+            
+            <p style="line-height: 1.8; color: #333; margin-bottom: 20px;">
+              سفارش شما در حال بررسی است. برای تکمیل فرآیند بررسی، نیاز به ارسال مدارک زیر داریم:
+            </p>
+
+            <div style="background-color: #fef7ed; padding: 15px; border-radius: 6px; margin: 20px 0;">
+              <h4 style="color: #ea580c; margin-top: 0;">مدارک مورد نیاز:</h4>
+              <p style="margin: 0; color: #7c2d12; font-weight: bold;">${orderData.documentsRequired}</p>
+            </div>
+
+            <div style="background-color: #f0f9ff; padding: 20px; border-radius: 6px; margin: 25px 0;">
+              <h4 style="color: #0369a1; margin-top: 0;">نحوه ارسال مدارک:</h4>
+              <ul style="color: #0c4a6e; margin: 0; padding-right: 20px;">
+                <li>وارد حساب کاربری خود شوید</li>
+                <li>به بخش "سفارشات من" بروید</li>
+                <li>روی سفارش ${orderData.orderNumber} کلیک کنید</li>
+                <li>مدارک جدید را آپلود کنید</li>
+              </ul>
+            </div>
+
+            <div style="text-align: center; margin: 25px 0; padding: 15px; background-color: #dcfce7; border-radius: 6px;">
+              <p style="margin: 0; color: #166534; font-weight: bold;">
+                ⏰ لطفاً مدارک را در اسرع وقت ارسال کنید تا فرآیند بررسی تکمیل شود
+              </p>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px; padding: 20px; background-color: #f8fafc; border-radius: 6px;">
+              <h4 style="color: #334155; margin-top: 0;">راه‌های تماس</h4>
+              <p style="margin: 5px 0; color: #64748b;">
+                📞 <strong>+964 770 999 6771</strong><br>
+                📧 <strong>support@momtazchem.com</strong><br>
+                🌐 <strong>www.momtazchem.com</strong>
+              </p>
+            </div>
+
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center;">
+              <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                با احترام، تیم مالی شرکت ممتاز شیمی<br>
+                این ایمیل به صورت خودکار ارسال شده است
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const textContent = `
+${orderData.customerName} عزیز،
+
+سفارش شما ${orderData.orderNumber} در حال بررسی است.
+
+مدارک مورد نیاز: ${orderData.documentsRequired}
+
+لطفاً وارد حساب کاربری خود شده و مدارک جدید را آپلود کنید.
+
+راه‌های تماس:
+تلفن: +964 770 999 6771
+ایمیل: support@momtazchem.com
+
+با احترام،
+تیم مالی شرکت ممتاز شیمی
+      `;
+
+      return await this.sendEmail({
+        to,
+        subject,
+        text: textContent,
+        html: htmlContent
+      }, 'notifications');
+      
+    } catch (error) {
+      console.error('Error sending additional documents request:', error);
+      return false;
+    }
+  }
+
   async sendPaymentRejectionNotification(
     to: string, 
     orderData: { orderNumber: string; rejectionReason: string; customerName: string }

@@ -7537,7 +7537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // NEW ENDPOINT: Confirm grace period payment by financial department
   app.post("/api/admin/orders/confirm-grace-period-payment", requireAuth, async (req, res) => {
     try {
-      const { orderId, orderNumber, confirmed } = req.body;
+      const { orderId, orderNumber, confirmed, rejectionReason, requestAdditionalDocuments, additionalDocumentsNote } = req.body;
       
       console.log(`🏦 [GRACE PERIOD CONFIRMATION] Processing financial confirmation:`, {
         orderId,
@@ -7591,9 +7591,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "پرداخت تایید شد و سفارش به انبار ارسال شد",
           orderConfirmed: true
         });
-      } else {
+      } else if (confirmed === false) {
         // Financial department rejected payment - DO NOT DELETE, just update status and notify customer
-        const { rejectionReason } = req.body;
         
         await db
           .update(customerOrders)
@@ -7639,6 +7638,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
           orderNumber: orderNumber,
           rejectionReason: rejectionReason || 'مدارک ارسالی نامعتبر یا ناکافی است'
         });
+      } else if (requestAdditionalDocuments) {
+        // Financial department requests additional documents from customer
+        await db
+          .update(customerOrders)
+          .set({
+            paymentStatus: 'additional_documents_required',
+            status: 'pending_additional_documents',
+            additionalDocumentsNote: additionalDocumentsNote || 'نیاز به مدارک تکمیلی',
+            updatedAt: new Date()
+          })
+          .where(eq(customerOrders.id, parseInt(targetOrderId)));
+
+        console.log(`📋 [ADDITIONAL DOCS] Order ${orderNumber} requires additional documents - customer notification sent`);
+        
+        // Send notification to customer about additional document requirements
+        try {
+          const { emailService } = await import('./email-service');
+          const orderDetails = await db
+            .select()
+            .from(customerOrders)
+            .where(eq(customerOrders.id, parseInt(targetOrderId)))
+            .limit(1);
+          
+          if (orderDetails.length > 0) {
+            const order = orderDetails[0];
+            await emailService.sendAdditionalDocumentsRequest(
+              order.customerEmail || 'info@momtazchem.com',
+              {
+                orderNumber: orderNumber,
+                documentsRequired: additionalDocumentsNote || 'نیاز به مدارک تکمیلی',
+                customerName: order.customerName || 'مشتری گرامی'
+              }
+            );
+            console.log(`📧 [ADDITIONAL DOCS] Email sent to customer about additional document requirements`);
+          }
+        } catch (notificationError) {
+          console.error(`❌ [ADDITIONAL DOCS] Failed to send email:`, notificationError);
+        }
+        
+        return res.json({
+          success: true,
+          message: "درخواست مدارک تکمیلی به مشتری ارسال شد",
+          additionalDocumentsRequested: true,
+          orderNumber: orderNumber,
+          documentsRequired: additionalDocumentsNote || 'نیاز به مدارک تکمیلی'
+        });
       }
       
     } catch (error) {
@@ -7646,6 +7691,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "خطا در پردازش تایید پرداخت"
+      });
+    }
+  });
+
+  // Customer endpoint to upload additional documents for grace period orders
+  app.post("/api/customers/orders/:orderId/upload-additional-documents", upload.single('additionalReceipt'), async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      const { notes } = req.body;
+      const uploadedFile = req.file;
+      
+      console.log(`📋 [ADDITIONAL DOCS UPLOAD] Customer uploading additional documents for order ${orderId}`);
+
+      if (!uploadedFile) {
+        return res.status(400).json({
+          success: false,
+          message: "فایل مدرک الزامی است"
+        });
+      }
+
+      // Find the order that requires additional documents
+      const [order] = await db
+        .select()
+        .from(customerOrders)
+        .where(and(
+          eq(customerOrders.id, parseInt(orderId)),
+          eq(customerOrders.paymentStatus, 'additional_documents_required')
+        ))
+        .limit(1);
+
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد یا نیازی به مدارک تکمیلی ندارد"
+        });
+      }
+
+      // Save the uploaded file path and update order status back to grace period review
+      const additionalDocumentPath = `/uploads/${uploadedFile.filename}`;
+      
+      await db
+        .update(customerOrders)
+        .set({
+          receiptPath: additionalDocumentPath, // Store latest document
+          paymentStatus: 'pending', // Back to pending for finance review
+          status: 'payment_grace_period', // Back to grace period for review
+          notes: notes || 'مدارک تکمیلی آپلود شد',
+          updatedAt: new Date()
+        })
+        .where(eq(customerOrders.id, parseInt(orderId)));
+
+      console.log(`✅ [ADDITIONAL DOCS] Customer uploaded additional documents for order ${order.orderNumber} - sent back to finance for review`);
+
+      // Notify financial department about new documents
+      try {
+        const { emailService } = await import('./email-service');
+        await emailService.sendEmail({
+          to: 'finance@momtazchem.com',
+          subject: `مدارک تکمیلی آپلود شد - سفارش ${order.orderNumber}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; direction: rtl; padding: 20px;">
+              <h2>مدارک تکمیلی دریافت شد</h2>
+              <p>مشتری مدارک جدید برای سفارش <strong>${order.orderNumber}</strong> آپلود کرد.</p>
+              <p>لطفاً مجدداً بررسی کنید.</p>
+              <p>یادداشت مشتری: ${notes || 'بدون یادداشت'}</p>
+            </div>
+          `
+        }, 'admin');
+        console.log(`📧 [FINANCE NOTIFICATION] Finance department notified about additional documents`);
+      } catch (emailError) {
+        console.error(`❌ [FINANCE NOTIFICATION] Failed to notify finance department:`, emailError);
+      }
+
+      res.json({
+        success: true,
+        message: "مدارک تکمیلی با موفقیت آپلود شد و برای بررسی مجدد ارسال شد",
+        orderNumber: order.orderNumber,
+        documentPath: additionalDocumentPath
+      });
+
+    } catch (error) {
+      console.error('Error uploading additional documents:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در آپلود مدارک تکمیلی"
+      });
+    }
+  });
+
+  // Get orders that need additional documents for specific customer
+  app.get("/api/customers/orders/requiring-documents", async (req, res) => {
+    try {
+      const customerId = req.session?.customerId;
+      
+      if (!customerId) {
+        return res.status(401).json({
+          success: false,
+          message: "احراز هویت نشده"
+        });
+      }
+
+      const ordersRequiringDocs = await db
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          totalAmount: customerOrders.totalAmount,
+          additionalDocumentsNote: customerOrders.additionalDocumentsNote,
+          createdAt: customerOrders.createdAt,
+          updatedAt: customerOrders.updatedAt
+        })
+        .from(customerOrders)
+        .where(and(
+          eq(customerOrders.customerId, customerId),
+          eq(customerOrders.paymentStatus, 'additional_documents_required')
+        ))
+        .orderBy(customerOrders.updatedAt);
+
+      res.json({
+        success: true,
+        orders: ordersRequiringDocs,
+        message: `${ordersRequiringDocs.length} سفارش نیاز به مدارک تکمیلی دارد`
+      });
+
+    } catch (error) {
+      console.error('Error fetching orders requiring documents:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت سفارشات"
       });
     }
   });
