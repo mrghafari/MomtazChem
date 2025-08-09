@@ -926,8 +926,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                        (walletData as any)?.wallet ? parseFloat((walletData as any).wallet.balance) : 
                        (walletData as any)?.balance ? parseFloat((walletData as any).balance) : 0;
   // Check if wallet is enabled in admin settings
-  const isWalletEnabledInSettings = Array.isArray(availablePaymentMethods) ? 
-    availablePaymentMethods.some((method: any) => method.methodKey === 'wallet') : false;
+  const isWalletEnabledInSettings = availablePaymentMethods.some((method: any) => method.methodKey === 'wallet');
   const canUseWallet = walletBalance > 0 && (existingCustomer || (customerData as any)?.success) && isWalletEnabledInSettings;
   const maxWalletAmount = Math.min(walletBalance, totalAmount);
   const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet' ? totalAmount : 0);
@@ -1927,27 +1926,26 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
             </div>
           </div>
 
-          {/* Payment Method Selection - available for all users */}
-          <div className="space-y-3 border rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
-            <div className="flex items-center gap-2">
-              <Wallet className="w-5 h-5 text-blue-600" />
-              <h3 className="font-medium text-blue-900 dark:text-blue-100">{t.paymentMethod}</h3>
-            </div>
-            
-            {/* Wallet Balance Display - only for logged in users */}
-            {customerData?.success && (
+          {/* Payment Method Selection - moved up below total */}
+          {customerData?.success && (
+            <div className="space-y-3 border rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
+              <div className="flex items-center gap-2">
+                <Wallet className="w-5 h-5 text-blue-600" />
+                <h3 className="font-medium text-blue-900 dark:text-blue-100">{t.paymentMethod}</h3>
+              </div>
+              
+              {/* Wallet Balance Display */}
               <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">{t.walletBalance}:</span>
                   <span className="font-semibold text-green-600">{formatCurrency(walletBalance)}</span>
                 </div>
               </div>
-            )}
 
               {/* Payment Options */}
               <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as any)} className="space-y-3">
                 {/* Dynamic payment methods based on admin settings */}
-                {Array.isArray(availablePaymentMethods) && availablePaymentMethods.map((method: any) => {
+                {availablePaymentMethods.map((method: any) => {
                   if (method.methodKey === 'online_payment') {
                     return (
                       <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
@@ -1975,7 +1973,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 
                 
                 {/* Dynamic other payment methods */}
-                {Array.isArray(availablePaymentMethods) && availablePaymentMethods.map((method: any) => {
+                {availablePaymentMethods.map((method: any) => {
                   if (method.methodKey === 'bank_transfer_grace') {
                     return (
                       <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
@@ -2083,7 +2081,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   </div>
                 </div>
               )}
-          </div>
+            </div>
+          )}
 
           {/* Customer Data Status */}
           {customerData?.success && customerData.customer && (
