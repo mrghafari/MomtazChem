@@ -1769,6 +1769,23 @@ const LogisticsManagement = () => {
             </div>
           </div>
 
+          ${selectedOrder.financialReviewedAt || selectedOrder.financialNotes ? `
+          <div class="section">
+            <h3>💰 اطلاعات مالی</h3>
+            <div class="info-grid">
+              ${selectedOrder.financialReviewedAt ? `
+              <div class="info-item">
+                <span class="label">تاریخ بررسی مالی:</span>
+                <span class="value">${new Date(selectedOrder.financialReviewedAt).toLocaleDateString('en-GB')}</span>
+              </div>` : ''}
+              ${selectedOrder.financialNotes ? `
+              <div class="info-item" style="grid-column: 1 / -1;">
+                <span class="label">یادداشت‌های مالی:</span>
+                <span class="value">${selectedOrder.financialNotes}</span>
+              </div>` : ''}
+            </div>
+          </div>` : ''}
+
           <div class="section">
             <h3>📦 جزئیات سفارش</h3>
             <div class="info-grid">
