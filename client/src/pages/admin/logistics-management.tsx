@@ -947,7 +947,7 @@ const LogisticsManagement = () => {
       allowedRoutes: allowedRoutesArray,
       averageSpeedKmh: parseFloat(formData.get('averageSpeedKmh') as string) || 50,
       supportsFlammable: formData.get('supportsFlammable') === 'true',
-
+      supportsHazardous: formData.get('supportsHazardous') === 'true',
       isActive: formData.get('isActive') === 'on'
     };
 
@@ -1037,6 +1037,36 @@ const LogisticsManagement = () => {
                         <Label htmlFor="averageSpeedKmh">سرعت متوسط (کیلومتر/ساعت)</Label>
                         <Input id="averageSpeedKmh" name="averageSpeedKmh" type="number" defaultValue="50" />
                       </div>
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-2">
+                          <Flame className="h-4 w-4 text-orange-500" />
+                          حمل مواد آتش زا
+                        </Label>
+                        <Select name="supportsFlammable">
+                          <SelectTrigger>
+                            <SelectValue placeholder="انتخاب کنید" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="true">مجاز</SelectItem>
+                            <SelectItem value="false">غیر مجاز</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-2">
+                          <Shield className="h-4 w-4 text-red-500" />
+                          حمل مواد خطرناک
+                        </Label>
+                        <Select name="supportsHazardous">
+                          <SelectTrigger>
+                            <SelectValue placeholder="انتخاب کنید" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="true">مجاز</SelectItem>
+                            <SelectItem value="false">غیر مجاز</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
                     </div>
                     <DialogFooter>
@@ -1059,6 +1089,8 @@ const LogisticsManagement = () => {
                       <TableHead>نوع</TableHead>
                       <TableHead>حداکثر وزن</TableHead>
                       <TableHead>حجم</TableHead>
+                      <TableHead>مواد آتش زا</TableHead>
+                      <TableHead>مواد خطرناک</TableHead>
                       <TableHead>قیمت پایه</TableHead>
                       <TableHead>وضعیت</TableHead>
                       <TableHead>عملیات</TableHead>
@@ -1067,11 +1099,11 @@ const LogisticsManagement = () => {
                   <TableBody>
                     {vehiclesLoading ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8">در حال بارگذاری...</TableCell>
+                        <TableCell colSpan={9} className="text-center py-8">در حال بارگذاری...</TableCell>
                       </TableRow>
                     ) : vehicles.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8">هیچ الگوی خودرویی یافت نشد</TableCell>
+                        <TableCell colSpan={9} className="text-center py-8">هیچ الگوی خودرویی یافت نشد</TableCell>
                       </TableRow>
                     ) : (
                       vehicles.map((vehicle: any) => (
@@ -1080,6 +1112,22 @@ const LogisticsManagement = () => {
                           <TableCell>{(VEHICLE_TYPES as any)[vehicle.vehicleType] || vehicle.vehicleType}</TableCell>
                           <TableCell>{parseInt(vehicle.maxWeightKg)} کیلوگرم</TableCell>
                           <TableCell>{parseInt(vehicle.maxVolumeM3) || 0} متر مکعب</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Flame className="h-3 w-3 text-orange-500" />
+                              <Badge variant={vehicle.supportsFlammable ? "default" : "secondary"} className="text-xs">
+                                {vehicle.supportsFlammable ? "مجاز" : "غیر مجاز"}
+                              </Badge>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Shield className="h-3 w-3 text-red-500" />
+                              <Badge variant={vehicle.supportsHazardous ? "default" : "secondary"} className="text-xs">
+                                {vehicle.supportsHazardous ? "مجاز" : "غیر مجاز"}
+                              </Badge>
+                            </div>
+                          </TableCell>
                           <TableCell>{parseInt(vehicle.basePrice)} دینار</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -1254,7 +1302,36 @@ const LogisticsManagement = () => {
                           className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
-
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-2">
+                          <Flame className="h-4 w-4 text-orange-500" />
+                          حمل مواد آتش زا
+                        </Label>
+                        <Select name="supportsFlammable" defaultValue={editingVehicle.supportsFlammable?.toString() || "false"}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="true">مجاز</SelectItem>
+                            <SelectItem value="false">غیر مجاز</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-2">
+                          <Shield className="h-4 w-4 text-red-500" />
+                          حمل مواد خطرناک
+                        </Label>
+                        <Select name="supportsHazardous" defaultValue={editingVehicle.supportsHazardous?.toString() || "false"}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="true">مجاز</SelectItem>
+                            <SelectItem value="false">غیر مجاز</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
                       <div className="space-y-2 col-span-2">
                         <div className="flex items-center space-x-2">
