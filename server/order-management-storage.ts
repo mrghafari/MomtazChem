@@ -141,8 +141,6 @@ export interface IOrderManagementStorage {
   // M[YY][NNNNN] order numbering - SEQUENTIAL & GAP-FREE
   generateOrderNumber(): Promise<string>; // 🚨 DEPRECATED: Can create gaps!
   generateOrderNumberInTransaction(transactionClient?: any): Promise<string>; // ✅ RECOMMENDED: Gap-free
-  reserveOrderNumber(): Promise<string>; // 🆕 Reserve number for immediate use
-  releaseOrderNumber(orderNumber: string): Promise<boolean>; // 🆕 Release unused number
   createOrderWithSequentialNumber(orderData: any): Promise<{ order: any; orderNumber: string }>; // ✅ COMPLETE SOLUTION
   resetOrderCounter(year?: number): Promise<void>;
   
@@ -1816,106 +1814,6 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     } catch (error) {
       console.error('❌ Error resetting order counter:', error);
       throw error;
-    }
-  }
-  
-  // 🆕 Reserve order number immediately for use (gap-free system)
-  async reserveOrderNumber(): Promise<string> {
-    console.log('🔒 [RESERVE] Reserving order number immediately...');
-    
-    return await db.transaction(async (tx) => {
-      try {
-        const currentYear = new Date().getFullYear();
-        const yearSuffix = (currentYear % 100).toString().padStart(2, '0');
-        
-        // Check if counter exists for current year
-        const yearCounterCheck = await tx.execute(sql`
-          SELECT * FROM order_counter WHERE year = ${currentYear} FOR UPDATE
-        `);
-        
-        if (yearCounterCheck.rows.length === 0) {
-          // Create new counter for current year starting from 01111
-          await tx.execute(sql`
-            INSERT INTO order_counter (year, counter, prefix, last_reset)
-            VALUES (${currentYear}, 1111, 'M', CURRENT_TIMESTAMP)
-          `);
-          const orderNumber = `M${yearSuffix}01111`;
-          console.log(`🔢 [RESERVE] New year counter created, reserved: ${orderNumber}`);
-          return orderNumber;
-        }
-        
-        // Increment counter atomically
-        const result = await tx.execute(sql`
-          UPDATE order_counter 
-          SET counter = counter + 1, 
-              updated_at = CURRENT_TIMESTAMP
-          WHERE year = ${currentYear}
-          RETURNING counter, prefix
-        `);
-        
-        const row = result.rows[0] as { counter: number; prefix: string };
-        if (row) {
-          const paddedCounter = row.counter.toString().padStart(5, '0');
-          const orderNumber = `${row.prefix}${yearSuffix}${paddedCounter}`;
-          console.log(`🔢 [RESERVE] Reserved order number: ${orderNumber}`);
-          return orderNumber;
-        }
-        
-        throw new Error('Failed to reserve order number');
-      } catch (error) {
-        console.error('❌ [RESERVE] Error reserving order number:', error);
-        throw error;
-      }
-    });
-  }
-  
-  // 🆕 Release unused order number (makes it available for reuse)
-  async releaseOrderNumber(orderNumber: string): Promise<boolean> {
-    console.log(`🔓 [RELEASE] Attempting to release order number: ${orderNumber}`);
-    
-    try {
-      // Extract year and counter from order number (M2511111 -> year=2025, counter=1111)
-      const match = orderNumber.match(/^M(\d{2})(\d{5})$/);
-      if (!match) {
-        console.error(`❌ [RELEASE] Invalid order number format: ${orderNumber}`);
-        return false;
-      }
-      
-      const yearSuffix = parseInt(match[1]);
-      const counter = parseInt(match[2]);
-      const fullYear = 2000 + yearSuffix; // Convert YY to YYYY
-      
-      return await db.transaction(async (tx) => {
-        // Check if this was the latest counter
-        const currentCounter = await tx.execute(sql`
-          SELECT counter FROM order_counter WHERE year = ${fullYear} FOR UPDATE
-        `);
-        
-        if (currentCounter.rows.length === 0) {
-          console.error(`❌ [RELEASE] No counter found for year ${fullYear}`);
-          return false;
-        }
-        
-        const currentCounterValue = (currentCounter.rows[0] as { counter: number }).counter;
-        
-        // Only allow rollback if this was the most recent number
-        if (counter === currentCounterValue) {
-          await tx.execute(sql`
-            UPDATE order_counter 
-            SET counter = counter - 1,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE year = ${fullYear}
-          `);
-          console.log(`✅ [RELEASE] Successfully released order number: ${orderNumber} (counter rolled back to ${counter - 1})`);
-          return true;
-        } else {
-          console.warn(`⚠️ [RELEASE] Cannot release ${orderNumber} - not the latest number (current: ${currentCounterValue})`);
-          return false;
-        }
-      });
-    } catch (error) {
-      console.error(`❌ [RELEASE] Error releasing order number ${orderNumber}:`, error);
-      return false;
     }
   }
   

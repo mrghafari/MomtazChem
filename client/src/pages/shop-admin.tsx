@@ -49,142 +49,6 @@ import InvoiceManagement from "@/pages/admin/invoice-management";
 import ShopInvoiceManagement from "@/components/ShopInvoiceManagement";
 import PaymentMethodBadge from "@/components/PaymentMethodBadge";
 
-// Bulk Purchase Settings Component
-function BulkPurchaseSettings({ product, onUpdate }: { product: any; onUpdate: () => void }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [threshold, setThreshold] = useState(product.bulkPurchaseThreshold || '');
-  const [discount, setDiscount] = useState(product.bulkPurchaseDiscount || '');
-  const [isSaving, setIsSaving] = useState(false);
-  const { toast } = useToast();
-
-  const saveBulkSettings = async () => {
-    setIsSaving(true);
-    try {
-      await apiRequest(`/api/shop/products/${product.id}/bulk-settings`, {
-        method: 'PATCH',
-        body: {
-          bulkPurchaseThreshold: threshold ? parseInt(threshold) : null,
-          bulkPurchaseDiscount: discount ? parseFloat(discount) : null
-        }
-      });
-      
-      toast({
-        title: "تنظیمات ذخیره شد",
-        description: "تنظیمات خرید عمده با موفقیت به‌روزرسانی شد"
-      });
-      
-      setIsEditing(false);
-      onUpdate();
-    } catch (error) {
-      toast({
-        title: "خطا در ذخیره",
-        description: "مشکلی در ذخیره تنظیمات پیش آمد",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  return (
-    <div className="border rounded-lg p-4 bg-gray-50">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <h3 className="font-medium text-lg">{product.name}</h3>
-          <p className="text-sm text-gray-600">SKU: {product.sku}</p>
-          <p className="text-sm text-gray-600">قیمت واحد: {parseInt(product.price).toLocaleString()} دینار</p>
-          
-          {!isEditing ? (
-            <div className="mt-3 space-y-2">
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-medium">آستانه خرید عمده:</span>
-                <Badge variant={product.bulkPurchaseThreshold ? "default" : "secondary"}>
-                  {product.bulkPurchaseThreshold ? `${product.bulkPurchaseThreshold} واحد` : "تعریف نشده"}
-                </Badge>
-              </div>
-              
-              {product.bulkPurchaseDiscount && (
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-medium">درصد تخفیف:</span>
-                  <Badge variant="outline" className="text-green-600">
-                    {product.bulkPurchaseDiscount}%
-                  </Badge>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="mt-3 space-y-3">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor={`threshold-${product.id}`}>حد آستانه (تعداد)</Label>
-                  <Input
-                    id={`threshold-${product.id}`}
-                    type="number"
-                    min="1"
-                    value={threshold}
-                    onChange={(e) => setThreshold(e.target.value)}
-                    placeholder="مثال: 100"
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor={`discount-${product.id}`}>درصد تخفیف</Label>
-                  <Input
-                    id={`discount-${product.id}`}
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.1"
-                    value={discount}
-                    onChange={(e) => setDiscount(e.target.value)}
-                    placeholder="مثال: 5.5"
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="flex items-center gap-2">
-          {!isEditing ? (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setIsEditing(true)}
-            >
-              <Edit className="w-4 h-4 mr-1" />
-              ویرایش
-            </Button>
-          ) : (
-            <>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setIsEditing(false);
-                  setThreshold(product.bulkPurchaseThreshold || '');
-                  setDiscount(product.bulkPurchaseDiscount || '');
-                }}
-              >
-                انصراف
-              </Button>
-              <Button
-                size="sm"
-                onClick={saveBulkSettings}
-                disabled={isSaving}
-              >
-                {isSaving ? <RefreshCw className="w-4 h-4 mr-1 animate-spin" /> : null}
-                ذخیره
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function ShopAdmin() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
@@ -423,11 +287,10 @@ export default function ShopAdmin() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="inventory">Inventory</TabsTrigger>
             <TabsTrigger value="discounts">Discount Settings</TabsTrigger>
-            <TabsTrigger value="bulk-purchases">خریدهای عمده</TabsTrigger>
             <TabsTrigger value="invoices">Invoice Management</TabsTrigger>
             <TabsTrigger value="returns">Returned Items</TabsTrigger>
             <TabsTrigger value="reports">Sales Reports</TabsTrigger>
@@ -674,38 +537,6 @@ export default function ShopAdmin() {
                       </div>
                     ))
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Bulk Purchases Tab */}
-          <TabsContent value="bulk-purchases" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calculator className="w-5 h-5" />
-                  تنظیمات خریدهای عمده
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border">
-                    <p className="font-medium mb-2">راهنمای خریدهای عمده:</p>
-                    <p>در این بخش می‌توانید برای هر محصول مشخص کنید که چه مقدار خرید، خرید عمده محسوب می‌شود و چه درصد تخفیف اعمال شود.</p>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {products.map((product: any) => (
-                      <BulkPurchaseSettings 
-                        key={product.id} 
-                        product={product}
-                        onUpdate={() => {
-                          queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
-                        }}
-                      />
-                    ))}
-                  </div>
                 </div>
               </CardContent>
             </Card>

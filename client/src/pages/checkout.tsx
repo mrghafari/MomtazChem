@@ -381,32 +381,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     }
   }, [customerData]);
 
-  // Calculate order totals with bulk purchase discounts
+  // Calculate order totals
   const cartItems = Object.entries(cart).map(([productId, quantity]) => {
     const product = products.find(p => p.id === parseInt(productId));
-    if (!product) return null;
-    
-    const basePrice = parseFloat(product.price);
-    let finalPrice = basePrice;
-    let hasBulkDiscount = false;
-    
-    // Apply bulk purchase discount if applicable
-    if (product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && 
-        quantity >= product.bulkPurchaseThreshold) {
-      const discountAmount = (basePrice * product.bulkPurchaseDiscount) / 100;
-      finalPrice = basePrice - discountAmount;
-      hasBulkDiscount = true;
-    }
-    
-    return {
+    return product ? {
       ...product,
       quantity,
-      originalPrice: basePrice,
-      finalPrice,
-      hasBulkDiscount,
-      bulkDiscountPercent: hasBulkDiscount ? product.bulkPurchaseDiscount : 0,
-      totalPrice: finalPrice * quantity
-    };
+      totalPrice: parseFloat(product.price) * quantity
+    } : null;
   }).filter(Boolean);
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -2843,31 +2825,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             </Button>
                           </div>
                           <div className="text-right">
-                            <div className="space-y-1">
-                              {item.hasBulkDiscount && (
-                                <div className="text-xs">
-                                  <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                    خرید عمده {item.bulkDiscountPercent}% تخفیف
-                                  </Badge>
-                                </div>
-                              )}
-                              <div className="text-xs text-gray-500">
-                                {item.quantity} × {item.hasBulkDiscount ? (
-                                  <>
-                                    <span className="line-through text-gray-400 mr-1">
-                                      {item.originalPrice.toLocaleString()} IQD
-                                    </span>
-                                    <span className="text-green-600 font-medium">
-                                      {item.finalPrice.toLocaleString()} IQD
-                                    </span>
-                                  </>
-                                ) : (
-                                  <span>{parseFloat(item.price).toLocaleString()} IQD</span>
-                                )}
-                              </div>
-                              <div className="font-medium">
-                                {item.totalPrice.toLocaleString()} IQD
-                              </div>
+                            <div className="text-xs text-gray-500">
+                              {item.quantity} × {parseFloat(item.price).toLocaleString()} IQD
+                            </div>
+                            <div className="font-medium">
+                              {item.totalPrice.toLocaleString()} IQD
                             </div>
                           </div>
                         </div>

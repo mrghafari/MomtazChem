@@ -1377,18 +1377,6 @@ const Shop = () => {
 
 
 
-                          {/* Bulk Purchase Threshold Indicator */}
-                          {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && (
-                            <div className="mb-3 p-2 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-blue-200">
-                              <div className="flex items-center gap-2">
-                                <Package className="w-4 h-4 text-blue-600" />
-                                <span className="text-sm font-medium text-blue-800">
-                                  خرید عمده: {product.bulkPurchaseThreshold}+ واحد = {product.bulkPurchaseDiscount}% تخفیف
-                                </span>
-                              </div>
-                            </div>
-                          )}
-
                           {/* Modern Discount Card */}
                           <div className="mb-3 h-24 overflow-hidden">
                             {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 ? (

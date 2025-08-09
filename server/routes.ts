@@ -8057,67 +8057,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
-  // ORDER NUMBER MANAGEMENT ENDPOINTS (NEW SYSTEM)
-  // =============================================================================
-
-  // Reserve order number immediately (no more temporary numbers)
-  app.post("/api/orders/reserve-number", async (req, res) => {
-    try {
-      console.log('🔒 [API] Reserving order number...');
-      
-      const reservedNumber = await storage.reserveOrderNumber();
-      
-      res.json({
-        success: true,
-        orderNumber: reservedNumber,
-        message: "شماره سفارش reserve شد"
-      });
-    } catch (error) {
-      console.error('❌ [API] Error reserving order number:', error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در reserve کردن شماره سفارش"
-      });
-    }
-  });
-
-  // Release unused order number (for failed payments)
-  app.post("/api/orders/release-number", async (req, res) => {
-    try {
-      const { orderNumber } = req.body;
-      
-      if (!orderNumber) {
-        return res.status(400).json({
-          success: false,
-          message: "شماره سفارش ارسال نشده"
-        });
-      }
-
-      console.log(`🔓 [API] Releasing order number: ${orderNumber}`);
-      
-      const released = await storage.releaseOrderNumber(orderNumber);
-      
-      if (released) {
-        res.json({
-          success: true,
-          message: "شماره سفارش آزاد شد"
-        });
-      } else {
-        res.status(400).json({
-          success: false,
-          message: "امکان آزاد کردن شماره سفارش وجود ندارد"
-        });
-      }
-    } catch (error) {
-      console.error('❌ [API] Error releasing order number:', error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در آزاد کردن شماره سفارش"
-      });
-    }
-  });
-
-  // =============================================================================
   // FACTORY MANAGEMENT ENDPOINTS
   // =============================================================================
 
@@ -18828,47 +18767,6 @@ Momtaz Chemical Technical Team`,
     } catch (error) {
       console.error("Error updating shop product:", error);
       res.status(500).json({ success: false, message: "Failed to update product" });
-    }
-  });
-
-  // Update bulk purchase settings for a product
-  app.patch("/api/shop/products/:id/bulk-settings", requireAuth, async (req, res) => {
-    try {
-      const productId = parseInt(req.params.id);
-      if (isNaN(productId)) {
-        return res.status(400).json({ success: false, message: "Invalid product ID" });
-      }
-      
-      const { bulkPurchaseThreshold, bulkPurchaseDiscount } = req.body;
-      
-      // Validate the inputs
-      if (bulkPurchaseThreshold && (bulkPurchaseThreshold < 1 || !Number.isInteger(bulkPurchaseThreshold))) {
-        return res.status(400).json({ success: false, message: "Bulk purchase threshold must be a positive integer" });
-      }
-      
-      if (bulkPurchaseDiscount && (bulkPurchaseDiscount < 0 || bulkPurchaseDiscount > 100)) {
-        return res.status(400).json({ success: false, message: "Bulk purchase discount must be between 0 and 100" });
-      }
-      
-      // Update the product in the database
-      await db.update(shopProducts)
-        .set({
-          bulkPurchaseThreshold: bulkPurchaseThreshold,
-          bulkPurchaseDiscount: bulkPurchaseDiscount
-        })
-        .where(eq(shopProducts.id, productId));
-      
-      res.json({ 
-        success: true, 
-        message: "Bulk purchase settings updated successfully",
-        data: {
-          bulkPurchaseThreshold,
-          bulkPurchaseDiscount
-        }
-      });
-    } catch (error) {
-      console.error("Error updating bulk purchase settings:", error);
-      res.status(500).json({ success: false, message: "Failed to update bulk purchase settings" });
     }
   });
 
