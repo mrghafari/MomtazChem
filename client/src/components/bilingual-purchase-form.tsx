@@ -1734,12 +1734,18 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       {/* Middle Section with Bulk Indicator and Quantity Controls */}
                       <div className="flex flex-col items-center gap-2">
                         {/* Bulk Purchase Indicator in Middle */}
-                        {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && 
-                         quantity >= product.bulkPurchaseThreshold && (
-                          <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1">
-                            🎉 خرید عمده
-                          </Badge>
-                        )}
+                        {(() => {
+                          console.log('🛒 [BULK DEBUG] Product:', product.name, 'Quantity:', quantity, 'Threshold:', product.bulkPurchaseThreshold, 'Discount:', product.bulkPurchaseDiscount);
+                          
+                          if (product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && quantity >= product.bulkPurchaseThreshold) {
+                            return (
+                              <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1">
+                                🎉 خرید عمده
+                              </Badge>
+                            );
+                          }
+                          return null;
+                        })()}
                         
                         {/* Quantity Controls */}
                         <div className="flex items-center gap-2">
