@@ -248,9 +248,17 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet' | 'wallet_full' | 'wallet_partial' | 'wallet_combined' | 'bank_transfer_grace' | 'bank_receipt'>('online_payment');
 
-  // Debug cart sync issue
-  console.log('🛒 [PURCHASE FORM DEBUG] Cart received as prop:', cart);
-  console.log('🛒 [PURCHASE FORM DEBUG] Cart total items:', Object.values(cart).reduce((sum, qty) => sum + qty, 0));
+  // Use internal cart state that syncs with prop
+  const [internalCart, setInternalCart] = useState(cart);
+
+  // Sync internal cart with prop changes
+  useEffect(() => {
+    console.log('🛒 [PURCHASE FORM SYNC] Cart prop changed:', cart);
+    setInternalCart(cart);
+  }, [cart]);
+
+  // Debug cart sync issue - remove after testing
+  console.log('🛒 [PURCHASE FORM SYNC DEBUG] Cart synced successfully:', Object.values(internalCart).reduce((sum, qty) => sum + qty, 0), 'items');
 
   // Fetch available payment methods from admin settings (public endpoint)
   const { data: availablePaymentMethods = [] } = useQuery<any[]>({
@@ -483,7 +491,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Check if cart contains flammable materials - CRITICAL SAFETY CHECK
   const containsFlammableProducts = useMemo(() => {
-    const flammableItems = Object.entries(cart).some(([productId, quantity]) => {
+    const flammableItems = Object.entries(internalCart).some(([productId, quantity]) => {
       if (quantity > 0) {
         const product = products.find(p => p.id === parseInt(productId));
         const isFlammable = product?.isFlammable === true;
@@ -517,7 +525,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       try {
         console.log('🚚 [BILINGUAL FORM] Fetching shipping rates with flammable filtering...', {
           containsFlammableProducts,
-          cartProducts: Object.entries(cart).map(([id, qty]) => ({
+          cartProducts: Object.entries(internalCart).map(([id, qty]) => ({
             id,
             quantity: qty,
             name: products.find(p => p.id === parseInt(id))?.name,
@@ -780,7 +788,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
 
   // Calculate subtotal with discounts - IQD whole numbers only
-  const subtotalAmount = Math.round(Object.entries(cart).reduce((sum, [productId, quantity]) => {
+  const subtotalAmount = Math.round(Object.entries(internalCart).reduce((sum, [productId, quantity]) => {
     const product = products.find(p => p.id === parseInt(productId));
     if (product && product.price) {
       const discountedPrice = getDiscountedPrice(product, quantity);
@@ -904,7 +912,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   });
   
   // Calculate total weight of all products in cart
-  const totalWeight = Object.entries(cart).reduce((sum, [productId, quantity]) => {
+  const totalWeight = Object.entries(internalCart).reduce((sum, [productId, quantity]) => {
     const product = products.find(p => p.id === parseInt(productId));
     if (product) {
       // Get weight from product data (use different weight fields as fallback)
@@ -1685,7 +1693,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               {t.cartManagement}
             </h3>
             <div className="space-y-3">
-              {Object.entries(cart).map(([productId, quantity]) => {
+              {Object.entries(internalCart).map(([productId, quantity]) => {
                 const product = products.find(p => p.id === parseInt(productId));
                 if (!product) return null;
                 
@@ -1834,7 +1842,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               
               {/* Bulk Purchase Shipping Recommendation */}
               {(() => {
-                const hasBulkPurchase = Object.entries(cart).some(([productId, quantity]) => {
+                const hasBulkPurchase = Object.entries(internalCart).some(([productId, quantity]) => {
                   const product = products.find(p => p.id === parseInt(productId));
                   return product?.bulkPurchaseThreshold && 
                          product?.bulkPurchaseDiscount && 
@@ -1904,7 +1912,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         
                         // Handle self_pickup option specially (highlight for bulk purchases)
                         if (rate.deliveryMethod === 'self_pickup' || rate.delivery_method === 'self_pickup') {
-                          const hasBulkPurchase = Object.entries(cart).some(([productId, quantity]) => {
+                          const hasBulkPurchase = Object.entries(internalCart).some(([productId, quantity]) => {
                             const product = products.find(p => p.id === parseInt(productId));
                             return product?.bulkPurchaseThreshold && 
                                    product?.bulkPurchaseDiscount && 
