@@ -7,6 +7,7 @@ import fs from "fs";
 import puppeteer from "puppeteer";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
+import csv from "csv-parser";
 import { emailService } from "./email-service";
 import { storage } from "./storage";
 import { insertLeadSchema, insertLeadActivitySchema } from "@shared/schema";
@@ -177,8 +178,9 @@ const catalogsDir = path.join(uploadsDir, 'catalogs');
 const documentsDir = path.join(uploadsDir, 'documents');
 const receiptsDir = path.join(uploadsDir, 'receipts');
 const logosDir = path.join(uploadsDir, 'logos');
+const csvDir = path.join(uploadsDir, 'csv');
 
-[uploadsDir, imagesDir, catalogsDir, documentsDir, receiptsDir, logosDir].forEach(dir => {
+[uploadsDir, imagesDir, catalogsDir, documentsDir, receiptsDir, logosDir, csvDir].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -307,6 +309,31 @@ const uploadReceipt = multer({
       fieldname: file.fieldname
     });
     cb(null, true);
+  }
+});
+
+// CSV upload configuration
+const csvStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, csvDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `csv-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+const uploadCsv = multer({
+  storage: csvStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit for CSV files
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'text/csv' || file.originalname.endsWith('.csv')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only CSV files are allowed'));
+    }
   }
 });
 
@@ -46970,6 +46997,155 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: "Failed to assign vehicle"
+      });
+    }
+  });
+
+  // ============= CSV IMPORT ENDPOINTS =============
+  
+  // CSV import endpoint for geographic data
+  app.post('/api/logistics/import-csv', requireAuth, uploadCsv.single('csvFile'), async (req, res) => {
+    try {
+      console.log('📄 [CSV IMPORT] Processing CSV file upload');
+      
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: 'No CSV file provided'
+        });
+      }
+      
+      const csvFilePath = req.file.path;
+      const results: any[] = [];
+      
+      // Read and parse the CSV file
+      fs.createReadStream(csvFilePath)
+        .pipe(csv())
+        .on('data', (data) => {
+          results.push(data);
+        })
+        .on('end', async () => {
+          try {
+            console.log(`📊 [CSV IMPORT] Parsed ${results.length} rows from CSV`);
+            
+            // Process the data based on the type
+            const { dataType } = req.body; // provinces, cities, or vehicles
+            
+            if (dataType === 'provinces') {
+              // Insert province data
+              for (const row of results) {
+                await logisticsStorage.createIraqiProvince({
+                  name: row.name || row.province_name,
+                  name_en: row.name_en || row.english_name,
+                  name_ku: row.name_ku || row.kurdish_name,
+                  code: row.code || row.province_code,
+                  population: parseInt(row.population) || 0,
+                  area_km2: parseFloat(row.area_km2) || 0,
+                  capital_city: row.capital_city || '',
+                  economic_activity: row.economic_activity || ''
+                });
+              }
+            } else if (dataType === 'cities') {
+              // Insert city data
+              for (const row of results) {
+                await logisticsStorage.createIraqiCity({
+                  name: row.name || row.city_name,
+                  name_en: row.name_en || row.english_name,
+                  name_ku: row.name_ku || row.kurdish_name,
+                  province_id: parseInt(row.province_id) || 1,
+                  district: row.district || '',
+                  population: parseInt(row.population) || 0,
+                  postal_code: row.postal_code || '',
+                  coordinates: row.coordinates || '',
+                  distance_from_baghdad: parseFloat(row.distance_from_baghdad) || 0,
+                  economic_activity: row.economic_activity || ''
+                });
+              }
+            }
+            
+            // Clean up the uploaded file
+            fs.unlinkSync(csvFilePath);
+            
+            console.log('✅ [CSV IMPORT] Successfully imported data');
+            res.json({
+              success: true,
+              message: `Successfully imported ${results.length} ${dataType} records`,
+              imported: results.length
+            });
+            
+          } catch (processError) {
+            console.error('❌ [CSV IMPORT] Error processing data:', processError);
+            // Clean up the uploaded file in case of error
+            if (fs.existsSync(csvFilePath)) {
+              fs.unlinkSync(csvFilePath);
+            }
+            res.status(500).json({
+              success: false,
+              message: 'Failed to process CSV data'
+            });
+          }
+        })
+        .on('error', (parseError) => {
+          console.error('❌ [CSV IMPORT] Error parsing CSV:', parseError);
+          // Clean up the uploaded file
+          if (fs.existsSync(csvFilePath)) {
+            fs.unlinkSync(csvFilePath);
+          }
+          res.status(500).json({
+            success: false,
+            message: 'Failed to parse CSV file'
+          });
+        });
+        
+    } catch (error) {
+      console.error('❌ [CSV IMPORT] General error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to import CSV file'
+      });
+    }
+  });
+
+  // Generate sample CSV file endpoint
+  app.get('/api/logistics/generate-sample-csv/:type', requireAuth, async (req, res) => {
+    try {
+      const { type } = req.params; // 'provinces' or 'cities'
+      
+      let csvContent = '';
+      let filename = '';
+      
+      if (type === 'provinces') {
+        filename = 'sample-provinces.csv';
+        csvContent = [
+          'name,name_en,name_ku,code,population,area_km2,capital_city,economic_activity',
+          'بغداد,Baghdad,Bexda,BG,8126755,5072,Baghdad,Government and Services',
+          'البصرة,Basra,Besra,BA,2750000,19070,Basra,Oil and Petrochemicals',
+          'نينوى,Nineveh,Naynawa,NI,3270000,37323,Mosul,Agriculture and Trade'
+        ].join('\n');
+      } else if (type === 'cities') {
+        filename = 'sample-cities.csv';
+        csvContent = [
+          'name,name_en,name_ku,province_id,district,population,postal_code,coordinates,distance_from_baghdad,economic_activity',
+          'بغداد,Baghdad,Bexda,1,الكرخ,8126755,10001,"33.3152,44.3661",0,Government',
+          'البصرة,Basra,Besra,2,البصرة,1750000,61001,"30.5085,47.7804",550,Oil Industry',
+          'الموصل,Mosul,Mûsil,3,الموصل,1750000,41001,"36.3400,43.1500",400,Trade and Agriculture'
+        ].join('\n');
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid sample type. Use "provinces" or "cities"'
+        });
+      }
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(csvContent);
+      
+    } catch (error) {
+      console.error('❌ [CSV SAMPLE] Error generating sample:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to generate sample CSV'
       });
     }
   });
