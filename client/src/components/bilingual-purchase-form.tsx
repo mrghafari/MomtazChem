@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, Clock, Flame, Move, Truck } from "lucide-react";
+import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, Clock, Flame, Move } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -248,67 +248,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet' | 'wallet_full' | 'wallet_partial' | 'wallet_combined' | 'bank_transfer_grace' | 'bank_receipt'>('online_payment');
 
-  // FAIL-SAFE: Hardcoded fallback payment methods to ensure checkout never breaks
-  const FALLBACK_PAYMENT_METHODS = [
-    {
-      id: 1,
-      methodKey: 'online_payment',
-      methodName: 'پرداخت آنلاین (کارت بانکی)',
-      methodNameEn: 'Online Payment (Bank Card)',
-      enabled: true,
-      priority: 4,
-      description: 'پرداخت مستقیم از طریق درگاه بانکی'
-    },
-    {
-      id: 2,
-      methodKey: 'wallet',
-      methodName: 'استفاده از کیف پول',
-      methodNameEn: 'Digital Wallet',
-      enabled: true,
-      priority: 3,
-      description: 'پرداخت از موجودی کیف پول دیجیتال'
-    },
-    {
-      id: 4,
-      methodKey: 'bank_transfer_grace',
-      methodName: 'انتقال بانکی با مهلت 3 روزه',
-      methodNameEn: 'Bank Transfer with 3-Day Grace',
-      enabled: true,
-      priority: 1,
-      description: 'سفارش قفل شده با مهلت 3 روز برای واریز'
-    }
-  ];
-
   // Fetch available payment methods from admin settings (public endpoint)
-  const { data: paymentMethodsResponse, isLoading: isLoadingPaymentMethods, error: paymentMethodsError } = useQuery<{success: boolean, data: any[]}>({
+  const { data: availablePaymentMethods = [] } = useQuery<any[]>({
     queryKey: ['/api/public/payment-methods'],
-    retry: 3,
-    retryDelay: 1000,
-    staleTime: 5 * 60 * 1000, // 5 minutes
   });
-
-  // ROBUST PAYMENT METHODS: Use API data if available, fallback if needed
-  const availablePaymentMethods = useMemo(() => {
-    // If API response is successful and has data, use it
-    if (paymentMethodsResponse?.success && Array.isArray(paymentMethodsResponse.data) && paymentMethodsResponse.data.length > 0) {
-      return paymentMethodsResponse.data.filter(method => method.enabled);
-    }
-    
-    // FAIL-SAFE: Use hardcoded fallback to ensure checkout never breaks
-    console.warn('🛡️ [PAYMENT METHODS FAIL-SAFE] Using fallback payment methods');
-    return FALLBACK_PAYMENT_METHODS;
-  }, [paymentMethodsResponse]);
-
-  // Debug payment methods (but don't log sensitive data in production)
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 [PAYMENT METHODS DEBUG] Response:', paymentMethodsResponse);
-      console.log('🔍 [PAYMENT METHODS DEBUG] Available methods:', availablePaymentMethods);
-      console.log('🔍 [PAYMENT METHODS DEBUG] Length:', availablePaymentMethods?.length);
-      console.log('🔍 [PAYMENT METHODS DEBUG] Loading:', isLoadingPaymentMethods);
-      console.log('🔍 [PAYMENT METHODS DEBUG] Error:', paymentMethodsError);
-    }
-  }, [paymentMethodsResponse, availablePaymentMethods, isLoadingPaymentMethods, paymentMethodsError]);
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
@@ -1790,7 +1733,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       
                       {/* Middle Section with Bulk Indicator and Quantity Controls */}
                       <div className="flex flex-col items-center gap-2">
-                        {/* خرید عمده با کادر زیبا */}
+                        {/* Bulk Purchase Indicator in Middle */}
+                        {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && 
+                         quantity >= product.bulkPurchaseThreshold && (
+                          <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1">
+                            🎉 خرید عمده
+                          </Badge>
+                        )}
+                        
                         {/* Quantity Controls */}
                         <div className="flex items-center gap-2">
                           <Button
@@ -1835,16 +1785,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     {/* Item Total with discount info */}
                     <div className="mt-2 pt-2 border-t space-y-1">
                       <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">Item Total</span>
-                          {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && quantity >= product.bulkPurchaseThreshold && (
-                            <div className="px-2 py-0.5 bg-gradient-to-r from-blue-100 to-green-100 border border-blue-300 rounded-full shadow-sm mr-16">
-                              <span className="text-xs font-semibold text-blue-800">
-                                خرید عمده
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                        <span className="text-sm text-muted-foreground">Item Total</span>
                         <span className="font-medium">{formatCurrency(itemTotal)}</span>
                       </div>
                       {discountedPrice < basePrice && (
@@ -1894,20 +1835,20 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 
                 if (hasBulkPurchase) {
                   return (
-                    <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200" dir="rtl">
-                      <div className="flex items-start gap-3 flex-row-reverse">
+                    <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+                      <div className="flex items-start gap-3">
                         <Truck className="w-5 h-5 text-green-600 mt-0.5" />
-                        <div className="flex-1 text-right">
-                          <h4 className="text-sm font-semibold text-green-800 mb-1 text-right">
+                        <div className="flex-1">
+                          <h4 className="text-sm font-semibold text-green-800 mb-1">
                             💡 پیشنهاد ویژه خرید عمده
                           </h4>
-                          <p className="text-sm text-green-700 mb-2 text-right">
+                          <p className="text-sm text-green-700 mb-2">
                             با توجه به اینکه سفارش شما خرید عمده است، پیشنهاد می‌دهیم:
                           </p>
-                          <ul className="text-sm text-green-700 space-y-1 ml-4 text-right">
-                            <li className="text-right">• خودرو خودتان را بیاورید و هزینه حمل صرفه‌جویی کنید</li>
-                            <li className="text-right">• از گزینه "حمل توسط خودم" استفاده کنید</li>
-                            <li className="text-right">• با تیم لجستیک برای هماهنگی تماس بگیرید</li>
+                          <ul className="text-sm text-green-700 space-y-1 mr-4">
+                            <li>• خودرو خودتان را بیاورید و هزینه حمل صرفه‌جویی کنید</li>
+                            <li>• از گزینه "حمل توسط خودم" استفاده کنید</li>
+                            <li>• با تیم لجستیک برای هماهنگی تماس بگیرید</li>
                           </ul>
                         </div>
                       </div>
@@ -2164,10 +2105,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               </div>
             )}
 
-              {/* Payment Options - FAIL-SAFE GUARANTEED */}
+              {/* Payment Options */}
               <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as any)} className="space-y-3">
-                {/* ROBUST: Always render payment methods - either from API or fallback */}
-                {availablePaymentMethods.map((method: any) => {
+                {/* Dynamic payment methods based on admin settings */}
+                {Array.isArray(availablePaymentMethods) && availablePaymentMethods.map((method: any) => {
                   if (method.methodKey === 'online_payment') {
                     return (
                       <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
@@ -2182,8 +2123,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   return null;
                 })}
                 
-                {/* Wallet Combined Option - show if customer is logged in, has wallet balance, but not enough for full payment */}
-                {customerData?.success && walletBalance > 0 && walletBalance < totalAmount && (
+                {/* دوم: پرداخت از کیف پول (تمام یا بخش از آن) */}
+                {canUseWallet && isWalletEnabledInSettings && (
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <RadioGroupItem value="wallet_combined" id="wallet_combined" />
                     <Label htmlFor="wallet_combined" className="flex items-center gap-2 cursor-pointer">
@@ -2194,8 +2135,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 )}
                 
                 
-                {/* ROBUST: Other payment methods - guaranteed to render */}
-                {availablePaymentMethods.map((method: any) => {
+                {/* Dynamic other payment methods */}
+                {Array.isArray(availablePaymentMethods) && availablePaymentMethods.map((method: any) => {
                   if (method.methodKey === 'bank_transfer_grace') {
                     return (
                       <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
@@ -2213,65 +2154,44 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       </div>
                     );
                   } else if (method.methodKey === 'bank_receipt') {
-                    // bank_receipt is not a standalone payment method - it's part of bank transfer
-                    return null;
-                  } else if (method.methodKey === 'wallet' && method.enabled && customerData?.success && walletBalance >= totalAmount) {
-                    // Full wallet payment - only if customer has enough balance
                     return (
                       <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
-                        <RadioGroupItem value="wallet" id="wallet" />
-                        <Label htmlFor="wallet" className="flex items-center gap-2 cursor-pointer">
-                          <Wallet className="w-4 h-4 text-green-600" />
-                          <span className="font-semibold">پرداخت کامل از کیف پول ({formatIQDAmount(totalAmount)} IQD)</span>
+                        <RadioGroupItem value="bank_receipt" id="bank_receipt" />
+                        <Label htmlFor="bank_receipt" className="flex items-center gap-2 cursor-pointer">
+                          <Upload className="w-4 h-4 text-orange-600" />
+                          {method.methodName}
                         </Label>
                       </div>
                     );
                   }
                   return null;
-                })
-
-                /* FAIL-SAFE INDICATOR: Show if using fallback */}
-                {(!paymentMethodsResponse?.success) && (
-                  <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200">
-                    ⚠️ از روش‌های پرداخت پیش‌فرض استفاده می‌شود
-                  </div>
-                )}
+                })}
 
 
               </RadioGroup>
 
-              {/* Wallet Payment Calculator - Show for both wallet_combined and wallet */}
-              {(paymentMethod === 'wallet_combined' || paymentMethod === 'wallet') && customerData?.success && walletBalance > 0 && (
+              {/* Partial Payment Amount Input */}
+              {paymentMethod === 'wallet_combined' && (
                 <div className="space-y-4">
-                  {paymentMethod === 'wallet_combined' && (
-                    <div className="space-y-2">
-                      <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} IQD)</Label>
-                      <Input
-                        id="walletAmount"
-                        type="number"
-                        min="0"
-                        max={Math.min(walletBalance, totalAmount)}
-                        value={walletAmount || ''}
-                        onChange={(e) => {
-                          const value = parseFloat(e.target.value) || 0;
-                          setWalletAmount(Math.min(value, Math.min(walletBalance, totalAmount)));
-                        }}
-                        placeholder="مقدار دلخواه از کیف پول"
-                        className="text-right"
-                      />
-                    </div>
-                  )}
-                  
-                  {paymentMethod === 'wallet' && (
-                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-sm text-green-700 font-medium">
-                        پرداخت کامل از کیف پول: {formatIQDAmount(totalAmount)} IQD
-                      </p>
-                    </div>
-                  )}
+                  <div className="space-y-2">
+                    <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} IQD)</Label>
+                    <Input
+                      id="walletAmount"
+                      type="number"
+                      min="0"
+                      max={Math.min(walletBalance, totalAmount)}
+                      value={walletAmount || ''}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value) || 0;
+                        setWalletAmount(Math.min(value, Math.min(walletBalance, totalAmount)));
+                      }}
+                      placeholder="مقدار دلخواه از کیف پول"
+                      className="text-right"
+                    />
+                  </div>
                   
                   {/* Payment Breakdown Table */}
-                  {((paymentMethod === 'wallet_combined' && walletAmount > 0) || paymentMethod === 'wallet') && (
+                  {walletAmount > 0 && (
                     <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
                       <table className="w-full text-sm">
                         <tbody>
@@ -2286,32 +2206,18 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           {/* Wallet Payment Row */}
                           <tr className="border-b">
                             <td className="px-4 py-3 text-right">مبلغ پرداخت از کیف پول</td>
-                            <td className="px-4 py-3 text-center font-medium text-green-600">
-                              {formatIQDAmount(paymentMethod === 'wallet' ? totalAmount : walletAmount)}
-                            </td>
-                            <td className="px-4 py-3 text-right font-medium bg-blue-50">موجودی کیف پول</td>
+                            <td className="px-4 py-3 text-center font-medium">{formatIQDAmount(walletAmount)}</td>
+                            <td className="px-4 py-3 text-right font-medium bg-blue-50">محدودیت کیف پول</td>
                             <td className="px-4 py-3 text-center font-medium bg-blue-50 text-blue-700">{formatIQDAmount(walletBalance)}</td>
                           </tr>
                           
-                          {/* Bank Payment Row - only show if partial payment */}
-                          {paymentMethod === 'wallet_combined' && walletAmount < totalAmount && (
-                            <tr>
-                              <td className="px-4 py-3 text-right">مبلغ باقی‌مانده (کارت بانکی)</td>
-                              <td className="px-4 py-3 text-center font-medium text-orange-600">{formatIQDAmount(totalAmount - walletAmount)}</td>
-                              <td className="px-4 py-3 bg-gray-50"></td>
-                              <td className="px-4 py-3 bg-gray-50"></td>
-                            </tr>
-                          )}
-                          
-                          {/* Full wallet payment confirmation */}
-                          {paymentMethod === 'wallet' && (
-                            <tr>
-                              <td className="px-4 py-3 text-right">باقی‌مانده</td>
-                              <td className="px-4 py-3 text-center font-medium text-green-600">0 IQD</td>
-                              <td className="px-4 py-3 text-right bg-green-50">پس از پرداخت</td>
-                              <td className="px-4 py-3 text-center bg-green-50 text-green-700">{formatIQDAmount(walletBalance - totalAmount)} IQD</td>
-                            </tr>
-                          )}
+                          {/* Bank Payment Row */}
+                          <tr>
+                            <td className="px-4 py-3 text-right">پرداخت کارت بانکی</td>
+                            <td className="px-4 py-3 text-center font-medium text-orange-600">{formatIQDAmount(totalAmount - walletAmount)}</td>
+                            <td className="px-4 py-3 bg-gray-50"></td>
+                            <td className="px-4 py-3 bg-gray-50"></td>
+                          </tr>
                         </tbody>
                       </table>
                     </div>

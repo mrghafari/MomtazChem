@@ -81,8 +81,38 @@ const Shop = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
 
-  // *** CART SESSION TRACKING REMOVED ***
-  // Abandoned cart tracking has been simplified to use only persistent cart system
+  // Track cart session for abandoned cart management
+  const trackCartSession = async (cartData: {[key: number]: number}) => {
+    if (!customer) return;
+    
+    try {
+      const cartItems = Object.entries(cartData).map(([productId, quantity]) => ({
+        productId: parseInt(productId),
+        quantity
+      }));
+      
+      const totalValue = cartItems.reduce((sum, item) => {
+        const product = currentProducts?.find(p => p.id === item.productId);
+        return sum + (product?.price || 0) * item.quantity;
+      }, 0);
+
+      await fetch('/api/cart/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          sessionId: `session_${Date.now()}`,
+          cartData: cartItems,
+          itemCount: cartItems.length,
+          totalValue: totalValue.toString()
+        })
+      });
+    } catch (error) {
+      console.error('Error tracking cart session:', error);
+    }
+  };
   const [selectedImageForZoom, setSelectedImageForZoom] = useState<string | null>(null);
   const [selectedProductForZoom, setSelectedProductForZoom] = useState<any>(null);
   const [zoomedImageIndex, setZoomedImageIndex] = useState<number>(0);
@@ -283,8 +313,12 @@ const Shop = () => {
     queryKey: ["/api/shop/categories"],
   });
 
-  // *** CART SESSION TRACKING REMOVED ***
-  // Cart sessions are now handled entirely through persistent cart system
+  // Track cart session for abandoned cart management
+  useEffect(() => {
+    if (customer && Object.keys(cart).length > 0) {
+      trackCartSession(cart);
+    }
+  }, [cart, customer]);
 
   // Load customer info on component mount
   // Use the hook customer data instead of manual API call
@@ -1343,7 +1377,17 @@ const Shop = () => {
 
 
 
-
+                          {/* Bulk Purchase Threshold Indicator */}
+                          {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && (
+                            <div className="mb-3 p-2 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-blue-200">
+                              <div className="flex items-center gap-2">
+                                <Package className="w-4 h-4 text-blue-600" />
+                                <span className="text-sm font-medium text-blue-800">
+                                  خرید عمده: {product.bulkPurchaseThreshold}+ واحد = {product.bulkPurchaseDiscount}% تخفیف
+                                </span>
+                              </div>
+                            </div>
+                          )}
 
                           {/* Modern Discount Card */}
                           <div className="mb-3 h-24 overflow-hidden">

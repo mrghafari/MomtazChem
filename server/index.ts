@@ -68,7 +68,7 @@ const customerSessionMiddleware = session({
     httpOnly: false,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax',
-    path: '/',
+    path: '/api/customers',
     domain: undefined
   },
   name: 'momtazchem.customer.sid'
@@ -112,15 +112,25 @@ const generalSessionMiddleware = session({
   name: 'momtazchem.general.sid'
 });
 
-// Apply different session middleware based on route paths
-app.use('/api/admin', adminSessionMiddleware);
-app.use('/api/customers', customerSessionMiddleware);
-app.use('/api/management', managementSessionMiddleware);
-app.use('/api/content-management', managementSessionMiddleware);
-app.use('/api/super-admin', adminSessionMiddleware);
+// Use single unified session middleware for all routes
+const unifiedSessionMiddleware = session({
+  secret: process.env.SESSION_SECRET || "momtazchem-unified-secret-key",
+  store: adminSessionStore, // Use admin store for all sessions
+  resave: true, // Force save sessions to prevent loss
+  saveUninitialized: true, // Save new sessions to ensure they persist
+  rolling: true,
+  cookie: {
+    secure: false,
+    httpOnly: false,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax',
+    path: '/',
+    domain: undefined
+  },
+  name: 'momtazchem.unified.sid'
+});
 
-// General session for all other routes
-app.use(generalSessionMiddleware);
+app.use(unifiedSessionMiddleware);
 
 app.use((req, res, next) => {
   const start = Date.now();
