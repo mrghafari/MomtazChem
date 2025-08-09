@@ -7915,8 +7915,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           UPDATE shop_products 
           SET 
             bulk_purchase_enabled = $2,
-            bulk_purchase_minimum_quantity = $3,
-            bulk_purchase_description = $4
+            bulk_purchase_min_quantity = $3,
+            bulk_purchase_notes = $4
           WHERE id = $1
         `, [
           update.productId,
@@ -7956,8 +7956,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         UPDATE shop_products 
         SET 
           bulk_purchase_enabled = $2,
-          bulk_purchase_minimum_quantity = $3,
-          bulk_purchase_description = $4
+          bulk_purchase_min_quantity = $3,
+          bulk_purchase_notes = $4
         WHERE id = $1
       `, [
         productId,

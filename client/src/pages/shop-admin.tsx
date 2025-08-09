@@ -89,9 +89,32 @@ export default function ShopAdmin() {
     enabled: isAuthenticated
   });
 
+  // Fetch full email templates for content display
+  const { data: fullEmailTemplates } = useQuery({
+    queryKey: ['/api/email/templates/public'],
+    enabled: isAuthenticated
+  });
+
   // Extract templates from response data
   const emailTemplates = emailTemplatesResponse?.data || [];
   const smsTemplates = smsTemplatesResponse?.data || [];
+  
+  // Helper functions to get template content for tooltips
+  const getEmailTemplateContent = (templateId: string | number) => {
+    if (!fullEmailTemplates || !Array.isArray(fullEmailTemplates)) return 'محتوای ایمیل در دسترس نیست';
+    
+    const template = fullEmailTemplates.find(t => t.id === parseInt(templateId.toString()));
+    if (!template) return 'محتوای ایمیل در دسترس نیست';
+    
+    return `موضوع: ${template.subject || 'بدون موضوع'}\n\nمحتوا: ${template.htmlContent || template.textContent || 'بدون محتوا'}`;
+  };
+  
+  const getSmsTemplateContent = (templateId: string | number) => {
+    if (!smsTemplates || !Array.isArray(smsTemplates)) return 'محتوای پیامک در دسترس نیست';
+    
+    const template = smsTemplates.find(t => t.id === parseInt(templateId.toString()));
+    return template?.templateText || 'محتوای پیامک در دسترس نیست';
+  };
 
   // Authentication check
   useEffect(() => {
@@ -928,13 +951,9 @@ export default function ShopAdmin() {
                                   </TooltipTrigger>
                                   <TooltipContent className="max-w-sm p-3" side="right">
                                     <div className="space-y-1">
-                                      <p className="font-medium text-sm">عنوان ایمیل:</p>
-                                      <p className="text-xs text-gray-700">
-                                        {template.subject || 'عنوان در دسترس نیست'}
-                                      </p>
-                                      <p className="font-medium text-sm mt-2">محتوای ایمیل:</p>
+                                      <p className="font-medium text-sm">محتوای کامل قالب:</p>
                                       <p className="text-xs text-gray-700 whitespace-pre-wrap max-h-32 overflow-y-auto">
-                                        {template.content || 'محتوای ایمیل در دسترس نیست'}
+                                        {getEmailTemplateContent(template.id)}
                                       </p>
                                     </div>
                                   </TooltipContent>
@@ -1127,7 +1146,7 @@ export default function ShopAdmin() {
                                 <div className="space-y-1">
                                   <p className="font-medium text-sm">محتوای پیامک:</p>
                                   <p className="text-xs text-gray-700 whitespace-pre-wrap">
-                                    {template.templateText || 'محتوای پیامک در دسترس نیست'}
+                                    {getSmsTemplateContent(template.id)}
                                   </p>
                                 </div>
                               </TooltipContent>
@@ -1156,13 +1175,9 @@ export default function ShopAdmin() {
                               </TooltipTrigger>
                               <TooltipContent className="max-w-sm p-3" side="right">
                                 <div className="space-y-1">
-                                  <p className="font-medium text-sm">عنوان ایمیل:</p>
-                                  <p className="text-xs text-gray-700">
-                                    {template.subject || 'عنوان در دسترس نیست'}
-                                  </p>
-                                  <p className="font-medium text-sm mt-2">محتوای ایمیل:</p>
+                                  <p className="font-medium text-sm">محتوای کامل قالب:</p>
                                   <p className="text-xs text-gray-700 whitespace-pre-wrap max-h-32 overflow-y-auto">
-                                    {template.content || 'محتوای ایمیل در دسترس نیست'}
+                                    {getEmailTemplateContent(template.id)}
                                   </p>
                                 </div>
                               </TooltipContent>
