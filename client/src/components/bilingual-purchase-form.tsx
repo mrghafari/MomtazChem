@@ -249,8 +249,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet' | 'wallet_full' | 'wallet_partial' | 'wallet_combined' | 'bank_transfer_grace' | 'bank_receipt'>('online_payment');
 
   // Fetch available payment methods from admin settings (public endpoint)
-  const { data: availablePaymentMethods = [] } = useQuery<any[]>({
+  const { data: availablePaymentMethods = [] } = useQuery({
     queryKey: ['/api/public/payment-methods'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/public/payment-methods');
+      return response.data || [];
+    },
   });
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
@@ -912,11 +916,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     finalShippingCost,
     regularShippingCost: shippingCost,
     smartDeliveryCost: smartDeliveryCost,
-    optimalVehicle: optimalVehicle,
     optimalVehicleCost: optimalVehicle?.totalCost,
-    selectedShippingMethod: selectedShippingMethod,
-    isSmartVehicleSelected: shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod)?.deliveryMethod === 'smart_vehicle',
-    shippingMethodData: shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod),
     totalAmount,
     'Components': `${subtotalAmount} + ${totalTaxAmount} + ${finalShippingCost} = ${totalAmount}`
   });
@@ -926,7 +926,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                        (walletData as any)?.wallet ? parseFloat((walletData as any).wallet.balance) : 
                        (walletData as any)?.balance ? parseFloat((walletData as any).balance) : 0;
   // Check if wallet is enabled in admin settings
-  const isWalletEnabledInSettings = Array.isArray(availablePaymentMethods) ? availablePaymentMethods.some((method: any) => method.methodKey === 'wallet') : false;
+  const isWalletEnabledInSettings = availablePaymentMethods.some((method: any) => method.methodKey === 'wallet');
   const canUseWallet = walletBalance > 0 && (existingCustomer || (customerData as any)?.success) && isWalletEnabledInSettings;
   const maxWalletAmount = Math.min(walletBalance, totalAmount);
   const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet' ? totalAmount : 0);
@@ -1367,7 +1367,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         onOrderComplete();
       }
       // Handle bank transfer - redirect to payment gateway  
-      else if (response.paymentMethod === 'bank_transfer' || (paymentMethod !== 'wallet' && paymentMethod !== 'wallet_full' && paymentMethod !== 'wallet_partial' && paymentMethod !== 'wallet_combined' && paymentMethod !== 'online_payment' && paymentMethod !== 'bank_transfer_grace' && paymentMethod !== 'bank_receipt')) {
+      else if (response.paymentMethod === 'bank_transfer' || (paymentMethod !== 'wallet' && paymentMethod !== 'wallet_full' && paymentMethod !== 'wallet_partial' && paymentMethod !== 'online_payment' && paymentMethod !== 'bank_transfer_grace' && paymentMethod !== 'bank_receipt')) {
         toast({
           title: "انتقال به درگاه بانک",
           description: "در حال هدایت شما به درگاه پرداخت بانکی..."
@@ -1898,9 +1898,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         if (smartDeliveryLoading) {
                           return <span className="text-emerald-600">در حال محاسبه...</span>;
                         }
-                        if (optimalVehicle?.totalCost && optimalVehicle.totalCost > 0) {
-                          return <span className="text-emerald-600 font-bold">{formatCurrency(optimalVehicle.totalCost)}</span>;
-                        }
                         if (finalShippingCost > 0) {
                           return <span className="text-emerald-600 font-bold">{formatCurrency(finalShippingCost)}</span>;
                         }
@@ -1945,7 +1942,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               {/* Payment Options */}
               <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as any)} className="space-y-3">
                 {/* Dynamic payment methods based on admin settings */}
-                {Array.isArray(availablePaymentMethods) ? availablePaymentMethods.map((method: any) => {
+                {availablePaymentMethods.map((method: any) => {
                   if (method.methodKey === 'online_payment') {
                     return (
                       <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
@@ -1958,7 +1955,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     );
                   }
                   return null;
-                }) : []}
+                })}
                 
                 {/* دوم: پرداخت از کیف پول (تمام یا بخش از آن) */}
                 {canUseWallet && isWalletEnabledInSettings && (
@@ -1973,7 +1970,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 
                 
                 {/* Dynamic other payment methods */}
-                {Array.isArray(availablePaymentMethods) ? availablePaymentMethods.map((method: any) => {
+                {availablePaymentMethods.map((method: any) => {
                   if (method.methodKey === 'bank_transfer_grace') {
                     return (
                       <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
@@ -2002,7 +1999,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     );
                   }
                   return null;
-                }) : []}
+                })}
 
 
               </RadioGroup>
