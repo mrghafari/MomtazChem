@@ -73,16 +73,20 @@ export default function ShopAdmin() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
 
   // Fetch email templates for reminder configuration
-  const { data: emailTemplates = [] } = useQuery({
+  const { data: emailTemplatesResponse } = useQuery({
     queryKey: ['/api/shop/email-templates'],
     enabled: isAuthenticated
   });
 
   // Fetch SMS templates for reminder configuration
-  const { data: smsTemplates = [] } = useQuery({
+  const { data: smsTemplatesResponse } = useQuery({
     queryKey: ['/api/shop/sms-templates'],
     enabled: isAuthenticated
   });
+
+  // Extract templates from response data
+  const emailTemplates = emailTemplatesResponse?.data || [];
+  const smsTemplates = smsTemplatesResponse?.data || [];
 
   // Authentication check
   useEffect(() => {
@@ -839,7 +843,7 @@ export default function ShopAdmin() {
                             <SelectValue placeholder="انتخاب قالب پیامک" />
                           </SelectTrigger>
                           <SelectContent>
-                            {smsTemplates.map((template: any) => (
+                            {Array.isArray(smsTemplates) && smsTemplates.map((template: any) => (
                               <SelectItem key={template.id} value={template.id.toString()}>
                                 {template.templateNumber} - {template.templateName}
                               </SelectItem>
@@ -854,7 +858,7 @@ export default function ShopAdmin() {
                             <SelectValue placeholder="انتخاب قالب ایمیل" />
                           </SelectTrigger>
                           <SelectContent>
-                            {emailTemplates.map((template: any) => (
+                            {Array.isArray(emailTemplates) && emailTemplates.map((template: any) => (
                               <SelectItem key={template.id} value={template.id.toString()}>
                                 {template.name} ({template.category})
                               </SelectItem>
