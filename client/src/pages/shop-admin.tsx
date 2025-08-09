@@ -63,6 +63,8 @@ export default function ShopAdmin() {
   const [showReturnDialog, setShowReturnDialog] = useState(false);
   const [selectedReturn, setSelectedReturn] = useState<any>(null);
   const [proformaDeadlineDays, setProformaDeadlineDays] = useState("3");
+  const [reminderDays, setReminderDays] = useState("1");
+  const [reminderHour, setReminderHour] = useState("10");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
@@ -90,6 +92,12 @@ export default function ShopAdmin() {
   // Fetch products for inventory management
   const { data: products = [] } = useQuery<ShopProduct[]>({
     queryKey: ["/api/shop/products"],
+    enabled: isAuthenticated,
+  });
+
+  // Fetch proforma reminders
+  const { data: reminderSchedules } = useQuery({
+    queryKey: ["/api/shop/proforma-reminders"],
     enabled: isAuthenticated,
   });
 
@@ -187,6 +195,63 @@ export default function ShopAdmin() {
       toast({
         title: "Error",
         description: error.message || "Failed to update proforma deadline",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Add reminder mutation
+  const addReminderMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest(`/api/shop/proforma-reminders`, {
+        method: "POST",
+        body: {
+          reminderHour: parseInt(reminderHour),
+          daysBefore: parseInt(reminderDays),
+          messageTemplate: `یادآوری: مهلت پرداخت حواله شما ${reminderDays === "0" ? "امروز" : `${reminderDays} روز دیگر`} به پایان می‌رسد.`,
+          messageSubject: `یادآوری پرداخت حواله - ${reminderDays === "0" ? "روز پایان مهلت" : `${reminderDays} روز مانده`}`,
+          notificationMethod: "email",
+          isActive: true,
+          priority: parseInt(reminderDays) + 1
+        }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/proforma-reminders"] });
+      setReminderDays("1");
+      setReminderHour("10");
+      toast({
+        title: "موفق",
+        description: "یادآوری جدید با موفقیت اضافه شد",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا",
+        description: error.message || "خطا در اضافه کردن یادآوری",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete reminder mutation
+  const deleteReminderMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/shop/proforma-reminders/${id}`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/proforma-reminders"] });
+      toast({
+        title: "موفق",
+        description: "یادآوری با موفقیت حذف شد",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا", 
+        description: error.message || "خطا در حذف یادآوری",
         variant: "destructive",
       });
     },
@@ -712,6 +777,88 @@ export default function ShopAdmin() {
                     )}
                     {saveProformaDeadlineMutation.isPending ? 'Saving...' : 'Save Settings'}
                   </Button>
+                </div>
+
+                <Separator className="my-6" />
+
+                {/* Reminder Schedule Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <Clock className="w-5 h-5" />
+                    جدول زمانی یادآوری مشتریان
+                  </h3>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-4 space-x-reverse p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-2 space-x-reverse">
+                        <Label htmlFor="reminder-days">روز قبل از پایان مهلت:</Label>
+                        <Input
+                          id="reminder-days"
+                          type="number"
+                          min="0"
+                          max="10"
+                          value={reminderDays}
+                          onChange={(e) => setReminderDays(e.target.value)}
+                          className="w-16"
+                        />
+                      </div>
+                      <div className="flex items-center space-x-2 space-x-reverse">
+                        <Label htmlFor="reminder-hour">ساعت ارسال:</Label>
+                        <Input
+                          id="reminder-hour"
+                          type="number"
+                          min="0"
+                          max="23"
+                          value={reminderHour}
+                          onChange={(e) => setReminderHour(e.target.value)}
+                          className="w-16"
+                        />
+                      </div>
+                      <Button 
+                        size="sm" 
+                        className="bg-blue-600 hover:bg-blue-700"
+                        onClick={() => addReminderMutation.mutate()}
+                        disabled={addReminderMutation.isPending}
+                      >
+                        {addReminderMutation.isPending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                        افزودن
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      {reminderSchedules?.data?.map((schedule: any) => (
+                        <div key={schedule.id} className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="flex items-center space-x-4 space-x-reverse">
+                            <Badge variant="outline" className="bg-blue-100">
+                              {schedule.days_before === 0 ? 'روز پایان مهلت' : `${schedule.days_before} روز قبل`}
+                            </Badge>
+                            <span className="text-sm">ساعت {schedule.reminder_hour}:00</span>
+                            <span className="text-sm text-gray-600">{schedule.message_subject}</span>
+                          </div>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => deleteReminderMutation.mutate(schedule.id)}
+                            disabled={deleteReminderMutation.isPending}
+                          >
+                            {deleteReminderMutation.isPending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                          </Button>
+                        </div>
+                      ))}
+                      
+                      {(!reminderSchedules?.data || reminderSchedules.data.length === 0) && (
+                        <div className="text-center py-4 text-gray-500">
+                          <Clock className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                          <p className="text-sm">هیچ یادآوری تنظیم نشده است</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <p className="text-xs text-gray-500">
+                    یادآوری‌ها بر اساس ساعت محلی ارسال می‌شوند. مشتریان از طریق ایمیل و پیامک اطلاع‌رسانی خواهند شد.
+                  </p>
                 </div>
               </CardContent>
             </Card>

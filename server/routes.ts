@@ -7675,6 +7675,186 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =============================================================================
+  // PROFORMA REMINDER SCHEDULE MANAGEMENT
+  // =============================================================================
+
+  // Get all proforma reminder schedules
+  app.get("/api/shop/proforma-reminders", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT id, reminder_hour, days_before, message_template, 
+               message_subject, notification_method, is_active, priority,
+               created_at, updated_at
+        FROM proforma_reminder_schedule
+        ORDER BY days_before ASC, reminder_hour ASC
+      `);
+
+      res.json({
+        success: true,
+        data: result.rows
+      });
+    } catch (error) {
+      console.error('❌ [PROFORMA REMINDERS] Error fetching schedules:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در بارگذاری جدول زمانی یادآوری"
+      });
+    }
+  });
+
+  // Create or update proforma reminder schedule
+  app.post("/api/shop/proforma-reminders", requireAuth, async (req, res) => {
+    try {
+      const { 
+        reminderHour, 
+        daysBefore, 
+        messageTemplate, 
+        messageSubject, 
+        notificationMethod,
+        isActive,
+        priority 
+      } = req.body;
+
+      if (reminderHour === undefined || !daysBefore || !messageTemplate || !messageSubject) {
+        return res.status(400).json({
+          success: false,
+          message: "تمام فیلدهای الزامی را پر کنید"
+        });
+      }
+
+      const { pool } = await import('./db');
+      
+      console.log(`📅 [PROFORMA REMINDERS] Creating new reminder schedule...`);
+
+      const result = await pool.query(`
+        INSERT INTO proforma_reminder_schedule (
+          reminder_hour, days_before, message_template, message_subject,
+          notification_method, is_active, priority, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+        RETURNING *
+      `, [
+        reminderHour,
+        daysBefore,
+        messageTemplate,
+        messageSubject,
+        notificationMethod || 'email',
+        isActive !== false,
+        priority || 1
+      ]);
+
+      console.log(`✅ [PROFORMA REMINDERS] Created schedule ID: ${result.rows[0].id}`);
+
+      res.json({
+        success: true,
+        data: result.rows[0],
+        message: "جدول زمانی یادآوری با موفقیت ایجاد شد"
+      });
+    } catch (error) {
+      console.error('❌ [PROFORMA REMINDERS] Error creating schedule:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ایجاد جدول زمانی یادآوری"
+      });
+    }
+  });
+
+  // Update proforma reminder schedule
+  app.put("/api/shop/proforma-reminders/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { 
+        reminderHour, 
+        daysBefore, 
+        messageTemplate, 
+        messageSubject, 
+        notificationMethod,
+        isActive,
+        priority 
+      } = req.body;
+
+      const { pool } = await import('./db');
+      
+      console.log(`📅 [PROFORMA REMINDERS] Updating schedule ID: ${id}`);
+
+      const result = await pool.query(`
+        UPDATE proforma_reminder_schedule 
+        SET reminder_hour = $1, days_before = $2, message_template = $3,
+            message_subject = $4, notification_method = $5, is_active = $6,
+            priority = $7, updated_at = NOW()
+        WHERE id = $8
+        RETURNING *
+      `, [
+        reminderHour,
+        daysBefore,
+        messageTemplate,
+        messageSubject,
+        notificationMethod || 'email',
+        isActive !== false,
+        priority || 1,
+        id
+      ]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "جدول زمانی یادآوری پیدا نشد"
+        });
+      }
+
+      console.log(`✅ [PROFORMA REMINDERS] Updated schedule ID: ${id}`);
+
+      res.json({
+        success: true,
+        data: result.rows[0],
+        message: "جدول زمانی یادآوری با موفقیت بروزرسانی شد"
+      });
+    } catch (error) {
+      console.error('❌ [PROFORMA REMINDERS] Error updating schedule:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در بروزرسانی جدول زمانی یادآوری"
+      });
+    }
+  });
+
+  // Delete proforma reminder schedule
+  app.delete("/api/shop/proforma-reminders/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { pool } = await import('./db');
+      
+      console.log(`📅 [PROFORMA REMINDERS] Deleting schedule ID: ${id}`);
+
+      const result = await pool.query(`
+        DELETE FROM proforma_reminder_schedule WHERE id = $1
+        RETURNING id
+      `, [id]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "جدول زمانی یادآوری پیدا نشد"
+        });
+      }
+
+      console.log(`✅ [PROFORMA REMINDERS] Deleted schedule ID: ${id}`);
+
+      res.json({
+        success: true,
+        message: "جدول زمانی یادآوری با موفقیت حذف شد"
+      });
+    } catch (error) {
+      console.error('❌ [PROFORMA REMINDERS] Error deleting schedule:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در حذف جدول زمانی یادآوری"
+      });
+    }
+  });
+
   // Get public shop settings (for frontend)
   app.get("/api/public/shop/settings", async (req, res) => {
     try {

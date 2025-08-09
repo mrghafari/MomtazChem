@@ -56,6 +56,28 @@ export type InsertAbandonedOrder = z.infer<typeof insertAbandonedOrderSchema>;
 export type AbandonedOrder = typeof abandonedOrders.$inferSelect;
 
 // =============================================================================
+// PROFORMA REMINDER SCHEDULE SYSTEM
+// =============================================================================
+
+// Proforma Reminder Schedule table for managing customer notification schedule
+export const proformaReminderSchedule = pgTable("proforma_reminder_schedule", {
+  id: serial("id").primaryKey(),
+  reminderHour: integer("reminder_hour").notNull(), // Hour to send reminder (0-23)
+  daysBefore: integer("days_before").notNull(), // Days before deadline (1, 2, etc.)
+  messageTemplate: text("message_template").notNull(), // Message template to send
+  messageSubject: text("message_subject").notNull(), // Email subject line
+  notificationMethod: text("notification_method").notNull().default("email"), // 'email', 'sms', 'both'
+  isActive: boolean("is_active").default(true),
+  priority: integer("priority").default(1), // Order of sending (1=first, 2=second, etc.)
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertProformaReminderScheduleSchema = createInsertSchema(proformaReminderSchedule);
+export type InsertProformaReminderSchedule = z.infer<typeof insertProformaReminderScheduleSchema>;
+export type ProformaReminderSchedule = typeof proformaReminderSchedule.$inferSelect;
+
+// =============================================================================
 // SEO MANAGEMENT SCHEMA
 // =============================================================================
 
