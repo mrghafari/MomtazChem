@@ -52,6 +52,7 @@ import { AutoInvoiceConverter } from "./auto-invoice-converter";
 import { 
   vehicleTemplates, 
   vehicleSelectionHistory, 
+  routeOptimization,
   insertVehicleTemplateSchema, 
   insertVehicleSelectionHistorySchema, 
   internationalCountries, 
@@ -47061,6 +47062,26 @@ momtazchem.com
                   economic_activity: row.economic_activity || ''
                 });
               }
+            } else if (dataType === 'distances') {
+              // Insert route distance data
+              for (const row of results) {
+                await db.insert(routeOptimization).values({
+                  fromProvinceId: parseInt(row.from_province_id) || null,
+                  fromCityId: parseInt(row.from_city_id) || null,
+                  toProvinceId: parseInt(row.to_province_id) || null,
+                  toCityId: parseInt(row.to_city_id) || null,
+                  routeType: row.route_type || 'interurban',
+                  distanceKm: parseFloat(row.distance_km) || 0,
+                  estimatedTimeMinutes: parseInt(row.estimated_time_minutes) || 0,
+                  hasHighway: row.has_highway === 'true' || row.has_highway === '1',
+                  hasMountainRoad: row.has_mountain_road === 'true' || row.has_mountain_road === '1',
+                  hasUnpavedRoad: row.has_unpaved_road === 'true' || row.has_unpaved_road === '1',
+                  tollCost: parseFloat(row.toll_cost) || 0,
+                  trafficMultiplier: parseFloat(row.traffic_multiplier) || 1.0,
+                  weatherRestrictions: row.weather_restrictions ? row.weather_restrictions.split(',') : [],
+                  dataSource: 'csv_import'
+                });
+              }
             }
             
             // Clean up the uploaded file
@@ -47106,6 +47127,114 @@ momtazchem.com
     }
   });
 
+  // Export existing data to CSV endpoint
+  app.get('/api/admin/logistics/export-csv/:type', requireAuth, async (req, res) => {
+    try {
+      const { type } = req.params; // 'provinces', 'cities', 'distances'
+      
+      let csvContent = '';
+      let filename = '';
+      
+      if (type === 'provinces') {
+        const provinces = await db.select().from(iraqiProvinces).orderBy(iraqiProvinces.name);
+        
+        const csvRows = [
+          'name,name_en,name_ku,code,population,area_km2,capital_city,economic_activity'
+        ];
+        
+        provinces.forEach(province => {
+          csvRows.push([
+            province.name,
+            province.name_en || '',
+            province.name_ku || '',
+            province.code || '',
+            province.population || 0,
+            province.area_km2 || 0,
+            province.capital_city || '',
+            province.economic_activity || ''
+          ].join(','));
+        });
+        
+        filename = `provinces-export-${new Date().toISOString().split('T')[0]}.csv`;
+        csvContent = csvRows.join('\n');
+        
+      } else if (type === 'cities') {
+        const cities = await db.select().from(iraqiCities).orderBy(iraqiCities.name);
+        
+        const csvRows = [
+          'name,name_en,name_ku,province_id,district,population,postal_code,coordinates,distance_from_baghdad,economic_activity'
+        ];
+        
+        cities.forEach(city => {
+          csvRows.push([
+            city.name,
+            city.name_en || '',
+            city.name_ku || '',
+            city.province_id,
+            city.district || '',
+            city.population || 0,
+            city.postal_code || '',
+            city.coordinates || '',
+            city.distance_from_baghdad || 0,
+            city.economic_activity || ''
+          ].join(','));
+        });
+        
+        filename = `cities-export-${new Date().toISOString().split('T')[0]}.csv`;
+        csvContent = csvRows.join('\n');
+        
+      } else if (type === 'distances') {
+        const distances = await db.select().from(routeOptimization).orderBy(routeOptimization.fromCityId);
+        
+        const csvRows = [
+          'from_city_id,to_city_id,from_province_id,to_province_id,distance_km,estimated_time_minutes,route_type,has_highway,has_mountain_road,has_unpaved_road,toll_cost,traffic_multiplier,weather_restrictions'
+        ];
+        
+        distances.forEach(route => {
+          csvRows.push([
+            route.fromCityId || '',
+            route.toCityId || '',
+            route.fromProvinceId || '',
+            route.toProvinceId || '',
+            route.distanceKm || 0,
+            route.estimatedTimeMinutes || 0,
+            route.routeType || 'interurban',
+            route.hasHighway ? 'true' : 'false',
+            route.hasMountainRoad ? 'true' : 'false',
+            route.hasUnpavedRoad ? 'true' : 'false',
+            route.tollCost || 0,
+            route.trafficMultiplier || 1.0,
+            (route.weatherRestrictions || []).join(',')
+          ].join(','));
+        });
+        
+        filename = `distances-export-${new Date().toISOString().split('T')[0]}.csv`;
+        csvContent = csvRows.join('\n');
+        
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid export type'
+        });
+      }
+      
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Cache-Control', 'no-cache');
+      
+      // Add UTF-8 BOM for proper Excel display
+      res.write('\ufeff');
+      res.end(csvContent);
+      
+    } catch (error) {
+      console.error('❌ [CSV EXPORT] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to export CSV file'
+      });
+    }
+  });
+
   // Generate sample CSV file endpoint
   app.get('/api/logistics/generate-sample-csv/:type', requireAuth, async (req, res) => {
     try {
@@ -47130,10 +47259,18 @@ momtazchem.com
           'البصرة,Basra,Besra,2,البصرة,1750000,61001,"30.5085,47.7804",550,Oil Industry',
           'الموصل,Mosul,Mûsil,3,الموصل,1750000,41001,"36.3400,43.1500",400,Trade and Agriculture'
         ].join('\n');
+      } else if (type === 'distances') {
+        filename = 'sample-distances.csv';
+        csvContent = [
+          'from_city_id,to_city_id,from_province_id,to_province_id,distance_km,estimated_time_minutes,route_type,has_highway,has_mountain_road,has_unpaved_road,toll_cost,traffic_multiplier,weather_restrictions',
+          '1,2,1,2,550.5,480,interurban,true,false,false,25000,1.2,"rain,sandstorm"',
+          '1,3,1,3,400.0,360,highway,true,false,false,20000,1.1,rain',
+          '2,3,2,3,420.0,390,interurban,false,true,false,0,1.3,"rain,snow"'
+        ].join('\n');
       } else {
         return res.status(400).json({
           success: false,
-          message: 'Invalid sample type. Use "provinces" or "cities"'
+          message: 'Invalid sample type. Use "provinces", "cities", or "distances"'
         });
       }
       

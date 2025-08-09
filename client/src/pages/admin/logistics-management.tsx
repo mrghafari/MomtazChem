@@ -4386,7 +4386,7 @@ const LogisticsManagement = () => {
               ورود داده‌های جغرافیایی از فایل CSV
             </CardTitle>
             <CardDescription>
-              امکان وارد کردن اطلاعات استان‌ها، شهرها و نرخ‌های حمل از فایل‌های CSV
+              امکان وارد کردن اطلاعات استان‌ها، شهرها، فاصله‌ها و نرخ‌های حمل از فایل‌های CSV
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -4400,6 +4400,7 @@ const LogisticsManagement = () => {
                 <SelectContent>
                   <SelectItem value="provinces">استان‌ها (Provinces)</SelectItem>
                   <SelectItem value="cities">شهرها (Cities)</SelectItem>
+                  <SelectItem value="distances">فاصله‌ها (Distances)</SelectItem>
                   <SelectItem value="shipping_rates">نرخ‌های حمل (Shipping Rates)</SelectItem>
                 </SelectContent>
               </Select>
@@ -4416,11 +4417,28 @@ const LogisticsManagement = () => {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    {(importType === 'provinces' || importType === 'cities') && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        window.open(`/api/admin/logistics/export-csv/${importType}`, '_blank');
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      خروجی موجود
+                    </Button>
+                    {(importType === 'provinces' || importType === 'cities' || importType === 'distances') && (
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => downloadSampleCsv(importType as 'provinces' | 'cities')}
+                        onClick={() => {
+                          if (importType === 'provinces' || importType === 'cities') {
+                            downloadSampleCsv(importType as 'provinces' | 'cities');
+                          } else {
+                            window.open(`/api/admin/logistics/sample-csv?type=${importType}`, '_blank');
+                          }
+                        }}
                         className="flex items-center gap-2"
                       >
                         <Download className="w-4 h-4" />
