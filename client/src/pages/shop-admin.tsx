@@ -75,16 +75,6 @@ export default function ShopAdmin() {
     }
   }, [authLoading, isAuthenticated, setLocation]);
 
-  // Load existing proforma deadline settings
-  useEffect(() => {
-    if (shopSettings.length > 0) {
-      const proformaDeadline = shopSettings.find((s: any) => s.settingKey === 'proforma_deadline_days');
-      if (proformaDeadline) {
-        setProformaDeadlineDays(proformaDeadline.settingValue);
-      }
-    }
-  }, [shopSettings]);
-
   // Fetch shop statistics
   const { data: stats = {} } = useQuery({
     queryKey: ["/api/shop/statistics"],
@@ -140,6 +130,16 @@ export default function ShopAdmin() {
     queryKey: ['/api/shop/settings'],
     enabled: isAuthenticated,
   });
+
+  // Load existing proforma deadline settings
+  useEffect(() => {
+    if (shopSettings.length > 0) {
+      const proformaDeadline = shopSettings.find((s: any) => s.settingKey === 'proforma_deadline_days');
+      if (proformaDeadline) {
+        setProformaDeadlineDays(proformaDeadline.settingValue);
+      }
+    }
+  }, [shopSettings]);
 
   // Save proforma deadline mutation
   const saveProformaDeadlineMutation = useMutation({
