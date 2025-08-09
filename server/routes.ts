@@ -37,7 +37,7 @@ import { sql, eq, and, or, isNull, isNotNull, desc, gte, inArray } from "drizzle
 import { findCorruptedOrders, getDataIntegrityStats, validateOrderIntegrity, markCorruptedOrderAsDeleted } from './data-integrity-tools';
 import { z } from "zod";
 import * as schema from "@shared/schema";
-const { crmCustomers, iraqiProvinces, iraqiCities, abandonedOrders, contentItems, footerSettings, paymentMethodSettings } = schema;
+const { crmCustomers, iraqiProvinces, iraqiCities, abandonedOrders, contentItems, footerSettings, paymentMethodSettings, shopSettings } = schema;
 import { webrtcRooms, roomParticipants, chatMessages } from "@shared/webrtc-schema";
 import { orderManagement, shippingRates, deliveryMethods, paymentReceipts } from "@shared/order-management-schema";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
@@ -16031,9 +16031,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Add grace period fields for bank_transfer_grace payment method
         if (orderData.paymentMethod === 'bank_transfer_grace') {
+          // Get grace period days from shop settings
+          let gracePeriodDays = 3; // Default fallback
+          try {
+            const gracePeriodDaysResult = await db.select()
+              .from(shopSettings)
+              .where(eq(shopSettings.settingKey, 'proforma_deadline_days'))
+              .limit(1);
+            
+            if (gracePeriodDaysResult.length > 0) {
+              gracePeriodDays = parseInt(gracePeriodDaysResult[0].settingValue) || 3;
+            }
+            console.log(`🕒 [GRACE PERIOD] Using ${gracePeriodDays} days from settings`);
+          } catch (settingsError) {
+            console.log(`⚠️ [GRACE PERIOD] Failed to get settings, using default: ${gracePeriodDays} days`, settingsError);
+          }
+          
           const gracePeriodStart = new Date();
           const gracePeriodEnd = new Date();
-          gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 3); // 3 days grace period
+          gracePeriodEnd.setDate(gracePeriodEnd.getDate() + gracePeriodDays);
 
           orderMgmtData = {
             ...orderMgmtData,
@@ -16042,7 +16058,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             isOrderLocked: true, // Lock order details during grace period
           };
 
-          console.log(`🕒 Grace period activated for order ${orderNumber} - expires: ${gracePeriodEnd.toISOString()}`);
+          console.log(`🕒 Grace period activated for order ${orderNumber} - ${gracePeriodDays} days period expires: ${gracePeriodEnd.toISOString()}`);
         }
 
         await orderManagementStorage.createOrderManagement(orderMgmtData);
@@ -16418,15 +16434,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // 🏦 [BANK_TRANSFER_GRACE] Handle grace period bank transfer with receipt upload
         if (finalPaymentMethod === 'bank_transfer_grace') {
-          console.log(`🕒 [GRACE PERIOD] Order ${orderNumber} created with grace period for bank receipt upload`);
+          // Get grace period days from shop settings
+          let gracePeriodDays = 3; // Default fallback
+          try {
+            const gracePeriodDaysResult = await db.select()
+              .from(shopSettings)
+              .where(eq(shopSettings.settingKey, 'proforma_deadline_days'))
+              .limit(1);
+            
+            if (gracePeriodDaysResult.length > 0) {
+              gracePeriodDays = parseInt(gracePeriodDaysResult[0].settingValue) || 3;
+            }
+            console.log(`🕒 [GRACE PERIOD RESPONSE] Using ${gracePeriodDays} days from settings`);
+          } catch (settingsError) {
+            console.log(`⚠️ [GRACE PERIOD RESPONSE] Failed to get settings, using default: ${gracePeriodDays} days`, settingsError);
+          }
+          
+          const gracePeriodExpiresAt = new Date(Date.now() + gracePeriodDays * 24 * 60 * 60 * 1000);
+          
+          console.log(`🕒 [GRACE PERIOD] Order ${orderNumber} created with ${gracePeriodDays} days grace period for bank receipt upload`);
           
           responseData = {
             ...responseData,
-            message: "سفارش ثبت شد - لطفاً رسید بانکی خود را آپلود کنید",
+            message: `سفارش ثبت شد - لطفاً رسید بانکی خود را ظرف ${gracePeriodDays} روز آپلود کنید`,
             requiresBankReceipt: true,
             gracePeriodOrder: true,
+            gracePeriodDays: gracePeriodDays,
             uploadReceiptUrl: `/customers/orders/${order.id}/upload-receipt`,
-            gracePeriodExpires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() // 3 days from now
+            gracePeriodExpires: gracePeriodExpiresAt.toISOString()
           };
           
           return res.json(responseData);
