@@ -1004,6 +1004,44 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
   };
 
+  // Calculate distance between cities (basic estimation)
+  const calculateDistanceBetweenCities = (fromCity: string, toCity: string): number => {
+    // Basic distance estimation between major Iraqi cities (km)
+    const cityDistances: { [key: string]: { [key: string]: number } } = {
+      'اربیل': {
+        'بغداد': 350,
+        'البصرة': 650,
+        'الموصل': 85,
+        'كربلا': 467,
+        'النجف': 480,
+        'السليمانية': 65,
+        'دهوك': 75,
+        'كركوك': 90,
+        'الرمادي': 420,
+        'الناصرية': 570
+      },
+      'بغداد': {
+        'اربیل': 350,
+        'البصرة': 420,
+        'الموصل': 400,
+        'كربلا': 100,
+        'النجف': 180,
+        'السليمانية': 300,
+        'دهوك': 450,
+        'كركوك': 230,
+        'الرمادي': 110,
+        'الناصرية': 320
+      }
+    };
+
+    // Default distance if not found
+    const defaultDistance = 200;
+    
+    return cityDistances[fromCity]?.[toCity] || 
+           cityDistances[toCity]?.[fromCity] || 
+           defaultDistance;
+  };
+
   // Calculate smart delivery cost
   const calculateSmartDeliveryCost = async (destinationCity: string, destinationProvince: string) => {
     if (!destinationCity || totalWeight <= 0) {
@@ -1015,62 +1053,83 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     setSmartDeliveryError('');
     
     try {
+      // Calculate estimated distance
+      const estimatedDistance = calculateDistanceBetweenCities('اربیل', destinationCity);
+      
       console.log('🚚 [SMART DELIVERY] Calculating cost for:', {
         weight: totalWeight,
         city: destinationCity,
         province: destinationProvince,
+        estimatedDistance,
         cartItems: Object.keys(cart).length
       });
 
-      const response = await fetch('/api/calculate-delivery-cost', {
+      // Use smart vehicle selection API instead of old delivery cost API
+      const response = await fetch('/api/logistics/select-optimal-vehicle', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         credentials: 'include',
         body: JSON.stringify({
-          weight: totalWeight,
+          orderNumber: `CART-${Date.now()}`,
+          weightKg: totalWeight,
+          routeType: estimatedDistance > 100 ? 'highway' : 'urban', // Choose route type based on distance
+          distanceKm: estimatedDistance,
+          isHazardous: false, // TODO: Determine based on cart contents if needed
           destinationCity: destinationCity,
-          destinationProvince: destinationProvince,
-          cart: cart,
-          useSecondaryAddress: showSecondAddress && secondAddress.trim().length > 0,
-          secondaryAddress: showSecondAddress ? {
-            address: secondAddress,
-            city: secondCity,
-            province: secondProvince,
-            postalCode: secondPostalCode
-          } : null
+          destinationProvince: destinationProvince
         })
       });
 
       const data = await response.json();
       
       console.log('🚚 [SMART DELIVERY] API response:', data);
-      console.log('🚚 [SMART DELIVERY] Response details:', {
-        success: data.success,
-        hasData: !!data.data,
-        hasOptimalVehicle: !!(data.data?.optimalVehicle),
-        optimalVehicle: data.data?.optimalVehicle
-      });
       
-      if (data.success && data.data) {
-        // Handle standard vehicle selection response format from database templates
-        const { optimalVehicle, alternatives } = data.data;
-        
-        // Check if optimalVehicle exists and has required properties
-        if (optimalVehicle && optimalVehicle.totalCost !== undefined) {
-          setOptimalVehicle(optimalVehicle);
-          setAlternativeVehicles(alternatives || []);
-          setSmartDeliveryCost(optimalVehicle.totalCost);
+      if (data.success) {
+        // Handle new smart vehicle API response format
+        if (data.multiVehicleRequired) {
+          // Multi-vehicle scenario
+          const multiVehicleData = data.solution;
+          const totalCost = multiVehicleData.totalCost;
+          const vehicleInfo = {
+            vehicleName: `${multiVehicleData.totalVehicles} خودرو`,
+            totalCost: totalCost,
+            summary: multiVehicleData.summary
+          };
           
-          console.log('✅ [SMART DELIVERY] Cost calculated:', {
-            vehicle: optimalVehicle.vehicleName,
-            cost: optimalVehicle.totalCost,
-            estimatedTime: optimalVehicle.estimatedTime
+          setOptimalVehicle(vehicleInfo);
+          setAlternativeVehicles([]);
+          setSmartDeliveryCost(totalCost);
+          
+          console.log('✅ [SMART DELIVERY] Multi-vehicle cost calculated:', {
+            vehicles: multiVehicleData.totalVehicles,
+            cost: totalCost,
+            summary: multiVehicleData.summary
+          });
+        } else if (data.selectedVehicle) {
+          // Single vehicle scenario
+          const vehicle = data.selectedVehicle;
+          const vehicleInfo = {
+            vehicleName: vehicle.vehicleName,
+            totalCost: vehicle.totalCost,
+            basePrice: vehicle.basePrice,
+            distanceCost: vehicle.distanceCost
+          };
+          
+          setOptimalVehicle(vehicleInfo);
+          setAlternativeVehicles(data.alternatives || []);
+          setSmartDeliveryCost(vehicle.totalCost);
+          
+          console.log('✅ [SMART DELIVERY] Single vehicle cost calculated:', {
+            vehicle: vehicle.vehicleName,
+            cost: vehicle.totalCost,
+            basePrice: vehicle.basePrice,
+            distanceCost: vehicle.distanceCost
           });
         } else {
-          console.error('❌ [SMART DELIVERY] Invalid optimalVehicle data:', optimalVehicle);
-          throw new Error('داده‌های وسیله نقلیه بهینه دریافت نشد');
+          console.error('❌ [SMART DELIVERY] Invalid response format:', data);
+          throw new Error('فرمت پاسخ سیستم انتخاب خودرو نامعتبر است');
         }
       } else {
         throw new Error(data.message || 'محاسبه هزینه ارسال ناموفق بود');
