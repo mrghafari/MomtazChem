@@ -734,6 +734,11 @@ const LogisticsManagement = () => {
       // Open the vehicle assignment dialog immediately
       setIsVehicleAssignmentOpen(true);
       
+      console.log('🎯 [DEBUG] Dialog state after opening:', {
+        isVehicleAssignmentOpen: true,
+        selectedOrderForVehicle: order?.orderNumber
+      });
+      
       // Get all suitable vehicles identified during checkout
       const suitableVehiclesResponse = await fetch(`/api/orders/${order.customerOrderId}/suitable-vehicles`, {
         credentials: 'include'
@@ -745,15 +750,18 @@ const LogisticsManagement = () => {
           setSuitableVehiclesData(suitableVehiclesData.data);
           console.log('✅ [SUITABLE VEHICLES] Found vehicles:', suitableVehiclesData.data.suitableVehicles.length);
           console.log('🔍 [VEHICLE DETAILS] First 3 vehicles:', suitableVehiclesData.data.suitableVehicles.slice(0, 3));
+          console.log('📊 [FULL API RESPONSE]:', JSON.stringify(suitableVehiclesData.data, null, 2));
           
-          // Set the fleet vehicles from the suitable vehicles response
-          if (suitableVehiclesData.data.availableFleetVehicles) {
-            setAvailableFleetVehicles(suitableVehiclesData.data.availableFleetVehicles);
-            console.log('🚛 [FLEET VEHICLES] Set from suitable vehicles API:', suitableVehiclesData.data.availableFleetVehicles.length);
+          // Use suitableVehicles as availableFleetVehicles for display
+          if (suitableVehiclesData.data.suitableVehicles && suitableVehiclesData.data.suitableVehicles.length > 0) {
+            setAvailableFleetVehicles(suitableVehiclesData.data.suitableVehicles);
+            console.log('🚛 [FLEET VEHICLES] Set from suitable vehicles API:', suitableVehiclesData.data.suitableVehicles.length);
+            console.log('🚛 [FLEET VEHICLES] First vehicle details:', suitableVehiclesData.data.suitableVehicles[0]);
+          } else {
+            console.log('❌ [FLEET VEHICLES] No suitableVehicles in response');
           }
           
-          setSelectedOrderForVehicle(order);
-          setIsSuitableVehiclesOpen(true);
+          console.log('🎯 [DIALOG] Should show dialog with vehicles now');
           return;
         }
       }
