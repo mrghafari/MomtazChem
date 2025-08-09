@@ -339,6 +339,12 @@ app.use((req, res, next) => {
             }, 60 * 60 * 1000);
             log('📅 Proforma reminder service started');
           });
+
+          // Start auto-invoice conversion service
+          import('./auto-invoice-converter').then(({ AutoInvoiceConverter }) => {
+            AutoInvoiceConverter.startPeriodicCheck();
+            log('🧾 Auto-invoice conversion service started');
+          });
           
           // Start inventory monitoring service
           InventoryAlertService.startInventoryMonitoring();

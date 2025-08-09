@@ -32,6 +32,7 @@ import { db } from "./db";
 import { pool as dbPool } from "./db";
 import { eq, and, desc, asc, inArray, sql, isNotNull } from "drizzle-orm";
 import ProformaInvoiceConverter from "./proforma-invoice-converter";
+import { AutoInvoiceConverter } from "./auto-invoice-converter";
 
 export interface IOrderManagementStorage {
   // Order Management
@@ -334,6 +335,27 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     
     // Log status change
     await this.logStatusChange(currentOrder.id, currentOrder.currentStatus as OrderStatus, newStatus, changedBy, department, notes);
+    
+    // 🧾 AUTO-INVOICE CONVERSION: Check if order status changed to shipped/delivered
+    try {
+      // Get order number for auto-conversion
+      const orderDetails = await db
+        .select({ orderNumber: customerOrders.orderNumber })
+        .from(customerOrders)
+        .where(eq(customerOrders.id, updatedOrder.customerOrderId))
+        .limit(1);
+      
+      if (orderDetails[0]?.orderNumber) {
+        const orderNumber = orderDetails[0].orderNumber;
+        console.log(`🔍 [AUTO INVOICE] Checking auto-conversion for order ${orderNumber} with new status: ${newStatus}`);
+        
+        // Trigger auto-conversion if status is shipped or delivered
+        await AutoInvoiceConverter.handleOrderStatusChange(orderNumber, newStatus);
+      }
+    } catch (autoConversionError) {
+      console.error(`❌ [AUTO INVOICE] Error in auto-conversion check:`, autoConversionError);
+      // Don't fail the order update if auto-conversion fails
+    }
     
     return updatedOrder;
   }

@@ -46,6 +46,7 @@ import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { gpsDeliveryConfirmations } from "@shared/gps-delivery-schema";
 import ProformaInvoiceConverter from "./proforma-invoice-converter";
+import { AutoInvoiceConverter } from "./auto-invoice-converter";
 
 import { 
   vehicleTemplates, 
@@ -9010,6 +9011,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
             updatedAt: new Date()
           })
           .where(eq(customerOrders.id, currentOrder.customerOrderId));
+      }
+
+      // 🧾 AUTO-INVOICE CONVERSION: Trigger conversion for shipped/delivered orders
+      try {
+        // Get order number for auto-conversion
+        const orderDetails = await db
+          .select({ orderNumber: customerOrders.orderNumber })
+          .from(customerOrders)
+          .where(eq(customerOrders.id, currentOrder.customerOrderId))
+          .limit(1);
+        
+        if (orderDetails[0]?.orderNumber) {
+          const orderNumber = orderDetails[0].orderNumber;
+          console.log(`🔍 [AUTO INVOICE] Checking auto-conversion for order ${orderNumber} with new status: ${newStatus}`);
+          
+          // Trigger auto-conversion if status is shipped or delivered
+          await AutoInvoiceConverter.handleOrderStatusChange(orderNumber, newStatus);
+        }
+      } catch (autoConversionError) {
+        console.error(`❌ [AUTO INVOICE] Error in auto-conversion check:`, autoConversionError);
+        // Don't fail the order update if auto-conversion fails
       }
 
       console.log(`✅ [ROUTES] Order ${orderManagementId} status updated to ${newStatus}`);
