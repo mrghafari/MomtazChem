@@ -1113,6 +1113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           createdAt: customerOrders.createdAt,
           vatAmount: customerOrders.vatAmount, // Frozen VAT amount from order creation
           surchargeAmount: customerOrders.surchargeAmount, // Frozen surcharge amount from order creation
+          invoiceType: customerOrders.invoiceType, // 🧾 اضافه کردن نوع فاکتور
           customerName: sql<string>`CONCAT(${crmCustomers.firstName}, ' ', ${crmCustomers.lastName})`,
           customerEmail: crmCustomers.email,
           customerPhone: crmCustomers.phone,
@@ -1128,20 +1129,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const order = orderResult[0];
 
-      // Check if order has financial approval or is approved
-      const validStatuses = ['confirmed', 'warehouse_ready', 'warehouse_pending', 'in_transit', 'delivered'];
-      if (!validStatuses.includes(order.status)) {
-        console.log('❌ [INVOICE ERROR] Order status not eligible for final invoice:', {
+      // 🧾 Check if order is eligible for final invoice download
+      // Allow download if invoiceType is 'official_invoice' OR if order has traditional approval statuses
+      const validStatuses = ['confirmed', 'warehouse_ready', 'warehouse_pending', 'in_transit', 'delivered', 'shipped'];
+      const isOfficialInvoice = order.invoiceType === 'official_invoice';
+      const hasValidStatus = validStatuses.includes(order.status);
+      
+      if (!isOfficialInvoice && !hasValidStatus) {
+        console.log('❌ [INVOICE ERROR] Order not eligible for final invoice:', {
           orderId: order.id,
           orderNumber: order.orderNumber,
           currentStatus: order.status,
-          validStatuses
+          invoiceType: order.invoiceType,
+          validStatuses,
+          isOfficialInvoice,
+          hasValidStatus
         });
         return res.status(400).json({ 
           success: false, 
-          message: 'فقط سفارشات تأیید شده قابل صدور فاکتور نهایی هستند' 
+          message: 'فقط سفارشات تأیید شده یا فاکتورهای رسمی قابل دانلود هستند' 
         });
       }
+      
+      console.log('✅ [INVOICE ACCESS] Order eligible for final invoice download:', {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        invoiceType: order.invoiceType,
+        status: order.status,
+        reason: isOfficialInvoice ? 'Official Invoice Type' : 'Valid Status'
+      });
 
       // Get order items
       const itemsResult = await db
