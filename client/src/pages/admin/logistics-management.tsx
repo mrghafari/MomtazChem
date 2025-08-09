@@ -437,6 +437,13 @@ const LogisticsManagement = () => {
     enabled: true
   });
 
+  // Company information query for logo
+  const { data: companyInfo } = useQuery({
+    queryKey: ['/api/company-information'],
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
   // Get orders that have reached logistics stage (warehouse approved)
   const { data: logisticsOrdersResponse, isLoading: loadingLogisticsOrders, refetch: refetchLogisticsOrders } = useQuery({
     queryKey: ['/api/order-management/logistics'],
@@ -1684,7 +1691,7 @@ const LogisticsManagement = () => {
         </head>
         <body>
           <div class="header">
-            <img src="/uploads/Logo_1753245273579.jpeg" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
+            <img src="${companyInfo?.logoUrl || '/uploads/Logo_1753245273579.jpeg'}" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
             <h1>جزئیات سفارش لجستیک</h1>
             <h2>سفارش ${selectedOrder.orderNumber}</h2>
             <p>تاریخ چاپ: ${new Date().toLocaleDateString('en-US')}</p>
@@ -1942,7 +1949,7 @@ const LogisticsManagement = () => {
     </head>
     <body>
       <div class="header">
-        <img src="/uploads/Logo_1753245273579.jpeg" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
+        <img src="${companyInfo?.logoUrl || '/uploads/Logo_1753245273579.jpeg'}" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
         <div class="company-name">ممتاز شیمی</div>
         <div>جزئیات سفارش</div>
         <div style="font-size: 12px; color: #6b7280;">تاریخ چاپ: ${new Date().toLocaleDateString('en-GB')}</div>

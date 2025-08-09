@@ -1755,6 +1755,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get company information
+  app.get('/api/company-information', async (req, res) => {
+    try {
+      const companyInfo = await companyStorage.getCompanyInformation();
+      res.json({ success: true, data: companyInfo });
+    } catch (error) {
+      console.error('Error fetching company information:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت اطلاعات شرکت" });
+    }
+  });
+
   // Legacy endpoint - backward compatibility  
   app.get('/api/company-information/images', requireAuth, async (req, res) => {
     try {
