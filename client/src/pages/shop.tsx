@@ -2057,7 +2057,7 @@ const Shop = () => {
             CHECKOUT MODAL IS OPEN
           </div>
           <BilingualPurchaseForm
-            cart={cart}
+            cart={isCartLoading ? {} : cart}
             products={currentProducts}
             existingCustomer={customer}
             onOrderComplete={async () => {

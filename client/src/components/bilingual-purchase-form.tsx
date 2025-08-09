@@ -241,6 +241,26 @@ const getCurrentLocation = (): Promise<{latitude: number, longitude: number}> =>
 };
 
 export default function BilingualPurchaseForm({ cart, products, onOrderComplete, onClose, existingCustomer, onUpdateQuantity, onRemoveItem }: PurchaseFormProps) {
+  // Early return if cart or products are not ready
+  if (!cart || !products || products.length === 0) {
+    console.log('🔄 [BILINGUAL FORM] Waiting for cart and products data...', {
+      hasCart: !!cart,
+      cartKeys: cart ? Object.keys(cart).length : 0,
+      hasProducts: !!products,
+      productsLength: products ? products.length : 0
+    });
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl">
+          <div className="flex items-center space-x-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <span className="text-lg">در حال بارگذاری...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const { toast } = useToast();
   const { language, direction } = useLanguage();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
@@ -963,16 +983,57 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     totalTaxAmount
   });
   
-  // Calculate total weight of all products in cart
-  const totalWeight = Object.entries(cart).reduce((sum, [productId, quantity]) => {
+  // Calculate total weight of all products in cart - only if cart and products are ready
+  const totalWeight = cart && products && products.length > 0 ? Object.entries(cart).reduce((sum, [productId, quantity]) => {
     const product = products.find(p => p.id === parseInt(productId));
     if (product) {
-      // Get weight from product data (use different weight fields as fallback)
-      const productWeight = parseFloat(product.weight || product.weightKg || product.weight_kg || '0');
+      // Get weight from product data (prioritize grossWeight for logistics calculations)
+      const productWeight = parseFloat(product.grossWeight || product.netWeight || product.weight || '0');
+      console.log('🔍 [WEIGHT CALCULATION]', {
+        productId,
+        quantity,
+        productName: product.name,
+        productWeight,
+        weightFields: {
+          grossWeight: product.grossWeight,
+          netWeight: product.netWeight,
+          weight: product.weight
+        },
+        weightContribution: productWeight * quantity
+      });
       return sum + (productWeight * quantity);
     }
     return sum;
-  }, 0);
+  }, 0) : 0;
+  
+  console.log('🔍 [TOTAL WEIGHT] Final calculation:', {
+    cart,
+    productsCount: products?.length || 0,
+    cartEntriesCount: cart ? Object.entries(cart).length : 0,
+    totalWeight,
+    cartData: cart,
+    productsData: products?.slice(0, 2), // Show first 2 products for debugging
+    isCartObjectEmpty: cart && Object.keys(cart).length === 0,
+    isCartValid: cart && typeof cart === 'object',
+    cartType: typeof cart
+  });
+  
+  // Enhanced debugging for weight calculation issues
+  if (cart && products && products.length > 0 && Object.keys(cart).length > 0) {
+    Object.entries(cart).forEach(([productId, quantity]) => {
+      const product = products.find(p => p.id === parseInt(productId));
+      console.log('🔍 [INDIVIDUAL PRODUCT WEIGHT]', {
+        productId,
+        quantity,
+        product: product ? {
+          name: product.name,
+          grossWeight: product.grossWeight,
+          netWeight: product.netWeight,
+          weight: product.weight
+        } : 'NOT FOUND'
+      });
+    });
+  }
 
   // Calculate shipping cost - prioritize smart delivery over regular shipping
   const finalShippingCost = selectedShippingMethod && (shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod)?.deliveryMethod === 'smart_vehicle' || shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod)?.delivery_method === 'smart_vehicle')
@@ -1117,9 +1178,24 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Calculate smart delivery cost
   const calculateSmartDeliveryCost = async (destinationCity: string, destinationProvince: string) => {
-    if (!destinationCity || totalWeight <= 0) {
-      console.log('🚚 [SMART DELIVERY] Skipping calculation - missing city or zero weight');
+    if (!destinationCity) {
+      console.log('🚚 [SMART DELIVERY] Skipping calculation - missing destination city');
       return;
+    }
+    
+    if (!totalWeight || totalWeight <= 0) {
+      console.log('🚚 [SMART DELIVERY] Warning - zero or missing weight, proceeding with minimum weight:', {
+        destinationCity,
+        totalWeight,
+        hasDestinationCity: !!destinationCity,
+        hasTotalWeight: !!totalWeight,
+        totalWeightValue: totalWeight,
+        cartKeys: cart ? Object.keys(cart) : [],
+        productsLength: products ? products.length : 0
+      });
+      // Use minimum weight of 1kg if weight calculation failed
+      const fallbackWeight = 1;
+      console.log('🚚 [SMART DELIVERY] Using fallback weight:', fallbackWeight);
     }
 
     setSmartDeliveryLoading(true);
@@ -1146,7 +1222,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         credentials: 'include',
         body: JSON.stringify({
           orderNumber: `CART-${Date.now()}`,
-          weightKg: totalWeight,
+          finalWeightKg: totalWeight || 1, // Use fallback weight if calculation failed
           routeType: estimatedDistance > 100 ? 'highway' : 'urban', // Choose route type based on distance
           distanceKm: estimatedDistance,
           isHazardous: false, // TODO: Determine based on cart contents if needed
@@ -1166,8 +1242,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           const multiVehicleData = data.solution;
           const totalCost = multiVehicleData.totalCost;
           const vehicleInfo = {
+            vehicleType: 'multiple',
             vehicleName: `${multiVehicleData.totalVehicles} خودرو`,
             totalCost: totalCost,
+            totalVehicles: multiVehicleData.totalVehicles,
+            vehicles: multiVehicleData.vehicles,
             summary: multiVehicleData.summary
           };
           
@@ -1178,12 +1257,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           console.log('✅ [SMART DELIVERY] Multi-vehicle cost calculated:', {
             vehicles: multiVehicleData.totalVehicles,
             cost: totalCost,
-            summary: multiVehicleData.summary
+            summary: multiVehicleData.summary,
+            vehicleInfo
           });
         } else if (data.selectedVehicle) {
           // Single vehicle scenario
           const vehicle = data.selectedVehicle;
           const vehicleInfo = {
+            vehicleType: 'single',
             vehicleName: vehicle.vehicleName,
             totalCost: vehicle.totalCost,
             basePrice: vehicle.basePrice,
@@ -1198,7 +1279,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
             vehicle: vehicle.vehicleName,
             cost: vehicle.totalCost,
             basePrice: vehicle.basePrice,
-            distanceCost: vehicle.distanceCost
+            distanceCost: vehicle.distanceCost,
+            vehicleInfo
           });
         } else {
           console.error('❌ [SMART DELIVERY] Invalid response format:', data);
@@ -1245,7 +1327,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       totalWeight
     });
 
-    if (finalDestinationCity && finalDestinationProvince && totalWeight > 0) {
+    if (finalDestinationCity && finalDestinationProvince && totalWeight > 0 && products.length > 0 && Object.keys(cart).length > 0) {
       const debounceTimer = setTimeout(() => {
         calculateSmartDeliveryCost(finalDestinationCity, finalDestinationProvince);
       }, 1000); // 1 second debounce
@@ -1257,7 +1339,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         hasProvince: !!finalDestinationProvince,
         hasWeight: totalWeight > 0,
         cityValue: finalDestinationCity,
-        provinceValue: finalDestinationProvince
+        provinceValue: finalDestinationProvince,
+        totalWeight,
+        productsLength: products.length,
+        cartKeys: Object.keys(cart).length,
+        cartData: cart,
+        productsData: products.slice(0, 2) // Show first 2 products for debugging
       });
     }
   }, [showSecondAddress, secondCity, secondProvince, form.watch('city'), totalWeight, cart, crmCustomerData?.cityRegion, crmCustomerData?.province, customerData?.customer?.cityRegion, customerData?.customer?.province]);
