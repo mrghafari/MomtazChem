@@ -293,19 +293,19 @@ const LogisticsManagement = () => {
   // State for vehicle editing 
   const [editingVehicle, setEditingVehicle] = useState<any>(null);
 
-  // Ready vehicles API integration
-  const { data: readyVehiclesData, isLoading: loadingReadyVehicles } = useQuery({
+  // Fleet vehicles API integration (previously "ready vehicles")
+  const { data: fleetVehiclesData, isLoading: loadingFleetVehicles } = useQuery({
     queryKey: ['/api/logistics/ready-vehicles'],
-    enabled: activeTab === 'ready-vehicles'
+    enabled: activeTab === 'fleet-vehicles'
   });
 
   // Vehicle templates API integration
   const { data: vehicleTemplatesData, isLoading: loadingVehicleTemplates } = useQuery({
     queryKey: ['/api/logistics/vehicle-templates'],
-    enabled: activeTab === 'ready-vehicles'
+    enabled: activeTab === 'vehicle-templates'
   });
 
-  const readyVehicles = (readyVehiclesData as any)?.data || [];
+  const fleetVehicles = (fleetVehiclesData as any)?.data || [];
 
   // Effect to handle vehicle type selection for editing - uses dynamic vehicle templates
   React.useEffect(() => {
@@ -532,10 +532,10 @@ const LogisticsManagement = () => {
 
 
 
-  // Vehicle optimization queries
+  // Vehicle templates queries (for optimization)
   const { data: vehiclesData, isLoading: vehiclesLoading } = useQuery({
     queryKey: ['/api/logistics/vehicle-templates'],
-    enabled: activeTab === 'vehicles'
+    enabled: activeTab === 'vehicle-templates'
   });
 
   const { data: historyData, isLoading: historyLoading } = useQuery({
@@ -962,16 +962,16 @@ const LogisticsManagement = () => {
     });
   };
 
-  const VehicleOptimizationTab = () => {
+  const VehicleTemplatesTab = () => {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <Truck className="h-5 w-5" />
-              سیستم انتخاب بهینه وسیله نقلیه
+              مدیریت قالب‌های خودرو
             </h2>
-            <p className="text-muted-foreground text-sm">مدیریت الگوهای خودرو و انتخاب بهینه بر اساس الگوریتم هزینه</p>
+            <p className="text-muted-foreground text-sm">مدیریت الگوهای خودرو برای سیستم انتخاب بهینه و محاسبه هزینه</p>
           </div>
         </div>
 
@@ -3402,15 +3402,10 @@ const LogisticsManagement = () => {
     );
   };
 
-  // Ready Vehicles Tab Component
-  const ReadyVehiclesTab = () => {
-    // Query for ready vehicles
-    const { data: readyVehiclesData, isLoading: readyVehiclesLoading } = useQuery({
-      queryKey: ['/api/logistics/ready-vehicles'],
-      queryFn: () => fetch('/api/logistics/ready-vehicles', { credentials: 'include' }).then(res => res.json())
-    });
-
-    const readyVehicles = readyVehiclesData?.data || [];
+  // Fleet Vehicles Tab Component (ناوگان خودروها)
+  const FleetVehiclesTab = () => {
+    // Use the already defined fleet vehicles data from top level
+    const readyVehicles = fleetVehicles;
 
     // Create ready vehicle mutation
     const createReadyVehicleMutation = useMutation({
@@ -3539,16 +3534,19 @@ const LogisticsManagement = () => {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Truck className="h-5 w-5 text-green-600" />
-            دایرکتوری خودروهای آماده به کار
-          </h3>
+          <div>
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Truck className="h-5 w-5 text-green-600" />
+              ناوگان خودروهای شرکت
+            </h3>
+            <p className="text-muted-foreground text-sm">مدیریت خودروهای واقعی و آماده شرکت برای اختصاص به سفارشات</p>
+          </div>
           <Button 
             onClick={() => setIsCreateReadyVehicleDialogOpen(true)}
             className="bg-green-600 hover:bg-green-700"
           >
             <Plus className="h-4 w-4 mr-2" />
-            افزودن خودرو آماده
+            افزودن خودرو به ناوگان
           </Button>
         </div>
 
@@ -3558,25 +3556,26 @@ const LogisticsManagement = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>نوع خودرو</TableHead>
-                  <TableHead>شماره خودرو</TableHead>
+                  <TableHead>پلاک خودرو</TableHead>
                   <TableHead>نام راننده</TableHead>
                   <TableHead>موبایل راننده</TableHead>
+                  <TableHead>ظرفیت حمل</TableHead>
                   <TableHead>موقعیت فعلی</TableHead>
-                  <TableHead>وضعیت</TableHead>
-                  <TableHead>حذف</TableHead>
+                  <TableHead>وضعیت دسترسی</TableHead>
+                  <TableHead>عملیات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {readyVehiclesLoading ? (
+                {loadingFleetVehicles ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">در حال بارگذاری...</TableCell>
+                    <TableCell colSpan={8} className="text-center py-8">در حال بارگذاری...</TableCell>
                   </TableRow>
                 ) : readyVehicles.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
+                    <TableCell colSpan={8} className="text-center py-8">
                       <div className="flex flex-col items-center gap-2">
                         <Truck className="h-12 w-12 text-gray-400" />
-                        <p className="text-gray-600">هیچ خودرو آماده‌ای ثبت نشده</p>
+                        <p className="text-gray-600">هیچ خودرویی در ناوگان شرکت ثبت نشده</p>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -3594,6 +3593,12 @@ const LogisticsManagement = () => {
                         <div className="flex items-center gap-1">
                           <Phone className="h-3 w-3 text-blue-600" />
                           <span className="font-mono text-blue-600">{vehicle.driverMobile}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Weight className="h-3 w-3 text-orange-600" />
+                          <span className="font-medium text-orange-600">{vehicle.loadCapacity} کیلوگرم</span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -3646,10 +3651,10 @@ const LogisticsManagement = () => {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Truck className="h-5 w-5 text-green-600" />
-                افزودن خودرو آماده به کار
+                افزودن خودرو به ناوگان شرکت
               </DialogTitle>
               <DialogDescription>
-                اطلاعات خودرو و راننده را برای ثبت در دایرکتوری وارد کنید
+                اطلاعات خودرو و راننده را برای اضافه کردن به ناوگان خودروهای شرکت وارد کنید
               </DialogDescription>
             </DialogHeader>
             
@@ -3765,10 +3770,10 @@ const LogisticsManagement = () => {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Edit className="h-5 w-5 text-blue-600" />
-                ویرایش خودرو آماده
+                ویرایش خودرو ناوگان
               </DialogTitle>
               <DialogDescription>
-                ویرایش اطلاعات خودرو {selectedReadyVehicle?.licensePlate}
+                ویرایش اطلاعات خودرو {selectedReadyVehicle?.licensePlate} در ناوگان شرکت
               </DialogDescription>
             </DialogHeader>
             
@@ -3905,8 +3910,8 @@ const LogisticsManagement = () => {
           <TabsTrigger value="companies">شرکت‌های حمل</TabsTrigger>
           <TabsTrigger value="geography">جغرافیای عراق</TabsTrigger>
           <TabsTrigger value="international">جغرافیای خارج از عراق</TabsTrigger>
-          <TabsTrigger value="vehicles">وسایل نقلیه</TabsTrigger>
-          <TabsTrigger value="ready-vehicles">خودروهای آماده</TabsTrigger>
+          <TabsTrigger value="vehicle-templates">قالب‌های خودرو</TabsTrigger>
+          <TabsTrigger value="fleet-vehicles">ناوگان خودروها</TabsTrigger>
           <TabsTrigger value="postal">خدمات پست</TabsTrigger>
         </TabsList>
 
@@ -3930,12 +3935,12 @@ const LogisticsManagement = () => {
 
 
 
-        <TabsContent value="vehicles">
-          <VehicleOptimizationTab />
+        <TabsContent value="vehicle-templates">
+          <VehicleTemplatesTab />
         </TabsContent>
 
-        <TabsContent value="ready-vehicles">
-          <ReadyVehiclesTab />
+        <TabsContent value="fleet-vehicles">
+          <FleetVehiclesTab />
         </TabsContent>
 
         <TabsContent value="international">
