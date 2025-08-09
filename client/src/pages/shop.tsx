@@ -81,38 +81,8 @@ const Shop = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
 
-  // Track cart session for abandoned cart management
-  const trackCartSession = async (cartData: {[key: number]: number}) => {
-    if (!customer) return;
-    
-    try {
-      const cartItems = Object.entries(cartData).map(([productId, quantity]) => ({
-        productId: parseInt(productId),
-        quantity
-      }));
-      
-      const totalValue = cartItems.reduce((sum, item) => {
-        const product = currentProducts?.find(p => p.id === item.productId);
-        return sum + (product?.price || 0) * item.quantity;
-      }, 0);
-
-      await fetch('/api/cart/session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          sessionId: `session_${Date.now()}`,
-          cartData: cartItems,
-          itemCount: cartItems.length,
-          totalValue: totalValue.toString()
-        })
-      });
-    } catch (error) {
-      console.error('Error tracking cart session:', error);
-    }
-  };
+  // *** CART SESSION TRACKING REMOVED ***
+  // Abandoned cart tracking has been simplified to use only persistent cart system
   const [selectedImageForZoom, setSelectedImageForZoom] = useState<string | null>(null);
   const [selectedProductForZoom, setSelectedProductForZoom] = useState<any>(null);
   const [zoomedImageIndex, setZoomedImageIndex] = useState<number>(0);
@@ -313,12 +283,8 @@ const Shop = () => {
     queryKey: ["/api/shop/categories"],
   });
 
-  // Track cart session for abandoned cart management
-  useEffect(() => {
-    if (customer && Object.keys(cart).length > 0) {
-      trackCartSession(cart);
-    }
-  }, [cart, customer]);
+  // *** CART SESSION TRACKING REMOVED ***
+  // Cart sessions are now handled entirely through persistent cart system
 
   // Load customer info on component mount
   // Use the hook customer data instead of manual API call

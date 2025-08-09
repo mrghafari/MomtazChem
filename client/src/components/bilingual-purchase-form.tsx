@@ -1734,16 +1734,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       {/* Middle Section with Bulk Indicator and Quantity Controls */}
                       <div className="flex flex-col items-center gap-2">
                         {/* خرید عمده با کادر زیبا */}
-                        {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && (
-                          <div className="mb-2">
-                            <div className="px-3 py-1 bg-gradient-to-r from-blue-100 to-green-100 border-2 border-blue-300 rounded-full shadow-sm">
-                              <span className="text-xs font-semibold text-blue-800">
-                                خرید عمده
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                        
                         {/* Quantity Controls */}
                         <div className="flex items-center gap-2">
                           <Button
@@ -1789,7 +1779,16 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     <div className="mt-2 pt-2 border-t space-y-1">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-muted-foreground">Item Total</span>
-                        <span className="font-medium">{formatCurrency(itemTotal)}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{formatCurrency(itemTotal)}</span>
+                          {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && quantity >= product.bulkPurchaseThreshold && (
+                            <div className="px-2 py-0.5 bg-gradient-to-r from-blue-100 to-green-100 border border-blue-300 rounded-full shadow-sm">
+                              <span className="text-xs font-semibold text-blue-800">
+                                خرید عمده
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       {discountedPrice < basePrice && (
                         <div className="flex justify-between items-center text-xs text-green-600">

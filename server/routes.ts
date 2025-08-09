@@ -40277,42 +40277,9 @@ momtazchem.com
     }
   });
 
-  // Track cart session (for logged-in customers)
-  app.post("/api/cart/session", async (req: Request, res: Response) => {
-    try {
-      const { sessionId, cartData, itemCount, totalValue } = req.body;
-      const session = req.session as SessionData;
-      
-      if (!session.customerId) {
-        return res.status(401).json({ success: false, message: "Customer not authenticated" });
-      }
-      
-      // Handle double-encoded JSON strings  
-      let parsedCartData = cartData;
-      if (typeof cartData === 'string') {
-        try {
-          parsedCartData = JSON.parse(cartData);
-        } catch (parseError) {
-          console.error('Cart data JSON parsing error:', parseError);
-          parsedCartData = cartData; // Keep original if parsing fails
-        }
-      }
-
-      const sessionData = {
-        customerId: session.customerId,
-        sessionId,
-        cartData: parsedCartData,
-        itemCount,
-        totalValue: parseFloat(totalValue) || 0
-      };
-      
-      await cartStorage.createOrUpdateCartSession(sessionData);
-      res.json({ success: true, message: "Cart session tracked successfully" });
-    } catch (error) {
-      console.error("Error tracking cart session:", error);
-      res.status(500).json({ success: false, message: "Internal server error" });
-    }
-  });
+  // *** API ENDPOINT REMOVED ***
+  // The /api/cart/session endpoint has been removed to unify cart system
+  // All cart operations now use persistent cart endpoints only
 
   // Send abandoned cart notification
   app.post("/api/admin/abandoned-cart/notify/:cartId", requireAuth, async (req: Request, res: Response) => {
