@@ -411,6 +411,95 @@ class EmailService {
     }
   }
 
+  async sendPaymentRejectionNotification(
+    to: string, 
+    orderData: { orderNumber: string; rejectionReason: string; customerName: string }
+  ): Promise<boolean> {
+    try {
+      const subject = `رد پرداخت سفارش ${orderData.orderNumber} - Momtaz Chemistry`;
+      
+      const htmlContent = `
+        <div style="font-family: 'Tahoma', Arial, sans-serif; direction: rtl; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+          <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #dc2626; margin-bottom: 10px;">اطلاعیه رد پرداخت</h1>
+              <h2 style="color: #2563eb; font-size: 18px;">شرکت ممتاز شیمی</h2>
+            </div>
+            
+            <div style="background-color: #fef2f2; padding: 20px; border-right: 4px solid #dc2626; margin-bottom: 20px;">
+              <h3 style="color: #dc2626; margin-top: 0;">سفارش شما رد شد</h3>
+              <p style="margin: 0; color: #666;">شماره سفارش: <strong style="color: #333;">${orderData.orderNumber}</strong></p>
+            </div>
+
+            <p style="line-height: 1.8; color: #333; font-size: 16px;">
+              ${orderData.customerName} عزیز،
+            </p>
+            
+            <p style="line-height: 1.8; color: #333; margin-bottom: 20px;">
+              متأسفانه پس از بررسی مدارک پرداخت ارسالی شما، سفارش شماره <strong>${orderData.orderNumber}</strong> رد شده است.
+            </p>
+
+            <div style="background-color: #fef7ed; padding: 15px; border-radius: 6px; margin: 20px 0;">
+              <h4 style="color: #ea580c; margin-top: 0;">دلیل رد:</h4>
+              <p style="margin: 0; color: #7c2d12; font-weight: bold;">${orderData.rejectionReason}</p>
+            </div>
+
+            <div style="background-color: #f0f9ff; padding: 20px; border-radius: 6px; margin: 25px 0;">
+              <h4 style="color: #0369a1; margin-top: 0;">برای رفع مشکل:</h4>
+              <ul style="color: #0c4a6e; margin: 0; padding-right: 20px;">
+                <li>مدارک پرداخت صحیح را مجدداً ارسال کنید</li>
+                <li>با تیم پشتیبانی تماس بگیرید</li>
+                <li>از کیفیت تصاویر اطمینان حاصل کنید</li>
+              </ul>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px; padding: 20px; background-color: #f8fafc; border-radius: 6px;">
+              <h4 style="color: #334155; margin-top: 0;">راه‌های تماس</h4>
+              <p style="margin: 5px 0; color: #64748b;">
+                📞 <strong>+964 770 999 6771</strong><br>
+                📧 <strong>support@momtazchem.com</strong><br>
+                🌐 <strong>www.momtazchem.com</strong>
+              </p>
+            </div>
+
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center;">
+              <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                با احترام، تیم مالی شرکت ممتاز شیمی<br>
+                این ایمیل به صورت خودکار ارسال شده است
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const textContent = `
+${orderData.customerName} عزیز،
+
+سفارش شما با شماره ${orderData.orderNumber} رد شده است.
+
+دلیل رد: ${orderData.rejectionReason}
+
+برای رفع مشکل با ما تماس بگیرید:
+تلفن: +964 770 999 6771
+ایمیل: support@momtazchem.com
+
+با احترام،
+تیم مالی شرکت ممتاز شیمی
+      `;
+
+      return await this.sendEmail({
+        to,
+        subject,
+        text: textContent,
+        html: htmlContent
+      }, 'notifications');
+      
+    } catch (error) {
+      console.error('Error sending payment rejection notification:', error);
+      return false;
+    }
+  }
+
   async sendEmail(options: EmailOptions, category: string = 'admin') {
     try {
       const { transporter, config } = await this.createTransporter(category);

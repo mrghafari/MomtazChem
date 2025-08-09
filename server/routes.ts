@@ -7592,16 +7592,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
           orderConfirmed: true
         });
       } else {
-        // Financial department rejected payment - delete order to free up number
-        const deletedOrder = await customerStorage.deleteTemporaryOrder(parseInt(targetOrderId));
-        console.log(`🗑️ [GRACE PERIOD REJECTED] Order ${orderNumber} rejected by financial department - order deleted`);
+        // Financial department rejected payment - DO NOT DELETE, just update status and notify customer
+        const { rejectionReason } = req.body;
+        
+        await db
+          .update(customerOrders)
+          .set({
+            paymentStatus: 'rejected',
+            status: 'payment_rejected',
+            rejectionReason: rejectionReason || 'مدارک ارسالی نامعتبر یا ناکافی است',
+            updatedAt: new Date()
+          })
+          .where(eq(customerOrders.id, parseInt(targetOrderId)));
+
+        console.log(`❌ [GRACE PERIOD REJECTED] Order ${orderNumber} rejected by financial department - status updated, order preserved`);
+        
+        // Send notification to customer about rejection reason
+        try {
+          const { emailService } = await import('./email-service');
+          const orderDetails = await db
+            .select()
+            .from(customerOrders)
+            .where(eq(customerOrders.id, parseInt(targetOrderId)))
+            .limit(1);
+          
+          if (orderDetails.length > 0) {
+            const order = orderDetails[0];
+            await emailService.sendPaymentRejectionNotification(
+              order.customerEmail || 'info@momtazchem.com',
+              {
+                orderNumber: orderNumber,
+                rejectionReason: rejectionReason || 'مدارک ارسالی نامعتبر یا ناکافی است',
+                customerName: order.customerName || 'مشتری گرامی'
+              }
+            );
+            console.log(`📧 [REJECTION NOTIFICATION] Email sent to customer about payment rejection`);
+          }
+        } catch (notificationError) {
+          console.error(`❌ [REJECTION NOTIFICATION] Failed to send email:`, notificationError);
+        }
         
         return res.json({
           success: true,
-          message: "پرداخت رد شد و سفارش حذف شد",
-          orderDeleted: true,
+          message: "پرداخت رد شد و به مشتری اطلاع‌رسانی شد - سفارش حفظ شد",
+          orderRejected: true,
           orderNumber: orderNumber,
-          inventoryRestored: deletedOrder.releasedProducts?.length || 0
+          rejectionReason: rejectionReason || 'مدارک ارسالی نامعتبر یا ناکافی است'
         });
       }
       

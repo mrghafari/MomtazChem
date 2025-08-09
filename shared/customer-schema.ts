@@ -179,6 +179,9 @@ export const customerOrders = pgTable("customer_orders", {
   invoiceType: text("invoice_type").default("proforma"), // proforma, official_invoice
   invoiceConvertedAt: timestamp("invoice_converted_at"), // When proforma was converted to official invoice
   
+  // Payment rejection tracking
+  rejectionReason: text("rejection_reason"), // Reason for payment rejection by financial department
+  
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
