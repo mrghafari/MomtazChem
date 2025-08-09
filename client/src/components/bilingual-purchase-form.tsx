@@ -248,21 +248,67 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet' | 'wallet_full' | 'wallet_partial' | 'wallet_combined' | 'bank_transfer_grace' | 'bank_receipt'>('online_payment');
 
+  // FAIL-SAFE: Hardcoded fallback payment methods to ensure checkout never breaks
+  const FALLBACK_PAYMENT_METHODS = [
+    {
+      id: 1,
+      methodKey: 'online_payment',
+      methodName: 'پرداخت آنلاین (کارت بانکی)',
+      methodNameEn: 'Online Payment (Bank Card)',
+      enabled: true,
+      priority: 4,
+      description: 'پرداخت مستقیم از طریق درگاه بانکی'
+    },
+    {
+      id: 2,
+      methodKey: 'wallet',
+      methodName: 'استفاده از کیف پول',
+      methodNameEn: 'Digital Wallet',
+      enabled: true,
+      priority: 3,
+      description: 'پرداخت از موجودی کیف پول دیجیتال'
+    },
+    {
+      id: 4,
+      methodKey: 'bank_transfer_grace',
+      methodName: 'انتقال بانکی با مهلت 3 روزه',
+      methodNameEn: 'Bank Transfer with 3-Day Grace',
+      enabled: true,
+      priority: 1,
+      description: 'سفارش قفل شده با مهلت 3 روز برای واریز'
+    }
+  ];
+
   // Fetch available payment methods from admin settings (public endpoint)
-  const { data: paymentMethodsResponse, isLoading: isLoadingPaymentMethods } = useQuery<{success: boolean, data: any[]}>({
+  const { data: paymentMethodsResponse, isLoading: isLoadingPaymentMethods, error: paymentMethodsError } = useQuery<{success: boolean, data: any[]}>({
     queryKey: ['/api/public/payment-methods'],
+    retry: 3,
+    retryDelay: 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const availablePaymentMethods = paymentMethodsResponse?.data || [];
+  // ROBUST PAYMENT METHODS: Use API data if available, fallback if needed
+  const availablePaymentMethods = useMemo(() => {
+    // If API response is successful and has data, use it
+    if (paymentMethodsResponse?.success && Array.isArray(paymentMethodsResponse.data) && paymentMethodsResponse.data.length > 0) {
+      return paymentMethodsResponse.data.filter(method => method.enabled);
+    }
+    
+    // FAIL-SAFE: Use hardcoded fallback to ensure checkout never breaks
+    console.warn('🛡️ [PAYMENT METHODS FAIL-SAFE] Using fallback payment methods');
+    return FALLBACK_PAYMENT_METHODS;
+  }, [paymentMethodsResponse]);
 
-  // Debug payment methods
+  // Debug payment methods (but don't log sensitive data in production)
   useEffect(() => {
-    console.log('🔍 [PAYMENT METHODS DEBUG] Response:', paymentMethodsResponse);
-    console.log('🔍 [PAYMENT METHODS DEBUG] Available methods:', availablePaymentMethods);
-    console.log('🔍 [PAYMENT METHODS DEBUG] Is array:', Array.isArray(availablePaymentMethods));
-    console.log('🔍 [PAYMENT METHODS DEBUG] Length:', availablePaymentMethods?.length);
-    console.log('🔍 [PAYMENT METHODS DEBUG] Loading:', isLoadingPaymentMethods);
-  }, [paymentMethodsResponse, availablePaymentMethods, isLoadingPaymentMethods]);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 [PAYMENT METHODS DEBUG] Response:', paymentMethodsResponse);
+      console.log('🔍 [PAYMENT METHODS DEBUG] Available methods:', availablePaymentMethods);
+      console.log('🔍 [PAYMENT METHODS DEBUG] Length:', availablePaymentMethods?.length);
+      console.log('🔍 [PAYMENT METHODS DEBUG] Loading:', isLoadingPaymentMethods);
+      console.log('🔍 [PAYMENT METHODS DEBUG] Error:', paymentMethodsError);
+    }
+  }, [paymentMethodsResponse, availablePaymentMethods, isLoadingPaymentMethods, paymentMethodsError]);
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
@@ -2118,29 +2164,23 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               </div>
             )}
 
-              {/* Payment Options */}
+              {/* Payment Options - FAIL-SAFE GUARANTEED */}
               <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as any)} className="space-y-3">
-                {/* Dynamic payment methods based on admin settings */}
-                {Array.isArray(availablePaymentMethods) && availablePaymentMethods.length > 0 ? (
-                  availablePaymentMethods.map((method: any) => {
-                    if (method.methodKey === 'online_payment') {
-                      return (
-                        <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
-                          <RadioGroupItem value="online_payment" id="online_payment" />
-                          <Label htmlFor="online_payment" className="flex items-center gap-2 cursor-pointer">
-                            <CreditCard className="w-4 h-4 text-blue-600" />
-                            <span className="font-semibold">{method.methodName}</span>
-                          </Label>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })
-                ) : isLoadingPaymentMethods ? (
-                  <div className="text-gray-500 text-sm">در حال بارگذاری روش‌های پرداخت...</div>
-                ) : (
-                  <div className="text-red-500 text-sm">خطا در بارگذاری روش‌های پرداخت</div>
-                )}
+                {/* ROBUST: Always render payment methods - either from API or fallback */}
+                {availablePaymentMethods.map((method: any) => {
+                  if (method.methodKey === 'online_payment') {
+                    return (
+                      <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
+                        <RadioGroupItem value="online_payment" id="online_payment" />
+                        <Label htmlFor="online_payment" className="flex items-center gap-2 cursor-pointer">
+                          <CreditCard className="w-4 h-4 text-blue-600" />
+                          <span className="font-semibold">{method.methodName}</span>
+                        </Label>
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
                 
                 {/* دوم: پرداخت از کیف پول (تمام یا بخش از آن) */}
                 {canUseWallet && isWalletEnabledInSettings && (
@@ -2154,43 +2194,48 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 )}
                 
                 
-                {/* Dynamic other payment methods */}
-                {Array.isArray(availablePaymentMethods) && availablePaymentMethods.length > 0 && 
-                  availablePaymentMethods.map((method: any) => {
-                    if (method.methodKey === 'bank_transfer_grace') {
-                      return (
-                        <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
-                          <RadioGroupItem 
-                            value="bank_transfer_grace" 
-                            id="bank_transfer_grace"
-                          />
-                          <Label htmlFor="bank_transfer_grace" className="flex items-center gap-2 cursor-pointer">
-                            <Clock className="w-4 h-4 text-amber-600" />
-                            {method.methodName}
-                          </Label>
-                          <span className="text-xs text-amber-600 mr-2">
-                            {method.description}
-                          </span>
-                        </div>
-                      );
-                    } else if (method.methodKey === 'bank_receipt') {
-                      // bank_receipt is not a standalone payment method - it's part of bank transfer
-                      return null;
-                    } else if (method.methodKey === 'wallet' && method.enabled) {
-                      // Display wallet option from admin settings if enabled
-                      return (
-                        <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
-                          <RadioGroupItem value="wallet" id="wallet" />
-                          <Label htmlFor="wallet" className="flex items-center gap-2 cursor-pointer">
-                            <Wallet className="w-4 h-4 text-green-600" />
-                            {method.methodName}
-                          </Label>
-                        </div>
-                      );
-                    }
+                {/* ROBUST: Other payment methods - guaranteed to render */}
+                {availablePaymentMethods.map((method: any) => {
+                  if (method.methodKey === 'bank_transfer_grace') {
+                    return (
+                      <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
+                        <RadioGroupItem 
+                          value="bank_transfer_grace" 
+                          id="bank_transfer_grace"
+                        />
+                        <Label htmlFor="bank_transfer_grace" className="flex items-center gap-2 cursor-pointer">
+                          <Clock className="w-4 h-4 text-amber-600" />
+                          {method.methodName}
+                        </Label>
+                        <span className="text-xs text-amber-600 mr-2">
+                          {method.description}
+                        </span>
+                      </div>
+                    );
+                  } else if (method.methodKey === 'bank_receipt') {
+                    // bank_receipt is not a standalone payment method - it's part of bank transfer
                     return null;
-                  })
-                }
+                  } else if (method.methodKey === 'wallet' && method.enabled) {
+                    // Display wallet option from admin settings if enabled
+                    return (
+                      <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
+                        <RadioGroupItem value="wallet" id="wallet" />
+                        <Label htmlFor="wallet" className="flex items-center gap-2 cursor-pointer">
+                          <Wallet className="w-4 h-4 text-green-600" />
+                          {method.methodName}
+                        </Label>
+                      </div>
+                    );
+                  }
+                  return null;
+                })
+
+                /* FAIL-SAFE INDICATOR: Show if using fallback */}
+                {(!paymentMethodsResponse?.success) && (
+                  <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                    ⚠️ از روش‌های پرداخت پیش‌فرض استفاده می‌شود
+                  </div>
+                )}
 
 
               </RadioGroup>
