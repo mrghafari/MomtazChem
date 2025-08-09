@@ -438,6 +438,15 @@ const LogisticsManagement = () => {
     enabled: true
   });
 
+  // Admin authentication check
+  const { data: adminUser, isLoading: loadingUser } = useQuery({
+    queryKey: ['/api/admin/me'],
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  const user = adminUser?.user;
+
   // Company information query for logo
   const { data: companyInfo } = useQuery({
     queryKey: ['/api/company-information'],
