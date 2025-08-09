@@ -249,16 +249,33 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet' | 'wallet_full' | 'wallet_partial' | 'wallet_combined' | 'bank_transfer_grace' | 'bank_receipt'>('online_payment');
 
   // Use internal cart state that syncs with prop
-  const [internalCart, setInternalCart] = useState(cart);
+  const [internalCart, setInternalCart] = useState(() => {
+    console.log('🛒 [PURCHASE FORM INIT] Initializing with cart:', cart);
+    return cart;
+  });
 
-  // Sync internal cart with prop changes
+  // Sync internal cart with prop changes - more aggressive sync
   useEffect(() => {
-    console.log('🛒 [PURCHASE FORM SYNC] Cart prop changed:', cart);
+    console.log('🛒 [PURCHASE FORM SYNC] Cart prop changed from', internalCart, 'to', cart);
     setInternalCart(cart);
   }, [cart]);
 
-  // Debug cart sync issue - remove after testing
-  console.log('🛒 [PURCHASE FORM SYNC DEBUG] Cart synced successfully:', Object.values(internalCart).reduce((sum, qty) => sum + qty, 0), 'items');
+  // Force re-sync if cart has items but internalCart is empty
+  useEffect(() => {
+    const cartTotal = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+    const internalTotal = Object.values(internalCart).reduce((sum, qty) => sum + qty, 0);
+    
+    if (cartTotal > 0 && internalTotal === 0) {
+      console.log('🛒 [PURCHASE FORM FORCE SYNC] Cart has items but internal is empty, forcing sync');
+      setInternalCart(cart);
+    }
+  }, [cart, internalCart]);
+
+  // Debug cart sync issue - enhanced debugging
+  console.log('🛒 [PURCHASE FORM DEBUG] Cart prop total:', Object.values(cart).reduce((sum, qty) => sum + qty, 0));
+  console.log('🛒 [PURCHASE FORM DEBUG] Internal cart total:', Object.values(internalCart).reduce((sum, qty) => sum + qty, 0));
+  console.log('🛒 [PURCHASE FORM DEBUG] Cart prop keys:', Object.keys(cart));
+  console.log('🛒 [PURCHASE FORM DEBUG] Internal cart keys:', Object.keys(internalCart));
 
   // Fetch available payment methods from admin settings (public endpoint)
   const { data: availablePaymentMethods = [] } = useQuery<any[]>({
