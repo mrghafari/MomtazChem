@@ -1837,20 +1837,20 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 
                 if (hasBulkPurchase) {
                   return (
-                    <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
-                      <div className="flex items-start gap-3">
+                    <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200" dir="rtl">
+                      <div className="flex items-start gap-3 flex-row-reverse">
                         <Truck className="w-5 h-5 text-green-600 mt-0.5" />
-                        <div className="flex-1">
-                          <h4 className="text-sm font-semibold text-green-800 mb-1">
+                        <div className="flex-1 text-right">
+                          <h4 className="text-sm font-semibold text-green-800 mb-1 text-right">
                             💡 پیشنهاد ویژه خرید عمده
                           </h4>
-                          <p className="text-sm text-green-700 mb-2">
+                          <p className="text-sm text-green-700 mb-2 text-right">
                             با توجه به اینکه سفارش شما خرید عمده است، پیشنهاد می‌دهیم:
                           </p>
-                          <ul className="text-sm text-green-700 space-y-1 mr-4">
-                            <li>• خودرو خودتان را بیاورید و هزینه حمل صرفه‌جویی کنید</li>
-                            <li>• از گزینه "حمل توسط خودم" استفاده کنید</li>
-                            <li>• با تیم لجستیک برای هماهنگی تماس بگیرید</li>
+                          <ul className="text-sm text-green-700 space-y-1 ml-4 text-right">
+                            <li className="text-right">• خودرو خودتان را بیاورید و هزینه حمل صرفه‌جویی کنید</li>
+                            <li className="text-right">• از گزینه "حمل توسط خودم" استفاده کنید</li>
+                            <li className="text-right">• با تیم لجستیک برای هماهنگی تماس بگیرید</li>
                           </ul>
                         </div>
                       </div>
