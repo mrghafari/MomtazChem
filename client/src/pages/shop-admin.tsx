@@ -44,6 +44,7 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { ShopProduct, Customer, Order } from "@shared/shop-schema";
@@ -889,9 +890,23 @@ export default function ShopAdmin() {
                           </SelectTrigger>
                           <SelectContent>
                             {Array.isArray(smsTemplates) && smsTemplates.map((template: any) => (
-                              <SelectItem key={template.id} value={template.id.toString()}>
-                                {template.templateNumber} - {template.templateName}
-                              </SelectItem>
+                              <TooltipProvider key={template.id}>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <SelectItem value={template.id.toString()}>
+                                      {template.templateNumber} - {template.templateName}
+                                    </SelectItem>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-sm p-3" side="right">
+                                    <div className="space-y-1">
+                                      <p className="font-medium text-sm">محتوای پیامک:</p>
+                                      <p className="text-xs text-gray-700 whitespace-pre-wrap">
+                                        {template.templateText || 'محتوای پیامک در دسترس نیست'}
+                                      </p>
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                             ))}
                           </SelectContent>
                         </Select>
@@ -904,9 +919,27 @@ export default function ShopAdmin() {
                           </SelectTrigger>
                           <SelectContent>
                             {Array.isArray(emailTemplates) && emailTemplates.map((template: any) => (
-                              <SelectItem key={template.id} value={template.id.toString()}>
-                                {template.name} ({template.category})
-                              </SelectItem>
+                              <TooltipProvider key={template.id}>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <SelectItem value={template.id.toString()}>
+                                      {template.name} ({template.category})
+                                    </SelectItem>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-sm p-3" side="right">
+                                    <div className="space-y-1">
+                                      <p className="font-medium text-sm">عنوان ایمیل:</p>
+                                      <p className="text-xs text-gray-700">
+                                        {template.subject || 'عنوان در دسترس نیست'}
+                                      </p>
+                                      <p className="font-medium text-sm mt-2">محتوای ایمیل:</p>
+                                      <p className="text-xs text-gray-700 whitespace-pre-wrap max-h-32 overflow-y-auto">
+                                        {template.content || 'محتوای ایمیل در دسترس نیست'}
+                                      </p>
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                             ))}
                           </SelectContent>
                         </Select>
@@ -934,10 +967,61 @@ export default function ShopAdmin() {
                             {(schedule.sms_template_id || schedule.email_template_id) && (
                               <div className="flex items-center space-x-1 space-x-reverse text-xs text-blue-600">
                                 {schedule.sms_template_id && (
-                                  <span className="bg-blue-100 px-2 py-1 rounded">پیامک: {schedule.sms_template_id}</span>
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="bg-blue-100 px-2 py-1 rounded cursor-help">
+                                          پیامک: {(() => {
+                                            const template = Array.isArray(smsTemplates) && smsTemplates.find((t: any) => t.id === schedule.sms_template_id);
+                                            return template ? `${template.templateNumber} - ${template.templateName}` : schedule.sms_template_id;
+                                          })()}
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent className="max-w-sm p-3" side="top">
+                                        <div className="space-y-1">
+                                          <p className="font-medium text-sm">محتوای پیامک:</p>
+                                          <p className="text-xs text-gray-700 whitespace-pre-wrap">
+                                            {(() => {
+                                              const template = Array.isArray(smsTemplates) && smsTemplates.find((t: any) => t.id === schedule.sms_template_id);
+                                              return template?.templateText || 'محتوای پیامک در دسترس نیست';
+                                            })()}
+                                          </p>
+                                        </div>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
                                 )}
                                 {schedule.email_template_id && (
-                                  <span className="bg-green-100 px-2 py-1 rounded">ایمیل: {schedule.email_template_id}</span>
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="bg-green-100 px-2 py-1 rounded cursor-help">
+                                          ایمیل: {(() => {
+                                            const template = Array.isArray(emailTemplates) && emailTemplates.find((t: any) => t.id === schedule.email_template_id);
+                                            return template ? `${template.name} (${template.category})` : schedule.email_template_id;
+                                          })()}
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent className="max-w-sm p-3" side="top">
+                                        <div className="space-y-1">
+                                          <p className="font-medium text-sm">عنوان ایمیل:</p>
+                                          <p className="text-xs text-gray-700">
+                                            {(() => {
+                                              const template = Array.isArray(emailTemplates) && emailTemplates.find((t: any) => t.id === schedule.email_template_id);
+                                              return template?.subject || 'عنوان در دسترس نیست';
+                                            })()}
+                                          </p>
+                                          <p className="font-medium text-sm mt-2">محتوای ایمیل:</p>
+                                          <p className="text-xs text-gray-700 whitespace-pre-wrap max-h-32 overflow-y-auto">
+                                            {(() => {
+                                              const template = Array.isArray(emailTemplates) && emailTemplates.find((t: any) => t.id === schedule.email_template_id);
+                                              return template?.content || 'محتوای ایمیل در دسترس نیست';
+                                            })()}
+                                          </p>
+                                        </div>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
                                 )}
                               </div>
                             )}
@@ -1032,9 +1116,23 @@ export default function ShopAdmin() {
                       <SelectContent>
                         <SelectItem value="">بدون قالب</SelectItem>
                         {Array.isArray(smsTemplates) && smsTemplates.map((template: any) => (
-                          <SelectItem key={template.id} value={template.id.toString()}>
-                            {template.templateNumber} - {template.templateName}
-                          </SelectItem>
+                          <TooltipProvider key={template.id}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <SelectItem value={template.id.toString()}>
+                                  {template.templateNumber} - {template.templateName}
+                                </SelectItem>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-sm p-3" side="right">
+                                <div className="space-y-1">
+                                  <p className="font-medium text-sm">محتوای پیامک:</p>
+                                  <p className="text-xs text-gray-700 whitespace-pre-wrap">
+                                    {template.templateText || 'محتوای پیامک در دسترس نیست'}
+                                  </p>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         ))}
                       </SelectContent>
                     </Select>
@@ -1049,9 +1147,27 @@ export default function ShopAdmin() {
                       <SelectContent>
                         <SelectItem value="">بدون قالب</SelectItem>
                         {Array.isArray(emailTemplates) && emailTemplates.map((template: any) => (
-                          <SelectItem key={template.id} value={template.id.toString()}>
-                            {template.name} ({template.category})
-                          </SelectItem>
+                          <TooltipProvider key={template.id}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <SelectItem value={template.id.toString()}>
+                                  {template.name} ({template.category})
+                                </SelectItem>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-sm p-3" side="right">
+                                <div className="space-y-1">
+                                  <p className="font-medium text-sm">عنوان ایمیل:</p>
+                                  <p className="text-xs text-gray-700">
+                                    {template.subject || 'عنوان در دسترس نیست'}
+                                  </p>
+                                  <p className="font-medium text-sm mt-2">محتوای ایمیل:</p>
+                                  <p className="text-xs text-gray-700 whitespace-pre-wrap max-h-32 overflow-y-auto">
+                                    {template.content || 'محتوای ایمیل در دسترس نیست'}
+                                  </p>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         ))}
                       </SelectContent>
                     </Select>
