@@ -2165,6 +2165,17 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         </Label>
                       </div>
                     );
+                  } else if (method.methodKey === 'wallet' && method.enabled) {
+                    // Display wallet option from admin settings if enabled
+                    return (
+                      <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
+                        <RadioGroupItem value="wallet" id="wallet" />
+                        <Label htmlFor="wallet" className="flex items-center gap-2 cursor-pointer">
+                          <Wallet className="w-4 h-4 text-green-600" />
+                          {method.methodName}
+                        </Label>
+                      </div>
+                    );
                   }
                   return null;
                 })}
