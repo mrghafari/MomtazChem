@@ -2174,15 +2174,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         </div>
                       );
                     } else if (method.methodKey === 'bank_receipt') {
-                      return (
-                        <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
-                          <RadioGroupItem value="bank_receipt" id="bank_receipt" />
-                          <Label htmlFor="bank_receipt" className="flex items-center gap-2 cursor-pointer">
-                            <Upload className="w-4 h-4 text-orange-600" />
-                            {method.methodName}
-                          </Label>
-                        </div>
-                      );
+                      // bank_receipt is not a standalone payment method - it's part of bank transfer
+                      return null;
                     } else if (method.methodKey === 'wallet' && method.enabled) {
                       // Display wallet option from admin settings if enabled
                       return (
