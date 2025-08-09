@@ -252,6 +252,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const { data: availablePaymentMethods = [] } = useQuery<any[]>({
     queryKey: ['/api/public/payment-methods'],
   });
+
+  // Debug payment methods
+  useEffect(() => {
+    console.log('🔍 [PAYMENT METHODS DEBUG] Available methods:', availablePaymentMethods);
+    console.log('🔍 [PAYMENT METHODS DEBUG] Is array:', Array.isArray(availablePaymentMethods));
+    console.log('🔍 [PAYMENT METHODS DEBUG] Length:', availablePaymentMethods?.length);
+  }, [availablePaymentMethods]);
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
