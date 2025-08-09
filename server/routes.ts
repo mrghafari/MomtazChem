@@ -10578,11 +10578,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
           {
             methodKey: 'bank_transfer_grace',
-            methodName: 'انتقال بانکی با مهلت 3 روزه',
-            methodNameEn: 'Bank Transfer with 3-Day Grace',
+            methodName: 'پرداخت به روش حواله',
+            methodNameEn: 'Bank Transfer Payment',
             enabled: true,
             priority: 1,
-            description: 'سفارش قفل شده با مهلت 3 روز برای واریز'
+            description: 'پرداخت به روش حواله با مهلت مشخص'
           }
         ];
         
@@ -10735,11 +10735,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         {
           methodKey: 'bank_transfer_grace',
-          methodName: 'انتقال بانکی با مهلت 3 روزه',
-          methodNameEn: 'Bank Transfer with 3-Day Grace',
+          methodName: 'پرداخت به روش حواله',
+          methodNameEn: 'Bank Transfer Payment',
           enabled: true,
           priority: 1,
-          description: 'سفارش قفل شده با مهلت 3 روز برای واریز',
+          description: 'پرداخت به روش حواله با مهلت قابل تنظیم',
           config: { gracePeriodDays: 3, requiresManualApproval: true }
         }
       ];

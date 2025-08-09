@@ -2005,13 +2005,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         />
                         <Label htmlFor="bank_transfer_grace" className="flex items-center gap-2 cursor-pointer">
                           <Clock className="w-4 h-4 text-amber-600" />
-                          {method.methodName}
+                          <span className="font-semibold">پرداخت به روش حواله با مهلت {proformaDeadlineDays} روزه</span>
                         </Label>
-                        <span className="text-xs text-amber-600 mr-2">
-                          {method.methodKey === 'bank_transfer_grace' 
-                            ? `پرداخت به روش حواله با مهلت ${proformaDeadlineDays} روزه`
-                            : method.description}
-                        </span>
                       </div>
                     );
                   } else if (method.methodKey === 'bank_receipt') {
