@@ -29,7 +29,9 @@ import {
   Mail,
   Receipt,
   Building,
-  Clock
+  Clock,
+  AlertCircle,
+  Save,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,6 +43,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { ShopProduct, Customer, Order } from "@shared/shop-schema";
@@ -59,6 +62,7 @@ export default function ShopAdmin() {
   const [showReturnForm, setShowReturnForm] = useState(false);
   const [showReturnDialog, setShowReturnDialog] = useState(false);
   const [selectedReturn, setSelectedReturn] = useState<any>(null);
+  const [proformaDeadlineDays, setProformaDeadlineDays] = useState("3");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
@@ -70,6 +74,16 @@ export default function ShopAdmin() {
       setLocation("/admin/login");
     }
   }, [authLoading, isAuthenticated, setLocation]);
+
+  // Load existing proforma deadline settings
+  useEffect(() => {
+    if (shopSettings.length > 0) {
+      const proformaDeadline = shopSettings.find((s: any) => s.settingKey === 'proforma_deadline_days');
+      if (proformaDeadline) {
+        setProformaDeadlineDays(proformaDeadline.settingValue);
+      }
+    }
+  }, [shopSettings]);
 
   // Fetch shop statistics
   const { data: stats = {} } = useQuery({
@@ -119,6 +133,44 @@ export default function ShopAdmin() {
   const { data: transactions = [] } = useQuery({
     queryKey: ["/api/shop/financial-transactions"],
     enabled: isAuthenticated,
+  });
+
+  // Fetch shop settings for proforma deadline
+  const { data: shopSettings = [], isLoading: settingsLoading } = useQuery({
+    queryKey: ['/api/shop/settings'],
+    enabled: isAuthenticated,
+  });
+
+  // Save proforma deadline mutation
+  const saveProformaDeadlineMutation = useMutation({
+    mutationFn: async (days: string) => {
+      const settings = [{
+        settingKey: 'proforma_deadline_days',
+        settingValue: days,
+        settingType: 'number',
+        displayName: 'Purchase Proforma Deadline (Days)',
+        description: 'Number of days for proforma payment deadline',
+        category: 'payment',
+        isPublic: true,
+        validationRule: 'min:1,max:30',
+        defaultValue: '3'
+      }];
+      return await apiRequest('/api/shop/settings', { method: 'POST', body: { settings } });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Proforma deadline updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/shop/settings'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update proforma deadline",
+        variant: "destructive",
+      });
+    },
   });
 
   // Update order status mutation
@@ -288,10 +340,11 @@ export default function ShopAdmin() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="discounts">Discount Settings</TabsTrigger>
             <TabsTrigger value="bulk-purchases">Bulk Purchases</TabsTrigger>
+            <TabsTrigger value="proforma-deadline">Purchase Proforma Deadline</TabsTrigger>
             <TabsTrigger value="inventory">Inventory</TabsTrigger>
             <TabsTrigger value="invoices">Invoice Management</TabsTrigger>
             <TabsTrigger value="returns">Returned Items</TabsTrigger>
@@ -576,6 +629,70 @@ export default function ShopAdmin() {
                       />
                     ))
                   )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Purchase Proforma Deadline Tab */}
+          <TabsContent value="proforma-deadline" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Purchase Proforma Deadline Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    This setting applies to all products in the shop and displays in checkout and purchase cards.
+                  </AlertDescription>
+                </Alert>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="proforma_deadline">Payment Deadline (Days)</Label>
+                    <Input
+                      id="proforma_deadline"
+                      type="number"
+                      min="1"
+                      max="30"
+                      value={proformaDeadlineDays}
+                      onChange={(e) => setProformaDeadlineDays(e.target.value)}
+                      placeholder="3"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Number of days for payment deadline (minimum 1 day, maximum 30 days)
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Preview Message</Label>
+                    <div className="p-3 bg-muted rounded-md">
+                      <p className="text-sm">
+                        Payment deadline: <strong>{proformaDeadlineDays} days</strong>
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        This message displays in purchase cards and checkout page
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end mt-6">
+                  <Button 
+                    onClick={() => saveProformaDeadlineMutation.mutate(proformaDeadlineDays)}
+                    disabled={saveProformaDeadlineMutation.isPending}
+                    className="flex items-center gap-2"
+                  >
+                    {saveProformaDeadlineMutation.isPending ? (
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4" />
+                    )}
+                    {saveProformaDeadlineMutation.isPending ? 'Saving...' : 'Save Settings'}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
