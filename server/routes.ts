@@ -66,16 +66,22 @@ import {
   deliveryPersonnel,
   deliveryRoutes,
   logisticsAnalytics,
+  vehicleDeliveryHistory,
+  vehicleUsageStats,
   insertTransportationCompanySchema,
   insertDeliveryVehicleSchema,
   insertDeliveryPersonnelSchema,
   insertDeliveryRouteSchema,
   insertDeliveryVerificationCodeSchema,
+  insertVehicleDeliveryHistorySchema,
+  insertVehicleUsageStatsSchema,
   type TransportationCompany,
   type DeliveryVehicle,
   type DeliveryPersonnel,
   type DeliveryRoute,
   type DeliveryVerificationCode,
+  type VehicleDeliveryHistory,
+  type VehicleUsageStats,
   VEHICLE_TYPES,
   DELIVERY_STATUS,
   ROUTE_STATUS,
@@ -17579,6 +17585,238 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // =============================================================================
+  // VEHICLE DELIVERY HISTORY MANAGEMENT
+  // =============================================================================
+
+  // Get vehicle delivery history
+  app.get("/api/logistics/vehicle-history", requireAuth, async (req, res) => {
+    try {
+      const { plateNumber, page = 1, limit = 20, startDate, endDate } = req.query;
+      const offset = (parseInt(page.toString()) - 1) * parseInt(limit.toString());
+      
+      let query = db.select().from(vehicleDeliveryHistory);
+      let whereConditions = [];
+      
+      if (plateNumber) {
+        whereConditions.push(eq(vehicleDeliveryHistory.plateNumber, plateNumber.toString()));
+      }
+      
+      if (startDate) {
+        whereConditions.push(gte(vehicleDeliveryHistory.deliveryDateTime, new Date(startDate.toString())));
+      }
+      
+      if (endDate) {
+        whereConditions.push(sql`${vehicleDeliveryHistory.deliveryDateTime} <= ${new Date(endDate.toString())}`);
+      }
+      
+      if (whereConditions.length > 0) {
+        query = query.where(and(...whereConditions));
+      }
+      
+      const history = await query
+        .orderBy(desc(vehicleDeliveryHistory.deliveryDateTime))
+        .limit(parseInt(limit.toString()))
+        .offset(offset);
+        
+      // Get total count for pagination
+      let countQuery = db.select({ count: sql<number>`count(*)` }).from(vehicleDeliveryHistory);
+      if (whereConditions.length > 0) {
+        countQuery = countQuery.where(and(...whereConditions));
+      }
+      const [{ count }] = await countQuery;
+      
+      res.json({
+        success: true,
+        data: history,
+        pagination: {
+          page: parseInt(page.toString()),
+          limit: parseInt(limit.toString()),
+          total: count,
+          totalPages: Math.ceil(count / parseInt(limit.toString()))
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching vehicle delivery history:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch vehicle delivery history" 
+      });
+    }
+  });
+
+  // Get vehicle usage statistics
+  app.get("/api/logistics/vehicle-stats", requireAuth, async (req, res) => {
+    try {
+      const { plateNumber } = req.query;
+      
+      let query = db.select().from(vehicleUsageStats);
+      
+      if (plateNumber) {
+        query = query.where(eq(vehicleUsageStats.plateNumber, plateNumber.toString()));
+      }
+      
+      const stats = await query.orderBy(desc(vehicleUsageStats.totalDeliveries));
+      
+      res.json({
+        success: true,
+        data: stats
+      });
+    } catch (error) {
+      console.error("Error fetching vehicle usage stats:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch vehicle usage stats" 
+      });
+    }
+  });
+
+  // Add vehicle delivery history record
+  app.post("/api/logistics/vehicle-history", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertVehicleDeliveryHistorySchema.parse(req.body);
+      
+      const [newRecord] = await db.insert(vehicleDeliveryHistory)
+        .values(validatedData)
+        .returning();
+        
+      // Update vehicle usage stats
+      await updateVehicleUsageStats(newRecord.plateNumber);
+      
+      res.json({
+        success: true,
+        message: "Vehicle delivery history record added successfully",
+        data: newRecord
+      });
+    } catch (error) {
+      console.error("Error adding vehicle delivery history:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to add vehicle delivery history record" 
+      });
+    }
+  });
+
+  // Get vehicle delivery summary by plate number
+  app.get("/api/logistics/vehicle-summary/:plateNumber", requireAuth, async (req, res) => {
+    try {
+      const plateNumber = req.params.plateNumber;
+      
+      // Get vehicle stats
+      const [vehicleStats] = await db.select()
+        .from(vehicleUsageStats)
+        .where(eq(vehicleUsageStats.plateNumber, plateNumber));
+        
+      // Get recent deliveries (last 10)
+      const recentDeliveries = await db.select()
+        .from(vehicleDeliveryHistory)
+        .where(eq(vehicleDeliveryHistory.plateNumber, plateNumber))
+        .orderBy(desc(vehicleDeliveryHistory.deliveryDateTime))
+        .limit(10);
+        
+      // Get vehicle details
+      const [vehicle] = await db.select()
+        .from(deliveryVehicles)
+        .where(eq(deliveryVehicles.plateNumber, plateNumber));
+      
+      res.json({
+        success: true,
+        data: {
+          vehicle,
+          stats: vehicleStats,
+          recentDeliveries
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching vehicle summary:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch vehicle summary" 
+      });
+    }
+  });
+
+  // Function to update vehicle usage statistics
+  async function updateVehicleUsageStats(plateNumber: string) {
+    try {
+      // Get vehicle ID
+      const [vehicle] = await db.select()
+        .from(deliveryVehicles)
+        .where(eq(deliveryVehicles.plateNumber, plateNumber));
+        
+      if (!vehicle) return;
+      
+      // Calculate stats from delivery history
+      const statsQuery = await db.select({
+        totalDeliveries: sql<number>`count(*)`,
+        successfulDeliveries: sql<number>`count(*) filter (where delivery_status = 'completed')`,
+        failedDeliveries: sql<number>`count(*) filter (where delivery_status = 'failed')`,
+        cancelledDeliveries: sql<number>`count(*) filter (where delivery_status = 'cancelled')`,
+        totalDistance: sql<number>`coalesce(sum(delivery_distance), 0)`,
+        totalWeight: sql<number>`coalesce(sum(total_weight), 0)`,
+        totalRevenue: sql<number>`coalesce(sum(delivery_cost), 0)`,
+        totalFuelCost: sql<number>`coalesce(sum(fuel_cost_estimate), 0)`,
+        averageRating: sql<number>`coalesce(avg(customer_rating), 0)`,
+        totalRatings: sql<number>`count(*) filter (where customer_rating is not null)`,
+        onTimeCount: sql<number>`count(*) filter (where on_time_delivery = true)`,
+        firstDelivery: sql<Date>`min(delivery_datetime)`,
+        lastDelivery: sql<Date>`max(delivery_datetime)`
+      })
+      .from(vehicleDeliveryHistory)
+      .where(eq(vehicleDeliveryHistory.plateNumber, plateNumber));
+      
+      const stats = statsQuery[0];
+      
+      if (stats) {
+        const onTimeRate = stats.totalDeliveries > 0 ? 
+          (stats.onTimeCount / stats.totalDeliveries) * 100 : 0;
+          
+        // Upsert vehicle usage stats
+        await db.insert(vehicleUsageStats)
+          .values({
+            vehicleId: vehicle.id,
+            plateNumber,
+            totalDeliveries: stats.totalDeliveries,
+            successfulDeliveries: stats.successfulDeliveries,
+            failedDeliveries: stats.failedDeliveries,
+            cancelledDeliveries: stats.cancelledDeliveries,
+            totalDistance: stats.totalDistance?.toString() || "0",
+            totalWeight: stats.totalWeight?.toString() || "0",
+            totalRevenue: stats.totalRevenue?.toString() || "0",
+            totalFuelCost: stats.totalFuelCost?.toString() || "0",
+            averageRating: stats.averageRating?.toString() || "0",
+            totalRatings: stats.totalRatings,
+            onTimeDeliveryRate: onTimeRate.toString(),
+            firstDeliveryDate: stats.firstDelivery,
+            lastDeliveryDate: stats.lastDelivery,
+            lastCalculatedAt: new Date()
+          })
+          .onConflictDoUpdate({
+            target: vehicleUsageStats.vehicleId,
+            set: {
+              totalDeliveries: stats.totalDeliveries,
+              successfulDeliveries: stats.successfulDeliveries,
+              failedDeliveries: stats.failedDeliveries,
+              cancelledDeliveries: stats.cancelledDeliveries,
+              totalDistance: stats.totalDistance?.toString() || "0",
+              totalWeight: stats.totalWeight?.toString() || "0",
+              totalRevenue: stats.totalRevenue?.toString() || "0",
+              totalFuelCost: stats.totalFuelCost?.toString() || "0",
+              averageRating: stats.averageRating?.toString() || "0",
+              totalRatings: stats.totalRatings,
+              onTimeDeliveryRate: onTimeRate.toString(),
+              firstDeliveryDate: stats.firstDelivery,
+              lastDeliveryDate: stats.lastDelivery,
+              lastCalculatedAt: new Date(),
+              updatedAt: new Date()
+            }
+          });
+      }
+    } catch (error) {
+      console.error("Error updating vehicle usage stats:", error);
+    }
+  }
 
   // =============================================================================
   // SHIPPING RATES MANAGEMENT

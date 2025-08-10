@@ -4279,7 +4279,7 @@ const LogisticsManagement = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="orders">سفارشات</TabsTrigger>
           <TabsTrigger value="delivered">تحویل شده</TabsTrigger>
           <TabsTrigger value="companies">شرکت‌های حمل</TabsTrigger>
@@ -4287,6 +4287,7 @@ const LogisticsManagement = () => {
           <TabsTrigger value="international">جغرافیای خارج از عراق</TabsTrigger>
           <TabsTrigger value="vehicle-templates">قالب‌های خودرو</TabsTrigger>
           <TabsTrigger value="fleet-vehicles">ناوگان خودروها</TabsTrigger>
+          <TabsTrigger value="vehicle-history">تاریخچه خودروها</TabsTrigger>
           <TabsTrigger value="postal">خدمات پست</TabsTrigger>
         </TabsList>
 
@@ -4316,6 +4317,34 @@ const LogisticsManagement = () => {
 
         <TabsContent value="fleet-vehicles">
           <FleetVehiclesTab />
+        </TabsContent>
+
+        <TabsContent value="vehicle-history">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <History className="h-5 w-5" />
+                تاریخچه تحویلات خودروها
+              </CardTitle>
+              <CardDescription>
+                مشاهده تاریخچه کامل تحویلات هر خودرو از ناوگان شرکت
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">
+                  برای مشاهده تاریخچه کامل خودروها، به صفحه مخصوص مراجعه کنید
+                </p>
+                <Button 
+                  onClick={() => window.open('/admin/vehicle-history', '_blank')}
+                  className="flex items-center gap-2"
+                >
+                  <History className="h-4 w-4" />
+                  مشاهده تاریخچه خودروها
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="international">

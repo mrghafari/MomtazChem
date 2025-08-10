@@ -292,6 +292,12 @@ export type InsertDeliveryVerificationCode = z.infer<typeof insertDeliveryVerifi
 export type LogisticsAnalytics = typeof logisticsAnalytics.$inferSelect;
 export type InsertLogisticsAnalytics = z.infer<typeof insertLogisticsAnalyticsSchema>;
 
+export type VehicleDeliveryHistory = typeof vehicleDeliveryHistory.$inferSelect;
+export type InsertVehicleDeliveryHistory = z.infer<typeof insertVehicleDeliveryHistorySchema>;
+
+export type VehicleUsageStats = typeof vehicleUsageStats.$inferSelect;
+export type InsertVehicleUsageStats = z.infer<typeof insertVehicleUsageStatsSchema>;
+
 // =============================================================================
 // CONSTANTS
 // =============================================================================
@@ -345,6 +351,124 @@ export type VehicleType = typeof VEHICLE_TYPES[keyof typeof VEHICLE_TYPES];
 export type DeliveryStatus = typeof DELIVERY_STATUS[keyof typeof DELIVERY_STATUS];
 export type RouteStatus = typeof ROUTE_STATUS[keyof typeof ROUTE_STATUS];
 export type SmsStatus = typeof SMS_STATUS[keyof typeof SMS_STATUS];
+
+// =============================================================================
+// VEHICLE DELIVERY HISTORY TRACKING
+// =============================================================================
+
+// Vehicle delivery history table for tracking all deliveries performed by each vehicle
+export const vehicleDeliveryHistory = pgTable("vehicle_delivery_history", {
+  id: serial("id").primaryKey(),
+  vehicleId: integer("vehicle_id").references(() => deliveryVehicles.id),
+  plateNumber: varchar("plate_number", { length: 20 }).notNull(), // Store plate number for easy reference
+  
+  // Order and delivery details
+  customerOrderId: integer("customer_order_id").notNull(),
+  orderNumber: text("order_number").notNull(),
+  routeId: integer("route_id").references(() => deliveryRoutes.id),
+  driverId: integer("driver_id").references(() => deliveryPersonnel.id),
+  driverName: text("driver_name"), // Store driver name at time of delivery
+  
+  // Customer and delivery information
+  customerName: text("customer_name").notNull(),
+  customerPhone: varchar("customer_phone", { length: 20 }),
+  
+  // Location details
+  originAddress: text("origin_address").notNull(), // Where order was picked up from
+  originCity: text("origin_city"),
+  destinationAddress: text("destination_address").notNull(), // Where order was delivered to
+  destinationCity: text("destination_city"),
+  
+  // Load and weight details
+  totalWeight: decimal("total_weight", { precision: 10, scale: 3 }).notNull(), // kg
+  weightUnit: varchar("weight_unit", { length: 10 }).default("kg"),
+  itemsCount: integer("items_count").default(1), // Number of items/packages
+  itemsDescription: text("items_description"), // Brief description of items
+  
+  // Distance and cost
+  deliveryDistance: decimal("delivery_distance", { precision: 8, scale: 2 }), // km
+  deliveryCost: decimal("delivery_cost", { precision: 12, scale: 2 }).notNull(), // IQD
+  fuelCostEstimate: decimal("fuel_cost_estimate", { precision: 10, scale: 2 }), // IQD
+  currency: varchar("currency", { length: 5 }).default("IQD"),
+  
+  // Timing details
+  pickupDateTime: timestamp("pickup_datetime"),
+  deliveryDateTime: timestamp("delivery_datetime"),
+  estimatedDeliveryTime: integer("estimated_delivery_time"), // minutes
+  actualDeliveryTime: integer("actual_delivery_time"), // minutes
+  
+  // Status and performance
+  deliveryStatus: varchar("delivery_status", { length: 20 }).notNull(), // completed, failed, cancelled
+  onTimeDelivery: boolean("on_time_delivery").default(true),
+  customerRating: decimal("customer_rating", { precision: 3, scale: 2 }), // 1-5 stars
+  customerFeedback: text("customer_feedback"),
+  
+  // GPS and tracking
+  pickupLatitude: decimal("pickup_latitude", { precision: 10, scale: 7 }),
+  pickupLongitude: decimal("pickup_longitude", { precision: 10, scale: 7 }),
+  deliveryLatitude: decimal("delivery_latitude", { precision: 10, scale: 7 }),
+  deliveryLongitude: decimal("delivery_longitude", { precision: 10, scale: 7 }),
+  
+  // Additional tracking info
+  deliveryNotes: text("delivery_notes"),
+  specialInstructions: text("special_instructions"),
+  weatherConditions: text("weather_conditions"),
+  trafficConditions: varchar("traffic_conditions", { length: 20 }), // light, moderate, heavy
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("vehicle_delivery_history_vehicle_idx").on(table.vehicleId),
+  index("vehicle_delivery_history_plate_idx").on(table.plateNumber),
+  index("vehicle_delivery_history_order_idx").on(table.customerOrderId),
+  index("vehicle_delivery_history_date_idx").on(table.deliveryDateTime),
+  index("vehicle_delivery_history_status_idx").on(table.deliveryStatus),
+  index("vehicle_delivery_history_route_idx").on(table.routeId),
+  index("vehicle_delivery_history_driver_idx").on(table.driverId),
+]);
+
+// Vehicle usage statistics view (computed metrics)
+export const vehicleUsageStats = pgTable("vehicle_usage_stats", {
+  id: serial("id").primaryKey(),
+  vehicleId: integer("vehicle_id").references(() => deliveryVehicles.id).unique(),
+  plateNumber: varchar("plate_number", { length: 20 }).notNull(),
+  
+  // Usage statistics
+  totalDeliveries: integer("total_deliveries").default(0),
+  successfulDeliveries: integer("successful_deliveries").default(0),
+  failedDeliveries: integer("failed_deliveries").default(0),
+  cancelledDeliveries: integer("cancelled_deliveries").default(0),
+  
+  // Performance metrics
+  totalDistance: decimal("total_distance", { precision: 12, scale: 2 }).default("0"), // km
+  totalWeight: decimal("total_weight", { precision: 12, scale: 3 }).default("0"), // kg
+  totalRevenue: decimal("total_revenue", { precision: 15, scale: 2 }).default("0"), // IQD
+  totalFuelCost: decimal("total_fuel_cost", { precision: 12, scale: 2 }).default("0"), // IQD
+  
+  // Time metrics
+  totalOperatingTime: integer("total_operating_time").default(0), // minutes
+  averageDeliveryTime: decimal("average_delivery_time", { precision: 8, scale: 2 }).default("0"), // minutes
+  onTimeDeliveryRate: decimal("on_time_delivery_rate", { precision: 5, scale: 2 }).default("0"), // percentage
+  
+  // Customer satisfaction
+  averageRating: decimal("average_rating", { precision: 3, scale: 2 }).default("0"), // 1-5 stars
+  totalRatings: integer("total_ratings").default(0),
+  
+  // Date tracking
+  firstDeliveryDate: timestamp("first_delivery_date"),
+  lastDeliveryDate: timestamp("last_delivery_date"),
+  
+  // Update tracking
+  lastCalculatedAt: timestamp("last_calculated_at").notNull().defaultNow(),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("vehicle_usage_stats_vehicle_idx").on(table.vehicleId),
+  index("vehicle_usage_stats_plate_idx").on(table.plateNumber),
+  index("vehicle_usage_stats_deliveries_idx").on(table.totalDeliveries),
+  index("vehicle_usage_stats_revenue_idx").on(table.totalRevenue),
+]);
 
 // =============================================================================
 // VEHICLE CATEGORIES (LEVEL ONE)
@@ -781,6 +905,10 @@ export const routeOptimization = pgTable("route_optimization", {
   index("route_optimization_type_idx").on(table.routeType),
   index("route_optimization_distance_idx").on(table.distanceKm),
 ]);
+
+// Insert schemas for vehicle delivery history  
+export const insertVehicleDeliveryHistorySchema = createInsertSchema(vehicleDeliveryHistory);
+export const insertVehicleUsageStatsSchema = createInsertSchema(vehicleUsageStats);
 
 // Insert schemas and types for vehicle optimization
 export const insertVehicleTemplateSchema = createInsertSchema(vehicleTemplates);
