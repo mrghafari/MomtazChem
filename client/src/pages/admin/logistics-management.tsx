@@ -4223,6 +4223,8 @@ const LogisticsManagement = () => {
         driverMobile: formData.get('driverMobile') as string,
         loadCapacity: parseInt(formData.get('loadCapacity') as string),
         currentLocation: formData.get('currentLocation') as string,
+        supportsFlammable: formData.get('supportsFlammable') === 'true',
+        notAllowedFlammable: formData.get('notAllowedFlammable') === 'true',
         notes: formData.get('notes') as string,
         isAvailable: formData.get('isAvailable') === 'true'
       };
@@ -4259,6 +4261,8 @@ const LogisticsManagement = () => {
         driverMobile: formData.get('driverMobile') as string,
         loadCapacity: parseInt(formData.get('loadCapacity') as string),
         currentLocation: formData.get('currentLocation') as string,
+        supportsFlammable: formData.get('supportsFlammable') === 'true',
+        notAllowedFlammable: formData.get('notAllowedFlammable') === 'true',
         notes: formData.get('notes') as string,
         isAvailable: formData.get('isAvailable') === 'true'
       };
@@ -4299,6 +4303,7 @@ const LogisticsManagement = () => {
                   <TableHead>نام راننده</TableHead>
                   <TableHead>موبایل راننده</TableHead>
                   <TableHead>ظرفیت حمل</TableHead>
+                  <TableHead>قابلیت‌های ویژه</TableHead>
                   <TableHead>موقعیت فعلی</TableHead>
                   <TableHead>وضعیت دسترسی</TableHead>
                   <TableHead>عملیات</TableHead>
@@ -4307,11 +4312,11 @@ const LogisticsManagement = () => {
               <TableBody>
                 {loadingFleetVehicles ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8">در حال بارگذاری...</TableCell>
+                    <TableCell colSpan={9} className="text-center py-8">در حال بارگذاری...</TableCell>
                   </TableRow>
                 ) : readyVehicles.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8">
+                    <TableCell colSpan={9} className="text-center py-8">
                       <div className="flex flex-col items-center gap-2">
                         <Truck className="h-12 w-12 text-gray-400" />
                         <p className="text-gray-600">هیچ خودرویی در ناوگان شرکت ثبت نشده</p>
@@ -4338,6 +4343,25 @@ const LogisticsManagement = () => {
                         <div className="flex items-center gap-1">
                           <Weight className="h-3 w-3 text-orange-600" />
                           <span className="font-medium text-orange-600">{vehicle.loadCapacity} کیلوگرم</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          {vehicle.supportsFlammable && (
+                            <Badge variant="outline" className="text-green-700 bg-green-50 border-green-200">
+                              <Flame className="h-3 w-3 mr-1" />
+                              مجاز آتش‌زا
+                            </Badge>
+                          )}
+                          {vehicle.notAllowedFlammable && (
+                            <Badge variant="outline" className="text-red-700 bg-red-50 border-red-200">
+                              <X className="h-3 w-3 mr-1" />
+                              ممنوع آتش‌زا
+                            </Badge>
+                          )}
+                          {!vehicle.supportsFlammable && !vehicle.notAllowedFlammable && (
+                            <span className="text-gray-500 text-xs">عادی</span>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -4420,7 +4444,6 @@ const LogisticsManagement = () => {
                       ))}
                     </SelectContent>
                   </Select>
-
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="licensePlate">شماره خودرو *</Label>
@@ -4469,6 +4492,34 @@ const LogisticsManagement = () => {
                     placeholder="مثال: اربیل، بغداد"
                   />
                 </div>
+                
+                {/* Special Capabilities Section */}
+                <div className="space-y-2 col-span-2">
+                  <Label className="text-base font-semibold text-blue-700">قابلیت‌های ویژه حمل مواد</Label>
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-blue-50 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <input type="hidden" name="supportsFlammable" value="false" />
+                      <input 
+                        type="checkbox" 
+                        id="supportsFlammable" 
+                        name="supportsFlammable" 
+                        value="true"
+                      />
+                      <Label htmlFor="supportsFlammable" className="text-green-700">قابلیت حمل مواد آتش‌زا</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="hidden" name="notAllowedFlammable" value="false" />
+                      <input 
+                        type="checkbox" 
+                        id="notAllowedFlammable" 
+                        name="notAllowedFlammable" 
+                        value="true"
+                      />
+                      <Label htmlFor="notAllowedFlammable" className="text-red-700">ممنوع حمل مواد آتش‌زا</Label>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="space-y-2 col-span-2">
                   <Label htmlFor="notes">یادداشت‌ها</Label>
                   <Input 
@@ -4477,17 +4528,22 @@ const LogisticsManagement = () => {
                     placeholder="اطلاعات اضافی در مورد خودرو یا راننده"
                   />
                 </div>
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <input type="hidden" name="isAvailable" value="false" />
-                    <input 
-                      type="checkbox" 
-                      id="isAvailable" 
-                      name="isAvailable" 
-                      value="true" 
-                      defaultChecked
-                    />
-                    <Label htmlFor="isAvailable">آماده به کار</Label>
+                
+                {/* Status Section */}
+                <div className="space-y-2 col-span-2">
+                  <Label className="text-base font-semibold text-green-700">وضعیت دسترسی</Label>
+                  <div className="p-4 bg-green-50 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <input type="hidden" name="isAvailable" value="false" />
+                      <input 
+                        type="checkbox" 
+                        id="isAvailable" 
+                        name="isAvailable" 
+                        value="true" 
+                        defaultChecked
+                      />
+                      <Label htmlFor="isAvailable" className="font-medium">آماده به کار</Label>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -4588,6 +4644,36 @@ const LogisticsManagement = () => {
                       defaultValue={selectedReadyVehicle.currentLocation || ''}
                     />
                   </div>
+                  
+                  {/* Special Capabilities Section */}
+                  <div className="space-y-2 col-span-2">
+                    <Label className="text-base font-semibold text-blue-700">قابلیت‌های ویژه حمل مواد</Label>
+                    <div className="grid grid-cols-2 gap-4 p-4 bg-blue-50 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <input type="hidden" name="supportsFlammable" value="false" />
+                        <input 
+                          type="checkbox" 
+                          id="edit-supportsFlammable" 
+                          name="supportsFlammable" 
+                          value="true"
+                          defaultChecked={selectedReadyVehicle.supportsFlammable}
+                        />
+                        <Label htmlFor="edit-supportsFlammable" className="text-green-700">قابلیت حمل مواد آتش‌زا</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="hidden" name="notAllowedFlammable" value="false" />
+                        <input 
+                          type="checkbox" 
+                          id="edit-notAllowedFlammable" 
+                          name="notAllowedFlammable" 
+                          value="true"
+                          defaultChecked={selectedReadyVehicle.notAllowedFlammable}
+                        />
+                        <Label htmlFor="edit-notAllowedFlammable" className="text-red-700">ممنوع حمل مواد آتش‌زا</Label>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="space-y-2 col-span-2">
                     <Label htmlFor="edit-notes">یادداشت‌ها</Label>
                     <Input 
@@ -4596,17 +4682,22 @@ const LogisticsManagement = () => {
                       defaultValue={selectedReadyVehicle.notes || ''}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <input type="hidden" name="isAvailable" value="false" />
-                      <input 
-                        type="checkbox" 
-                        id="edit-isAvailable" 
-                        name="isAvailable" 
-                        value="true" 
-                        defaultChecked={selectedReadyVehicle.isAvailable}
-                      />
-                      <Label htmlFor="edit-isAvailable">آماده به کار</Label>
+                  
+                  {/* Status Section */}
+                  <div className="space-y-2 col-span-2">
+                    <Label className="text-base font-semibold text-green-700">وضعیت دسترسی</Label>
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <input type="hidden" name="isAvailable" value="false" />
+                        <input 
+                          type="checkbox" 
+                          id="edit-isAvailable" 
+                          name="isAvailable" 
+                          value="true" 
+                          defaultChecked={selectedReadyVehicle.isAvailable}
+                        />
+                        <Label htmlFor="edit-isAvailable" className="font-medium">آماده به کار</Label>
+                      </div>
                     </div>
                   </div>
                 </div>
