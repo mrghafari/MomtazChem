@@ -297,20 +297,14 @@ const LogisticsManagement = () => {
 
   // Fleet vehicles API integration (previously "ready vehicles")
   const { data: fleetVehiclesData, isLoading: loadingFleetVehicles } = useQuery({
-    queryKey: ['/api/ready-vehicles'],
+    queryKey: ['/api/logistics/ready-vehicles'],
     enabled: activeTab === 'fleet-vehicles'
   });
 
   // Vehicle templates API integration
   const { data: vehicleTemplatesData, isLoading: loadingVehicleTemplates } = useQuery({
-    queryKey: ['/api/vehicle-templates'],
+    queryKey: ['/api/logistics/vehicle-templates'],
     enabled: activeTab === 'vehicle-templates'
-  });
-
-  // Vehicle selection history API integration
-  const { data: vehicleHistoryData, isLoading: loadingVehicleHistory } = useQuery({
-    queryKey: ['/api/vehicle-selection-history'],
-    enabled: activeTab === 'vehicle-history'
   });
 
   const fleetVehicles = (fleetVehiclesData as any)?.data || [];
@@ -333,16 +327,16 @@ const LogisticsManagement = () => {
 
   // Create ready vehicle mutation
   const createReadyVehicleMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/ready-vehicles', { method: 'POST', body: data }),
+    mutationFn: (data: any) => apiRequest('/api/logistics/ready-vehicles', { method: 'POST', body: data }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/ready-vehicles'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
       setIsCreateReadyVehicleDialogOpen(false);
-      toast({ title: "موفقیت", description: "خودرو فیزیکی با موفقیت ایجاد شد" });
+      toast({ title: "موفقیت", description: "خودرو آماده کار با موفقیت ایجاد شد" });
     },
     onError: (error: any) => {
       toast({ 
         title: "خطا", 
-        description: error?.response?.data?.message || "خطا در ایجاد خودرو فیزیکی", 
+        description: error?.response?.data?.message || "خطا در ایجاد خودرو آماده کار", 
         variant: "destructive" 
       });
     }
@@ -350,17 +344,17 @@ const LogisticsManagement = () => {
 
   // Update ready vehicle mutation
   const updateReadyVehicleMutation = useMutation({
-    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/ready-vehicles/${id}`, { method: 'PUT', body: data }),
+    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/logistics/ready-vehicles/${id}`, { method: 'PUT', body: data }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/ready-vehicles'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
       setIsEditReadyVehicleDialogOpen(false);
       setSelectedReadyVehicle(null);
-      toast({ title: "موفقیت", description: "خودرو فیزیکی با موفقیت بروزرسانی شد" });
+      toast({ title: "موفقیت", description: "خودرو آماده کار با موفقیت بروزرسانی شد" });
     },
     onError: (error: any) => {
       toast({ 
         title: "خطا", 
-        description: error?.response?.data?.message || "خطا در بروزرسانی خودرو فیزیکی", 
+        description: error?.response?.data?.message || "خطا در بروزرسانی خودرو آماده کار", 
         variant: "destructive" 
       });
     }
@@ -368,62 +362,15 @@ const LogisticsManagement = () => {
 
   // Delete ready vehicle mutation
   const deleteReadyVehicleMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/ready-vehicles/${id}`, { method: 'DELETE' }),
+    mutationFn: (id: number) => apiRequest(`/api/logistics/ready-vehicles/${id}`, { method: 'DELETE' }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/ready-vehicles'] });
-      toast({ title: "موفقیت", description: "خودرو فیزیکی با موفقیت حذف شد" });
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
+      toast({ title: "موفقیت", description: "خودرو آماده کار با موفقیت حذف شد" });
     },
     onError: (error: any) => {
       toast({ 
         title: "خطا", 
-        description: error?.response?.data?.message || "خطا در حذف خودرو فیزیکی", 
-        variant: "destructive" 
-      });
-    }
-  });
-
-  // Vehicle template mutations
-  const createVehicleTemplateMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/vehicle-templates', { method: 'POST', body: data }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/vehicle-templates'] });
-      toast({ title: "موفقیت", description: "الگوی خودرو با موفقیت ایجاد شد" });
-    },
-    onError: (error: any) => {
-      toast({ 
-        title: "خطا", 
-        description: error?.response?.data?.message || "خطا در ایجاد الگوی خودرو", 
-        variant: "destructive" 
-      });
-    }
-  });
-
-  const updateVehicleTemplateMutation = useMutation({
-    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/vehicle-templates/${id}`, { method: 'PUT', body: data }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/vehicle-templates'] });
-      setEditingVehicle(null);
-      toast({ title: "موفقیت", description: "الگوی خودرو با موفقیت بروزرسانی شد" });
-    },
-    onError: (error: any) => {
-      toast({ 
-        title: "خطا", 
-        description: error?.response?.data?.message || "خطا در بروزرسانی الگوی خودرو", 
-        variant: "destructive" 
-      });
-    }
-  });
-
-  const deleteVehicleTemplateMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/vehicle-templates/${id}`, { method: 'DELETE' }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/vehicle-templates'] });
-      toast({ title: "موفقیت", description: "الگوی خودرو با موفقیت حذف شد" });
-    },
-    onError: (error: any) => {
-      toast({ 
-        title: "خطا", 
-        description: error?.response?.data?.message || "خطا در حذف الگوی خودرو", 
+        description: error?.response?.data?.message || "خطا در حذف خودرو آماده کار", 
         variant: "destructive" 
       });
     }
@@ -734,11 +681,6 @@ const LogisticsManagement = () => {
       // Open the vehicle assignment dialog immediately
       setIsVehicleAssignmentOpen(true);
       
-      console.log('🎯 [DEBUG] Dialog state after opening:', {
-        isVehicleAssignmentOpen: true,
-        selectedOrderForVehicle: order?.orderNumber
-      });
-      
       // Get all suitable vehicles identified during checkout
       const suitableVehiclesResponse = await fetch(`/api/orders/${order.customerOrderId}/suitable-vehicles`, {
         credentials: 'include'
@@ -749,19 +691,8 @@ const LogisticsManagement = () => {
         if (suitableVehiclesData.success) {
           setSuitableVehiclesData(suitableVehiclesData.data);
           console.log('✅ [SUITABLE VEHICLES] Found vehicles:', suitableVehiclesData.data.suitableVehicles.length);
-          console.log('🔍 [VEHICLE DETAILS] First 3 vehicles:', suitableVehiclesData.data.suitableVehicles.slice(0, 3));
-          console.log('📊 [FULL API RESPONSE]:', JSON.stringify(suitableVehiclesData.data, null, 2));
-          
-          // Use suitableVehicles as availableFleetVehicles for display
-          if (suitableVehiclesData.data.suitableVehicles && suitableVehiclesData.data.suitableVehicles.length > 0) {
-            setAvailableFleetVehicles(suitableVehiclesData.data.suitableVehicles);
-            console.log('🚛 [FLEET VEHICLES] Set from suitable vehicles API:', suitableVehiclesData.data.suitableVehicles.length);
-            console.log('🚛 [FLEET VEHICLES] First vehicle details:', suitableVehiclesData.data.suitableVehicles[0]);
-          } else {
-            console.log('❌ [FLEET VEHICLES] No suitableVehicles in response');
-          }
-          
-          console.log('🎯 [DIALOG] Should show dialog with vehicles now');
+          setSelectedOrderForVehicle(order);
+          setIsSuitableVehiclesOpen(true);
           return;
         }
       }
@@ -782,7 +713,7 @@ const LogisticsManagement = () => {
       }
       
       // Get all ready vehicles (آماده به کار)
-      const readyVehiclesResponse = await fetch('/api/ready-vehicles', {
+      const readyVehiclesResponse = await fetch('/api/logistics/ready-vehicles', {
         credentials: 'include'
       });
       
@@ -791,7 +722,6 @@ const LogisticsManagement = () => {
         const readyVehiclesData = await readyVehiclesResponse.json();
         readyVehicles = readyVehiclesData.vehicles || readyVehiclesData.data || [];
         console.log('🚛 [READY VEHICLES] Found ready vehicles:', readyVehicles.length);
-        console.log('🔍 [READY VEHICLES DETAILS] First 3:', readyVehicles.slice(0, 3));
         
         const orderWeight = order.calculatedWeight || order.totalWeight || 0;
         console.log('📦 [ORDER DETAILS] Weight:', orderWeight, 'kg');
@@ -887,67 +817,17 @@ const LogisticsManagement = () => {
         console.log('✅ [FINAL VEHICLES] Available vehicles after template matching:', availableVehicles.length);
       } else {
         console.error('🚫 [READY VEHICLES API ERROR]', readyVehiclesResponse.status);
-        
-        // Try to fetch ready vehicles data even without authentication
-        try {
-          const fallbackResponse = await fetch('/api/ready-vehicles');
-          if (fallbackResponse.ok) {
-            const fallbackData = await fallbackResponse.json();
-            readyVehicles = fallbackData.vehicles || fallbackData.data || [];
-            console.log('🔄 [FALLBACK SUCCESS] Found ready vehicles without auth:', readyVehicles.length);
-            
-            const orderWeight = order.calculatedWeight || order.totalWeight || 0;
-            let availableVehicles = readyVehicles.filter((vehicle: any) => 
-              vehicle.isAvailable && 
-              vehicle.loadCapacity >= orderWeight
-            );
-            
-            // 🎯 TEMPLATE MATCHING for fallback vehicles
-            if (checkoutVehicleDetails && checkoutVehicleDetails.vehicleType) {
-              console.log('🔍 [FALLBACK TEMPLATE] Customer selected:', checkoutVehicleDetails.vehicleType);
-              console.log('🔍 [FALLBACK VEHICLES] Available vehicles:', availableVehicles.length);
-              
-              const exactMatches = availableVehicles.filter((vehicle: any) => {
-                // Try multiple field combinations for template matching
-                const templateMatch = vehicle.templateName === checkoutVehicleDetails.vehicleType ||
-                  vehicle.templateName?.includes(checkoutVehicleDetails.vehicleType) ||
-                  checkoutVehicleDetails.vehicleType.includes(vehicle.templateName || '') ||
-                  vehicle.vehicleType === checkoutVehicleDetails.vehicleType ||
-                  vehicle.vehicleType?.includes(checkoutVehicleDetails.vehicleType) ||
-                  checkoutVehicleDetails.vehicleType.includes(vehicle.vehicleType || '');
-                
-                console.log(`🚛 [VEHICLE MATCH] ${vehicle.licensePlate}: template="${vehicle.templateName}", type="${vehicle.vehicleType}", match=${templateMatch}`);
-                return templateMatch;
-              });
-              
-              if (exactMatches.length > 0) {
-                exactMatches.forEach((v: any) => {
-                  v.isCheckoutSuggested = true;
-                  v.matchType = 'exact';
-                  v.priority = 1;
-                  v.matchReason = `انطباق با الگوی "${checkoutVehicleDetails.vehicleType}" انتخاب شده توسط مشتری`;
-                });
-                console.log('✅ [FALLBACK EXACT] Found template matches:', exactMatches.length);
-              }
-              
-              availableVehicles.sort((a: any, b: any) => {
-                if (a.priority && b.priority) return a.priority - b.priority;
-                if (a.priority && !b.priority) return -1;
-                if (!a.priority && b.priority) return 1;
-                return b.loadCapacity - a.loadCapacity;
-              });
-            }
-            
-            setAvailableFleetVehicles(availableVehicles);
-            console.log('✅ [FALLBACK FINAL] Available vehicles:', availableVehicles.length);
-          } else {
-            setAvailableFleetVehicles([]);
-            console.log('⚠️ [FALLBACK FAILED] No vehicles available');
-          }
-        } catch (fallbackError) {
-          console.error('🚫 [FALLBACK ERROR]', fallbackError);
+        if (readyVehiclesResponse.status === 401) {
+          toast({
+            title: "خطای احراز هویت",
+            description: "برای مشاهده خودروهای آماده، لطفاً ابتدا وارد سیستم شوید",
+            variant: "destructive"
+          });
           setAvailableFleetVehicles([]);
+          return;
         }
+        setAvailableFleetVehicles([]);
+        console.log('⚠️ [FALLBACK] No vehicles available due to API error');
         
         // Enhanced vehicle matching based on checkout selection
         if (checkoutVehicleDetails) {
@@ -4648,8 +4528,6 @@ const LogisticsManagement = () => {
                     </div>
                   </div>
                 )}
-                
-
                 
                 {availableFleetVehicles.length === 0 ? (
                   <div className="text-center py-8">
