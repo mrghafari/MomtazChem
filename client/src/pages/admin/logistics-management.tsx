@@ -1029,6 +1029,91 @@ const LogisticsManagement = () => {
 
 
   // Handle enhanced vehicle assignment workflow
+  // Smart vehicle recommendation based on template matching
+  const getRecommendedVehicles = (order: LogisticsOrder, availableVehicles: any[], suitableTemplates: any[]) => {
+    const orderWeight = order.calculatedWeight || order.totalWeight || 0;
+    const orderCity = order.shippingAddress?.city || '';
+    
+    console.log('🤖 [SMART RECOMMENDATION] Analyzing order requirements:', {
+      weight: orderWeight,
+      city: orderCity,
+      availableVehicles: availableVehicles.length,
+      suitableTemplates: suitableTemplates.length
+    });
+    
+    // Score vehicles based on multiple factors
+    const scoredVehicles = availableVehicles.map(vehicle => {
+      let score = 0;
+      let reasons = [];
+      
+      // Find matching template for this vehicle
+      const matchingTemplate = suitableTemplates.find(template => template.name === vehicle.vehicleType);
+      
+      if (matchingTemplate) {
+        score += 40; // Base score for template match
+        reasons.push('مطابق با الگوی پیشنهادی');
+        
+        // Weight efficiency scoring
+        const weightCapacity = parseFloat(matchingTemplate.maxWeightKg) || parseFloat(vehicle.loadCapacity) || 0;
+        if (weightCapacity > 0) {
+          const utilizationRate = orderWeight / weightCapacity;
+          if (utilizationRate >= 0.7 && utilizationRate <= 0.9) {
+            score += 30; // Optimal utilization
+            reasons.push('استفاده بهینه از ظرفیت');
+          } else if (utilizationRate >= 0.5 && utilizationRate < 0.7) {
+            score += 20; // Good utilization
+            reasons.push('استفاده مناسب از ظرفیت');
+          } else if (utilizationRate < 0.5) {
+            score += 10; // Underutilized but safe
+            reasons.push('ظرفیت اضافی موجود');
+          }
+        }
+        
+        // Route compatibility
+        if (matchingTemplate.allowedRoutes?.includes('urban') && orderCity) {
+          score += 15;
+          reasons.push('مناسب برای حمل شهری');
+        }
+        
+        // Cost efficiency
+        const totalCost = parseFloat(matchingTemplate.basePrice) + 
+                         (parseFloat(matchingTemplate.pricePerKm) * 10) + // Assume 10km average
+                         (parseFloat(matchingTemplate.pricePerKg) * orderWeight);
+        
+        if (totalCost < 100000) {
+          score += 20;
+          reasons.push('هزینه اقتصادی');
+        } else if (totalCost < 200000) {
+          score += 10;
+          reasons.push('هزینه متعادل');
+        }
+      }
+      
+      // Vehicle availability and status
+      if (vehicle.isAvailable !== false && vehicle.status !== 'maintenance') {
+        score += 25;
+        reasons.push('آماده به خدمت');
+      }
+      
+      // Driver availability
+      if (vehicle.driverName && vehicle.driverName !== 'راننده موقت') {
+        score += 15;
+        reasons.push('راننده تعیین شده');
+      }
+      
+      return {
+        ...vehicle,
+        recommendationScore: score,
+        recommendationReasons: reasons,
+        matchingTemplate,
+        isRecommended: score >= 70
+      };
+    });
+    
+    // Sort by score (highest first)
+    return scoredVehicles.sort((a, b) => b.recommendationScore - a.recommendationScore);
+  };
+
   const handleVehicleAssignment = async (order: LogisticsOrder) => {
     try {
       console.log('🚚 [ENHANCED VEHICLE ASSIGNMENT] Starting for order:', order.orderNumber);
@@ -1061,8 +1146,8 @@ const LogisticsManagement = () => {
         }
       }
       
-      // Fallback to original vehicle assignment if suitable vehicles API fails
-      console.log('⚠️ [FALLBACK] Using original vehicle assignment method');
+      // Enhanced fallback with smart recommendations
+      console.log('⚠️ [FALLBACK] Using enhanced vehicle assignment method');
       
       // Get customer's selected vehicle details from checkout
       const vehicleDetailsResponse = await fetch(`/api/orders/${order.customerOrderId}/vehicle-details`, {
@@ -1163,103 +1248,53 @@ const LogisticsManagement = () => {
               priority: 3,
               isCheckoutSuggested: false,
               matchType: 'alternative',
-              matchReason: `خودروی جایگزین با ظرفیت مناسب (الگوی مشتری: "${checkoutVehicleDetails.vehicleType}")`
+              matchReason: 'گزینه جایگزین با ظرفیت مناسب'
             })));
-            console.log('⚠️ [TEMPLATE ALTERNATIVE] Added alternative vehicles with priority 3');
+            console.log('🔀 [ALTERNATIVES] Added alternative vehicles with priority 3');
           }
           
+          // Sort by priority (lower number = higher priority)
+          prioritizedVehicles.sort((a: any, b: any) => a.priority - b.priority);
           availableVehicles = prioritizedVehicles;
           
-          // Sort by priority, then by capacity
-          availableVehicles.sort((a: any, b: any) => {
-            if (a.priority !== b.priority) return a.priority - b.priority;
-            return b.loadCapacity - a.loadCapacity;
-          });
+          console.log('🎯 [FINAL PRIORITY] Final vehicle list:', availableVehicles.map((v: any) => ({
+            id: v.id,
+            licensePlate: v.licensePlate,
+            matchType: v.matchType,
+            priority: v.priority,
+            reason: v.matchReason
+          })));
+        }
+        
+        // Apply smart vehicle recommendation algorithm
+        if (checkoutVehicleDetails && vehicleTemplatesData) {
+          const suitableTemplates = ((vehicleTemplatesData as any)?.data || []).filter((template: any) => 
+            template.name === checkoutVehicleDetails.vehicleType ||
+            template.name.includes(checkoutVehicleDetails.vehicleType) ||
+            checkoutVehicleDetails.vehicleType.includes(template.name)
+          );
+          
+          if (suitableTemplates.length > 0) {
+            console.log('🤖 [SMART RECOMMENDATION] Applying recommendation algorithm');
+            availableVehicles = getRecommendedVehicles(order, availableVehicles, suitableTemplates);
+          }
         }
         
         setAvailableFleetVehicles(availableVehicles);
-        console.log('✅ [FINAL VEHICLES] Available vehicles after template matching:', availableVehicles.length);
-      } else {
-        console.error('🚫 [READY VEHICLES API ERROR]', readyVehiclesResponse.status);
-        if (readyVehiclesResponse.status === 401) {
-          toast({
-            title: "خطای احراز هویت",
-            description: "برای مشاهده خودروهای آماده، لطفاً ابتدا وارد سیستم شوید",
-            variant: "destructive"
-          });
-          setAvailableFleetVehicles([]);
-          return;
-        }
-        setAvailableFleetVehicles([]);
-        console.log('⚠️ [FALLBACK] No vehicles available due to API error');
+        console.log('✅ [VEHICLE ASSIGNMENT] Dialog opened with', availableVehicles.length, 'vehicles available');
         
-        // Enhanced vehicle matching based on checkout selection
-        if (checkoutVehicleDetails) {
-          console.log('🔍 [CHECKOUT DETAILS] Customer selected:', checkoutVehicleDetails);
-          console.log('🔍 [MATCHING TEST] Checking vehicle type:', checkoutVehicleDetails.vehicleType);
-          console.log('🔍 [AVAILABLE VEHICLES] Total available vehicles:', availableFleetVehicles.length);
-          availableFleetVehicles.forEach((v: any, i: number) => {
-            console.log(`🚛 [VEHICLE ${i+1}] Type: "${v.vehicleType}", Plate: "${v.plateNumber || v.licensePlate}", Match: ${v.vehicleType === checkoutVehicleDetails.vehicleType ? '✅ EXACT' : '❌ NO'}`);
-          });
-          
-          // Find exact matches and close matches
-          const exactMatches = availableFleetVehicles.filter((vehicle: any) => 
-            vehicle.vehicleType === checkoutVehicleDetails.vehicleType
-          );
-          
-          const closeMatches = availableFleetVehicles.filter((vehicle: any) => 
-            vehicle.vehicleType !== checkoutVehicleDetails.vehicleType && (
-              vehicle.vehicleType.includes(checkoutVehicleDetails.vehicleType) ||
-              checkoutVehicleDetails.vehicleType.includes(vehicle.vehicleType)
-            )
-          );
-          
-          // Mark vehicles for UI highlighting
-          exactMatches.forEach((vehicle: any) => {
-            vehicle.isCheckoutSuggested = true;
-            vehicle.matchType = 'exact';
-            vehicle.suggestionPriority = 1;
-          });
-          
-          closeMatches.forEach((vehicle: any) => {
-            vehicle.isCheckoutSuggested = true;
-            vehicle.matchType = 'close';
-            vehicle.suggestionPriority = 2;
-          });
-          
-          // Sort vehicles to prioritize suggested ones
-          availableFleetVehicles.sort((a: any, b: any) => {
-            // First sort by suggestion priority (exact matches first)
-            if (a.suggestionPriority && b.suggestionPriority) {
-              return a.suggestionPriority - b.suggestionPriority;
-            }
-            if (a.suggestionPriority && !b.suggestionPriority) return -1;
-            if (!a.suggestionPriority && b.suggestionPriority) return 1;
-            
-            // Then by availability and weight capacity
-            return (b.loadCapacity - a.loadCapacity);
-          });
-          
-          console.log('🎯 [ENHANCED MATCHING] Exact matches:', exactMatches.length, 'Close matches:', closeMatches.length);
-          console.log('🚛 [SORTED VEHICLES] First 3 vehicles:', availableFleetVehicles.slice(0, 3).map((v: any) => ({
-            name: v.vehicleName,
-            type: v.vehicleType,
-            plate: v.plateNumber,
-            suggested: v.isCheckoutSuggested,
-            matchType: v.matchType
-          })));
-        }
+      } else {
+        console.error('❌ [READY VEHICLES] Failed to fetch ready vehicles');
+        setAvailableFleetVehicles([]);
       }
-      
-      setSelectedOrderForVehicle(order);
-      setIsVehicleAssignmentOpen(true);
     } catch (error) {
-      console.error('Error loading vehicle assignment data:', error);
+      console.error('❌ [VEHICLE ASSIGNMENT ERROR]:', error);
       toast({
         title: "خطا",
-        description: "خطا در بارگذاری اطلاعات اختصاص وسیله ارسال محموله",
+        description: "خطا در بارگذاری خودروهای موجود",
         variant: "destructive"
       });
+      setAvailableFleetVehicles([]);
     }
   };
 
@@ -4966,6 +5001,42 @@ const LogisticsManagement = () => {
                           </div>
                         </div>
                         
+                        {/* Recommendation Score and Reasons */}
+                        {vehicle.recommendationScore && (
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium text-blue-800">امتیاز هوشمند</span>
+                              <div className="flex items-center gap-2">
+                                <div className={`w-12 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                  vehicle.recommendationScore >= 80 ? 'bg-green-600 text-white' :
+                                  vehicle.recommendationScore >= 60 ? 'bg-yellow-500 text-white' :
+                                  'bg-orange-500 text-white'
+                                }`}>
+                                  {vehicle.recommendationScore}
+                                </div>
+                                {vehicle.isRecommended && (
+                                  <Badge className="bg-green-600 text-white text-xs">
+                                    🤖 پیشنهاد سیستم
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            {vehicle.recommendationReasons && vehicle.recommendationReasons.length > 0 && (
+                              <div className="space-y-1">
+                                <span className="text-xs text-blue-700 font-medium">دلایل پیشنهاد:</span>
+                                <ul className="text-xs text-blue-600 space-y-1">
+                                  {vehicle.recommendationReasons.map((reason: string, idx: number) => (
+                                    <li key={idx} className="flex items-center gap-1">
+                                      <div className="w-1 h-1 bg-blue-500 rounded-full flex-shrink-0"></div>
+                                      {reason}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                         {vehicle.matchReason && (
                           <div className={`border rounded-lg p-3 mb-4 ${
                             vehicle.matchType === 'exact' 
