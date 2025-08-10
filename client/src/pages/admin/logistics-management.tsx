@@ -597,7 +597,7 @@ const LogisticsManagement = () => {
   const [availableFleetVehicles, setAvailableFleetVehicles] = useState<any[]>([]);
   
   // States for enhanced suitable vehicles display
-  const [isSuitableVehiclesOpen, setIsSuitableVehiclesOpen] = useState(false);
+
   const [suitableVehiclesData, setSuitableVehiclesData] = useState<any>(null);
 
   // States for postal services
@@ -1055,9 +1055,21 @@ const LogisticsManagement = () => {
         if (suitableVehiclesData.success) {
           setSuitableVehiclesData(suitableVehiclesData.data);
           console.log('✅ [SUITABLE VEHICLES] Found vehicles:', suitableVehiclesData.data.suitableVehicles.length);
-          setSelectedOrderForVehicle(order);
-          setIsSuitableVehiclesOpen(true);
-          return;
+          
+          // Use the suitable vehicles data to populate the main dialog instead of opening a second dialog
+          const suitableVehicles = suitableVehiclesData.data.suitableVehicles || [];
+          
+          // Convert suitable vehicles to the format expected by the main dialog
+          const formattedVehicles = suitableVehicles.map((vehicle: any) => ({
+            ...vehicle,
+            priority: 1,
+            isCheckoutSuggested: true,
+            matchType: 'optimal',
+            matchReason: `خودروی بهینه پیشنهادی سیستم`
+          }));
+          
+          setAvailableFleetVehicles(formattedVehicles);
+          // Continue with main dialog only, don't return here
         }
       }
       
@@ -5475,9 +5487,7 @@ const LogisticsManagement = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Enhanced Suitable Vehicles Dialog */}
-      <Dialog open={isSuitableVehiclesOpen} onOpenChange={setIsSuitableVehiclesOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" dir="rtl">
+
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Bus className="h-5 w-5 text-blue-600" />
