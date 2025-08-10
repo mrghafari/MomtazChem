@@ -139,7 +139,7 @@ export default function VehicleOptimization() {
 
 
 
-  const vehicles: VehicleTemplate[] = vehiclesData?.data || [];
+  const vehicles: VehicleTemplate[] = (vehiclesData as any)?.data || [];
 
   const handleCreateVehicle = (formData: FormData) => {
     const vehicleData = {
@@ -177,12 +177,7 @@ export default function VehicleOptimization() {
         </div>
       </div>
 
-      <Tabs defaultValue="templates" className="w-full">
-        <TabsList className="grid w-full grid-cols-1">
-          <TabsTrigger value="templates">الگوهای خودرو</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="templates" className="space-y-4">
+      <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-semibold">الگوهای خودرو</h2>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -370,7 +365,7 @@ export default function VehicleOptimization() {
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
+
 
         {/* Edit Vehicle Dialog */}
         {editingVehicle && (
@@ -507,7 +502,7 @@ export default function VehicleOptimization() {
             </DialogContent>
           </Dialog>
         )}
-      </Tabs>
+      </div>
     </div>
   );
 }
