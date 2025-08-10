@@ -51,7 +51,371 @@ import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import PostalServicesTab from '@/components/PostalServicesTab';
 import VehicleTemplateEditor from '@/components/admin/VehicleTemplateEditor';
 import InternationalGeographyTab from '@/components/InternationalGeographyTab';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { ArrowLeft, Car, Star, TrendingUp, Calendar as CalendarIcon, Search, Filter } from 'lucide-react';
+import { format } from 'date-fns';
 
+// Types for vehicle history
+interface VehicleDeliveryHistory {
+  id: number;
+  plateNumber: string;
+  customerOrderId: number;
+  orderNumber: string;
+  customerName: string;
+  customerPhone: string;
+  originAddress: string;
+  destinationAddress: string;
+  totalWeight: number;
+  deliveryCost: number;
+  deliveryStatus: string;
+  deliveryDateTime: string;
+  onTimeDelivery: boolean;
+  customerRating?: number;
+  customerFeedback?: string;
+  itemsDescription?: string;
+  deliveryDistance?: number;
+  driverName?: string;
+}
+
+interface VehicleUsageStats {
+  id: number;
+  plateNumber: string;
+  totalDeliveries: number;
+  successfulDeliveries: number;
+  failedDeliveries: number;
+  totalDistance: number;
+  totalRevenue: number;
+  averageRating: number;
+  onTimeDeliveryRate: number;
+  firstDeliveryDate?: string;
+  lastDeliveryDate?: string;
+}
+
+// Vehicle History Section Component
+function VehicleHistorySection() {
+  const [viewMode, setViewMode] = useState<'overview' | 'details'>('overview');
+  const [selectedPlate, setSelectedPlate] = useState<string>("");
+  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(20);
+  const [searchPlate, setSearchPlate] = useState("");
+
+  // Get vehicle usage statistics
+  const { data: statsData, isLoading: statsLoading } = useQuery({
+    queryKey: ['/api/logistics/vehicle-stats'],
+    queryFn: () => apiRequest('/api/logistics/vehicle-stats', { method: 'GET' }),
+  });
+
+  // Get vehicle delivery history
+  const { data: historyData, isLoading: historyLoading } = useQuery({
+    queryKey: [
+      '/api/logistics/vehicle-history',
+      selectedPlate,
+      currentPage,
+      pageSize,
+      dateRange.from?.toISOString(),
+      dateRange.to?.toISOString()
+    ],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (selectedPlate) params.append('plateNumber', selectedPlate);
+      params.append('page', currentPage.toString());
+      params.append('limit', pageSize.toString());
+      if (dateRange.from) params.append('startDate', dateRange.from.toISOString());
+      if (dateRange.to) params.append('endDate', dateRange.to.toISOString());
+      
+      return apiRequest(`/api/logistics/vehicle-history?${params.toString()}`, { method: 'GET' });
+    },
+    enabled: viewMode === 'details' && !!selectedPlate
+  });
+
+  // Get vehicle summary for selected plate
+  const { data: summaryData, isLoading: summaryLoading } = useQuery({
+    queryKey: ['/api/logistics/vehicle-summary', selectedPlate],
+    queryFn: () => apiRequest(`/api/logistics/vehicle-summary/${selectedPlate}`, { method: 'GET' }),
+    enabled: viewMode === 'details' && !!selectedPlate,
+  });
+
+  const handlePlateSearch = () => {
+    if (searchPlate.trim()) {
+      setSelectedPlate(searchPlate.trim().toUpperCase());
+      setViewMode('details');
+    }
+  };
+
+  const handleBackToOverview = () => {
+    setViewMode('overview');
+    setSelectedPlate("");
+    setSearchPlate("");
+    setCurrentPage(1);
+    setDateRange({});
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'IQD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusColors = {
+      completed: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+      failed: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+      cancelled: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
+      pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+    };
+    
+    return (
+      <Badge className={statusColors[status as keyof typeof statusColors] || statusColors.pending}>
+        {status === 'completed' ? 'مکمل' : 
+         status === 'failed' ? 'ناموفق' : 
+         status === 'cancelled' ? 'لغو شده' : 'در انتظار'}
+      </Badge>
+    );
+  };
+
+  if (viewMode === 'overview') {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <History className="h-5 w-5" />
+            تاریخچه تحویلات خودروها
+          </CardTitle>
+          <CardDescription>
+            مشاهده تاریخچه کامل تحویلات هر خودرو از ناوگان شرکت
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Search Section */}
+            <div className="flex gap-4 items-end">
+              <div className="flex-1">
+                <Label htmlFor="search-plate">جستجوی شماره پلاک</Label>
+                <Input
+                  id="search-plate"
+                  placeholder="مثال: ABC123"
+                  value={searchPlate}
+                  onChange={(e) => setSearchPlate(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handlePlateSearch()}
+                />
+              </div>
+              <Button 
+                onClick={handlePlateSearch}
+                disabled={!searchPlate.trim()}
+                className="flex items-center gap-2"
+              >
+                <Search className="h-4 w-4" />
+                جستجو
+              </Button>
+            </div>
+
+            {/* Overview Statistics */}
+            {statsData?.data?.length > 0 ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">نمای کلی ناوگان</h3>
+                  <Badge variant="outline">
+                    {statsData.data.length} خودرو
+                  </Badge>
+                </div>
+                
+                <ScrollArea className="h-[400px]">
+                  <div className="grid gap-4">
+                    {statsData.data.map((stat: VehicleUsageStats) => (
+                      <Card key={stat.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer"
+                            onClick={() => {
+                              setSelectedPlate(stat.plateNumber);
+                              setSearchPlate(stat.plateNumber);
+                              setViewMode('details');
+                            }}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Car className="h-8 w-8 text-blue-500" />
+                            <div>
+                              <h3 className="font-semibold text-lg">{stat.plateNumber}</h3>
+                              <p className="text-sm text-muted-foreground">
+                                {stat.totalDeliveries} تحویل | {Math.round(Number(stat.totalDistance) || 0)} km
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-bold">{formatCurrency(Number(stat.totalRevenue) || 0)}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {Math.round(Number(stat.onTimeDeliveryRate) || 0)}% به موقع
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-4 grid grid-cols-3 gap-4 text-center">
+                          <div>
+                            <div className="text-lg font-semibold text-green-600">
+                              {stat.successfulDeliveries}
+                            </div>
+                            <div className="text-xs text-muted-foreground">موفق</div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-semibold text-red-600">
+                              {stat.failedDeliveries}
+                            </div>
+                            <div className="text-xs text-muted-foreground">ناموفق</div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-semibold text-yellow-600">
+                              {stat.averageRating ? Number(stat.averageRating).toFixed(1) : 'N/A'}
+                            </div>
+                            <div className="text-xs text-muted-foreground">امتیاز</div>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                {statsLoading ? 'در حال بارگذاری...' : 'هنوز داده‌ای برای نمایش وجود ندارد'}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Details View
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBackToOverview}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              برگشت
+            </Button>
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Car className="h-5 w-5" />
+                تاریخچه خودرو {selectedPlate}
+              </CardTitle>
+              <CardDescription>
+                جزئیات کامل تحویلات و عملکرد
+              </CardDescription>
+            </div>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {historyLoading || summaryLoading ? (
+          <div className="text-center py-8 text-muted-foreground">
+            در حال بارگذاری جزئیات...
+          </div>
+        ) : historyData?.data?.length > 0 ? (
+          <div className="space-y-6">
+            {/* Summary Stats */}
+            {summaryData?.data && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card className="p-4 text-center">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {summaryData.data.stats.totalDeliveries}
+                  </div>
+                  <div className="text-sm text-muted-foreground">کل تحویلات</div>
+                </Card>
+                <Card className="p-4 text-center">
+                  <div className="text-2xl font-bold text-green-600">
+                    {Math.round(Number(summaryData.data.stats.onTimeDeliveryRate) || 0)}%
+                  </div>
+                  <div className="text-sm text-muted-foreground">به موقع</div>
+                </Card>
+                <Card className="p-4 text-center">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {formatCurrency(Number(summaryData.data.stats.totalRevenue) || 0)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">کل درآمد</div>
+                </Card>
+                <Card className="p-4 text-center">
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {summaryData.data.stats.averageRating ? Number(summaryData.data.stats.averageRating).toFixed(1) : 'N/A'}
+                  </div>
+                  <div className="text-sm text-muted-foreground">امتیاز میانگین</div>
+                </Card>
+              </div>
+            )}
+
+            {/* Delivery History Table */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">تاریخچه تحویلات</h3>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-right">شماره سفارش</TableHead>
+                    <TableHead className="text-right">مشتری</TableHead>
+                    <TableHead className="text-right">مقصد</TableHead>
+                    <TableHead className="text-right">وزن</TableHead>
+                    <TableHead className="text-right">هزینه</TableHead>
+                    <TableHead className="text-right">وضعیت</TableHead>
+                    <TableHead className="text-right">تاریخ تحویل</TableHead>
+                    <TableHead className="text-right">امتیاز</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {historyData.data.map((delivery: VehicleDeliveryHistory) => (
+                    <TableRow key={delivery.id}>
+                      <TableCell className="font-medium">{delivery.orderNumber}</TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{delivery.customerName}</div>
+                          <div className="text-sm text-muted-foreground">{delivery.customerPhone}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <div>{delivery.destinationAddress}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{delivery.totalWeight} kg</TableCell>
+                      <TableCell>{formatCurrency(delivery.deliveryCost)}</TableCell>
+                      <TableCell>{getStatusBadge(delivery.deliveryStatus)}</TableCell>
+                      <TableCell>
+                        {delivery.deliveryDateTime ? 
+                          format(new Date(delivery.deliveryDateTime), 'yyyy/MM/dd HH:mm') : 
+                          'نامشخص'
+                        }
+                      </TableCell>
+                      <TableCell>
+                        {delivery.customerRating ? (
+                          <div className="flex items-center gap-1">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span>{delivery.customerRating.toFixed(1)}</span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            {selectedPlate ? 'تاریخچه‌ای برای این خودرو یافت نشد' : 'برای مشاهده جزئیات، شماره پلاک خودرو را جستجو کنید'}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 // Safe date formatting function to prevent Invalid Date errors
 const formatDateSafe = (dateString: string | null | undefined, locale = 'en-US', options = {}): string => {
@@ -4320,31 +4684,7 @@ const LogisticsManagement = () => {
         </TabsContent>
 
         <TabsContent value="vehicle-history">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <History className="h-5 w-5" />
-                تاریخچه تحویلات خودروها
-              </CardTitle>
-              <CardDescription>
-                مشاهده تاریخچه کامل تحویلات هر خودرو از ناوگان شرکت
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <p className="text-muted-foreground mb-4">
-                  برای مشاهده تاریخچه کامل خودروها، به صفحه مخصوص مراجعه کنید
-                </p>
-                <Button 
-                  onClick={() => window.open('/admin/vehicle-history', '_blank')}
-                  className="flex items-center gap-2"
-                >
-                  <History className="h-4 w-4" />
-                  مشاهده تاریخچه خودروها
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <VehicleHistorySection />
         </TabsContent>
 
         <TabsContent value="international">
