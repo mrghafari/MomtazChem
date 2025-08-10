@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Calendar, CalendarDateRangePicker } from "@/components/ui/calendar";
+import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { apiRequest } from "@/lib/queryClient";
@@ -86,30 +86,30 @@ export default function VehicleHistoryPage() {
       dateRange.from?.toISOString(),
       dateRange.to?.toISOString()
     ],
-    queryFn: () => apiRequest('/api/logistics/vehicle-history', {
-      method: 'GET',
-      params: {
-        plateNumber: selectedPlate,
-        page: currentPage,
-        limit: pageSize,
-        startDate: dateRange.from?.toISOString(),
-        endDate: dateRange.to?.toISOString()
-      }
-    }),
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (selectedPlate) params.append('plateNumber', selectedPlate);
+      params.append('page', currentPage.toString());
+      params.append('limit', pageSize.toString());
+      if (dateRange.from) params.append('startDate', dateRange.from.toISOString());
+      if (dateRange.to) params.append('endDate', dateRange.to.toISOString());
+      
+      return apiRequest(`/api/logistics/vehicle-history?${params.toString()}`, { method: 'GET' });
+    },
     enabled: !!selectedPlate
   });
 
   // Get vehicle usage statistics
   const { data: statsData, isLoading: statsLoading } = useQuery({
     queryKey: ['/api/logistics/vehicle-stats'],
-    queryFn: () => apiRequest('/api/logistics/vehicle-stats')
+    queryFn: () => apiRequest('/api/logistics/vehicle-stats', { method: 'GET' }),
   });
 
   // Get vehicle summary for selected plate
   const { data: summaryData, isLoading: summaryLoading } = useQuery({
     queryKey: ['/api/logistics/vehicle-summary', selectedPlate],
-    queryFn: () => apiRequest(`/api/logistics/vehicle-summary/${selectedPlate}`),
-    enabled: !!selectedPlate
+    queryFn: () => apiRequest(`/api/logistics/vehicle-summary/${selectedPlate}`, { method: 'GET' }),
+    enabled: !!selectedPlate,
   });
 
   const handlePlateSearch = () => {
@@ -520,14 +520,14 @@ export default function VehicleHistoryPage() {
                               <div>
                                 <h3 className="font-semibold text-lg">{stat.plateNumber}</h3>
                                 <p className="text-sm text-muted-foreground">
-                                  {stat.totalDeliveries} تحویل | {Math.round(stat.totalDistance)} km
+                                  {stat.totalDeliveries} تحویل | {Math.round(Number(stat.totalDistance) || 0)} km
                                 </p>
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="text-lg font-bold">{formatCurrency(stat.totalRevenue)}</div>
+                              <div className="text-lg font-bold">{formatCurrency(Number(stat.totalRevenue) || 0)}</div>
                               <div className="text-sm text-muted-foreground">
-                                {Math.round(stat.onTimeDeliveryRate)}% به موقع
+                                {Math.round(Number(stat.onTimeDeliveryRate) || 0)}% به موقع
                               </div>
                             </div>
                           </div>
@@ -547,7 +547,7 @@ export default function VehicleHistoryPage() {
                             </div>
                             <div>
                               <div className="text-lg font-semibold text-yellow-600">
-                                {stat.averageRating ? stat.averageRating.toFixed(1) : 'N/A'}
+                                {stat.averageRating ? Number(stat.averageRating).toFixed(1) : 'N/A'}
                               </div>
                               <div className="text-xs text-muted-foreground">امتیاز</div>
                             </div>
