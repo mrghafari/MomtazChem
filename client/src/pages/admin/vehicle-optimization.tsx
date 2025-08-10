@@ -28,6 +28,7 @@ interface VehicleTemplate {
   pricePerKm: string;
   pricePerKg: string;
   supportsHazardous: boolean;
+  supportsFlammable: boolean;
   supportsRefrigerated: boolean;
   supportsFragile: boolean;
   averageSpeedKmh: string;
@@ -66,9 +67,25 @@ interface OptimalVehicleRequest {
 
 const VEHICLE_TYPES = {
   motorcycle: "موتور",
-  van: "وانت", 
+  bicycle: "دوچرخه",
+  scooter: "اسکوتر",
+  van: "وانت",
+  pickup: "پیکاپ", 
+  small_truck: "کامیون کوچک",
   light_truck: "کامیون سبک",
-  heavy_truck: "کامیون سنگین"
+  medium_truck: "کامیون متوسط",
+  heavy_truck: "کامیون سنگین",
+  articulated_truck: "کامیون کشنده",
+  tanker: "تانکر",
+  refrigerated_truck: "کامیون یخچالی",
+  flatbed_truck: "کامیون بار باز",
+  container_truck: "کامیون کانتینری",
+  crane_truck: "کامیون جرثقیل",
+  dump_truck: "کامیون کمپرسی",
+  cargo_van: "ون باری",
+  mini_bus: "مینی‌بوس",
+  bus: "اتوبوس",
+  trailer: "تریلی"
 };
 
 const ROUTE_TYPES = {
@@ -86,20 +103,18 @@ export default function VehicleOptimization() {
 
   // Fetch vehicle templates
   const { data: vehiclesData, isLoading: vehiclesLoading } = useQuery({
-    queryKey: ['/api/logistics/vehicle-templates'],
-    queryFn: () => apiRequest({ url: '/api/logistics/vehicle-templates' })
+    queryKey: ['/api/logistics/vehicle-templates']
   });
 
   // Fetch selection history
   const { data: historyData, isLoading: historyLoading } = useQuery({
-    queryKey: ['/api/logistics/vehicle-selection-history'],
-    queryFn: () => apiRequest({ url: '/api/logistics/vehicle-selection-history' })
+    queryKey: ['/api/logistics/vehicle-selection-history']
   });
 
   // Create vehicle template mutation
   const createVehicleMutation = useMutation({
     mutationFn: (data: Partial<VehicleTemplate>) => 
-      apiRequest({ url: '/api/logistics/vehicle-templates', method: 'POST', data }),
+      apiRequest('/api/logistics/vehicle-templates', { method: 'POST', body: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/vehicle-templates'] });
       setIsCreateDialogOpen(false);
@@ -113,7 +128,7 @@ export default function VehicleOptimization() {
   // Update vehicle template mutation
   const updateVehicleMutation = useMutation({
     mutationFn: ({ id, ...data }: Partial<VehicleTemplate> & { id: number }) => 
-      apiRequest({ url: `/api/logistics/vehicle-templates/${id}`, method: 'PATCH', data }),
+      apiRequest(`/api/logistics/vehicle-templates/${id}`, { method: 'PATCH', body: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/vehicle-templates'] });
       setEditingVehicle(null);
@@ -127,7 +142,7 @@ export default function VehicleOptimization() {
   // Delete vehicle template mutation
   const deleteVehicleMutation = useMutation({
     mutationFn: (id: number) => 
-      apiRequest({ url: `/api/logistics/vehicle-templates/${id}`, method: 'DELETE' }),
+      apiRequest(`/api/logistics/vehicle-templates/${id}`, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/vehicle-templates'] });
       toast({ title: "موفقیت", description: "الگوی خودرو حذف شد" });

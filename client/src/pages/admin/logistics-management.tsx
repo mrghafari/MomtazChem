@@ -1018,9 +1018,25 @@ const LogisticsManagement = () => {
 
   const VEHICLE_TYPES = {
     motorcycle: "موتور",
-    van: "وانت", 
+    bicycle: "دوچرخه",
+    scooter: "اسکوتر",
+    van: "وانت",
+    pickup: "پیکاپ", 
+    small_truck: "کامیون کوچک",
     light_truck: "کامیون سبک",
-    heavy_truck: "کامیون سنگین"
+    medium_truck: "کامیون متوسط",
+    heavy_truck: "کامیون سنگین",
+    articulated_truck: "کامیون کشنده",
+    tanker: "تانکر",
+    refrigerated_truck: "کامیون یخچالی",
+    flatbed_truck: "کامیون بار باز",
+    container_truck: "کامیون کانتینری",
+    crane_truck: "کامیون جرثقیل",
+    dump_truck: "کامیون کمپرسی",
+    cargo_van: "ون باری",
+    mini_bus: "مینی‌بوس",
+    bus: "اتوبوس",
+    trailer: "تریلی"
   };
 
   const ROUTE_TYPES = {

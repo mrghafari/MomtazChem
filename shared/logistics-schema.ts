@@ -298,9 +298,25 @@ export type InsertLogisticsAnalytics = z.infer<typeof insertLogisticsAnalyticsSc
 
 export const VEHICLE_TYPES = {
   MOTORCYCLE: 'motorcycle',
-  CAR: 'car', 
-  TRUCK: 'truck',
-  VAN: 'van'
+  BICYCLE: 'bicycle',
+  SCOOTER: 'scooter',
+  VAN: 'van',
+  PICKUP: 'pickup',
+  SMALL_TRUCK: 'small_truck',
+  LIGHT_TRUCK: 'light_truck',
+  MEDIUM_TRUCK: 'medium_truck',
+  HEAVY_TRUCK: 'heavy_truck',
+  ARTICULATED_TRUCK: 'articulated_truck',
+  TANKER: 'tanker',
+  REFRIGERATED_TRUCK: 'refrigerated_truck',
+  FLATBED_TRUCK: 'flatbed_truck',
+  CONTAINER_TRUCK: 'container_truck',
+  CRANE_TRUCK: 'crane_truck',
+  DUMP_TRUCK: 'dump_truck',
+  CARGO_VAN: 'cargo_van',
+  MINI_BUS: 'mini_bus',
+  BUS: 'bus',
+  TRAILER: 'trailer'
 } as const;
 
 export const DELIVERY_STATUS = {
@@ -329,6 +345,38 @@ export type VehicleType = typeof VEHICLE_TYPES[keyof typeof VEHICLE_TYPES];
 export type DeliveryStatus = typeof DELIVERY_STATUS[keyof typeof DELIVERY_STATUS];
 export type RouteStatus = typeof ROUTE_STATUS[keyof typeof ROUTE_STATUS];
 export type SmsStatus = typeof SMS_STATUS[keyof typeof SMS_STATUS];
+
+// =============================================================================
+// VEHICLE CATEGORIES (LEVEL ONE)
+// =============================================================================
+
+// Vehicle categories table for level one classification
+export const vehicleCategories = pgTable("vehicle_categories", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(), // English code like 'heavy_truck'
+  nameFa: text("name_fa").notNull(), // Persian name like 'کامیون سنگین'
+  nameEn: text("name_en"), // English name like 'Heavy Truck'
+  nameAr: text("name_ar"), // Arabic name like 'شاحنة ثقيلة'
+  nameKu: text("name_ku"), // Kurdish name like 'لۆری قورس'
+  description: text("description"), // Optional description
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0), // For ordering in lists
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("vehicle_categories_code_idx").on(table.code),
+  index("vehicle_categories_active_idx").on(table.isActive),
+  index("vehicle_categories_sort_idx").on(table.sortOrder),
+]);
+
+export const vehicleCategoriesInsertSchema = createInsertSchema(vehicleCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type VehicleCategoryInsert = z.infer<typeof vehicleCategoriesInsertSchema>;
+export type VehicleCategorySelect = typeof vehicleCategories.$inferSelect;
 
 // =============================================================================
 // IRAQI CITIES AND SHIPPING RATES MANAGEMENT

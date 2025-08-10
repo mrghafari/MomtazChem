@@ -49458,6 +49458,205 @@ momtazchem.com
     }
   });
 
+  // =============================================================================
+  // VEHICLE CATEGORIES (LEVEL ONE) ENDPOINTS
+  // =============================================================================
+
+  // Get all vehicle categories
+  app.get("/api/logistics/vehicle-types", async (req, res) => {
+    try {
+      const { vehicleCategories } = await import("../shared/logistics-schema");
+      
+      const categories = await db
+        .select()
+        .from(vehicleCategories)
+        .orderBy(vehicleCategories.sortOrder, vehicleCategories.nameFa);
+
+      res.json({
+        success: true,
+        data: categories
+      });
+    } catch (error) {
+      console.error("❌ [VEHICLE CATEGORIES] Error fetching categories:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت دسته‌بندی‌های خودرو"
+      });
+    }
+  });
+
+  // Create new vehicle category
+  app.post("/api/logistics/vehicle-types", requireAuth, async (req, res) => {
+    try {
+      const { vehicleCategories, vehicleCategoriesInsertSchema } = await import("../shared/logistics-schema");
+      
+      const validatedData = vehicleCategoriesInsertSchema.parse(req.body);
+      
+      // Check if code already exists
+      const existingCategory = await db
+        .select()
+        .from(vehicleCategories)
+        .where(eq(vehicleCategories.code, validatedData.code))
+        .limit(1);
+
+      if (existingCategory.length > 0) {
+        return res.status(409).json({
+          success: false,
+          message: "کد این دسته‌بندی قبلاً استفاده شده است"
+        });
+      }
+
+      const newCategory = await db
+        .insert(vehicleCategories)
+        .values({
+          ...validatedData,
+          updatedAt: new Date()
+        })
+        .returning();
+
+      console.log(`✅ [VEHICLE CATEGORIES] Created new category: ${validatedData.nameFa} (${validatedData.code})`);
+
+      res.status(201).json({
+        success: true,
+        data: newCategory[0],
+        message: "دسته‌بندی خودرو جدید ایجاد شد"
+      });
+    } catch (error) {
+      console.error("❌ [VEHICLE CATEGORIES] Error creating category:", error);
+      
+      if (error.code === '23505') { // Unique constraint violation
+        return res.status(409).json({
+          success: false,
+          message: "کد این دسته‌بندی قبلاً استفاده شده است"
+        });
+      }
+      
+      res.status(500).json({
+        success: false,
+        message: "خطا در ایجاد دسته‌بندی خودرو"
+      });
+    }
+  });
+
+  // Update vehicle category
+  app.patch("/api/logistics/vehicle-types/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { vehicleCategories } = await import("../shared/logistics-schema");
+      
+      const categoryId = parseInt(id);
+      if (isNaN(categoryId)) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه دسته‌بندی نامعتبر است"
+        });
+      }
+
+      // Check if category exists
+      const existingCategory = await db
+        .select()
+        .from(vehicleCategories)
+        .where(eq(vehicleCategories.id, categoryId))
+        .limit(1);
+
+      if (existingCategory.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "دسته‌بندی یافت نشد"
+        });
+      }
+
+      // If code is being changed, check for uniqueness
+      if (req.body.code && req.body.code !== existingCategory[0].code) {
+        const codeCheck = await db
+          .select()
+          .from(vehicleCategories)
+          .where(eq(vehicleCategories.code, req.body.code))
+          .limit(1);
+
+        if (codeCheck.length > 0) {
+          return res.status(409).json({
+            success: false,
+            message: "کد این دسته‌بندی قبلاً استفاده شده است"
+          });
+        }
+      }
+
+      const updatedCategory = await db
+        .update(vehicleCategories)
+        .set({
+          ...req.body,
+          updatedAt: new Date()
+        })
+        .where(eq(vehicleCategories.id, categoryId))
+        .returning();
+
+      console.log(`✅ [VEHICLE CATEGORIES] Updated category: ${updatedCategory[0].nameFa} (${updatedCategory[0].code})`);
+
+      res.json({
+        success: true,
+        data: updatedCategory[0],
+        message: "دسته‌بندی خودرو بروزرسانی شد"
+      });
+    } catch (error) {
+      console.error("❌ [VEHICLE CATEGORIES] Error updating category:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در بروزرسانی دسته‌بندی خودرو"
+      });
+    }
+  });
+
+  // Delete vehicle category
+  app.delete("/api/logistics/vehicle-types/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { vehicleCategories } = await import("../shared/logistics-schema");
+      
+      const categoryId = parseInt(id);
+      if (isNaN(categoryId)) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه دسته‌بندی نامعتبر است"
+        });
+      }
+
+      // Check if category exists
+      const existingCategory = await db
+        .select()
+        .from(vehicleCategories)
+        .where(eq(vehicleCategories.id, categoryId))
+        .limit(1);
+
+      if (existingCategory.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "دسته‌بندی یافت نشد"
+        });
+      }
+
+      // TODO: Check if category is used in vehicle templates before deletion
+      // For now, we'll allow deletion
+
+      await db
+        .delete(vehicleCategories)
+        .where(eq(vehicleCategories.id, categoryId));
+
+      console.log(`✅ [VEHICLE CATEGORIES] Deleted category: ${existingCategory[0].nameFa} (${existingCategory[0].code})`);
+
+      res.json({
+        success: true,
+        message: "دسته‌بندی خودرو حذف شد"
+      });
+    } catch (error) {
+      console.error("❌ [VEHICLE CATEGORIES] Error deleting category:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در حذف دسته‌بندی خودرو"
+      });
+    }
+  });
+
   // Catch-all for unmatched API routes - return JSON 404 (must be last)
   app.all('/api/*', (req, res) => {
     console.log(`❌ 404 - Unmatched API route: ${req.method} ${req.originalUrl}`);
