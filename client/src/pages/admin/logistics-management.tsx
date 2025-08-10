@@ -382,8 +382,8 @@ function VehicleHistorySection() {
                           <div>{delivery.destinationAddress}</div>
                         </div>
                       </TableCell>
-                      <TableCell>{delivery.totalWeight} kg</TableCell>
-                      <TableCell>{formatCurrency(delivery.deliveryCost)}</TableCell>
+                      <TableCell>{Number(delivery.totalWeight) || 0} kg</TableCell>
+                      <TableCell>{formatCurrency(Number(delivery.deliveryCost) || 0)}</TableCell>
                       <TableCell>{getStatusBadge(delivery.deliveryStatus)}</TableCell>
                       <TableCell>
                         {delivery.deliveryDateTime ? 
@@ -395,7 +395,7 @@ function VehicleHistorySection() {
                         {delivery.customerRating ? (
                           <div className="flex items-center gap-1">
                             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            <span>{delivery.customerRating.toFixed(1)}</span>
+                            <span>{Number(delivery.customerRating).toFixed(1)}</span>
                           </div>
                         ) : (
                           <span className="text-muted-foreground">-</span>
