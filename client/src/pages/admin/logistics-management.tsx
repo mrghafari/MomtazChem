@@ -1118,26 +1118,19 @@ const LogisticsManagement = () => {
 
   const VehicleTemplatesTab = () => {
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <Truck className="h-5 w-5" />
-              مدیریت قالب‌های خودرو
-            </h2>
-            <p className="text-muted-foreground text-sm">مدیریت الگوهای خودرو برای سیستم انتخاب بهینه و محاسبه هزینه</p>
+      <>
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Truck className="h-5 w-5" />
+                مدیریت قالب‌های خودرو
+              </h2>
+              <p className="text-muted-foreground text-sm">مدیریت الگوهای خودرو برای سیستم انتخاب بهینه و محاسبه هزینه</p>
+            </div>
           </div>
-        </div>
 
-        <Tabs defaultValue="templates" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="templates">الگوهای خودرو</TabsTrigger>
-            <TabsTrigger value="editor">ویرایش قالب‌ها</TabsTrigger>
-            <TabsTrigger value="optimization">انتخاب بهینه</TabsTrigger>
-            <TabsTrigger value="history">تاریخچه انتخاب</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="templates" className="space-y-4">
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-md font-medium">الگوهای خودرو</h3>
               <Dialog open={isCreateVehicleDialogOpen} onOpenChange={setIsCreateVehicleDialogOpen}>
@@ -1327,19 +1320,19 @@ const LogisticsManagement = () => {
             </Card>
 
             {/* Edit Vehicle Dialog */}
-            <Dialog open={!!editingVehicle} onOpenChange={(open) => {
-              if (!open) {
-                setEditingVehicle(null);
-                setShowCustomEditInput(false);
-                setCustomEditVehicleType('');
-              }
-            }}>
-              <DialogContent className="max-w-2xl" dir="rtl">
-                <DialogHeader>
-                  <DialogTitle>ویرایش الگوی خودرو</DialogTitle>
-                  <DialogDescription>اطلاعات الگوی خودرو را ویرایش کنید</DialogDescription>
-                </DialogHeader>
-                {editingVehicle && (
+            {editingVehicle && (
+              <Dialog open={!!editingVehicle} onOpenChange={(open) => {
+                if (!open) {
+                  setEditingVehicle(null);
+                  setShowCustomEditInput(false);
+                  setCustomEditVehicleType('');
+                }
+              }}>
+                <DialogContent className="max-w-2xl" dir="rtl">
+                  <DialogHeader>
+                    <DialogTitle>ویرایش الگوی خودرو</DialogTitle>
+                    <DialogDescription>اطلاعات الگوی خودرو را ویرایش کنید</DialogDescription>
+                  </DialogHeader>
                   <form onSubmit={(e) => { e.preventDefault(); handleEditVehicle(new FormData(e.currentTarget)); }}>
                     <div className="grid grid-cols-2 gap-4 py-4">
                       <div className="space-y-2">
@@ -1512,122 +1505,12 @@ const LogisticsManagement = () => {
                       </Button>
                     </DialogFooter>
                   </form>
-                )}
-              </DialogContent>
-            </Dialog>
-          </TabsContent>
-
-          <TabsContent value="editor" className="space-y-4">
-            <VehicleTemplateEditor />
-          </TabsContent>
-
-          <TabsContent value="optimization" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calculator className="h-5 w-5" />
-                  انتخاب بهینه وسیله نقلیه
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>شماره سفارش *</Label>
-                    <Input 
-                      value={optimizationRequest.orderNumber || ''} 
-                      onChange={(e) => setOptimizationRequest({...optimizationRequest, orderNumber: e.target.value})}
-                      placeholder="M2507240001"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>وزن (کیلوگرم) *</Label>
-                    <Input 
-                      type="number"
-                      value={optimizationRequest.weightKg || ''} 
-                      onChange={(e) => setOptimizationRequest({...optimizationRequest, weightKg: parseFloat(e.target.value)})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>نوع مسیر *</Label>
-                    <select 
-                      value={optimizationRequest.routeType || ''} 
-                      onChange={(e) => setOptimizationRequest({...optimizationRequest, routeType: e.target.value})}
-                      className="w-full p-2 border rounded"
-                    >
-                      <option value="">انتخاب نوع مسیر</option>
-                      {Object.entries(ROUTE_TYPES).map(([key, value]) => (
-                        <option key={key} value={key}>{value}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>مسافت (کیلومتر) *</Label>
-                    <Input 
-                      type="number"
-                      value={optimizationRequest.distanceKm || ''} 
-                      onChange={(e) => setOptimizationRequest({...optimizationRequest, distanceKm: parseFloat(e.target.value)})}
-                    />
-                  </div>
-                </div>
-                <Button 
-                  onClick={handleOptimizeVehicle} 
-                  disabled={optimizeVehicleMutation.isPending}
-                  className="w-full mt-4"
-                >
-                  {optimizeVehicleMutation.isPending ? "در حال محاسبه..." : "انتخاب بهینه"}
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="history" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <History className="h-5 w-5" />
-                  تاریخچه انتخاب وسیله
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>شماره سفارش</TableHead>
-                      <TableHead>وزن</TableHead>
-                      <TableHead>مسیر</TableHead>
-                      <TableHead>وسیله انتخابی</TableHead>
-                      <TableHead>هزینه</TableHead>
-                      <TableHead>تاریخ</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {historyLoading ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8">در حال بارگذاری...</TableCell>
-                      </TableRow>
-                    ) : history.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8">هیچ تاریخچه‌ای یافت نشد</TableCell>
-                      </TableRow>
-                    ) : (
-                      history.map((item: any) => (
-                        <TableRow key={item.id}>
-                          <TableCell>{item.orderNumber}</TableCell>
-                          <TableCell>{item.orderWeightKg} کیلوگرم</TableCell>
-                          <TableCell>{(ROUTE_TYPES as any)[item.routeType] || item.routeType}</TableCell>
-                          <TableCell>{item.selectedVehicleName}</TableCell>
-                          <TableCell>{parseInt(item.totalCost).toLocaleString()} دینار</TableCell>
-                          <TableCell>{formatDateSafe(item.createdAt)}</TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+        </div>
+      </>
     );
   };
 
