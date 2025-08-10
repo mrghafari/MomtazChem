@@ -668,7 +668,7 @@ const LogisticsManagement = () => {
   // Vehicle templates API integration
   const { data: vehicleTemplatesData, isLoading: loadingVehicleTemplates } = useQuery({
     queryKey: ['/api/logistics/vehicle-templates'],
-    enabled: activeTab === 'vehicle-templates'
+    enabled: activeTab === 'vehicle-templates' || activeTab === 'fleet-vehicles'
   });
 
   const fleetVehicles = (fleetVehiclesData as any)?.data || [];
@@ -4437,13 +4437,20 @@ const LogisticsManagement = () => {
                       <SelectValue placeholder="انتخاب الگوی خودرو" />
                     </SelectTrigger>
                     <SelectContent>
-                      {(vehicleTemplatesData as any)?.data?.map((template: any) => (
-                        <SelectItem key={template.id} value={template.name}>
-                          {template.name}
-                        </SelectItem>
-                      ))}
+                      {loadingVehicleTemplates ? (
+                        <SelectItem value="loading" disabled>در حال بارگذاری...</SelectItem>
+                      ) : (vehicleTemplatesData as any)?.data?.length > 0 ? (
+                        (vehicleTemplatesData as any)?.data?.map((template: any) => (
+                          <SelectItem key={template.id} value={template.name}>
+                            {template.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-data" disabled>هیچ الگوی خودرویی یافت نشد</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
+
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="licensePlate">شماره خودرو *</Label>
@@ -4589,13 +4596,20 @@ const LogisticsManagement = () => {
                         <SelectValue placeholder="انتخاب الگوی خودرو" />
                       </SelectTrigger>
                       <SelectContent>
-                        {(vehicleTemplatesData as any)?.data?.map((template: any) => (
-                          <SelectItem key={template.id} value={template.name}>
-                            {template.name}
-                          </SelectItem>
-                        ))}
+                        {loadingVehicleTemplates ? (
+                          <SelectItem value="loading" disabled>در حال بارگذاری...</SelectItem>
+                        ) : (vehicleTemplatesData as any)?.data?.length > 0 ? (
+                          (vehicleTemplatesData as any)?.data?.map((template: any) => (
+                            <SelectItem key={template.id} value={template.name}>
+                              {template.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-data" disabled>هیچ الگوی خودرویی یافت نشد</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
+
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="edit-licensePlate">شماره خودرو *</Label>
