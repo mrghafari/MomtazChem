@@ -443,11 +443,11 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
                 </div>
               </div>
 
-              {/* Vehicle Specifications */}
+              {/* Capacity and Specifications */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">مشخصات فنی</h3>
+                <h3 className="text-lg font-semibold border-b pb-2">ظرفیت و محدودیت‌ها</h3>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="maxWeightKg"
@@ -484,15 +484,13 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
                       </FormItem>
                     )}
                   />
-                </div>
-
-                <div className="grid grid-cols-1 gap-4">
+                  
                   <FormField
                     control={form.control}
                     name="averageSpeedKmh"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>سرعت متوسط (کیلومتر بر ساعت) *</FormLabel>
+                        <FormLabel>سرعت متوسط (کیلومتر/ساعت) *</FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
@@ -568,58 +566,31 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
                 </div>
               </div>
 
-              {/* Route Types */}
+              {/* Routes */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">انواع مسیر مجاز</h3>
+                <h3 className="text-lg font-semibold border-b pb-2">مسیرهای مجاز</h3>
+                
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="urban"
-                      checked={allowedRoutes.includes('urban')}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setAllowedRoutes([...allowedRoutes, 'urban']);
-                        } else {
-                          setAllowedRoutes(allowedRoutes.filter(r => r !== 'urban'));
-                        }
-                      }}
-                      className="ml-2"
-                    />
-                    <label htmlFor="urban">شهری</label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="interurban"
-                      checked={allowedRoutes.includes('interurban')}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setAllowedRoutes([...allowedRoutes, 'interurban']);
-                        } else {
-                          setAllowedRoutes(allowedRoutes.filter(r => r !== 'interurban'));
-                        }
-                      }}
-                      className="ml-2"
-                    />
-                    <label htmlFor="interurban">بین‌شهری</label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="highway"
-                      checked={allowedRoutes.includes('highway')}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setAllowedRoutes([...allowedRoutes, 'highway']);
-                        } else {
-                          setAllowedRoutes(allowedRoutes.filter(r => r !== 'highway'));
-                        }
-                      }}
-                      className="ml-2"
-                    />
-                    <label htmlFor="highway">آزادراهی</label>
-                  </div>
+                  {Object.entries(ROUTE_TYPES).map(([key, value]) => (
+                    <div key={key} className="flex items-center space-x-2 space-x-reverse">
+                      <input
+                        type="checkbox"
+                        id={`route-${key}`}
+                        checked={allowedRoutes.includes(key)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setAllowedRoutes([...allowedRoutes, key]);
+                          } else {
+                            setAllowedRoutes(allowedRoutes.filter(r => r !== key));
+                          }
+                        }}
+                        className="w-4 h-4"
+                      />
+                      <label htmlFor={`route-${key}`} className="text-sm font-medium">
+                        {value}
+                      </label>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -627,14 +598,17 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold border-b pb-2">قابلیت‌های ویژه</h3>
                 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-6">
                   <FormField
                     control={form.control}
                     name="supportsHazardous"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <FormItem className="flex items-center justify-between rounded-lg border p-3">
                         <div className="space-y-0.5">
-                          <FormLabel>مواد خطرناک</FormLabel>
+                          <FormLabel>حمل مواد خطرناک</FormLabel>
+                          <FormDescription className="text-xs">
+                            قابلیت حمل مواد شیمیایی خطرناک
+                          </FormDescription>
                         </div>
                         <FormControl>
                           <Switch
@@ -650,9 +624,12 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
                     control={form.control}
                     name="supportsFlammable"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <FormItem className="flex items-center justify-between rounded-lg border p-3">
                         <div className="space-y-0.5">
-                          <FormLabel>مواد آتش‌زا</FormLabel>
+                          <FormLabel>حمل مواد آتش‌زا</FormLabel>
+                          <FormDescription className="text-xs">
+                            قابلیت حمل محصولات آتش‌زا و قابل اشتعال
+                          </FormDescription>
                         </div>
                         <FormControl>
                           <Switch
@@ -668,9 +645,12 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
                     control={form.control}
                     name="supportsRefrigerated"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <FormItem className="flex items-center justify-between rounded-lg border p-3">
                         <div className="space-y-0.5">
-                          <FormLabel>یخچالی</FormLabel>
+                          <FormLabel>حمل یخچالی</FormLabel>
+                          <FormDescription className="text-xs">
+                            قابلیت حمل محصولات یخچالی
+                          </FormDescription>
                         </div>
                         <FormControl>
                           <Switch
@@ -683,14 +663,17 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
                   />
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
                     name="supportsFragile"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <FormItem className="flex items-center justify-between rounded-lg border p-3">
                         <div className="space-y-0.5">
-                          <FormLabel>شکستنی</FormLabel>
+                          <FormLabel>حمل اجناس شکستنی</FormLabel>
+                          <FormDescription className="text-xs">
+                            قابلیت حمل محصولات شکستنی
+                          </FormDescription>
                         </div>
                         <FormControl>
                           <Switch
@@ -706,12 +689,15 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
                     control={form.control}
                     name="notAllowedFlammable"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 border-orange-200 bg-orange-50">
+                      <FormItem className="flex items-center justify-between rounded-lg border-orange-200 bg-orange-50 border p-3">
                         <div className="space-y-0.5">
                           <FormLabel className="text-orange-800">
                             <AlertTriangle className="w-4 h-4 inline ml-1" />
                             غیر مجاز برای حمل مواد آتش‌زا
                           </FormLabel>
+                          <FormDescription className="text-xs text-orange-700">
+                            این خودرو مجاز به حمل مواد آتش‌زا نیست
+                          </FormDescription>
                         </div>
                         <FormControl>
                           <Switch
