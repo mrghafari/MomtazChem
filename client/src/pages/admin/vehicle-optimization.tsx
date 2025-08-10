@@ -8,13 +8,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import VehicleTemplateEditor from "@/components/admin/VehicleTemplateEditor";
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Truck, Plus, Edit, Trash2, History, CheckCircle, AlertCircle } from "lucide-react";
+import { Truck, Plus, Edit, Trash2 } from "lucide-react";
 
 interface VehicleTemplate {
   id: number;
@@ -39,19 +39,7 @@ interface VehicleTemplate {
   updatedAt: string;
 }
 
-interface VehicleSelectionHistory {
-  id: number;
-  orderNumber: string;
-  customerId: number | null;
-  orderWeightKg: string;
-  routeType: string;
-  distanceKm: string;
-  isHazardous: boolean;
-  selectedVehicleName: string;
-  totalCost: string;
-  selectionCriteria: string;
-  createdAt: string;
-}
+
 
 interface OptimalVehicleRequest {
   orderNumber: string;
@@ -106,10 +94,7 @@ export default function VehicleOptimization() {
     queryKey: ['/api/logistics/vehicle-templates']
   });
 
-  // Fetch selection history
-  const { data: historyData, isLoading: historyLoading } = useQuery({
-    queryKey: ['/api/logistics/vehicle-selection-history']
-  });
+
 
   // Create vehicle template mutation
   const createVehicleMutation = useMutation({
@@ -155,7 +140,6 @@ export default function VehicleOptimization() {
 
 
   const vehicles: VehicleTemplate[] = vehiclesData?.data || [];
-  const history: VehicleSelectionHistory[] = historyData?.data || [];
 
   const handleCreateVehicle = (formData: FormData) => {
     const vehicleData = {
@@ -194,10 +178,8 @@ export default function VehicleOptimization() {
       </div>
 
       <Tabs defaultValue="templates" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-1">
           <TabsTrigger value="templates">الگوهای خودرو</TabsTrigger>
-          <TabsTrigger value="editor">ویرایش الگوها</TabsTrigger>
-          <TabsTrigger value="history">تاریخچه انتخاب</TabsTrigger>
         </TabsList>
 
         <TabsContent value="templates" className="space-y-4">
@@ -390,10 +372,6 @@ export default function VehicleOptimization() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="editor" className="space-y-4">
-          <VehicleTemplateEditor />
-        </TabsContent>
-
         {/* Edit Vehicle Dialog */}
         {editingVehicle && (
           <Dialog open={!!editingVehicle} onOpenChange={() => setEditingVehicle(null)}>
@@ -529,61 +507,6 @@ export default function VehicleOptimization() {
             </DialogContent>
           </Dialog>
         )}
-
-
-
-        <TabsContent value="history" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <History className="h-5 w-5" />
-                تاریخچه انتخاب وسایل نقلیه
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>شماره سفارش</TableHead>
-                    <TableHead>وسیله انتخاب شده</TableHead>
-                    <TableHead>وزن</TableHead>
-                    <TableHead>مسیر</TableHead>
-                    <TableHead>فاصله</TableHead>
-                    <TableHead>هزینه کل</TableHead>
-                    <TableHead>تاریخ</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {historyLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center">در حال بارگذاری...</TableCell>
-                    </TableRow>
-                  ) : history.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center">هیچ تاریخچه‌ای یافت نشد</TableCell>
-                    </TableRow>
-                  ) : (
-                    history.map((record) => (
-                      <TableRow key={record.id}>
-                        <TableCell className="font-medium">{record.orderNumber}</TableCell>
-                        <TableCell>{record.selectedVehicleName}</TableCell>
-                        <TableCell>{parseFloat(record.orderWeightKg).toLocaleString()} kg</TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">
-                            {ROUTE_TYPES[record.routeType as keyof typeof ROUTE_TYPES] || record.routeType}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{parseFloat(record.distanceKm).toLocaleString()} km</TableCell>
-                        <TableCell>{parseFloat(record.totalCost).toLocaleString()} IQD</TableCell>
-                        <TableCell>{new Date(record.createdAt).toLocaleDateString('fa-IR')}</TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );
