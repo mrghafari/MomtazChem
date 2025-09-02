@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, FileText, CheckCircle, AlertCircle, ArrowLeft, CreditCard, Building2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+// Using simple upload instead of SecureFileUploader due to CSS import issues
 
 export default function BankReceiptUpload() {
   const { orderId: paramOrderId } = useParams();
@@ -81,46 +82,33 @@ export default function BankReceiptUpload() {
     },
   });
 
-  // Upload mutation
+  // Upload mutation - Uses Object Storage now
   const uploadMutation = useMutation({
-    mutationFn: async (formData: FormData) => {
-      return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        
-        // Track upload progress
-        xhr.upload.addEventListener('progress', (e) => {
-          if (e.lengthComputable) {
-            const percentComplete = (e.loaded / e.total) * 100;
-            setUploadProgress(percentComplete);
-          }
-        });
-
-        xhr.addEventListener('load', () => {
-          if (xhr.status === 200) {
-            resolve(JSON.parse(xhr.responseText));
-          } else {
-            reject(new Error(`Upload failed: ${xhr.status}`));
-          }
-        });
-
-        xhr.addEventListener('error', () => {
-          reject(new Error('Upload failed'));
-        });
-
-        xhr.open('POST', `/api/payment/upload-receipt`);
-        xhr.send(formData);
+    mutationFn: async ({ receiptUrl, orderId, notes }: { receiptUrl: string; orderId: string; notes: string }) => {
+      const response = await apiRequest('/api/payment/upload-receipt', {
+        method: 'POST',
+        body: JSON.stringify({
+          receiptUrl,
+          orderId,
+          notes
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
+      return response;
     },
     onSuccess: () => {
       toast({
         title: "✅ فیش بانکی آپلود شد",
-        description: "فیش واریزی شما با موفقیت ارسال شد و در حال بررسی است",
+        description: "فیش واریزی شما با موفقیت ارسال شد و در دیتابیس ذخیره گردید",
       });
       
       // Reset form
       setSelectedFile(null);
       setUploadProgress(0);
       setNotes("");
+      setReceiptAmount("");
       
       // Redirect to order status page
       setTimeout(() => {
@@ -165,7 +153,8 @@ export default function BankReceiptUpload() {
     }
   };
 
-  const handleUpload = () => {
+  // Simple upload handler with Object Storage
+  const handleUpload = async () => {
     if (!selectedFile) {
       toast({
         title: "فایل انتخاب نشده",
@@ -194,16 +183,61 @@ export default function BankReceiptUpload() {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('receipt', selectedFile);
-    formData.append('notes', notes);
-    formData.append('receiptAmount', receiptAmount);
-    // Only append orderId if it's a valid value (not null/empty)
-    if (orderId && orderId.trim() !== '') {
-      formData.append('orderId', orderId);
+    if (!orderId || orderId.trim() === '') {
+      toast({
+        title: "شماره سفارش الزامی است",
+        description: "لطفاً شماره سفارش را وارد کنید",
+        variant: "destructive",
+      });
+      return;
     }
 
-    uploadMutation.mutate(formData);
+    try {
+      setUploadProgress(10);
+      
+      // Step 1: Get presigned URL from Object Storage
+      const uploadUrlResponse = await apiRequest('/api/objects/upload', {
+        method: 'POST'
+      });
+      
+      if (!uploadUrlResponse.uploadURL) {
+        throw new Error('Unable to get upload URL');
+      }
+
+      setUploadProgress(30);
+
+      // Step 2: Upload file to Object Storage using presigned URL
+      const uploadResponse = await fetch(uploadUrlResponse.uploadURL, {
+        method: 'PUT',
+        body: selectedFile,
+        headers: {
+          'Content-Type': selectedFile.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('File upload failed');
+      }
+
+      setUploadProgress(70);
+
+      // Step 3: Save receipt to database with Object Storage URL
+      await uploadMutation.mutateAsync({
+        receiptUrl: uploadUrlResponse.uploadURL.split('?')[0], // Remove query params
+        orderId,
+        notes: notes + (receiptAmount ? ` | مبلغ: ${receiptAmount} دینار` : '')
+      });
+
+      setUploadProgress(100);
+      
+    } catch (error: any) {
+      toast({
+        title: "خطا در آپلود",
+        description: error.message || "خطا در آپلود فیش بانکی",
+        variant: "destructive",
+      });
+      setUploadProgress(0);
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -370,7 +404,7 @@ export default function BankReceiptUpload() {
         <CardContent className="space-y-4">
           {/* File Input */}
           <div>
-            <Label htmlFor="receipt-file">انتخاب فایل</Label>
+            <Label htmlFor="receipt-file">انتخاب فایل فیش بانکی</Label>
             <Input
               id="receipt-file"
               type="file"
@@ -378,6 +412,9 @@ export default function BankReceiptUpload() {
               onChange={handleFileSelect}
               className="mt-1"
             />
+            <p className="text-sm text-gray-500 mt-1">
+              فرمت‌های مجاز: JPG، PNG، WebP، PDF - حداکثر 10MB
+            </p>
           </div>
 
           {/* Selected File Display */}
@@ -397,7 +434,7 @@ export default function BankReceiptUpload() {
           )}
 
           {/* Upload Progress */}
-          {uploadProgress > 0 && uploadProgress < 100 && (
+          {uploadProgress > 0 && (
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>در حال آپلود...</span>

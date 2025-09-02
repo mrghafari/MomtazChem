@@ -3471,104 +3471,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Bank receipt upload endpoint (DISABLED - using newer version below)
-  /*
-  app.post("/api/payment/upload-receipt", requireCustomerAuth, (req, res) => {
-    const uploadReceipt = multer({
-      storage: receiptStorage,
-      limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB limit
-      },
-      fileFilter: (req, file, cb) => {
-        // Accept images and PDFs
-        if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') {
-          cb(null, true);
-        } else {
-          cb(new Error('Only image and PDF files are allowed for receipt uploads'));
-        }
-      }
-    }).single('receipt');
+  // Bank receipt upload endpoint - SECURE VERSION with Object Storage
+  app.post("/api/payment/upload-receipt", requireCustomerAuth, async (req, res) => {
+    try {
+      const { receiptUrl, orderId, notes } = req.body;
+      const customerId = (req.session as any)?.customerId;
 
-    uploadReceipt(req, res, async (err) => {
-      if (err) {
-        console.error('Receipt upload error:', err);
-        return res.status(400).json({ 
-          success: false, 
-          message: err.message 
+      if (!receiptUrl || !orderId) {
+        return res.status(400).json({
+          success: false,
+          message: "لینک فیش و شماره سفارش الزامی است"
         });
       }
 
-      try {
-        if (!req.file) {
-          return res.status(400).json({ 
-            success: false, 
-            message: "فایل فیش بانکی آپلود نشده است" 
-          });
-        }
-
-        const { orderId, notes } = req.body;
-        const customerId = (req.session as any)?.customerId;
-        const receiptUrl = `/uploads/receipts/${req.file.filename}`;
-
-        // Update order with receipt information
-        if (orderId) {
-          await shopStorage.updateOrder(parseInt(orderId), {
-            paymentStatus: 'receipt_uploaded',
-            receiptUrl: receiptUrl,
-            receiptUploadDate: new Date(),
-            receiptNotes: notes || null
-          });
-
-          // Also store in payment_receipts table for order management system
-          await orderManagementStorage.uploadPaymentReceipt({
-            customerOrderId: parseInt(orderId),
-            customerId: customerId,
-            receiptUrl: receiptUrl,
-            originalFileName: req.file.originalname,
-            fileSize: req.file.size,
-            mimeType: req.file.mimetype,
-            notes: notes || null
-          });
-
-          // Update order_management table if it exists
-          const orderMgmt = await orderManagementStorage.getOrderManagementByCustomerOrderId(parseInt(orderId));
-          if (orderMgmt) {
-            await orderManagementStorage.updateOrderManagement(orderMgmt.id, {
-              paymentReceiptUrl: receiptUrl,
-              currentStatus: 'payment_uploaded',
-              currentDepartment: 'finance',
-              updatedAt: new Date()
-            });
-            console.log(`✅ Order management updated for order ${orderId} - moved to finance department`);
-          } else {
-            console.log(`⚠️ Order management record not found for order ${orderId}`);
-          }
-
-          // Log the receipt upload
-          console.log(`Receipt uploaded for order ${orderId} by customer ${customerId}`);
-        }
-
-        res.json({ 
-          success: true, 
-          message: "فیش بانکی با موفقیت آپلود شد",
-          data: {
-            receiptUrl: receiptUrl,
-            filename: req.file.filename,
-            originalName: req.file.originalname,
-            size: req.file.size,
-            uploadDate: new Date()
-          }
-        });
-      } catch (error) {
-        console.error('Error processing receipt upload:', error);
-        res.status(500).json({ 
-          success: false, 
-          message: "خطا در پردازش فیش بانکی" 
+      // بررسی اینکه سفارش متعلق به همین مشتری است
+      const orderResult = await db.select().from(customerOrders).where(eq(customerOrders.orderNumber, orderId));
+      const order = orderResult[0];
+      
+      if (!order || order.customerId !== customerId) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش پیدا نشد یا شما دسترسی به آن ندارید"
         });
       }
-    });
+
+      // چک کردن اینکه آیا این سفارش نیاز به فیش بانکی دارد
+      if (!['bank_transfer', 'bank_transfer_grace'].includes(order.paymentMethod)) {
+        return res.status(400).json({
+          success: false,
+          message: "این سفارش نیاز به آپلود فیش بانکی ندارد"
+        });
+      }
+
+      // Normalize path for object storage
+      const normalizedPath = receiptUrl.replace('https://storage.googleapis.com/', '/');
+      
+      // Update order with receipt information
+      await db.update(customerOrders)
+        .set({
+          paymentStatus: 'receipt_uploaded',
+          receiptUrl: normalizedPath,
+          receiptUploadDate: new Date(),
+          receiptNotes: notes || null
+        })
+        .where(eq(customerOrders.id, order.id));
+
+      // Store in payment_receipts table
+      const [paymentReceipt] = await db.insert(paymentReceipts).values({
+        customerOrderId: order.id,
+        customerId: customerId,
+        receiptUrl: normalizedPath,
+        originalFileName: `receipt-${order.orderNumber}.pdf`,
+        fileSize: 0, // Will be populated when actual file info is available
+        mimeType: 'application/pdf',
+        notes: notes || null,
+        uploadedAt: new Date()
+      }).returning();
+
+      // Update order management status
+      const orderMgmtResult = await db.select().from(orderManagement).where(eq(orderManagement.customerOrderId, order.id));
+      if (orderMgmtResult.length > 0) {
+        await db.update(orderManagement)
+          .set({
+            paymentReceiptUrl: normalizedPath,
+            currentStatus: 'payment_uploaded',
+            currentDepartment: 'finance',
+            updatedAt: new Date()
+          })
+          .where(eq(orderManagement.customerOrderId, order.id));
+      }
+
+      console.log(`📋 [RECEIPT] Receipt uploaded for order ${order.orderNumber} by customer ${customerId}`);
+
+      res.json({
+        success: true,
+        message: "فیش بانکی با موفقیت آپلود شد و در دیتابیس ذخیره گردید",
+        data: {
+          receiptUrl: normalizedPath,
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          paymentReceiptId: paymentReceipt.id
+        }
+      });
+    } catch (error) {
+      console.error('❌ [RECEIPT] Error processing receipt upload:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در پردازش فیش آپلود شده"
+      });
+    }
   });
-  */
 
   // Get receipt for order (customer can view their own receipt)
   app.get("/api/payment/receipt/:orderId", requireCustomerAuth, async (req, res) => {
