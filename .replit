@@ -37,4 +37,3 @@ args = "npm run dev"
 waitForPort = 5000
 
 [agent]
-integrations = ["javascript_websocket==1.0.0", "javascript_sendgrid==1.0.0", "javascript_stripe==1.0.0", "javascript_notion==1.0.0"]
