@@ -29382,6 +29382,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         AND NOT (om.current_status = 'pending' AND co.status = 'pending' AND co.payment_status = 'pending')
         -- Ensure order_management record exists (exclude true orphans)
         AND om.id IS NOT NULL
+        -- Sort orders by creation date: older orders first (for financial priority)
         ORDER BY om.created_at ASC
       `);
       
