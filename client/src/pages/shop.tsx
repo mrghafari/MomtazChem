@@ -120,6 +120,23 @@ const Shop = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 12;
 
+  // Helper function to get expanded images array (minimum 3 images)
+  const getExpandedImages = (product: any) => {
+    let images = Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
+      ? product.imageUrls 
+      : (product.imageUrl ? [product.imageUrl] : []);
+    
+    // Ensure at least 3 images by repeating existing ones
+    if (images.length > 0 && images.length < 3) {
+      const originalImages = [...images];
+      while (images.length < 3) {
+        images = [...images, ...originalImages];
+      }
+      images = images.slice(0, 3); // Take only first 3
+    }
+    return images;
+  };
+
   // Debounce search term - only search with 3+ characters
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -337,9 +354,7 @@ const Shop = () => {
   useEffect(() => {
     if (selectedImageForZoom && selectedProductForZoom) {
       const handleKeyDown = (e: KeyboardEvent) => {
-        const images = Array.isArray(selectedProductForZoom.imageUrls) && selectedProductForZoom.imageUrls.length > 0 
-          ? selectedProductForZoom.imageUrls 
-          : (selectedProductForZoom.imageUrl ? [selectedProductForZoom.imageUrl] : []);
+        const images = getExpandedImages(selectedProductForZoom);
         
         switch (e.key) {
           case 'Escape':
@@ -1145,19 +1160,8 @@ const Shop = () => {
                       <>
                         <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden relative group cursor-pointer">
                           {(() => {
-                            // Use multiple images if available, fallback to legacy single image
-                            let images = Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
-                              ? product.imageUrls 
-                              : (product.imageUrl ? [product.imageUrl] : []);
-                            
-                            // Ensure at least 3 images by repeating existing ones
-                            if (images.length > 0 && images.length < 3) {
-                              const originalImages = [...images];
-                              while (images.length < 3) {
-                                images = [...images, ...originalImages];
-                              }
-                              images = images.slice(0, 3); // Take only first 3
-                            }
+                            // Use expanded images (minimum 3 images)
+                            const images = getExpandedImages(product);
                             
 
                             
@@ -1576,19 +1580,8 @@ const Shop = () => {
                       <div className="flex">
                         <div className="w-48 h-48 bg-gray-100 flex-shrink-0 relative group cursor-pointer">
                           {(() => {
-                            // Use multiple images if available, fallback to legacy single image
-                            let images = Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
-                              ? product.imageUrls 
-                              : (product.imageUrl ? [product.imageUrl] : []);
-                            
-                            // Ensure at least 3 images by repeating existing ones
-                            if (images.length > 0 && images.length < 3) {
-                              const originalImages = [...images];
-                              while (images.length < 3) {
-                                images = [...images, ...originalImages];
-                              }
-                              images = images.slice(0, 3); // Take only first 3
-                            }
+                            // Use expanded images (minimum 3 images)
+                            const images = getExpandedImages(product);
                             
                             if (images.length > 0) {
                               const currentIndex = currentImageIndexes[product.id] || 0;
@@ -2170,9 +2163,7 @@ const Shop = () => {
 
             {/* Navigation buttons and info inside image area */}
             {(() => {
-              const images = Array.isArray(selectedProductForZoom.imageUrls) && selectedProductForZoom.imageUrls.length > 0 
-                ? selectedProductForZoom.imageUrls 
-                : (selectedProductForZoom.imageUrl ? [selectedProductForZoom.imageUrl] : []);
+              const images = getExpandedImages(selectedProductForZoom);
               
               return (
                 <>
@@ -2291,9 +2282,7 @@ const Shop = () => {
 
             {/* Dot indicators */}
             {(() => {
-              const images = Array.isArray(selectedProductForZoom.imageUrls) && selectedProductForZoom.imageUrls.length > 0 
-                ? selectedProductForZoom.imageUrls 
-                : (selectedProductForZoom.imageUrl ? [selectedProductForZoom.imageUrl] : []);
+              const images = getExpandedImages(selectedProductForZoom);
 
               return images.length > 1 ? (
                 <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 flex space-x-3 bg-black/60 px-4 py-2 rounded-full">
