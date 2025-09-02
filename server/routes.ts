@@ -4563,7 +4563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 ? product.sku 
                 : `SKU-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
               barcode: product.barcode,
-              imageUrls: product.imageUrl ? [product.imageUrl] : [],
+              imageUrls: product.imageUrls || (product.imageUrl ? [product.imageUrl] : []),
               specifications: product.specifications || {},
               features: product.features || [],
               applications: product.applications || [],
@@ -4602,7 +4602,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               priceUnit: product.currency || product.priceUnit || 'IQD',
               description: product.description,
               shortDescription: product.shortDescription || product.description,
-              imageUrls: product.imageUrl ? [product.imageUrl] : (existingShopProduct.imageUrls || []),
+              imageUrls: product.imageUrls || (product.imageUrl ? [product.imageUrl] : (existingShopProduct.imageUrls || [])),
               specifications: product.specifications || {},
               features: product.features || [],
               applications: product.applications || [],
