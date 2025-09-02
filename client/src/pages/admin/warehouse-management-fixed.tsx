@@ -448,6 +448,21 @@ const WarehouseManagementFixed: React.FC = () => {
       matchesStatus = !!(order.notes && order.notes.trim().length > 0);
     } else if (selectedStatus === 'without_notes') {
       matchesStatus = !(order.notes && order.notes.trim().length > 0);
+    } else if (selectedStatus === 'warehouse_approved') {
+      // "ارسال شده به لجستیک" should include all statuses that have been sent to logistics
+      const logisticsStatuses = [
+        'warehouse_approved',
+        'logistics_assigned',
+        'logistics_processing', 
+        'logistics_dispatched',
+        'logistics_delivered',
+        'shipped',
+        'in_transit',
+        'delivered',
+        'completed',
+        'confirmed'
+      ];
+      matchesStatus = logisticsStatuses.includes(orderStatus);
     } else {
       matchesStatus = orderStatus === selectedStatus;
     }
