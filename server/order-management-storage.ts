@@ -615,8 +615,18 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         orderStatuses.WAREHOUSE_NOTIFIED,
         orderStatuses.WAREHOUSE_PROCESSING,
         'warehouse_verified', // مرحله اول تایید انبار - دو مرحله‌ای
-        orderStatuses.WAREHOUSE_APPROVED, // بازگردانده شد: سفارشات ارسال شده به لجستیک برای مشاهده
-        orderStatuses.WAREHOUSE_REJECTED
+        orderStatuses.WAREHOUSE_APPROVED, // ارسال شده به لجستیک
+        orderStatuses.WAREHOUSE_REJECTED,
+        // همه وضعیت‌های بعدی که از warehouse عبور کرده‌اند
+        orderStatuses.LOGISTICS_ASSIGNED, // تخصیص داده شده به لجستیک
+        orderStatuses.LOGISTICS_PROCESSING, // در حال پردازش لجستیک
+        orderStatuses.LOGISTICS_DISPATCHED, // ارسال شده توسط لجستیک
+        orderStatuses.LOGISTICS_DELIVERED, // تحویل شده توسط لجستیک
+        'shipped', // ارسال شده
+        'in_transit', // در حال حمل
+        'delivered', // تحویل داده شده
+        orderStatuses.COMPLETED, // تکمیل شده
+        'confirmed' // تایید شده نهایی
       ];
       console.log('🔍 [WAREHOUSE] Searching for orders with statuses:', warehouseStatuses);
       query = query.where(inArray(orderManagement.currentStatus, warehouseStatuses));
