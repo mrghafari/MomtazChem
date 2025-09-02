@@ -432,10 +432,16 @@ const WarehouseManagementFixed: React.FC = () => {
     const customerEmail = order.customer?.email || order.customerEmail || '';
     const customerPhone = order.customer?.phone || order.customerPhone || '';
     
-    const matchesSearch = customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.id.toString().includes(searchTerm) ||
-                         order.customerOrderId?.toString().includes(searchTerm);
+    // Only apply search filter if searchTerm has 3+ characters or is empty (show all)
+    const matchesSearch = searchTerm.length === 0 || searchTerm.length >= 3 ? (
+      searchTerm.length === 0 || 
+      customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customerPhone.includes(searchTerm) ||
+      order.id.toString().includes(searchTerm) ||
+      order.customerOrderId?.toString().includes(searchTerm) ||
+      (order.orderNumber && order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()))
+    ) : false;
     
     // Use currentStatus from API instead of status
     const orderStatus = order.currentStatus || order.status || '';
@@ -643,7 +649,7 @@ const WarehouseManagementFixed: React.FC = () => {
               <div className="relative">
                 <Search className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="جستجوی سفارش، مشتری، یا ایمیل..."
+                  placeholder="جستجو (حداقل 3 کاراکتر): شماره سفارش، نام مشتری، تلفن، ایمیل..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pr-10"
