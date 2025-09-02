@@ -50086,7 +50086,7 @@ momtazchem.com
         imageCompression: true,
         virusScanning: true,
         blacklistCheck: true,
-        sizeLimit: '25MB',
+        sizeLimit: '10MB',
         allowedTypes: [
           'image/jpeg', 'image/png', 'image/gif', 'image/webp',
           'application/pdf', 'text/plain',

@@ -124,7 +124,7 @@ export default function SecureUploadExample() {
           <CardContent className="space-y-6">
             <SecureFileUploader
               maxNumberOfFiles={3}
-              maxFileSize={25 * 1024 * 1024} // 25MB
+              maxFileSize={10 * 1024 * 1024} // 10MB
               allowedTypes={['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf']}
               onUploadComplete={handleUploadComplete}
               onSecurityCheck={handleSecurityCheck}
@@ -243,7 +243,7 @@ export default function SecureUploadExample() {
             </div>
             <div className="text-center">
               <div className="font-medium text-orange-600">حداکثر حجم</div>
-              <div className="text-sm text-gray-600">25 مگابایت</div>
+              <div className="text-sm text-gray-600">10 مگابایت</div>
             </div>
           </div>
         </CardContent>

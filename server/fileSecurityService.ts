@@ -328,7 +328,7 @@ export class FileSecurityService {
 
 // Export configured instance
 export const fileSecurityService = new FileSecurityService({
-  maxSizeBytes: 25 * 1024 * 1024, // 25MB for production
+  maxSizeBytes: 10 * 1024 * 1024, // 10MB for production
   enableImageCompression: true,
   compressionQuality: 85,
   maxImageDimensions: { width: 1920, height: 1080 },

@@ -29,7 +29,7 @@ export class SecureObjectStorageService extends ObjectStorageService {
       const errors: string[] = [];
 
       // Pre-upload validation
-      const sizeLimit = request.customSizeLimit || 25 * 1024 * 1024; // 25MB default
+      const sizeLimit = request.customSizeLimit || 10 * 1024 * 1024; // 10MB default
       if (request.fileSize > sizeLimit) {
         errors.push(`حجم فایل نباید بیشتر از ${this.formatFileSize(sizeLimit)} باشد`);
       }

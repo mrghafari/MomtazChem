@@ -44,7 +44,7 @@ interface SecurityStatus {
  */
 export function SecureFileUploader({
   maxNumberOfFiles = 1,
-  maxFileSize = 25 * 1024 * 1024, // 25MB default
+  maxFileSize = 10 * 1024 * 1024, // 10MB default
   allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'],
   onUploadComplete,
   onSecurityCheck,
