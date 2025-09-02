@@ -615,7 +615,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         orderStatuses.WAREHOUSE_NOTIFIED,
         orderStatuses.WAREHOUSE_PROCESSING,
         'warehouse_verified', // مرحله اول تایید انبار - دو مرحله‌ای
-        // orderStatuses.WAREHOUSE_APPROVED, // حذف: سفارشات تایید شده به لجستیک منتقل می‌شوند
+        orderStatuses.WAREHOUSE_APPROVED, // بازگردانده شد: سفارشات ارسال شده به لجستیک برای مشاهده
         orderStatuses.WAREHOUSE_REJECTED
       ];
       console.log('🔍 [WAREHOUSE] Searching for orders with statuses:', warehouseStatuses);
