@@ -2599,8 +2599,12 @@ export default function ProductsPage() {
                                       type="button"
                                       variant="outline"
                                       size="sm"
-                                      className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-white shadow-md"
-                                      onClick={() => {
+                                      className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-white shadow-md z-10"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        console.log(`🗑️ [IMAGE DELETE] Deleting image at index ${index}`);
+                                        
                                         const newPreviews = [...imagePreviews];
                                         newPreviews[index] = null;
                                         setImagePreviews(newPreviews);
