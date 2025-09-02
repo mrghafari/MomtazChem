@@ -127,30 +127,68 @@ export default function BankReceiptUpload() {
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
-      if (!allowedTypes.includes(file.type)) {
-        toast({
-          title: "فرمت فایل نامعتبر",
-          description: "لطفاً فایل‌های JPG، PNG، WebP یا PDF انتخاب کنید",
-          variant: "destructive",
-        });
-        return;
-      }
+    if (!file) return;
 
-      // Validate file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        toast({
-          title: "حجم فایل زیاد",
-          description: "حداکثر حجم فایل 10 مگابایت است",
-          variant: "destructive",
-        });
-        return;
-      }
+    // 🔒 Multi-layer client-side security validation for production
+    const errors: string[] = [];
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.pdf'];
 
-      setSelectedFile(file);
+    // Layer 1: File size validation with detailed info
+    if (file.size > maxSize) {
+      errors.push(`حجم فایل بیش از حد مجاز: ${(file.size / 1024 / 1024).toFixed(2)}MB (حداکثر: 10MB)`);
     }
+
+    // Layer 2: MIME type validation
+    if (!allowedTypes.includes(file.type)) {
+      errors.push(`نوع فایل مجاز نیست: ${file.type}`);
+    }
+
+    // Layer 3: Extension validation
+    const fileExtension = ('.' + file.name.split('.').pop()?.toLowerCase()) || '';
+    if (!allowedExtensions.includes(fileExtension)) {
+      errors.push(`پسوند فایل مجاز نیست: ${fileExtension}`);
+    }
+
+    // Layer 4: File name security validation
+    if (file.name.length > 255) {
+      errors.push('نام فایل خیلی طولانی است (حداکثر 255 کاراکتر)');
+    }
+
+    // Layer 5: Check for suspicious patterns in filename
+    const suspiciousPatterns = [
+      /<script/i, /javascript:/i, /\.exe$/i, /\.bat$/i, /\.cmd$/i, /\.php$/i, /\.js$/i
+    ];
+    if (suspiciousPatterns.some(pattern => pattern.test(file.name))) {
+      errors.push('نام فایل حاوی الگوهای مشکوک امنیتی است');
+    }
+
+    // Layer 6: Check for empty or too small files
+    if (file.size < 100) {
+      errors.push('فایل خیلی کوچک است (حداقل 100 بایت)');
+    }
+
+    if (errors.length > 0) {
+      toast({
+        title: "❌ خطاهای امنیتی فایل",
+        description: errors.join(' • '),
+        variant: "destructive",
+      });
+      // Reset the input to prevent malicious files
+      event.target.value = '';
+      console.log('🚫 [CLIENT SECURITY] File rejected:', { name: file.name, errors });
+      return;
+    }
+
+    console.log('✅ [CLIENT SECURITY] File passed all security validations:', {
+      name: file.name,
+      size: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
+      type: file.type,
+      extension: fileExtension
+    });
+
+    setSelectedFile(file);
   };
 
   // Simple upload handler with Object Storage
@@ -221,14 +259,22 @@ export default function BankReceiptUpload() {
 
       setUploadProgress(70);
 
-      // Step 3: Save receipt to database with Object Storage URL
+      // Step 3: Save receipt to database with comprehensive security info
       await uploadMutation.mutateAsync({
         receiptUrl: uploadUrlResponse.uploadURL.split('?')[0], // Remove query params
         orderId,
-        notes: notes + (receiptAmount ? ` | مبلغ: ${receiptAmount} دینار` : '')
+        notes: notes + (receiptAmount ? ` | مبلغ: ${receiptAmount} دینار` : ''),
+        fileSize: selectedFile.size,
+        originalFileName: selectedFile.name
       });
 
       setUploadProgress(100);
+      
+      console.log('🎯 [SECURE CLIENT] Bank receipt uploaded with full security validation:', {
+        fileSize: selectedFile.size,
+        fileName: selectedFile.name,
+        orderId
+      });
       
     } catch (error: any) {
       toast({

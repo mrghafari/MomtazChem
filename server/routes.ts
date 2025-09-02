@@ -3471,11 +3471,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Bank receipt upload endpoint - SECURE VERSION with Object Storage
+  // Secure Object Storage upload endpoint for general file uploads
+  app.post("/api/objects/upload", requireCustomerAuth, async (req, res) => {
+    try {
+      const { SecureObjectStorageService } = await import('./secureObjectStorage');
+      const secureObjectStorage = new SecureObjectStorageService();
+      
+      console.log('🔒 [SECURE UPLOAD] Generating secure upload URL for customer:', (req.session as any)?.customerId);
+      
+      // Generate secure presigned URL
+      const result = await secureObjectStorage.generateSecureUploadUrl({
+        fileName: `upload_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
+        fileSize: 10 * 1024 * 1024, // Default size, will be validated on actual upload
+        userId: (req.session as any)?.customerId?.toString(),
+        allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
+        customSizeLimit: 10 * 1024 * 1024
+      });
+
+      if (!result.success) {
+        console.log('❌ [SECURE UPLOAD] Upload URL generation failed:', result.errors);
+        return res.status(400).json({
+          success: false,
+          errors: result.errors
+        });
+      }
+
+      console.log('✅ [SECURE UPLOAD] Secure upload URL generated:', result.fileId);
+
+      res.json({
+        success: true,
+        uploadURL: result.uploadUrl,
+        fileId: result.fileId
+      });
+
+    } catch (error: any) {
+      console.error('❌ [SECURE UPLOAD] Error generating upload URL:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در تولید لینک آپلود امن"
+      });
+    }
+  });
+
+  // Enhanced secure bank receipt upload endpoint with comprehensive validation
   app.post("/api/payment/upload-receipt", requireCustomerAuth, async (req, res) => {
     try {
-      const { receiptUrl, orderId, notes } = req.body;
+      const { receiptUrl, orderId, notes, fileSize, originalFileName } = req.body;
       const customerId = (req.session as any)?.customerId;
+
+      console.log('🔒 [SECURE RECEIPT] Starting secure bank receipt processing:', {
+        orderId,
+        customerId,
+        fileSize,
+        originalFileName: originalFileName?.substring(0, 30) + '...'
+      });
 
       if (!receiptUrl || !orderId) {
         return res.status(400).json({
