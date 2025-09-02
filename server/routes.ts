@@ -47,6 +47,8 @@ import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { gpsDeliveryConfirmations } from "@shared/gps-delivery-schema";
 import ProformaInvoiceConverter from "./proforma-invoice-converter";
 import { AutoInvoiceConverter } from "./auto-invoice-converter";
+import { secureObjectStorageService } from "./secureObjectStorage";
+import { fileSecurityService } from "./fileSecurityService";
 
 import { 
   vehicleTemplates, 
@@ -49893,6 +49895,207 @@ momtazchem.com
         message: "خطا در حذف دسته‌بندی خودرو"
       });
     }
+  });
+
+  // ==============================================
+  // SECURE FILE UPLOAD ENDPOINTS
+  // ==============================================
+
+  // Generate secure upload URL with pre-validation
+  app.post('/api/secure-upload/generate-url', async (req, res) => {
+    try {
+      console.log('🔐 [SECURE UPLOAD] Generating upload URL with validation');
+      
+      const { fileName, fileSize, mimeType, userId, allowedTypes, customSizeLimit } = req.body;
+
+      if (!fileName || !fileSize) {
+        return res.status(400).json({
+          success: false,
+          errors: ['نام فایل و حجم فایل الزامی است']
+        });
+      }
+
+      const result = await secureObjectStorageService.generateSecureUploadUrl({
+        fileName,
+        fileSize,
+        mimeType,
+        userId,
+        allowedTypes,
+        customSizeLimit
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error('❌ [SECURE UPLOAD] Error generating upload URL:', error);
+      res.status(500).json({
+        success: false,
+        errors: ['خطا در تولید لینک آپلود امن']
+      });
+    }
+  });
+
+  // Validate uploaded file after upload
+  app.post('/api/secure-upload/validate', async (req, res) => {
+    try {
+      console.log('🔍 [SECURE UPLOAD] Starting post-upload validation');
+      
+      const { fileUrl, fileName, userId } = req.body;
+
+      if (!fileUrl || !fileName) {
+        return res.status(400).json({
+          success: false,
+          errors: ['URL فایل و نام فایل الزامی است']
+        });
+      }
+
+      // Download file for validation
+      const fileResponse = await fetch(fileUrl);
+      if (!fileResponse.ok) {
+        return res.status(400).json({
+          success: false,
+          errors: ['امکان دانلود فایل برای اعتبارسنجی وجود ندارد']
+        });
+      }
+
+      const fileBuffer = Buffer.from(await fileResponse.arrayBuffer());
+
+      // Comprehensive security validation
+      const validationResult = await fileSecurityService.validateFile(fileBuffer, fileName);
+      
+      if (!validationResult.isValid) {
+        console.log('❌ [SECURE UPLOAD] File validation failed:', validationResult.errors);
+        return res.json({
+          success: false,
+          errors: validationResult.errors,
+          securityReport: fileSecurityService.generateSecurityReport(validationResult)
+        });
+      }
+
+      // Additional blacklist check
+      const blacklistCheck = await secureObjectStorageService.checkFileAgainstBlacklist(fileName, fileBuffer);
+      if (blacklistCheck.isBlacklisted) {
+        return res.json({
+          success: false,
+          errors: [blacklistCheck.reason || 'فایل در لیست سیاه قرار دارد'],
+          securityReport: 'فایل در فهرست فایل‌های ممنوع قرار دارد'
+        });
+      }
+
+      console.log('✅ [SECURE UPLOAD] File validation successful');
+      
+      res.json({
+        success: true,
+        message: 'فایل با موفقیت اعتبارسنجی شد',
+        securityReport: fileSecurityService.generateSecurityReport(validationResult),
+        metadata: validationResult.metadata
+      });
+
+    } catch (error) {
+      console.error('❌ [SECURE UPLOAD] Error in post-upload validation:', error);
+      res.status(500).json({
+        success: false,
+        errors: ['خطا در اعتبارسنجی فایل']
+      });
+    }
+  });
+
+  // Process secure file upload with full pipeline
+  app.post('/api/secure-upload/process', async (req, res) => {
+    try {
+      console.log('🚀 [SECURE UPLOAD] Starting full secure processing pipeline');
+      
+      const { fileUrl, fileName, userId } = req.body;
+
+      if (!fileUrl || !fileName) {
+        return res.status(400).json({
+          success: false,
+          errors: ['URL فایل و نام فایل الزامی است']
+        });
+      }
+
+      // Download file
+      const fileResponse = await fetch(fileUrl);
+      if (!fileResponse.ok) {
+        return res.status(400).json({
+          success: false,
+          errors: ['امکان دانلود فایل وجود ندارد']
+        });
+      }
+
+      const fileBuffer = Buffer.from(await fileResponse.arrayBuffer());
+
+      // Run full secure processing pipeline
+      const result = await secureObjectStorageService.processSecureUpload(fileBuffer, fileName, userId);
+
+      if (!result.success) {
+        return res.json({
+          success: false,
+          errors: result.errors
+        });
+      }
+
+      console.log('✅ [SECURE UPLOAD] Full pipeline completed successfully');
+
+      res.json({
+        success: true,
+        message: 'فایل با موفقیت پردازش شد',
+        fileId: result.fileId,
+        metadata: result.metadata
+      });
+
+    } catch (error) {
+      console.error('❌ [SECURE UPLOAD] Error in processing pipeline:', error);
+      res.status(500).json({
+        success: false,
+        errors: ['خطا در پردازش امن فایل']
+      });
+    }
+  });
+
+  // Get security report for a file
+  app.get('/api/secure-upload/report/:fileId', async (req, res) => {
+    try {
+      const { fileId } = req.params;
+      
+      console.log(`📋 [SECURE UPLOAD] Generating security report for file: ${fileId}`);
+
+      // This is a placeholder - in a real implementation, you'd retrieve 
+      // the stored metadata and generate a comprehensive report
+      res.json({
+        success: true,
+        report: `گزارش امنیتی برای فایل ${fileId} در حال آماده‌سازی است`,
+        fileId
+      });
+
+    } catch (error) {
+      console.error('❌ [SECURE UPLOAD] Error generating security report:', error);
+      res.status(500).json({
+        success: false,
+        errors: ['خطا در تولید گزارش امنیتی']
+      });
+    }
+  });
+
+  // Security status endpoint
+  app.get('/api/secure-upload/status', (req, res) => {
+    res.json({
+      success: true,
+      status: 'active',
+      features: {
+        fileValidation: true,
+        imageCompression: true,
+        virusScanning: true,
+        blacklistCheck: true,
+        sizeLimit: '25MB',
+        allowedTypes: [
+          'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+          'application/pdf', 'text/plain',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ]
+      },
+      message: 'سیستم آپلود امن فعال است'
+    });
   });
 
   // Catch-all for unmatched API routes - return JSON 404 (must be last)
