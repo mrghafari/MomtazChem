@@ -967,16 +967,15 @@ const WarehouseManagement: React.FC = () => {
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="orders">سفارشات</TabsTrigger>
-          <TabsTrigger value="approved-orders">سفارشات تایید شده</TabsTrigger>
           <TabsTrigger value="inventory">موجودی</TabsTrigger>
           <TabsTrigger value="movements">حرکات انبار</TabsTrigger>
           <TabsTrigger value="settings">تنظیمات</TabsTrigger>
           <TabsTrigger value="analytics">آنالیز</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="orders" className="space-y-4">
+        <TabsContent value="orders" className="space-y-6">
           {/* Search and Filter */}
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -1005,7 +1004,7 @@ const WarehouseManagement: React.FC = () => {
             </div>
           </div>
 
-          {/* Orders Table */}
+          {/* Pending Orders Section */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -1206,9 +1205,8 @@ const WarehouseManagement: React.FC = () => {
               )}
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="approved-orders" className="space-y-4">
+          {/* Approved Orders Section */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
