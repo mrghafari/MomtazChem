@@ -120,21 +120,11 @@ const Shop = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 12;
 
-  // Helper function to get expanded images array (minimum 3 images)
-  const getExpandedImages = (product: any) => {
-    let images = Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
+  // Helper function to get images array (without artificial expansion)
+  const getImages = (product: any) => {
+    return Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
       ? product.imageUrls 
       : (product.imageUrl ? [product.imageUrl] : []);
-    
-    // Ensure at least 3 images by repeating existing ones
-    if (images.length > 0 && images.length < 3) {
-      const originalImages = [...images];
-      while (images.length < 3) {
-        images = [...images, ...originalImages];
-      }
-      images = images.slice(0, 3); // Take only first 3
-    }
-    return images;
   };
 
   // Debounce search term - only search with 3+ characters
@@ -354,7 +344,7 @@ const Shop = () => {
   useEffect(() => {
     if (selectedImageForZoom && selectedProductForZoom) {
       const handleKeyDown = (e: KeyboardEvent) => {
-        const images = getExpandedImages(selectedProductForZoom);
+        const images = getImages(selectedProductForZoom);
         
         switch (e.key) {
           case 'Escape':
@@ -1161,7 +1151,7 @@ const Shop = () => {
                         <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden relative group cursor-pointer">
                           {(() => {
                             // Use expanded images (minimum 3 images)
-                            const images = getExpandedImages(product);
+                            const images = getImages(product);
                             
 
                             
@@ -1581,7 +1571,7 @@ const Shop = () => {
                         <div className="w-48 h-48 bg-gray-100 flex-shrink-0 relative group cursor-pointer">
                           {(() => {
                             // Use expanded images (minimum 3 images)
-                            const images = getExpandedImages(product);
+                            const images = getImages(product);
                             
                             if (images.length > 0) {
                               const currentIndex = currentImageIndexes[product.id] || 0;
@@ -2163,7 +2153,7 @@ const Shop = () => {
 
             {/* Navigation buttons and info inside image area */}
             {(() => {
-              const images = getExpandedImages(selectedProductForZoom);
+              const images = getImages(selectedProductForZoom);
               
               return (
                 <>
@@ -2282,7 +2272,7 @@ const Shop = () => {
 
             {/* Dot indicators */}
             {(() => {
-              const images = getExpandedImages(selectedProductForZoom);
+              const images = getImages(selectedProductForZoom);
 
               return images.length > 1 ? (
                 <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 flex space-x-3 bg-black/60 px-4 py-2 rounded-full">
