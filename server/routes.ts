@@ -4570,7 +4570,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               isActive: true,
               isFeatured: false,
               metaTitle: product.name,
-              metaDescription: product.description
+              metaDescription: product.description,
+              pdfCatalogUrl: product.pdfCatalogUrl,
+              msdsUrl: product.msdsUrl,
+              showCatalogToCustomers: product.showCatalogToCustomers || false,
+              showMsdsToCustomers: product.showMsdsToCustomers || false,
+              catalogFileName: product.catalogFileName,
+              msdsFileName: product.msdsFileName,
+              catalogUploadDate: product.catalogUploadDate,
+              msdsUploadDate: product.msdsUploadDate
             };
             
             await shopStorage.createShopProduct(shopProductData);
@@ -4608,7 +4616,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               applications: product.applications || [],
               barcode: product.barcode,
               sku: product.sku || existingShopProduct.sku,
-              showWhenOutOfStock: productData.showWhenOutOfStock || false
+              showWhenOutOfStock: productData.showWhenOutOfStock || false,
+              pdfCatalogUrl: product.pdfCatalogUrl || existingShopProduct.pdfCatalogUrl,
+              msdsUrl: product.msdsUrl || existingShopProduct.msdsUrl,
+              showCatalogToCustomers: product.showCatalogToCustomers !== undefined ? product.showCatalogToCustomers : existingShopProduct.showCatalogToCustomers,
+              showMsdsToCustomers: product.showMsdsToCustomers !== undefined ? product.showMsdsToCustomers : existingShopProduct.showMsdsToCustomers,
+              catalogFileName: product.catalogFileName || existingShopProduct.catalogFileName,
+              msdsFileName: product.msdsFileName || existingShopProduct.msdsFileName,
+              catalogUploadDate: product.catalogUploadDate || existingShopProduct.catalogUploadDate,
+              msdsUploadDate: product.msdsUploadDate || existingShopProduct.msdsUploadDate
             };
             
             await shopStorage.updateShopProduct(existingShopProduct.id, updateData);
