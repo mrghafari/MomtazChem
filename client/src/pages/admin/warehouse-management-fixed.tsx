@@ -624,7 +624,7 @@ const WarehouseManagementFixed: React.FC = () => {
 
           <TabsContent value="orders" className="space-y-6">
             {/* Search and Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div className="relative">
                 <Search className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -644,19 +644,11 @@ const WarehouseManagementFixed: React.FC = () => {
                 <option value="financial_approved">تایید مالی</option>
                 <option value="warehouse_notified">اطلاع رسانی انبار</option>
                 <option value="warehouse_processing">در حال پردازش</option>
-                <option value="warehouse_approved">تایید شده</option>
+                <option value="warehouse_approved">ارسال شده به لجستیک</option>
                 <option value="warehouse_rejected">رد شده</option>
                 <option value="with_notes">دارای یادداشت</option>
                 <option value="without_notes">بدون یادداشت</option>
               </select>
-              <Button 
-                variant="outline" 
-                onClick={clearAllFilters}
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className="w-4 h-4" />
-                پاک کردن همه فیلترها
-              </Button>
             </div>
 
             {/* Orders Table */}
