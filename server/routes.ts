@@ -38022,6 +38022,69 @@ momtazchem.com
     }
   });
 
+  // Warehouse Department - Get approved/completed orders (orders that have left warehouse)
+  app.get("/api/warehouse/approved-orders", requireAuth, async (req: Request, res: Response) => {
+    try {
+      console.log('✅ [WAREHOUSE-APPROVED] Getting warehouse approved/completed orders...');
+      
+      // Get orders that have been approved by warehouse (including delivered ones)
+      const approvedStatuses = [
+        'warehouse_approved',    // Orders approved by warehouse and sent to logistics
+        'logistics_assigned',    // Orders in logistics phase
+        'logistics_processing',  // Orders being processed by logistics  
+        'logistics_dispatched',  // Orders dispatched by logistics
+        'in_transit',           // Orders in transit
+        'shipped',              // Orders that have been shipped
+        'delivered',            // Orders that have been delivered
+        'completed'             // Orders marked as completed
+      ];
+
+      const orders = await orderManagementStorage.getOrdersByStatus(approvedStatuses);
+      
+      console.log('✅ [WAREHOUSE-APPROVED] Retrieved', orders.length, 'approved/completed orders');
+      
+      // Transform orders to include shipping cost and customer info for frontend
+      const transformedOrders = orders.map((order: any) => ({
+        id: order.id,
+        customerOrderId: order.customerOrderId,
+        orderNumber: order.orderNumber,
+        customerName: `${order.customerFirstName || ''} ${order.customerLastName || ''}`.trim(),
+        customerEmail: order.customerEmail,
+        customerPhone: order.customerPhone,
+        customerAddress: order.shippingAddress ? 
+          (typeof order.shippingAddress === 'string' ? 
+            order.shippingAddress : 
+            JSON.stringify(order.shippingAddress)) : 
+          'آدرس نامشخص',
+        orderTotal: parseFloat(order.totalAmount || '0'),
+        shippingCost: parseFloat(order.shippingCost || '0'),
+        totalAmount: order.totalAmount,
+        currency: order.currency || 'IQD',
+        currentStatus: order.currentStatus,
+        warehouseNotes: order.warehouseNotes,
+        warehouseProcessedAt: order.warehouseProcessedAt,
+        warehouseAssigneeId: order.warehouseAssigneeId,
+        logisticsProcessedAt: order.logisticsProcessedAt,
+        actualDeliveryDate: order.actualDeliveryDate,
+        financialReviewedAt: order.financialReviewedAt,
+        financialNotes: order.financialNotes,
+        orderDate: order.createdAt,
+        deliveryCode: order.deliveryCode,
+        paymentMethod: order.paymentMethod,
+        orderItems: [] // Will be populated if needed
+      }));
+
+      res.json({ success: true, orders: transformedOrders });
+    } catch (error) {
+      console.error('✅ [WAREHOUSE-APPROVED] Error fetching approved orders:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت سفارشات تایید شده انبار",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Warehouse Department - Get product waste amounts
   app.get("/api/warehouse/waste", async (req: Request, res: Response) => {
     try {

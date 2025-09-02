@@ -422,6 +422,15 @@ const WarehouseManagement: React.FC = () => {
   
   const orders = ordersResponse?.orders || [];
 
+  // Query to fetch approved orders (orders that have left warehouse)
+  const { data: approvedOrdersResponse, isLoading: approvedOrdersLoading, refetch: refetchApprovedOrders } = useQuery({
+    queryKey: ['/api/warehouse/approved-orders'],
+    staleTime: 10000,
+    refetchInterval: 30000,
+  });
+
+  const approvedOrders = approvedOrdersResponse?.orders || [];
+
   // Fetch unified products for inventory management
   const { data: unifiedProducts = [], isLoading: productsLoading, refetch: refetchProducts } = useQuery({
     queryKey: ["/api/inventory/unified/products"],
@@ -856,6 +865,35 @@ const WarehouseManagement: React.FC = () => {
     }
   };
 
+  // Helper functions for approved orders tab
+  const getStatusColor = (status: string) => {
+    const colors = {
+      'warehouse_approved': 'bg-green-100 text-green-800',
+      'logistics_assigned': 'bg-blue-100 text-blue-800',
+      'logistics_processing': 'bg-yellow-100 text-yellow-800',
+      'logistics_dispatched': 'bg-purple-100 text-purple-800',
+      'in_transit': 'bg-orange-100 text-orange-800',
+      'shipped': 'bg-indigo-100 text-indigo-800',
+      'delivered': 'bg-green-100 text-green-800',
+      'completed': 'bg-gray-100 text-gray-800'
+    };
+    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getStatusLabel = (status: string) => {
+    const labels = {
+      'warehouse_approved': 'تایید انبار',
+      'logistics_assigned': 'واگذار به لجستیک',
+      'logistics_processing': 'در حال پردازش لجستیک',
+      'logistics_dispatched': 'ارسال شده توسط لجستیک',
+      'in_transit': 'در راه',
+      'shipped': 'ارسال شده',
+      'delivered': 'تحویل داده شده',
+      'completed': 'تکمیل شده'
+    };
+    return labels[status as keyof typeof labels] || status;
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
@@ -929,8 +967,9 @@ const WarehouseManagement: React.FC = () => {
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="orders">سفارشات</TabsTrigger>
+          <TabsTrigger value="approved-orders">سفارشات تایید شده</TabsTrigger>
           <TabsTrigger value="inventory">موجودی</TabsTrigger>
           <TabsTrigger value="movements">حرکات انبار</TabsTrigger>
           <TabsTrigger value="settings">تنظیمات</TabsTrigger>
@@ -1156,6 +1195,103 @@ const WarehouseManagement: React.FC = () => {
                                     تایید و ارسال به لجستیک
                                   </Button>
                                 </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="approved-orders" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5" />
+                سفارشات تایید شده انبار
+              </CardTitle>
+              <p className="text-sm text-gray-600">
+                سفارشاتی که انبار آنها را تایید کرده و به لجستیک ارسال شده‌اند
+              </p>
+            </CardHeader>
+            <CardContent>
+              {approvedOrdersLoading ? (
+                <div className="text-center py-8">در حال بارگیری...</div>
+              ) : !approvedOrders || approvedOrders.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <CheckCircle className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <p>هیچ سفارش تایید شده‌ای توسط انبار وجود ندارد</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-right p-4">شماره سفارش</th>
+                        <th className="text-right p-4">نام مشتری</th>
+                        <th className="text-right p-4">شماره موبایل</th>
+                        <th className="text-right p-4">آدرس</th>
+                        <th className="text-right p-4">مبلغ</th>
+                        <th className="text-right p-4">وضعیت فعلی</th>
+                        <th className="text-right p-4">تاریخ تایید انبار</th>
+                        <th className="text-right p-4">روش پرداخت</th>
+                        <th className="text-center p-4">عملیات</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {approvedOrders.map((order: any) => (
+                        <tr key={order.id} className="border-b hover:bg-gray-50">
+                          <td className="p-4 font-medium">
+                            #{order.orderNumber || order.customerOrderId}
+                          </td>
+                          <td className="p-4">
+                            <div className="font-medium">{order.customerName || 'نامشخص'}</div>
+                          </td>
+                          <td className="p-4">
+                            <div className="text-sm">{order.customerPhone || 'شماره نامشخص'}</div>
+                          </td>
+                          <td className="p-4">
+                            <div className="text-sm text-gray-600 max-w-xs truncate">
+                              {order.customerAddress || 'آدرس نامشخص'}
+                            </div>
+                          </td>
+                          <td className="p-4">{formatCurrency(parseFloat(order.totalAmount) || 0)}</td>
+                          <td className="p-4">
+                            <Badge className={getStatusColor(order.currentStatus)}>
+                              {getStatusLabel(order.currentStatus)}
+                            </Badge>
+                          </td>
+                          <td className="p-4 print:font-bold print:text-black">
+                            {formatDate(order.warehouseProcessedAt || order.orderDate)}
+                          </td>
+                          <td className="p-4">
+                            <span className="text-sm text-gray-600">
+                              {order.paymentMethod === 'wallet' ? 'کیف پول' :
+                               order.paymentMethod === 'wallet_partial' ? 'کیف پول جزئی' :
+                               order.paymentMethod === 'bank_transfer' ? 'حواله بانکی' :
+                               order.paymentMethod || 'نامشخص'}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex justify-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewOrderItems({ ...order, customerOrderId: order.customerOrderId })}
+                                className="text-blue-600 hover:text-blue-800"
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                جزئیات
+                              </Button>
+                              {order.deliveryCode && (
+                                <Badge variant="outline" className="text-xs">
+                                  کد: {order.deliveryCode}
+                                </Badge>
                               )}
                             </div>
                           </td>
