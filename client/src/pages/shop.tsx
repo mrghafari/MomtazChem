@@ -1146,9 +1146,18 @@ const Shop = () => {
                         <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden relative group cursor-pointer">
                           {(() => {
                             // Use multiple images if available, fallback to legacy single image
-                            const images = Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
+                            let images = Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
                               ? product.imageUrls 
                               : (product.imageUrl ? [product.imageUrl] : []);
+                            
+                            // Ensure at least 3 images by repeating existing ones
+                            if (images.length > 0 && images.length < 3) {
+                              const originalImages = [...images];
+                              while (images.length < 3) {
+                                images = [...images, ...originalImages];
+                              }
+                              images = images.slice(0, 3); // Take only first 3
+                            }
                             
 
                             
@@ -1568,9 +1577,18 @@ const Shop = () => {
                         <div className="w-48 h-48 bg-gray-100 flex-shrink-0 relative group cursor-pointer">
                           {(() => {
                             // Use multiple images if available, fallback to legacy single image
-                            const images = Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
+                            let images = Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
                               ? product.imageUrls 
                               : (product.imageUrl ? [product.imageUrl] : []);
+                            
+                            // Ensure at least 3 images by repeating existing ones
+                            if (images.length > 0 && images.length < 3) {
+                              const originalImages = [...images];
+                              while (images.length < 3) {
+                                images = [...images, ...originalImages];
+                              }
+                              images = images.slice(0, 3); // Take only first 3
+                            }
                             
                             if (images.length > 0) {
                               const currentIndex = currentImageIndexes[product.id] || 0;
