@@ -388,8 +388,8 @@ const FuelAdditives = () => {
 
       {/* Random Products from Shop */}
       <RandomCategoryProducts 
-        category="paint-thinner" 
-        title="محصولات پیشنهادی شیمیایی از فروشگاه"
+        category="fuel-additives" 
+        title="محصولات پیشنهادی افزودنی سوخت از فروشگاه"
       />
 
       {/* Live Chat Support */}

@@ -4151,11 +4151,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { category } = req.params;
       console.log(`🎲 [RANDOM PRODUCTS] Fetching random products for category: ${category}`);
       
-      // First get all products in the category
-      const products = await storage.getProductsByCategory(category);
-      console.log(`📦 [RANDOM PRODUCTS] Found ${products.length} products in category ${category}`);
+      // Get kardex showcase products for this category
+      const kardexProducts = await storage.getProductsByCategory(category);
+      console.log(`📦 [RANDOM PRODUCTS] Found ${kardexProducts.length} kardex products in category ${category}`);
       
-      if (products.length === 0) {
+      // Get assigned shop products for this category from content management
+      const { pool } = await import('./db');
+      let shopProducts = [];
+      
+      try {
+        // Get assigned product IDs for this category
+        const assignmentResult = await db
+          .select()
+          .from(contentItems)
+          .where(and(
+            eq(contentItems.section, 'category_products'),
+            eq(contentItems.key, category),
+            eq(contentItems.isActive, true)
+          ))
+          .limit(1);
+
+        if (assignmentResult.length > 0) {
+          const productIds = JSON.parse(assignmentResult[0].content || '[]');
+          console.log(`🛍️ [RANDOM PRODUCTS] Found assigned shop product IDs:`, productIds);
+          
+          if (productIds.length > 0) {
+            // Get shop products by IDs
+            const shopQuery = `
+              SELECT 
+                id, name, category, description, short_description as "shortDescription",
+                price, price_unit as "priceUnit", stock_quantity as "stockQuantity", 
+                sku, barcode, thumbnail_url as "imageUrl", 
+                is_active as "isActive", visible_in_shop as "visibleInShop"
+              FROM shop_products 
+              WHERE id = ANY($1) AND is_active = true AND visible_in_shop = true
+              ORDER BY name ASC
+            `;
+            
+            const shopResult = await pool.query(shopQuery, [productIds]);
+            shopProducts = shopResult.rows;
+            console.log(`🛒 [RANDOM PRODUCTS] Found ${shopProducts.length} shop products`);
+          }
+        }
+      } catch (shopError) {
+        console.error('Error fetching assigned shop products:', shopError);
+        // Continue with just kardex products if shop products fail
+      }
+
+      // Combine both types of products
+      const allProducts = [...kardexProducts, ...shopProducts];
+      console.log(`📦 [RANDOM PRODUCTS] Total combined products: ${allProducts.length} (${kardexProducts.length} kardex + ${shopProducts.length} shop)`);
+      
+      if (allProducts.length === 0) {
         return res.json({
           success: true,
           data: [],
@@ -4204,8 +4251,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🎯 [RANDOM PRODUCTS] Random display enabled, max display: ${maxDisplay}`);
       
       // Shuffle products and select random ones
-      const shuffledProducts = [...products].sort(() => Math.random() - 0.5);
-      const randomProducts = shuffledProducts.slice(0, Math.min(maxDisplay, products.length));
+      const shuffledProducts = [...allProducts].sort(() => Math.random() - 0.5);
+      const randomProducts = shuffledProducts.slice(0, Math.min(maxDisplay, allProducts.length));
       
       console.log(`✅ [RANDOM PRODUCTS] Returning ${randomProducts.length} random products`);
       
@@ -4216,8 +4263,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           category,
           randomEnabled: isRandomEnabled,
           maxDisplay,
-          totalProducts: products.length,
-          selectedCount: randomProducts.length
+          totalProducts: allProducts.length,
+          selectedCount: randomProducts.length,
+          kardexCount: kardexProducts.length,
+          shopCount: shopProducts.length
         }
       });
       
@@ -39659,6 +39708,212 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: "Failed to update content item",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // ================================
+  // CATEGORY PRODUCTS MANAGEMENT API
+  // ================================
+
+  // Get category product assignments
+  app.get("/api/content-management/category-products", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { contentItems } = await import("../shared/content-schema");
+      const { eq, and } = await import("drizzle-orm");
+
+      // Get all category product assignments
+      const categoryProducts = await db
+        .select()
+        .from(contentItems)
+        .where(and(
+          eq(contentItems.section, 'category_products'),
+          eq(contentItems.contentType, 'json')
+        ))
+        .orderBy(contentItems.key);
+
+      // Parse the JSON content for each category
+      const assignments = categoryProducts.map(item => ({
+        category: item.key,
+        productIds: item.content ? JSON.parse(item.content) : [],
+        isActive: item.isActive,
+        id: item.id,
+        updatedAt: item.updatedAt
+      }));
+
+      res.json({
+        success: true,
+        data: assignments
+      });
+    } catch (error) {
+      console.error("Error fetching category products:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch category product assignments",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Update category product assignment
+  app.put("/api/content-management/category-products/:category", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const category = req.params.category;
+      const { productIds, isActive = true } = req.body;
+
+      if (!Array.isArray(productIds)) {
+        return res.status(400).json({
+          success: false,
+          message: "productIds must be an array"
+        });
+      }
+
+      const { db } = await import("./db");
+      const { contentItems } = await import("../shared/content-schema");
+      const { eq, and } = await import("drizzle-orm");
+
+      // Check if assignment already exists
+      const existing = await db
+        .select()
+        .from(contentItems)
+        .where(and(
+          eq(contentItems.section, 'category_products'),
+          eq(contentItems.key, category)
+        ))
+        .limit(1);
+
+      if (existing.length > 0) {
+        // Update existing assignment
+        const [updated] = await db
+          .update(contentItems)
+          .set({
+            content: JSON.stringify(productIds),
+            isActive,
+            updatedAt: new Date()
+          })
+          .where(eq(contentItems.id, existing[0].id))
+          .returning();
+
+        res.json({
+          success: true,
+          data: {
+            category,
+            productIds,
+            isActive: updated.isActive,
+            id: updated.id
+          },
+          message: "Category product assignment updated successfully"
+        });
+      } else {
+        // Create new assignment
+        const [created] = await db
+          .insert(contentItems)
+          .values({
+            key: category,
+            content: JSON.stringify(productIds),
+            contentType: 'json',
+            language: 'en',
+            section: 'category_products',
+            isActive,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          })
+          .returning();
+
+        res.json({
+          success: true,
+          data: {
+            category,
+            productIds,
+            isActive: created.isActive,
+            id: created.id
+          },
+          message: "Category product assignment created successfully"
+        });
+      }
+    } catch (error) {
+      console.error("Error updating category products:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to update category product assignment",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Get available shop products for assignment (with search and filtering)
+  app.get("/api/content-management/available-products", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { search, category, limit = 50, offset = 0 } = req.query;
+      const { pool } = await import('./db');
+
+      let query = `
+        SELECT 
+          id, name, category, description, short_description, 
+          price, price_unit, stock_quantity, sku, barcode,
+          thumbnail_url, is_active, visible_in_shop,
+          created_at, updated_at
+        FROM shop_products 
+        WHERE is_active = true AND visible_in_shop = true
+      `;
+      const params = [];
+      let paramIndex = 1;
+
+      // Add search filter
+      if (search && typeof search === 'string') {
+        query += ` AND (name ILIKE $${paramIndex} OR description ILIKE $${paramIndex} OR sku ILIKE $${paramIndex})`;
+        params.push(`%${search}%`);
+        paramIndex++;
+      }
+
+      // Add category filter
+      if (category && typeof category === 'string') {
+        query += ` AND category ILIKE $${paramIndex}`;
+        params.push(`%${category}%`);
+        paramIndex++;
+      }
+
+      query += ` ORDER BY name ASC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+      params.push(parseInt(limit as string), parseInt(offset as string));
+
+      const result = await pool.query(query, params);
+
+      // Also get total count
+      let countQuery = `
+        SELECT COUNT(*) as total 
+        FROM shop_products 
+        WHERE is_active = true AND visible_in_shop = true
+      `;
+      const countParams = [];
+      let countParamIndex = 1;
+
+      if (search && typeof search === 'string') {
+        countQuery += ` AND (name ILIKE $${countParamIndex} OR description ILIKE $${countParamIndex} OR sku ILIKE $${countParamIndex})`;
+        countParams.push(`%${search}%`);
+        countParamIndex++;
+      }
+
+      if (category && typeof category === 'string') {
+        countQuery += ` AND category ILIKE $${countParamIndex}`;
+        countParams.push(`%${category}%`);
+      }
+
+      const countResult = await pool.query(countQuery, countParams);
+
+      res.json({
+        success: true,
+        data: result.rows,
+        total: parseInt(countResult.rows[0].total),
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string)
+      });
+    } catch (error) {
+      console.error("Error fetching available products:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch available products",
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }

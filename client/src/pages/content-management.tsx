@@ -120,6 +120,24 @@ export default function ContentManagement() {
         .then(data => Array.isArray(data) ? data : [])
   });
 
+  // Query for category product assignments
+  const { data: categoryProductAssignments, isLoading: loadingAssignments } = useQuery({
+    queryKey: ['/api/content-management/category-products'],
+    queryFn: () => 
+      fetch(`/api/content-management/category-products`)
+        .then(res => res.json())
+        .then(data => data.success ? data.data : [])
+  });
+
+  // Query for available shop products
+  const { data: availableProducts, isLoading: loadingAvailableProducts } = useQuery({
+    queryKey: ['/api/content-management/available-products', selectedCategory],
+    queryFn: () => 
+      fetch(`/api/content-management/available-products?category=${selectedCategory}&limit=100`)
+        .then(res => res.json())
+        .then(data => data.success ? data.data : [])
+  });
+
   // Mutation for updating content
   const updateContentMutation = useMutation({
     mutationFn: async (data: { id: number; content: string; isActive: boolean }) => {
@@ -199,6 +217,33 @@ export default function ContentManagement() {
         title: "خطا در حذف تصویر", 
         variant: "destructive",
         description: "تصویر حذف نشد. لطفاً دوباره تلاش کنید."
+      });
+    }
+  });
+
+  // Mutation for updating category product assignments
+  const updateCategoryProductsMutation = useMutation({
+    mutationFn: async (data: { category: string; productIds: number[]; isActive?: boolean }) => {
+      return apiRequest(`/api/content-management/category-products/${data.category}`, {
+        method: 'PUT',
+        body: {
+          productIds: data.productIds,
+          isActive: data.isActive !== undefined ? data.isActive : true
+        }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "محصولات کتگوری به‌روزرسانی شد",
+        description: "اختصاص محصولات با موفقیت ذخیره شد."
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/content-management/category-products'] });
+    },
+    onError: () => {
+      toast({
+        title: "خطا در به‌روزرسانی",
+        description: "خطا در ذخیره اختصاص محصولات.",
+        variant: "destructive"
       });
     }
   });
@@ -327,7 +372,7 @@ export default function ContentManagement() {
 
         {/* Content Management Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="content" className="flex items-center gap-2">
               <Type className="w-4 h-4" />
               Text Content
@@ -339,6 +384,10 @@ export default function ContentManagement() {
             <TabsTrigger value="products-display" className="flex items-center gap-2">
               <Package className="w-4 h-4" />
               نمایش محصولات
+            </TabsTrigger>
+            <TabsTrigger value="category-products" className="flex items-center gap-2">
+              <Package className="w-4 h-4" />
+              محصولات کتگوری
             </TabsTrigger>
             <TabsTrigger value="images" className="flex items-center gap-2">
               <Image className="w-4 h-4" />
@@ -952,6 +1001,192 @@ export default function ContentManagement() {
                 </Card>
               )}
             </div>
+          </TabsContent>
+
+          {/* Category Products Management Tab */}
+          <TabsContent value="category-products" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="w-5 h-5" />
+                  مدیریت محصولات کتگوری‌های صفحات
+                </CardTitle>
+                <CardDescription>
+                  محصولات فروشگاه را به کتگوری‌های صفحات مختلف اختصاص دهید تا در آن‌ها نمایش داده شوند
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <div className="grid gap-6">
+              {[
+                { key: 'fuel-additives', label: 'افزودنی سوخت', count: availableProducts?.filter((p: any) => p.category?.toLowerCase().includes('fuel')).length || 0 },
+                { key: 'water-treatment', label: 'تصفیه آب', count: availableProducts?.filter((p: any) => p.category?.toLowerCase().includes('water')).length || 0 },
+                { key: 'paint-solvents', label: 'رنگ و حلال', count: availableProducts?.filter((p: any) => p.category?.toLowerCase().includes('paint') || p.category?.toLowerCase().includes('solvent')).length || 0 },
+                { key: 'agricultural-fertilizers', label: 'کود کشاورزی', count: availableProducts?.filter((p: any) => p.category?.toLowerCase().includes('agricultural') || p.category?.toLowerCase().includes('fertilizer')).length || 0 },
+                { key: 'industrial-chemicals', label: 'مواد شیمیایی صنعتی', count: availableProducts?.filter((p: any) => p.category?.toLowerCase().includes('industrial') || p.category?.toLowerCase().includes('chemical')).length || 0 },
+                { key: 'paint-thinner', label: 'تینر', count: availableProducts?.filter((p: any) => p.category?.toLowerCase().includes('thinner')).length || 0 },
+                { key: 'technical-equipment', label: 'تجهیزات فنی', count: availableProducts?.filter((p: any) => p.category?.toLowerCase().includes('technical') || p.category?.toLowerCase().includes('equipment')).length || 0 },
+                { key: 'commercial-goods', label: 'کالاهای تجاری', count: availableProducts?.filter((p: any) => p.category?.toLowerCase().includes('commercial')).length || 0 }
+              ].map((category) => {
+                const currentAssignment = categoryProductAssignments?.find((assignment: any) => assignment.category === category.key);
+                const selectedProductIds = currentAssignment?.productIds || [];
+                
+                return (
+                  <Card key={category.key} className="relative">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg">{category.label}</CardTitle>
+                        <CardDescription>
+                          کلید: {category.key} | محصولات انتخاب شده: {selectedProductIds.length} | موجود در فروشگاه: {category.count}
+                        </CardDescription>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={currentAssignment?.isActive ? "default" : "secondary"}>
+                          {currentAssignment?.isActive ? "فعال" : "غیرفعال"}
+                        </Badge>
+                        <Switch
+                          checked={currentAssignment?.isActive || false}
+                          disabled={updateCategoryProductsMutation.isPending}
+                          onCheckedChange={(checked) => {
+                            updateCategoryProductsMutation.mutate({
+                              category: category.key,
+                              productIds: selectedProductIds,
+                              isActive: checked
+                            });
+                          }}
+                        />
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {/* Available Products Section */}
+                      <div className="space-y-4">
+                        <div>
+                          <Label className="text-sm font-medium">محصولات موجود در فروشگاه برای انتخاب</Label>
+                          {loadingAvailableProducts ? (
+                            <div className="flex items-center justify-center py-4">
+                              <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                              در حال بارگیری...
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-2 max-h-60 overflow-y-auto border rounded p-3 bg-gray-50">
+                              {availableProducts && availableProducts.length > 0 ? (
+                                availableProducts
+                                  .filter((product: any) => 
+                                    product.category?.toLowerCase().includes(category.key.split('-')[0]) ||
+                                    (category.key === 'fuel-additives' && product.category?.toLowerCase().includes('fuel')) ||
+                                    (category.key === 'paint-thinner' && product.category?.toLowerCase().includes('thinner')) ||
+                                    (category.key === 'agricultural-fertilizers' && product.category?.toLowerCase().includes('fertilizer'))
+                                  )
+                                  .map((product: any) => {
+                                    const isSelected = selectedProductIds.includes(product.id);
+                                    return (
+                                      <div
+                                        key={product.id}
+                                        className={`p-3 border rounded cursor-pointer transition-all ${
+                                          isSelected 
+                                            ? 'bg-blue-100 border-blue-500 shadow-md' 
+                                            : 'bg-white border-gray-200 hover:bg-gray-50'
+                                        }`}
+                                        onClick={() => {
+                                          const newProductIds = isSelected 
+                                            ? selectedProductIds.filter((id: number) => id !== product.id)
+                                            : [...selectedProductIds, product.id];
+                                          
+                                          updateCategoryProductsMutation.mutate({
+                                            category: category.key,
+                                            productIds: newProductIds,
+                                            isActive: currentAssignment?.isActive || true
+                                          });
+                                        }}
+                                      >
+                                        <div className="flex items-start justify-between">
+                                          <div className="flex-1">
+                                            <h4 className="font-medium text-sm text-gray-900 line-clamp-2">
+                                              {product.name}
+                                            </h4>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                              SKU: {product.sku} | موجودی: {product.stock_quantity}
+                                            </p>
+                                          </div>
+                                          <div className="ml-2">
+                                            {isSelected ? (
+                                              <Badge className="text-xs bg-blue-600">انتخاب شده</Badge>
+                                            ) : (
+                                              <Badge variant="outline" className="text-xs">انتخاب</Badge>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })
+                              ) : (
+                                <div className="col-span-full text-center py-4 text-gray-500">
+                                  محصولی برای این کتگوری یافت نشد
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Selected Products Preview */}
+                        {selectedProductIds.length > 0 && (
+                          <div>
+                            <Label className="text-sm font-medium text-green-700">محصولات انتخاب شده ({selectedProductIds.length})</Label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 p-3 bg-green-50 border border-green-200 rounded">
+                              {selectedProductIds.map((productId: number) => {
+                                const product = availableProducts?.find((p: any) => p.id === productId);
+                                return product ? (
+                                  <div key={productId} className="flex items-center justify-between bg-white p-2 rounded border">
+                                    <span className="text-sm font-medium">{product.name}</span>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        const newProductIds = selectedProductIds.filter((id: number) => id !== productId);
+                                        updateCategoryProductsMutation.mutate({
+                                          category: category.key,
+                                          productIds: newProductIds,
+                                          isActive: currentAssignment?.isActive || true
+                                        });
+                                      }}
+                                      className="h-6 w-6 p-0 hover:bg-red-100"
+                                    >
+                                      ×
+                                    </Button>
+                                  </div>
+                                ) : null;
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {updateCategoryProductsMutation.isPending && (
+                          <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 p-2 rounded-md">
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            در حال ذخیره تغییرات...
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {/* Instructions */}
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="pt-6">
+                <div className="space-y-2 text-sm text-blue-800">
+                  <h4 className="font-medium">نحوه استفاده:</h4>
+                  <ul className="list-disc list-inside space-y-1 text-blue-700">
+                    <li>محصولات مورد نظر را از فروشگاه برای هر کتگوری انتخاب کنید</li>
+                    <li>تنظیمات به صورت خودکار ذخیره می‌شوند</li>
+                    <li>محصولات انتخاب شده در صفحات کتگوری نمایش داده خواهند شد</li>
+                    <li>برای غیرفعال کردن نمایش محصولات، از سوئیچ استفاده کنید</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Images Tab */}
