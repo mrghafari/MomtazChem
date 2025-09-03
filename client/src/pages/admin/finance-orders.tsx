@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -662,32 +662,30 @@ function FinanceOrders() {
     }
   };
 
-  const handleOrderReview = (order: OrderManagement) => {
+  const handleOrderReview = useCallback((order: OrderManagement) => {
     setSelectedOrder(order);
     setReviewNotes(order.financialNotes || "");
     setDialogOpen(true);
-  };
+  }, []);
 
-
-
-  const handleApprove = () => {
+  const handleApprove = useCallback(() => {
     if (!selectedOrder) return;
     approveMutation.mutate({ 
       orderId: selectedOrder.customerOrderId, 
       notes: reviewNotes,
       receiptAmount: receiptAmount 
     });
-  };
+  }, [selectedOrder, approveMutation, reviewNotes, receiptAmount]);
 
-  const handleReject = () => {
+  const handleReject = useCallback(() => {
     if (!selectedOrder) return;
     rejectMutation.mutate({ 
       orderId: selectedOrder.customerOrderId, 
       notes: reviewNotes 
     });
-  };
+  }, [selectedOrder, rejectMutation, reviewNotes]);
 
-  const openImageModal = async (imageUrl: string) => {
+  const openImageModal = useCallback(async (imageUrl: string) => {
     console.log('🖼️ [IMAGE MODAL] Opening image modal with URL:', imageUrl);
     
     // Verify image exists before opening modal
@@ -707,22 +705,22 @@ function FinanceOrders() {
     
     setSelectedImageUrl(imageUrl);
     setImageModalOpen(true);
-  };
+  }, []);
 
   // Helper function for safe date formatting
-  const formatDateSafe = (dateString: string | undefined, locale: string = 'en-US') => {
+  const formatDateSafe = useCallback((dateString: string | undefined, locale: string = 'en-US') => {
     if (!dateString) return 'نامشخص';
     try {
       return new Date(dateString).toLocaleDateString(locale);
     } catch {
       return 'نامشخص';
     }
-  };
+  }, []);
 
   // Company info hook moved to top - was causing conditional hook error
 
   // Print function for order details - Enhanced to match screen display
-  const handlePrintOrder = async () => {
+  const handlePrintOrder = useCallback(async () => {
     if (!orderDetails) return;
 
     // Send print content to server for PDF generation
@@ -1088,7 +1086,7 @@ function FinanceOrders() {
         variant: "destructive",
       });
     }
-  };
+  }, [orderDetails, toast]);
 
   // Handle accept order from order details modal
   const handleAcceptOrder = () => {
