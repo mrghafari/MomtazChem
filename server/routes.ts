@@ -2222,6 +2222,196 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
 
 
+  // =============================================================================
+  // ENHANCED AI SEO ROUTES
+  // =============================================================================
+
+  // Advanced AI SEO Content Generation
+  app.post('/api/ai/seo/generate', requireAuth, async (req, res) => {
+    try {
+      const { generateAdvancedSeoContent } = await import('./ai-seo-enhanced');
+      const result = await generateAdvancedSeoContent(req.body);
+      
+      res.json({
+        success: true,
+        data: result,
+        message: 'AI SEO content generated successfully'
+      });
+    } catch (error: any) {
+      console.error('Error generating AI SEO content:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to generate AI SEO content'
+      });
+    }
+  });
+
+  // Advanced Keyword Research
+  app.post('/api/ai/seo/keywords', requireAuth, async (req, res) => {
+    try {
+      const { generateAdvancedKeywordResearch } = await import('./ai-seo-enhanced');
+      const result = await generateAdvancedKeywordResearch(req.body);
+      
+      res.json({
+        success: true,
+        data: result,
+        message: 'Advanced keyword research completed'
+      });
+    } catch (error: any) {
+      console.error('Error generating keyword research:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to generate keyword research'
+      });
+    }
+  });
+
+  // Business-specific keyword research  
+  app.post('/api/ai/seo/keyword-research', requireAuth, async (req, res) => {
+    try {
+      const { generateAdvancedKeywordResearch } = await import('./ai-seo-enhanced');
+      const result = await generateAdvancedKeywordResearch({
+        seedKeywords: req.body.seedKeywords?.split(',').map((k: string) => k.trim()) || [],
+        language: req.body.language || 'fa',
+        industry: req.body.industry || 'chemical',
+        businessContext: req.body.businessContext || 'شرکت شیمیایی مختص',
+        targetMarket: req.body.targetMarket,
+        aiProvider: req.body.aiProvider
+      });
+      
+      res.json({
+        success: true,
+        type: 'keywords',
+        data: result
+      });
+    } catch (error: any) {
+      console.error('Error generating business keyword research:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to generate business keyword research'
+      });
+    }
+  });
+
+  // Advanced Content Optimization
+  app.post('/api/ai/seo/optimize', requireAuth, async (req, res) => {
+    try {
+      const { optimizeContentForSeoAdvanced } = await import('./ai-seo-enhanced');
+      const result = await optimizeContentForSeoAdvanced({
+        content: req.body.content,
+        targetKeywords: req.body.targetKeywords || [],
+        language: req.body.language || 'fa',
+        contentType: req.body.contentType || 'webpage',
+        targetAudience: req.body.targetAudience
+      });
+      
+      res.json({
+        success: true,
+        data: result,
+        message: 'Content optimized successfully'
+      });
+    } catch (error: any) {
+      console.error('Error optimizing content:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to optimize content'
+      });
+    }
+  });
+
+  // Advanced SEO Performance Analysis
+  app.post('/api/ai/seo/analyze', requireAuth, async (req, res) => {
+    try {
+      const { analyzeAdvancedSeoPerformance } = await import('./ai-seo-enhanced');
+      const result = await analyzeAdvancedSeoPerformance({
+        url: req.body.url,
+        targetKeywords: req.body.targetKeywords || [],
+        language: req.body.language,
+        competitorUrls: req.body.competitorUrls
+      });
+      
+      res.json({
+        success: true,
+        data: result,
+        message: 'SEO analysis completed successfully'
+      });
+    } catch (error: any) {
+      console.error('Error analyzing SEO performance:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to analyze SEO performance'
+      });
+    }
+  });
+
+  // Schema.org Markup Generator
+  app.post('/api/ai/seo/schema', requireAuth, async (req, res) => {
+    try {
+      const { generateSchemaMarkup } = await import('./ai-seo-enhanced');
+      const result = await generateSchemaMarkup(
+        req.body.pageType, 
+        req.body.data, 
+        req.body.aiProvider
+      );
+      
+      res.json({
+        success: true,
+        data: result,
+        message: 'Schema markup generated successfully'
+      });
+    } catch (error: any) {
+      console.error('Error generating schema markup:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to generate schema markup'
+      });
+    }
+  });
+
+  // SEO Audit
+  app.post('/api/ai/seo/audit', requireAuth, async (req, res) => {
+    try {
+      const { generateSeoAudit } = await import('./ai-seo-enhanced');
+      const result = await generateSeoAudit(req.body.url, req.body.aiProvider);
+      
+      res.json({
+        success: true,
+        data: result,
+        message: 'SEO audit completed successfully'
+      });
+    } catch (error: any) {
+      console.error('Error generating SEO audit:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to generate SEO audit'
+      });
+    }
+  });
+
+  // Competitor Analysis
+  app.post('/api/ai/seo/competitors', requireAuth, async (req, res) => {
+    try {
+      const { analyzeCompetitors } = await import('./ai-seo-enhanced');
+      const result = await analyzeCompetitors(
+        req.body.competitorUrls || [],
+        req.body.targetKeywords || [],
+        req.body.aiProvider
+      );
+      
+      res.json({
+        success: true,
+        data: result,
+        message: 'Competitor analysis completed successfully'
+      });
+    } catch (error: any) {
+      console.error('Error analyzing competitors:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to analyze competitors'
+      });
+    }
+  });
+
   // API endpoint to get active users count
   app.get("/api/active-users", requireAuth, async (req: Request, res: Response) => {
     try {
