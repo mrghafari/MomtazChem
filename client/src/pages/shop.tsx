@@ -169,10 +169,9 @@ const Shop = () => {
   });
 
   // Fetch all shop products for total count
-  const { data: productsResponse } = useQuery({
+  const { data: products = [] } = useQuery<ShopProduct[]>({
     queryKey: ["/api/shop/products"],
   });
-  const products = productsResponse?.data || [];
 
   // Fetch discount settings to get the highest discount percentage
   const { data: discountResponse } = useQuery({
@@ -220,11 +219,10 @@ const Shop = () => {
   console.log('🎛️ [VISIBILITY] Discount Banner:', discountBannerEnabled, 'AI Features:', aiFeaturesEnabled);
 
   // Get data from search results or fallback to regular products
-  // Only use search results if there's actually a search query, otherwise use all products
-  const currentProducts = (debouncedQuery && searchResults?.data?.products) || products;
+  const currentProducts = searchResults?.data?.products || products;
   
   // Shop products are all visible by default (no visibleInShop field needed)
-  const filteredProducts = Array.isArray(currentProducts) ? currentProducts : [];
+  const filteredProducts = currentProducts;
   
   const totalResults = searchResults?.data?.total || products.length;
   const availableFilters = searchResults?.data?.filters;
@@ -504,8 +502,8 @@ const Shop = () => {
     }
   };
 
-  // Legacy filter and sort products - ensure products is an array
-  const legacyFilteredProducts = Array.isArray(products) ? products
+  // Legacy filter and sort products
+  const legacyFilteredProducts = products
     .filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            product.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -523,7 +521,7 @@ const Shop = () => {
         default:
           return 0;
       }
-    }) : [];
+    });
 
   // Cart storage is now handled by usePersistentCart hook
 
