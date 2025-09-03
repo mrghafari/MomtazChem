@@ -329,10 +329,10 @@ export class SyncService {
     // اولویت سوم: وضعیت‌های پرداخت - منطق بهبود یافته
     if (customerStatus === 'pending') {
       if (paymentStatus === 'paid') {
-        // 💰 WALLET LOGIC: پرداخت کامل انجام شده - مستقیماً به انبار
-        // سفارشات wallet_full خودکار تایید مالی محسوب می‌شوند
-        console.log(`💰 [STATUS MAPPING] Paid order (${paymentMethod}) moving to warehouse`);
-        return 'warehouse_pending';
+        // 💰 WALLET LOGIC: پرداخت کامل انجام شده - ابتدا به بخش مالی برای تایید
+        // همه سفارشات باید از بخش مالی عبور کنند (wallet نیز باید تایید شود)
+        console.log(`💰 [STATUS MAPPING] Paid order (${paymentMethod}) going to financial for approval`);
+        return 'finance_pending';
       } else if (paymentStatus === 'receipt_uploaded') {
         // فیش آپلود شده - نیاز به بررسی مالی
         return 'finance_pending';
@@ -356,9 +356,15 @@ export class SyncService {
     }
     
     // ویژه: سفارشات warehouse_ready که از pending آمده‌اند
-    if (customerStatus === 'warehouse_ready' && paymentStatus === 'paid' && isManuallyApproved) {
-      // این سفارشات که قبلاً تایید مالی شده‌اند نباید برگردانده شوند
-      return 'warehouse_pending';
+    if (customerStatus === 'warehouse_ready' && paymentStatus === 'paid') {
+      if (isManuallyApproved) {
+        // این سفارشات که قبلاً تایید مالی شده‌اند باید به انبار بروند
+        return 'warehouse_pending';
+      } else {
+        // حتی wallet orders باید ابتدا تایید مالی بگیرند
+        console.log(`💰 [STATUS MAPPING] Warehouse ready but needs financial approval first`);
+        return 'finance_pending';
+      }
     }
     
     // console.log(`⚠️ [STATUS MAPPING] Unmapped status combination: ${customerStatus}/${paymentStatus} - defaulting to pending`); // Reduced logging
