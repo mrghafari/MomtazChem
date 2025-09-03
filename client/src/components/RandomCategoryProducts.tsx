@@ -30,17 +30,27 @@ export function RandomCategoryProducts({ category, title }: RandomCategoryProduc
       return response.json();
     },
     enabled: !!category,
-    refetchInterval: 5 * 60 * 1000 // Refresh every 5 minutes for new random products
+    staleTime: 10 * 60 * 1000, // Consider data fresh for 10 minutes
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes (was cacheTime in v4)
   });
 
   const products = productsResponse?.data || [];
+  
+  // Ensure unique products and limit to exactly 2
+  const uniqueProducts = (products as Product[]).reduce((acc: Product[], product: Product) => {
+    const exists = acc.find(p => p.id === product.id);
+    if (!exists && acc.length < 2) {
+      acc.push(product);
+    }
+    return acc;
+  }, []);
 
   if (isLoading) {
     return (
       <section className="py-16 bg-gradient-to-br from-blue-50 to-green-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="h-8 bg-gray-200 rounded w-64 mx-auto mb-4 animate-pulse"></div>
+            <div className="h-8 bg-gray-200 rounded w-80 mx-auto mb-4 animate-pulse"></div>
             <div className="h-4 bg-gray-200 rounded w-96 mx-auto animate-pulse"></div>
           </div>
           <div className="grid md:grid-cols-2 gap-8">
@@ -61,7 +71,7 @@ export function RandomCategoryProducts({ category, title }: RandomCategoryProduc
     );
   }
 
-  if (error || !products || products.length === 0) {
+  if (error || !uniqueProducts || uniqueProducts.length === 0) {
     return null; // Don't show anything if no products available
   }
 
@@ -78,7 +88,7 @@ export function RandomCategoryProducts({ category, title }: RandomCategoryProduc
         </div>
         
         <div className="grid md:grid-cols-2 gap-8 mb-12">
-          {Array.isArray(products) && products.slice(0, 2).map((product) => (
+          {uniqueProducts.map((product) => (
             <Card 
               key={product.id} 
               className="bg-white hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
