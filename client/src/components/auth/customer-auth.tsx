@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { User, Mail, Lock, Phone, MapPin, Building, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { User, Mail, Lock, Phone, MapPin, Building, AlertCircle, Eye, EyeOff, Move } from "lucide-react";
 
 // Form schemas
 const loginSchema = z.object({
@@ -82,6 +82,13 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
   const [verificationSettings, setVerificationSettings] = useState<any>(null);
   const [verificationMethods, setVerificationMethods] = useState<any>({ sms: false, email: false });
   const [dualVerificationError, setDualVerificationError] = useState("");
+
+  // Draggable state and refs
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const modalRef = useRef<HTMLDivElement>(null);
+  const dragHandleRef = useRef<HTMLDivElement>(null);
 
   // Fetch provinces
   const { data: provincesResponse } = useQuery({
@@ -533,9 +540,63 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
     }
   };
 
+  // Drag functionality
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (dragHandleRef.current && dragHandleRef.current.contains(e.target as Node)) {
+      setIsDragging(true);
+      setDragStart({
+        x: e.clientX - position.x,
+        y: e.clientY - position.y
+      });
+      e.preventDefault();
+    }
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isDragging) {
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, dragStart]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent 
+        ref={modalRef}
+        className={`max-w-md ${isDragging ? 'cursor-grabbing shadow-2xl' : 'cursor-auto'} transition-shadow duration-200`}
+        style={{
+          transform: `translate(${position.x}px, ${position.y}px)`,
+          position: 'relative',
+          zIndex: isDragging ? 1000 : 'auto'
+        }}
+        onMouseDown={handleMouseDown}
+      >
+        {/* Drag Handle */}
+        <div 
+          ref={dragHandleRef}
+          className="flex items-center justify-center w-full py-2 mb-2 border-b border-gray-200 cursor-grab active:cursor-grabbing hover:bg-gray-50 rounded-t-lg"
+        >
+          <Move className="w-4 h-4 text-gray-400" />
+          <span className="ml-2 text-xs text-gray-500 select-none">Drag to move</span>
+        </div>
+
         <DialogHeader>
           <DialogTitle>
             {showVerificationForm ? "Verify Your Mobile Number" : "Customer Login"}

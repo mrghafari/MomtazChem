@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, ArrowLeft, UserPlus, LogIn } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, UserPlus, LogIn, Move } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthModalProps {
@@ -22,6 +22,13 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  
+  // Draggable state and refs
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const modalRef = useRef<HTMLDivElement>(null);
+  const dragHandleRef = useRef<HTMLDivElement>(null);
 
   // Update currentView when initialMode changes
   useEffect(() => {
@@ -70,7 +77,46 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
     });
     setShowPassword(false);
     setIsLoading(false);
+    // Reset drag position
+    setPosition({ x: 0, y: 0 });
+    setIsDragging(false);
   };
+
+  // Drag functionality
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (dragHandleRef.current && dragHandleRef.current.contains(e.target as Node)) {
+      setIsDragging(true);
+      setDragStart({
+        x: e.clientX - position.x,
+        y: e.clientY - position.y
+      });
+      e.preventDefault();
+    }
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isDragging) {
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, dragStart]);
 
   const handleClose = () => {
     resetModal();
@@ -232,7 +278,25 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent 
+        ref={modalRef}
+        className={`max-w-md ${isDragging ? 'cursor-grabbing shadow-2xl' : 'cursor-auto'} transition-shadow duration-200`}
+        style={{
+          transform: `translate(${position.x}px, ${position.y}px)`,
+          position: 'relative',
+          zIndex: isDragging ? 1000 : 'auto'
+        }}
+        onMouseDown={handleMouseDown}
+      >
+        {/* Drag Handle */}
+        <div 
+          ref={dragHandleRef}
+          className="flex items-center justify-center w-full py-2 mb-2 border-b border-gray-200 cursor-grab active:cursor-grabbing hover:bg-gray-50 rounded-t-lg"
+        >
+          <Move className="w-4 h-4 text-gray-400" />
+          <span className="ml-2 text-xs text-gray-500 select-none">Drag to move</span>
+        </div>
+
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {currentView !== 'choice' && (
