@@ -142,7 +142,6 @@ export default function SeoManagement() {
   // AI SEO states
   const [aiPageType, setAiPageType] = useState("");
   const [aiLanguage, setAiLanguage] = useState("");
-  const [selectedAiProvider, setSelectedAiProvider] = useState("openai");
   
   const [aiTargetKeywords, setAiTargetKeywords] = useState("");
   const [aiBusinessContext, setAiBusinessContext] = useState("");
@@ -451,7 +450,7 @@ export default function SeoManagement() {
       language: aiLanguage,
       targetKeywords: keywords,
       businessContext: aiBusinessContext,
-      aiProvider: selectedAiProvider,
+
     });
   };
 
@@ -470,7 +469,7 @@ export default function SeoManagement() {
       seedKeywords: keywords,
       language: aiLanguage || 'fa',
       industry: aiIndustry || 'chemical',
-      aiProvider: selectedAiProvider,
+
     });
   };
 
@@ -489,7 +488,7 @@ export default function SeoManagement() {
       content: aiContentToOptimize,
       targetKeywords: keywords,
       language: aiLanguage || 'fa',
-      aiProvider: selectedAiProvider,
+
     });
   };
 
@@ -507,7 +506,7 @@ export default function SeoManagement() {
     analyzePerformance.mutate({
       url: aiAnalyzeUrl,
       targetKeywords: keywords,
-      aiProvider: selectedAiProvider,
+
     });
   };
 
@@ -530,7 +529,6 @@ export default function SeoManagement() {
         seedKeywords: aiSeedKeywords,
         language: aiLanguage || 'fa',
         pageType: aiPageType || 'homepage',
-        aiProvider: selectedAiProvider
       });
       
       setAiResults(response);
