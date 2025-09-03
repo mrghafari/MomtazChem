@@ -205,6 +205,12 @@ function FinanceOrders() {
     refetchInterval: false, // Disable automatic refetch
   });
 
+  // Fetch company information for logo - MOVED to top to avoid conditional hooks
+  const { data: companyInfo } = useQuery({
+    queryKey: ['/api/admin/company-information'],
+    enabled: true
+  });
+
   // Send reminder mutation - MOVED to top to avoid conditional hooks
   const sendReminderMutation = useMutation({
     mutationFn: async ({ orderId, type }: { orderId: number; type: string }) => {
@@ -706,11 +712,7 @@ function FinanceOrders() {
     }
   };
 
-  // Fetch company information for logo
-  const { data: companyInfo } = useQuery({
-    queryKey: ['/api/admin/company-information'],
-    enabled: true
-  });
+  // Company info hook moved to top - was causing conditional hook error
 
   // Print function for order details - Enhanced to match screen display
   const handlePrintOrder = async () => {
