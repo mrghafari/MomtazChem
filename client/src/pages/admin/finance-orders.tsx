@@ -182,12 +182,26 @@ function FinanceOrders() {
 
   // Get orders for financial review - MOVED to top - Force fresh data
   const { data: ordersResponse, isLoading, refetch } = useQuery({
-    queryKey: ['/api/financial/orders'],
-    queryFn: () => fetch('/api/financial/orders', { credentials: 'include' }).then(res => res.json()),
+    queryKey: ['/api/financial/orders', Date.now()], // Force cache bust with timestamp
+    queryFn: async () => {
+      const res = await fetch('/api/financial/orders', { 
+        credentials: 'include',
+        cache: 'no-cache', // Force no cache
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      const data = await res.json();
+      console.log('🔍 [FINANCE DEBUG] Orders received:', data?.orders?.length, 'orders');
+      console.log('🔍 [FINANCE DEBUG] Order numbers:', data?.orders?.map((o: any) => o.orderNumber));
+      return data;
+    },
     enabled: Boolean(adminUser?.success), // Only run if authenticated
     staleTime: 0,
-    refetchOnWindowFocus: false, // Disable aggressive refetching
-    refetchInterval: false, // Disable automatic refetch
+    gcTime: 0, // Force immediate garbage collection
+    refetchOnWindowFocus: true, // Re-enable refetch
+    refetchInterval: 5000, // Refetch every 5 seconds for debugging
   });
 
   // Fetch approved orders that have been transferred to warehouse - MOVED to top
