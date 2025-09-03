@@ -346,6 +346,94 @@ function FinanceOrders() {
     }
   });
 
+  // ALL useCallback functions MUST be before early returns to maintain hook order
+  
+  // Force refresh function that completely clears all finance cache
+  const forceRefreshFinanceOrders = useCallback(async () => {
+    // Clear all finance cache first
+    await queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
+    await queryClient.removeQueries({ queryKey: ['/api/financial/orders'] });
+    await queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
+    await queryClient.removeQueries({ queryKey: ['/api/financial/approved-orders'] });
+    // Then refetch both
+    await refetch();
+    await refetchApproved();
+    toast({
+      title: "🔄 به‌روزرسانی شد",
+      description: "تمام اطلاعات مالی از سرور بازیابی شد",
+    });
+  }, [queryClient, refetch, refetchApproved, toast]);
+
+  // Fetch order details function for admin users
+  const fetchOrderDetails = useCallback(async (orderNumber: string) => {
+    try {
+      // For admin users, we need to find the order by orderNumber first, then get details by ID
+      const findOrderResponse = await fetch(`/api/admin/orders/find-by-number/${orderNumber}`, {
+        credentials: 'include'
+      });
+      
+      if (!findOrderResponse.ok) {
+        throw new Error('Order not found');
+      }
+      
+      const findOrderData = await findOrderResponse.json();
+      if (!findOrderData.success) {
+        throw new Error(findOrderData.message || 'Order not found');
+      }
+      
+      // Now get the order details using the customer order ID
+      const detailsResponse = await fetch(`/api/admin/orders/${findOrderData.order.id}/details`, {
+        credentials: 'include'
+      });
+      
+      if (!detailsResponse.ok) {
+        throw new Error('Failed to fetch order details');
+      }
+      
+      const detailsData = await detailsResponse.json();
+      if (detailsData.success) {
+        console.log('📋 [ORDER DETAILS] Order fetched:', detailsData.order.orderNumber);
+        console.log('📋 [ORDER DETAILS] Items count:', detailsData.order.items?.length || 0);
+        console.log('📋 [ORDER DETAILS] Items data:', detailsData.order.items);
+        setOrderDetails(detailsData.order);
+        setOrderDocuments(detailsData.documents || []);
+        setOrderDetailsModalOpen(true);
+      } else {
+        throw new Error(detailsData.message || 'Failed to get order details');
+      }
+    } catch (error) {
+      console.error('Error fetching order details:', error);
+      toast({
+        variant: "destructive", 
+        title: "خطا",
+        description: "امکان دریافت جزئیات سفارش وجود ندارد"
+      });
+    }
+  }, [toast]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // Early return for loading state - AFTER all hooks are called
   if (isCheckingAuth) {
     return (
@@ -387,22 +475,6 @@ function FinanceOrders() {
       </div>
     );
   }
-
-  // Force refresh function that completely clears all finance cache
-  const forceRefreshFinanceOrders = useCallback(async () => {
-    // Clear all finance cache first
-    await queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
-    await queryClient.removeQueries({ queryKey: ['/api/financial/orders'] });
-    await queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
-    await queryClient.removeQueries({ queryKey: ['/api/financial/approved-orders'] });
-    // Then refetch both
-    await refetch();
-    await refetchApproved();
-    toast({
-      title: "🔄 به‌روزرسانی شد",
-      description: "تمام اطلاعات مالی از سرور بازیابی شد",
-    });
-  }, [queryClient, refetch, refetchApproved, toast]);
 
 
 
@@ -467,52 +539,6 @@ function FinanceOrders() {
     sum + parseFloat(order.totalAmount || '0'), 0
   );
 
-  // Fetch order details function for admin users
-  const fetchOrderDetails = useCallback(async (orderNumber: string) => {
-    try {
-      // For admin users, we need to find the order by orderNumber first, then get details by ID
-      const findOrderResponse = await fetch(`/api/admin/orders/find-by-number/${orderNumber}`, {
-        credentials: 'include'
-      });
-      
-      if (!findOrderResponse.ok) {
-        throw new Error('Failed to find order');
-      }
-      
-      const findOrderData = await findOrderResponse.json();
-      if (!findOrderData.success || !findOrderData.order) {
-        throw new Error('Order not found');
-      }
-      
-      // Now get the order details using the customer order ID
-      const detailsResponse = await fetch(`/api/admin/orders/${findOrderData.order.id}/details`, {
-        credentials: 'include'
-      });
-      
-      if (!detailsResponse.ok) {
-        throw new Error('Failed to fetch order details');
-      }
-      
-      const detailsData = await detailsResponse.json();
-      if (detailsData.success) {
-        console.log('📋 [ORDER DETAILS] Order fetched:', detailsData.order.orderNumber);
-        console.log('📋 [ORDER DETAILS] Items count:', detailsData.order.items?.length || 0);
-        console.log('📋 [ORDER DETAILS] Items data:', detailsData.order.items);
-        setOrderDetails(detailsData.order);
-        setOrderDocuments(detailsData.documents || []);
-        setOrderDetailsModalOpen(true);
-      } else {
-        throw new Error(detailsData.message || 'Failed to get order details');
-      }
-    } catch (error) {
-      console.error('Error fetching order details:', error);
-      toast({
-        variant: "destructive", 
-        title: "خطا",
-        description: "امکان دریافت جزئیات سفارش وجود ندارد"
-      });
-    }
-  }, [toast]);
 
   // Auto-refresh controlled by global settings
   useEffect(() => {
@@ -628,106 +654,24 @@ function FinanceOrders() {
     }
   });
 
-  // Load tracking codes for order
-  const loadTrackingCodes = useCallback(async (orderId?: number) => {
-    if (!orderId) return;
-    
-    try {
-      const response = await apiRequest(`/api/tracking/order/${orderId}`, { method: 'GET' });
-      // setTrackingCodes(response.trackingCodes || []);
-    } catch (error) {
-      console.error("Error loading tracking codes:", error);
-    }
-  }, []);
 
-  // Handle tracking modal open
-  const handleTrackingModal = useCallback((order: OrderManagement) => {
-    // setSelectedOrderForTracking(order);
-    // setShowTrackingModal(true);
-    // loadTrackingCodes(order.customerOrderId);
-  }, []);
 
-  const getStatusBadge = useCallback((status: string) => {
-    switch (status) {
-      case 'payment_uploaded':
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700">در انتظار بررسی مالی</Badge>;
-      case 'financial_reviewing':
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700">در حال بررسی</Badge>;
-      case 'financial_approved':
-        return <Badge variant="outline" className="bg-green-50 text-green-700">تأیید شده</Badge>;
-      case 'auto_approved':
-        return <Badge variant="outline" className="bg-emerald-50 text-emerald-700">تأیید درگاه بانکی</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  }, []);
 
-  const handleOrderReview = useCallback((order: OrderManagement) => {
-    setSelectedOrder(order);
-    setReviewNotes(order.financialNotes || "");
-    setDialogOpen(true);
-  }, []);
 
-  const handleApprove = useCallback(() => {
-    if (!selectedOrder) return;
-    approveMutation.mutate({ 
-      orderId: selectedOrder.customerOrderId, 
-      notes: reviewNotes,
-      receiptAmount: receiptAmount 
-    });
-  }, [selectedOrder, approveMutation, reviewNotes, receiptAmount]);
 
-  const handleReject = useCallback(() => {
-    if (!selectedOrder) return;
-    rejectMutation.mutate({ 
-      orderId: selectedOrder.customerOrderId, 
-      notes: reviewNotes 
-    });
-  }, [selectedOrder, rejectMutation, reviewNotes]);
 
-  const openImageModal = useCallback(async (imageUrl: string) => {
-    console.log('🖼️ [IMAGE MODAL] Opening image modal with URL:', imageUrl);
-    
-    // Verify image exists before opening modal
-    try {
-      const response = await fetch(imageUrl, { method: 'HEAD' });
-      if (!response.ok) {
-        console.error('❌ [IMAGE MODAL] Image not accessible:', imageUrl, 'Status:', response.status);
-        // Try to open in new tab instead
-        window.open(imageUrl, '_blank');
-        return;
-      }
-      console.log('✅ [IMAGE MODAL] Image verified accessible:', imageUrl);
-    } catch (error) {
-      console.error('❌ [IMAGE MODAL] Failed to verify image:', error);
-      // Still try to open modal, let the image component handle the error
-    }
-    
-    setSelectedImageUrl(imageUrl);
-    setImageModalOpen(true);
-  }, []);
 
-  // Helper function for safe date formatting
-  const formatDateSafe = useCallback((dateString: string | undefined, locale: string = 'en-US') => {
-    if (!dateString) return 'نامشخص';
-    try {
-      return new Date(dateString).toLocaleDateString(locale);
-    } catch {
-      return 'نامشخص';
-    }
-  }, []);
+
+
+
+
+
+
+
 
   // Company info hook moved to top - was causing conditional hook error
 
-  // Print function for order details - Enhanced to match screen display
-  const handlePrintOrder = useCallback(async () => {
-    if (!orderDetails) return;
 
-    // Send print content to server for PDF generation
-    const itemsTotal = orderDetails.items?.reduce((sum: number, item: any) => {
-      const itemTotal = parseFloat(item.price || 0) * parseInt(item.quantity || 0);
-      return sum + (isNaN(itemTotal) ? 0 : itemTotal);
-    }, 0) || 0;
 
     const printContent = `
     <!DOCTYPE html>
@@ -1052,82 +996,11 @@ function FinanceOrders() {
     `;
 
     // Send to server for PDF generation and download
-    try {
-      const response = await fetch('/api/financial/print-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          htmlContent: printContent,
-          filename: `order-${orderDetails.orderNumber}.pdf`
-        })
-      });
 
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `order-${orderDetails.orderNumber}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } else {
-        throw new Error('Failed to generate PDF');
-      }
-    } catch (error) {
-      console.error('PDF generation failed:', error);
-      toast({
-        title: "خطا در تولید PDF",
-        description: "نتوانستیم فایل PDF را تولید کنیم. لطفاً مجدداً تلاش کنید.",
-        variant: "destructive",
-      });
-    }
-  }, [orderDetails, toast]);
 
-  // Handle accept order from order details modal
-  const handleAcceptOrder = useCallback(() => {
-    if (!orderDetails) return;
-    
-    // Find the corresponding order from allOrders using orderDetails.id (customer order ID)
-    const correspondingOrder = allOrders.find(order => order.customerOrderId === orderDetails.id);
-    
-    if (!correspondingOrder) {
-      console.error('🚫 [FINANCE] Could not find corresponding order for customer order ID:', orderDetails.id);
-      return;
-    }
-    
-    console.log('🔄 [FINANCE] Accepting order from modal - Management ID:', correspondingOrder.id, 'Customer Order ID:', correspondingOrder.customerOrderId);
-    approveMutation.mutate({ 
-      orderId: correspondingOrder.customerOrderId, // USE CUSTOMER ORDER ID FOR API
-      notes: `سفارش تأیید شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}`,
-      receiptAmount: receiptAmount 
-    });
-    // Don't close modal here - let the mutation success handler close it
-  }, [orderDetails, allOrders, approveMutation, receiptAmount]);
 
-  // Handle reject order from order details modal  
-  const handleRejectOrder = useCallback(() => {
-    if (!orderDetails) return;
-    
-    // Find the corresponding order from allOrders using orderDetails.id (customer order ID)
-    const correspondingOrder = allOrders.find(order => order.customerOrderId === orderDetails.id);
-    
-    if (!correspondingOrder) {
-      console.error('🚫 [FINANCE] Could not find corresponding order for customer order ID:', orderDetails.id);
-      return;
-    }
-    
-    console.log('🔄 [FINANCE] Rejecting order from modal - Management ID:', correspondingOrder.id, 'Customer Order ID:', correspondingOrder.customerOrderId);
-    rejectMutation.mutate({ 
-      orderId: correspondingOrder.customerOrderId, // USE CUSTOMER ORDER ID FOR API
-      notes: `سفارش رد شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}` 
-    });
-    // Don't close modal here - let the mutation success handler close it
-  }, [orderDetails, allOrders, rejectMutation]);
+
+
 
   if (isLoading) {
     return (
