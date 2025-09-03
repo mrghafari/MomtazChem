@@ -2,8 +2,9 @@ import { useState, useCallback } from "react";
 import Uppy from "@uppy/core";
 import { DashboardModal } from "@uppy/react";
 import AwsS3 from "@uppy/aws-s3";
-import "@uppy/core/dist/style.min.css";
-import "@uppy/dashboard/dist/style.min.css";
+// CSS imports moved to index.css to avoid pre-transform errors
+// import "@uppy/core/dist/style.min.css";
+// import "@uppy/dashboard/dist/style.min.css";
 import type { UploadResult, UppyFile } from "@uppy/core";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

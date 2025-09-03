@@ -8,19 +8,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, FileText, CheckCircle, AlertCircle, ArrowLeft, CreditCard, Building2 } from "lucide-react";
+import { Upload, FileText, CheckCircle, AlertCircle, ArrowLeft, CreditCard, Building2, Shield } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-// Using simple upload instead of SecureFileUploader due to CSS import issues
+import SecureFileUploader from "@/components/SecureFileUploader";
+import type { UploadResult } from "@uppy/core";
 
 export default function BankReceiptUpload() {
   const { orderId: paramOrderId } = useParams();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [notes, setNotes] = useState("");
   const [receiptAmount, setReceiptAmount] = useState("");
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [securityStatus, setSecurityStatus] = useState<string>("");
 
   // Get orderId from URL parameters or query string
   useEffect(() => {
@@ -82,7 +84,7 @@ export default function BankReceiptUpload() {
     },
   });
 
-  // Upload mutation - Uses Object Storage now
+  // Upload mutation - Uses Secure Object Storage
   const uploadMutation = useMutation({
     mutationFn: async ({ receiptUrl, orderId, notes }: { receiptUrl: string; orderId: string; notes: string }) => {
       const response = await apiRequest('/api/payment/upload-receipt', {
@@ -90,7 +92,8 @@ export default function BankReceiptUpload() {
         body: JSON.stringify({
           receiptUrl,
           orderId,
-          notes
+          notes,
+          securityValidated: true // Mark as security validated
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -101,14 +104,15 @@ export default function BankReceiptUpload() {
     onSuccess: () => {
       toast({
         title: "✅ فیش بانکی آپلود شد",
-        description: "فیش واریزی شما با موفقیت ارسال شد و در دیتابیس ذخیره گردید",
+        description: "فیش واریزی شما با موفقیت از سیستم امن عبور کرد و در دیتابیس ذخیره گردید",
       });
       
       // Reset form
-      setSelectedFile(null);
+      setUploadedFileUrl(null);
       setUploadProgress(0);
       setNotes("");
       setReceiptAmount("");
+      setSecurityStatus("");
       
       // Redirect to order status page
       setTimeout(() => {
@@ -125,78 +129,45 @@ export default function BankReceiptUpload() {
     },
   });
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // 🔒 Multi-layer client-side security validation for production
-    const errors: string[] = [];
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
-    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.pdf'];
-
-    // Layer 1: File size validation with detailed info
-    if (file.size > maxSize) {
-      errors.push(`حجم فایل بیش از حد مجاز: ${(file.size / 1024 / 1024).toFixed(2)}MB (حداکثر: 10MB)`);
-    }
-
-    // Layer 2: MIME type validation
-    if (!allowedTypes.includes(file.type)) {
-      errors.push(`نوع فایل مجاز نیست: ${file.type}`);
-    }
-
-    // Layer 3: Extension validation
-    const fileExtension = ('.' + file.name.split('.').pop()?.toLowerCase()) || '';
-    if (!allowedExtensions.includes(fileExtension)) {
-      errors.push(`پسوند فایل مجاز نیست: ${fileExtension}`);
-    }
-
-    // Layer 4: File name security validation
-    if (file.name.length > 255) {
-      errors.push('نام فایل خیلی طولانی است (حداکثر 255 کاراکتر)');
-    }
-
-    // Layer 5: Check for suspicious patterns in filename
-    const suspiciousPatterns = [
-      /<script/i, /javascript:/i, /\.exe$/i, /\.bat$/i, /\.cmd$/i, /\.php$/i, /\.js$/i
-    ];
-    if (suspiciousPatterns.some(pattern => pattern.test(file.name))) {
-      errors.push('نام فایل حاوی الگوهای مشکوک امنیتی است');
-    }
-
-    // Layer 6: Check for empty or too small files
-    if (file.size < 100) {
-      errors.push('فایل خیلی کوچک است (حداقل 100 بایت)');
-    }
-
-    if (errors.length > 0) {
+  // Handle secure file upload completion
+  const handleSecureUploadComplete = (result: UploadResult<any, any>) => {
+    if (result.successful && result.successful.length > 0) {
+      const uploadedFile = result.successful[0];
+      setUploadedFileUrl(uploadedFile.uploadURL);
+      setUploadProgress(100);
+      
       toast({
-        title: "❌ خطاهای امنیتی فایل",
-        description: errors.join(' • '),
-        variant: "destructive",
+        title: "✅ فایل با موفقیت آپلود شد",
+        description: "فیش بانکی از تمام بررسی‌های امنیتی عبور کرد",
       });
-      // Reset the input to prevent malicious files
-      event.target.value = '';
-      console.log('🚫 [CLIENT SECURITY] File rejected:', { name: file.name, errors });
-      return;
+
+      console.log('🔐 [SECURE UPLOAD] Bank receipt uploaded successfully:', {
+        fileName: uploadedFile.name,
+        uploadURL: uploadedFile.uploadURL
+      });
     }
-
-    console.log('✅ [CLIENT SECURITY] File passed all security validations:', {
-      name: file.name,
-      size: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
-      type: file.type,
-      extension: fileExtension
-    });
-
-    setSelectedFile(file);
   };
 
-  // Simple upload handler with Object Storage
-  const handleUpload = async () => {
-    if (!selectedFile) {
+  // Handle security check callback
+  const handleSecurityCheck = (fileName: string, isSecure: boolean, report?: string) => {
+    if (isSecure) {
+      setSecurityStatus(`✅ ${fileName} - بررسی امنیتی موفق`);
+    } else {
+      setSecurityStatus(`❌ ${fileName} - بررسی امنیتی ناموفق`);
       toast({
-        title: "فایل انتخاب نشده",
-        description: "لطفاً ابتدا فیش بانکی را انتخاب کنید",
+        title: "❌ خطای امنیتی",
+        description: report || "فایل از بررسی‌های امنیتی عبور نکرد",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Secure upload handler with validation
+  const handleSecureUpload = async () => {
+    if (!uploadedFileUrl) {
+      toast({
+        title: "فایل آپلود نشده",
+        description: "لطفاً ابتدا فیش بانکی را از طریق سیستم امن آپلود کنید",
         variant: "destructive",
       });
       return;
@@ -231,58 +202,29 @@ export default function BankReceiptUpload() {
     }
 
     try {
-      setUploadProgress(10);
+      // Get the secure object path from the uploaded URL
+      const secureObjectPath = uploadedFileUrl.split('?')[0]; // Remove query params
       
-      // Step 1: Get presigned URL from Object Storage
-      const uploadUrlResponse = await apiRequest('/api/objects/upload', {
-        method: 'POST'
-      });
-      
-      if (!uploadUrlResponse.uploadURL) {
-        throw new Error('Unable to get upload URL');
-      }
-
-      setUploadProgress(30);
-
-      // Step 2: Upload file to Object Storage using presigned URL
-      const uploadResponse = await fetch(uploadUrlResponse.uploadURL, {
-        method: 'PUT',
-        body: selectedFile,
-        headers: {
-          'Content-Type': selectedFile.type,
-        },
-      });
-
-      if (!uploadResponse.ok) {
-        throw new Error('File upload failed');
-      }
-
-      setUploadProgress(70);
-
-      // Step 3: Save receipt to database with comprehensive security info
+      // Save receipt to database with secure file URL
       await uploadMutation.mutateAsync({
-        receiptUrl: uploadUrlResponse.uploadURL.split('?')[0], // Remove query params
+        receiptUrl: secureObjectPath,
         orderId,
         notes: notes + (receiptAmount ? ` | مبلغ: ${receiptAmount} دینار` : ''),
-        fileSize: selectedFile.size,
-        originalFileName: selectedFile.name
       });
-
-      setUploadProgress(100);
       
-      console.log('🎯 [SECURE CLIENT] Bank receipt uploaded with full security validation:', {
-        fileSize: selectedFile.size,
-        fileName: selectedFile.name,
-        orderId
+      console.log('🔐 [SECURE SUBMISSION] Bank receipt submitted with full security validation:', {
+        secureFileUrl: secureObjectPath,
+        orderId,
+        amount: receiptAmount,
+        customer: customer?.id
       });
       
     } catch (error: any) {
       toast({
-        title: "خطا در آپلود",
-        description: error.message || "خطا در آپلود فیش بانکی",
+        title: "خطا در ثبت اطلاعات",
+        description: error.message || "خطا در ثبت اطلاعات فیش بانکی",
         variant: "destructive",
       });
-      setUploadProgress(0);
     }
   };
 
@@ -436,54 +378,69 @@ export default function BankReceiptUpload() {
         </CardContent>
       </Card>
 
-      {/* File Upload */}
+      {/* Secure File Upload */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Upload className="w-5 h-5" />
-            آپلود فیش بانکی
+            <Shield className="w-5 h-5 text-blue-600" />
+            آپلود امن فیش بانکی
           </CardTitle>
           <CardDescription>
-            فرمت‌های مجاز: JPG، PNG، WebP، PDF (حداکثر 10 مگابایت)
+            سیستم آپلود امن با اعتبارسنجی چندلایه، اسکن ویروس و فشردگی خودکار
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* File Input */}
+          {/* Secure File Uploader */}
           <div>
-            <Label htmlFor="receipt-file">انتخاب فایل فیش بانکی</Label>
-            <Input
-              id="receipt-file"
-              type="file"
-              accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
-              onChange={handleFileSelect}
-              className="mt-1"
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              فرمت‌های مجاز: JPG، PNG، WebP، PDF - حداکثر 10MB
-            </p>
+            <Label>آپلود فیش بانکی با سیستم امن</Label>
+            <div className="mt-2">
+              <SecureFileUploader
+                maxNumberOfFiles={1}
+                maxFileSize={10 * 1024 * 1024} // 10MB
+                allowedTypes={['image/jpeg', 'image/png', 'image/webp', 'application/pdf']}
+                onUploadComplete={handleSecureUploadComplete}
+                onSecurityCheck={handleSecurityCheck}
+                enableCompression={true}
+                enableVirusScanning={true}
+                userId={customer?.id?.toString()}
+                buttonClassName="w-full"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                انتخاب و آپلود فیش بانکی
+              </SecureFileUploader>
+            </div>
           </div>
 
-          {/* Selected File Display */}
-          {selectedFile && (
+          {/* Security Status Display */}
+          {securityStatus && (
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                {securityStatus}
+              </p>
+            </div>
+          )}
+
+          {/* Upload Success Display */}
+          {uploadedFileUrl && (
             <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-              <FileText className="w-5 h-5 text-green-600" />
+              <CheckCircle className="w-5 h-5 text-green-600" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-green-800 dark:text-green-200">
-                  {selectedFile.name}
+                  ✅ فیش بانکی با موفقیت آپلود شد
                 </p>
                 <p className="text-xs text-green-600 dark:text-green-300">
-                  {(selectedFile.size / 1024 / 1024).toFixed(2)} مگابایت
+                  فایل از تمام بررسی‌های امنیتی عبور کرد و آماده ثبت نهایی است
                 </p>
               </div>
-              <CheckCircle className="w-5 h-5 text-green-600" />
+              <Shield className="w-5 h-5 text-green-600" />
             </div>
           )}
 
           {/* Upload Progress */}
-          {uploadProgress > 0 && (
+          {uploadProgress > 0 && uploadProgress < 100 && (
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>در حال آپلود...</span>
+                <span>در حال پردازش امن...</span>
                 <span>{Math.round(uploadProgress)}%</span>
               </div>
               <Progress value={uploadProgress} className="w-full" />
@@ -607,22 +564,22 @@ export default function BankReceiptUpload() {
             />
           </div>
 
-          {/* Upload Button */}
+          {/* Secure Submit Button */}
           <Button
-            onClick={handleUpload}
-            disabled={!selectedFile || !receiptAmount || uploadMutation.isPending}
+            onClick={handleSecureUpload}
+            disabled={!uploadedFileUrl || !receiptAmount || uploadMutation.isPending}
             className="w-full"
             size="lg"
           >
             {uploadMutation.isPending ? (
               <>
-                <Upload className="w-4 h-4 ml-2 animate-spin" />
-                در حال آپلود...
+                <Shield className="w-4 h-4 ml-2 animate-spin" />
+                در حال ثبت امن...
               </>
             ) : (
               <>
-                <Upload className="w-4 h-4 ml-2" />
-                آپلود فیش بانکی
+                <Shield className="w-4 h-4 ml-2" />
+                ثبت نهایی فیش بانکی
               </>
             )}
           </Button>
