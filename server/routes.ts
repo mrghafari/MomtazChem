@@ -49,7 +49,7 @@ import ProformaInvoiceConverter from "./proforma-invoice-converter";
 import { AutoInvoiceConverter } from "./auto-invoice-converter";
 import { secureObjectStorageService } from "./secureObjectStorage";
 import { fileSecurityService } from "./fileSecurityService";
-import { ObjectStorageService } from "./objectStorage";
+import { ObjectStorageService, objectStorageClient } from "./objectStorage";
 
 import { 
   vehicleTemplates, 
@@ -50135,22 +50135,22 @@ momtazchem.com
         });
       }
 
-      // Extract object path from upload URL for validation
-      let objectPath: string;
+      // Extract bucket and object name from upload URL for validation
+      let bucketName: string;
+      let objectName: string;
       try {
         if (fileUrl.includes('storage.googleapis.com')) {
           // Extract from Google Cloud Storage URL
           const urlParts = fileUrl.split('?')[0]; // Remove query params
           const pathMatch = urlParts.match(/\/([^\/]+)\/(.*)/);
           if (pathMatch) {
-            const bucketName = pathMatch[1];
-            const objectName = pathMatch[2];
-            objectPath = `/${bucketName}/${objectName}`;
+            bucketName = pathMatch[1];
+            objectName = pathMatch[2];
           } else {
             throw new Error('نمی‌توان مسیر فایل را از URL استخراج کرد');
           }
         } else {
-          objectPath = fileUrl;
+          throw new Error('فرمت URL نامعتبر است');
         }
       } catch (error) {
         return res.status(400).json({
@@ -50159,15 +50159,23 @@ momtazchem.com
         });
       }
 
-      // Download file from Object Storage for validation
+      // Download file directly from Object Storage for validation
       let fileBuffer: Buffer;
       try {
-        const objectStorageService = new ObjectStorageService();
-        const file = await objectStorageService.getObjectEntityFile(objectPath);
+        const bucket = objectStorageClient.bucket(bucketName);
+        const file = bucket.file(objectName);
+        
+        // Check if file exists
+        const [exists] = await file.exists();
+        if (!exists) {
+          throw new Error('فایل یافت نشد');
+        }
         
         // Download file content
         const [content] = await file.download();
         fileBuffer = content;
+        
+        console.log(`✅ [VALIDATION] Successfully downloaded file: ${objectName} (${fileBuffer.length} bytes)`);
       } catch (error) {
         console.error('❌ [VALIDATION] Error downloading file from storage:', error);
         return res.status(400).json({
