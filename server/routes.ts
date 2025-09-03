@@ -13039,6 +13039,564 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =============================================================================
+  // WHATSAPP API ENDPOINTS
+  // =============================================================================
+
+  // Test WhatsApp sending
+  app.post("/api/admin/whatsapp/test", requireAuth, async (req, res) => {
+    try {
+      const { phoneNumber, message } = req.body;
+      
+      if (!phoneNumber || !message) {
+        return res.status(400).json({ success: false, message: "شماره تلفن و پیام الزامی است" });
+      }
+
+      const { createWhatsAppService } = await import('./whatsapp-service');
+      const whatsAppService = await createWhatsAppService();
+      
+      const result = await whatsAppService.sendMessage({
+        to: phoneNumber,
+        message: message
+      });
+
+      if (result.success) {
+        res.json({ 
+          success: true, 
+          message: "پیام واتساپ با موفقیت ارسال شد",
+          messageId: result.messageId 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false, 
+          message: `خطا در ارسال پیام واتساپ: ${result.error}` 
+        });
+      }
+    } catch (error) {
+      console.error("Error testing WhatsApp:", error);
+      res.status(500).json({ success: false, message: "خطا در تست واتساپ" });
+    }
+  });
+
+  // Send authentication code via multiple channels
+  app.post("/api/admin/send-auth-code", requireAuth, async (req, res) => {
+    try {
+      const { customerId, channels = ['email'] } = req.body;
+      
+      if (!customerId) {
+        return res.status(400).json({ success: false, message: "شناسه مشتری الزامی است" });
+      }
+
+      // Get customer info
+      const [customer] = await pool.query(
+        'SELECT * FROM customers WHERE id = $1',
+        [customerId]
+      );
+
+      if (!customer.rows[0]) {
+        return res.status(404).json({ success: false, message: "مشتری یافت نشد" });
+      }
+
+      const customerData = customer.rows[0];
+      const authCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+      const results = [];
+
+      // Send via email
+      if (channels.includes('email') && customerData.email) {
+        try {
+          const { UniversalEmailService } = await import('./universal-email-service');
+          await UniversalEmailService.sendEmail({
+            templateNumber: '#AUTH01',
+            categoryKey: 'admin',
+            to: [customerData.email],
+            variables: {
+              customerName: `${customerData.first_name} ${customerData.last_name}`,
+              authCode: authCode,
+              expiryTime: '5 دقیقه'
+            }
+          });
+          results.push({ channel: 'email', success: true });
+        } catch (error) {
+          console.error('Error sending auth email:', error);
+          results.push({ channel: 'email', success: false, error: error.message });
+        }
+      }
+
+      // Send via SMS
+      if (channels.includes('sms') && customerData.phone) {
+        try {
+          const { createSmsService } = await import('./sms-service.js');
+          const smsService = await createSmsService();
+          
+          const result = await smsService.sendSms({
+            to: customerData.phone,
+            message: `${customerData.first_name} عزیز، کد تایید شما: ${authCode}\nاین کد در ۵ دقیقه منقضی می‌شود.\nممتازکم`
+          });
+          
+          results.push({ channel: 'sms', success: result.success, error: result.error });
+        } catch (error) {
+          console.error('Error sending auth SMS:', error);
+          results.push({ channel: 'sms', success: false, error: error.message });
+        }
+      }
+
+      // Send via WhatsApp
+      if (channels.includes('whatsapp') && customerData.whatsapp_number) {
+        try {
+          const { createWhatsAppService } = await import('./whatsapp-service');
+          const whatsAppService = await createWhatsAppService();
+          
+          const result = await whatsAppService.sendAuthenticationCode(
+            customerData.whatsapp_number,
+            authCode,
+            customerData.first_name
+          );
+          
+          results.push({ channel: 'whatsapp', success: result.success, error: result.error });
+        } catch (error) {
+          console.error('Error sending auth WhatsApp:', error);
+          results.push({ channel: 'whatsapp', success: false, error: error.message });
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: "کد احراز هویت ارسال شد",
+        authCode: authCode, // In production, don't return this
+        results: results
+      });
+    } catch (error) {
+      console.error("Error sending auth code:", error);
+      res.status(500).json({ success: false, message: "خطا در ارسال کد احراز هویت" });
+    }
+  });
+
+  // Send delivery code via multiple channels
+  app.post("/api/admin/send-delivery-code", requireAuth, async (req, res) => {
+    try {
+      const { orderNumber, channels = ['email'] } = req.body;
+      
+      if (!orderNumber) {
+        return res.status(400).json({ success: false, message: "شماره سفارش الزامی است" });
+      }
+
+      // Get order and customer info
+      const [order] = await pool.query(`
+        SELECT om.*, c.first_name, c.last_name, c.email, c.phone, c.whatsapp_number
+        FROM order_management om
+        LEFT JOIN customer_orders co ON om.customer_order_id = co.id
+        LEFT JOIN customers c ON co.customer_id = c.id
+        WHERE om.order_number = $1
+      `, [orderNumber]);
+
+      if (!order.rows[0]) {
+        return res.status(404).json({ success: false, message: "سفارش یافت نشد" });
+      }
+
+      const orderData = order.rows[0];
+      const deliveryCode = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit code
+      const results = [];
+
+      // Send via email
+      if (channels.includes('email') && orderData.email) {
+        try {
+          const { UniversalEmailService } = await import('./universal-email-service');
+          await UniversalEmailService.sendEmail({
+            templateNumber: '#DELIVERY01',
+            categoryKey: 'admin',
+            to: [orderData.email],
+            variables: {
+              customerName: `${orderData.first_name} ${orderData.last_name}`,
+              orderNumber: orderNumber,
+              deliveryCode: deliveryCode
+            }
+          });
+          results.push({ channel: 'email', success: true });
+        } catch (error) {
+          console.error('Error sending delivery email:', error);
+          results.push({ channel: 'email', success: false, error: error.message });
+        }
+      }
+
+      // Send via SMS
+      if (channels.includes('sms') && orderData.phone) {
+        try {
+          const { createSmsService } = await import('./sms-service.js');
+          const smsService = await createSmsService();
+          
+          const result = await smsService.sendSms({
+            to: orderData.phone,
+            message: `${orderData.first_name} عزیز، سفارش ${orderNumber} در راه است.\nکد تحویل: ${deliveryCode}\nاین کد را هنگام تحویل به پیک اعلام کنید.\nممتازکم`
+          });
+          
+          results.push({ channel: 'sms', success: result.success, error: result.error });
+        } catch (error) {
+          console.error('Error sending delivery SMS:', error);
+          results.push({ channel: 'sms', success: false, error: error.message });
+        }
+      }
+
+      // Send via WhatsApp
+      if (channels.includes('whatsapp') && orderData.whatsapp_number) {
+        try {
+          const { createWhatsAppService } = await import('./whatsapp-service');
+          const whatsAppService = await createWhatsAppService();
+          
+          const result = await whatsAppService.sendDeliveryCode(
+            orderData.whatsapp_number,
+            deliveryCode,
+            orderData.first_name,
+            orderNumber
+          );
+          
+          results.push({ channel: 'whatsapp', success: result.success, error: result.error });
+        } catch (error) {
+          console.error('Error sending delivery WhatsApp:', error);
+          results.push({ channel: 'whatsapp', success: false, error: error.message });
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: "کد تحویل ارسال شد",
+        deliveryCode: deliveryCode, // In production, store this in database
+        results: results
+      });
+    } catch (error) {
+      console.error("Error sending delivery code:", error);
+      res.status(500).json({ success: false, message: "خطا در ارسال کد تحویل" });
+    }
+  });
+
+  // Send password reset link via multiple channels
+  app.post("/api/admin/send-password-reset", requireAuth, async (req, res) => {
+    try {
+      const { email, channels = ['email'] } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ success: false, message: "ایمیل الزامی است" });
+      }
+
+      // Get customer info
+      const [customer] = await pool.query(
+        'SELECT * FROM customers WHERE email = $1',
+        [email]
+      );
+
+      if (!customer.rows[0]) {
+        // Don't reveal if email exists or not for security
+        return res.json({ 
+          success: true, 
+          message: "اگر ایمیل معتبر باشد، لینک بازیابی ارسال شده است"
+        });
+      }
+
+      const customerData = customer.rows[0];
+      const crypto = await import('crypto');
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetExpires = new Date(Date.now() + 3600000); // 1 hour
+      const resetLink = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`;
+      const results = [];
+
+      // Store reset token in database
+      await pool.query(`
+        INSERT INTO password_resets (email, token, expires_at, used)
+        VALUES ($1, $2, $3, false)
+        ON CONFLICT (email) DO UPDATE SET
+        token = $2, expires_at = $3, used = false
+      `, [email, resetToken, resetExpires]);
+
+      // Send via email
+      if (channels.includes('email') && customerData.email) {
+        try {
+          const { UniversalEmailService } = await import('./universal-email-service');
+          await UniversalEmailService.sendEmail({
+            templateNumber: '#RESET01',
+            categoryKey: 'admin',
+            to: [customerData.email],
+            variables: {
+              customerName: `${customerData.first_name} ${customerData.last_name}`,
+              resetLink: resetLink,
+              expiryTime: '1 ساعت'
+            }
+          });
+          results.push({ channel: 'email', success: true });
+        } catch (error) {
+          console.error('Error sending reset email:', error);
+          results.push({ channel: 'email', success: false, error: error.message });
+        }
+      }
+
+      // Send via SMS
+      if (channels.includes('sms') && customerData.phone) {
+        try {
+          const { createSmsService } = await import('./sms-service.js');
+          const smsService = await createSmsService();
+          
+          const result = await smsService.sendSms({
+            to: customerData.phone,
+            message: `${customerData.first_name} عزیز، برای بازیابی رمز عبور خود روی لینک زیر کلیک کنید:\n${resetLink}\nاین لینک در ۱ ساعت منقضی می‌شود.\nممتازکم`
+          });
+          
+          results.push({ channel: 'sms', success: result.success, error: result.error });
+        } catch (error) {
+          console.error('Error sending reset SMS:', error);
+          results.push({ channel: 'sms', success: false, error: error.message });
+        }
+      }
+
+      // Send via WhatsApp
+      if (channels.includes('whatsapp') && customerData.whatsapp_number) {
+        try {
+          const { createWhatsAppService } = await import('./whatsapp-service');
+          const whatsAppService = await createWhatsAppService();
+          
+          const result = await whatsAppService.sendPasswordResetLink(
+            customerData.whatsapp_number,
+            resetLink,
+            customerData.first_name
+          );
+          
+          results.push({ channel: 'whatsapp', success: result.success, error: result.error });
+        } catch (error) {
+          console.error('Error sending reset WhatsApp:', error);
+          results.push({ channel: 'whatsapp', success: false, error: error.message });
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: "لینک بازیابی رمز عبور ارسال شد",
+        results: results
+      });
+    } catch (error) {
+      console.error("Error sending password reset:", error);
+      res.status(500).json({ success: false, message: "خطا در ارسال لینک بازیابی" });
+    }
+  });
+
+  // =============================================================================
+  // WHATSAPP CRM MANAGEMENT
+  // =============================================================================
+
+  // Get customers with WhatsApp numbers
+  app.get("/api/admin/whatsapp/customers", requireAuth, async (req, res) => {
+    try {
+      const { page = 1, limit = 20, search = '' } = req.query;
+      const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
+
+      let query = `
+        SELECT 
+          c.id,
+          c.first_name,
+          c.last_name,
+          c.email,
+          c.phone,
+          c.whatsapp_number,
+          c.communication_preference,
+          c.created_at,
+          c.last_login,
+          COUNT(co.id) as total_orders,
+          COALESCE(SUM(co.total_amount::numeric), 0) as total_spent
+        FROM customers c
+        LEFT JOIN customer_orders co ON c.id = co.customer_id
+        WHERE c.whatsapp_number IS NOT NULL 
+          AND c.whatsapp_number != ''
+      `;
+
+      const params = [];
+      if (search) {
+        query += ` AND (
+          c.first_name ILIKE $1 OR 
+          c.last_name ILIKE $1 OR 
+          c.email ILIKE $1 OR 
+          c.whatsapp_number ILIKE $1
+        )`;
+        params.push(`%${search}%`);
+      }
+
+      query += `
+        GROUP BY c.id, c.first_name, c.last_name, c.email, c.phone, 
+                 c.whatsapp_number, c.communication_preference, c.created_at, c.last_login
+        ORDER BY c.created_at DESC
+        LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+      `;
+
+      params.push(parseInt(limit as string), offset);
+
+      const customers = await pool.query(query, params);
+
+      // Get total count
+      let countQuery = `
+        SELECT COUNT(*) as total
+        FROM customers c
+        WHERE c.whatsapp_number IS NOT NULL 
+          AND c.whatsapp_number != ''
+      `;
+
+      const countParams = [];
+      if (search) {
+        countQuery += ` AND (
+          c.first_name ILIKE $1 OR 
+          c.last_name ILIKE $1 OR 
+          c.email ILIKE $1 OR 
+          c.whatsapp_number ILIKE $1
+        )`;
+        countParams.push(`%${search}%`);
+      }
+
+      const countResult = await pool.query(countQuery, countParams);
+      const total = parseInt(countResult.rows[0].total);
+
+      res.json({
+        success: true,
+        data: {
+          customers: customers.rows,
+          pagination: {
+            page: parseInt(page as string),
+            limit: parseInt(limit as string),
+            total: total,
+            totalPages: Math.ceil(total / parseInt(limit as string))
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching WhatsApp customers:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت لیست مشتریان واتساپ" });
+    }
+  });
+
+  // Get WhatsApp statistics
+  app.get("/api/admin/whatsapp/stats", requireAuth, async (req, res) => {
+    try {
+      const stats = await pool.query(`
+        SELECT 
+          COUNT(*) as total_customers,
+          COUNT(CASE WHEN whatsapp_number IS NOT NULL AND whatsapp_number != '' THEN 1 END) as whatsapp_customers,
+          COUNT(CASE WHEN communication_preference = 'whatsapp' THEN 1 END) as whatsapp_preferred,
+          COUNT(CASE WHEN communication_preference = 'email' THEN 1 END) as email_preferred,
+          COUNT(CASE WHEN communication_preference = 'sms' THEN 1 END) as sms_preferred,
+          COUNT(CASE WHEN communication_preference = 'phone' THEN 1 END) as phone_preferred
+        FROM customers
+      `);
+
+      const recentActivity = await pool.query(`
+        SELECT 
+          DATE(created_at) as date,
+          COUNT(*) as new_customers
+        FROM customers 
+        WHERE whatsapp_number IS NOT NULL 
+          AND whatsapp_number != ''
+          AND created_at >= NOW() - INTERVAL '30 days'
+        GROUP BY DATE(created_at)
+        ORDER BY date DESC
+        LIMIT 30
+      `);
+
+      res.json({
+        success: true,
+        data: {
+          overview: stats.rows[0],
+          recentActivity: recentActivity.rows
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching WhatsApp statistics:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت آمار واتساپ" });
+    }
+  });
+
+  // Bulk WhatsApp message sending
+  app.post("/api/admin/whatsapp/bulk-send", requireAuth, async (req, res) => {
+    try {
+      const { customerIds, message, messageType = 'promotional' } = req.body;
+      
+      if (!customerIds || !Array.isArray(customerIds) || customerIds.length === 0) {
+        return res.status(400).json({ success: false, message: "لیست مشتریان الزامی است" });
+      }
+
+      if (!message) {
+        return res.status(400).json({ success: false, message: "پیام الزامی است" });
+      }
+
+      // Get customers with WhatsApp numbers
+      const placeholders = customerIds.map((_, index) => `$${index + 1}`).join(',');
+      const customers = await pool.query(`
+        SELECT id, first_name, last_name, whatsapp_number
+        FROM customers 
+        WHERE id IN (${placeholders})
+          AND whatsapp_number IS NOT NULL 
+          AND whatsapp_number != ''
+      `, customerIds);
+
+      if (customers.rows.length === 0) {
+        return res.status(400).json({ success: false, message: "هیچ مشتری با شماره واتساپ یافت نشد" });
+      }
+
+      const { createWhatsAppService } = await import('./whatsapp-service');
+      const whatsAppService = await createWhatsAppService();
+
+      const results = [];
+      const batchSize = 5; // Send in batches to avoid overwhelming the API
+
+      for (let i = 0; i < customers.rows.length; i += batchSize) {
+        const batch = customers.rows.slice(i, i + batchSize);
+        const batchPromises = batch.map(async (customer) => {
+          const personalizedMessage = message.replace(/{{customerName}}/g, customer.first_name);
+          
+          try {
+            const result = await whatsAppService.sendMessage({
+              to: customer.whatsapp_number,
+              message: personalizedMessage
+            });
+
+            return {
+              customerId: customer.id,
+              customerName: `${customer.first_name} ${customer.last_name}`,
+              whatsappNumber: customer.whatsapp_number,
+              success: result.success,
+              messageId: result.messageId,
+              error: result.error
+            };
+          } catch (error) {
+            return {
+              customerId: customer.id,
+              customerName: `${customer.first_name} ${customer.last_name}`,
+              whatsappNumber: customer.whatsapp_number,
+              success: false,
+              error: error.message
+            };
+          }
+        });
+
+        const batchResults = await Promise.all(batchPromises);
+        results.push(...batchResults);
+
+        // Add delay between batches
+        if (i + batchSize < customers.rows.length) {
+          await new Promise(resolve => setTimeout(resolve, 2000)); // 2-second delay
+        }
+      }
+
+      const successCount = results.filter(r => r.success).length;
+      const failureCount = results.filter(r => !r.success).length;
+
+      res.json({
+        success: true,
+        message: `پیام واتساپ ارسال شد. موفق: ${successCount}, ناموفق: ${failureCount}`,
+        data: {
+          total: results.length,
+          successful: successCount,
+          failed: failureCount,
+          results: results
+        }
+      });
+    } catch (error) {
+      console.error("Error sending bulk WhatsApp messages:", error);
+      res.status(500).json({ success: false, message: "خطا در ارسال پیام‌های انبوه واتساپ" });
+    }
+  });
+
   // Get SMS logs (simplified statistics)
   app.get("/api/admin/sms/logs", requireAuth, async (req, res) => {
     try {
