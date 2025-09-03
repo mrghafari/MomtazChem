@@ -126,13 +126,20 @@ export class FileSecurityService {
         errors.push(`پسوند فایل مجاز نیست: ${fileExtension}`);
       }
 
-      // Layer 4: Content pattern scanning for malicious code
-      const contentStr = fileBuffer.toString('utf8');
-      for (const pattern of this.config.blockedPatterns) {
-        if (pattern.test(contentStr)) {
-          errors.push('فایل حاوی محتوای مشکوک است');
-          break;
+      // Layer 4: Content pattern scanning (only for non-image files to avoid false positives)
+      const detectedMime = detectedType?.mime;
+      const isImageFile = detectedMime?.startsWith('image/') || ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(detectedMime || '');
+      
+      if (!isImageFile) {
+        const contentStr = fileBuffer.toString('utf8');
+        for (const pattern of this.config.blockedPatterns) {
+          if (pattern.test(contentStr)) {
+            errors.push('فایل حاوی محتوای مشکوک است');
+            break;
+          }
         }
+      } else {
+        console.log('🖼️ [SECURITY] Skipping pattern matching for image file to avoid false positives');
       }
 
       // Layer 5: Virus scanning (if available)
