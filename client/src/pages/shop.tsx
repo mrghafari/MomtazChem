@@ -1188,7 +1188,7 @@ const Shop = () => {
             {/* Products Grid */}
             <div className={`${
               viewMode === "grid" 
-                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
+                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" 
                 : "flex flex-col gap-4"
             }`}>
               {productsLoading ? (
@@ -1208,7 +1208,7 @@ const Shop = () => {
                 </div>
               ) : (
                 filteredProducts.map((product: any) => (
-                  <Card key={product.id} className={viewMode === "list" ? "flex" : ""}>
+                  <Card key={product.id} className={`${viewMode === "list" ? "flex" : ""} ${viewMode === "grid" ? "h-full overflow-hidden" : ""}`}>
                     {viewMode === "grid" ? (
                       <>
                         <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden relative group cursor-pointer">
@@ -1398,30 +1398,28 @@ const Shop = () => {
                             </TooltipProvider>
                           </div>
                         </div>
-                        <CardContent className="p-4">
+                        <CardContent className="p-3 sm:p-4 flex flex-col h-full">
                           <div className="mb-2">
-                            <h3 className="font-semibold text-lg">{product.name}</h3>
+                            <h3 className="font-semibold text-base sm:text-lg line-clamp-2">{product.name}</h3>
                           </div>
                           
-                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                          <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-1">
                             {product.shortDescription || product.description}
                           </p>
                           
-                          <div className="flex items-center justify-between mb-3">
-                            <div>
-                              <span className="text-2xl font-bold text-green-600">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+                            <div className="min-w-0">
+                              <span className="text-xl sm:text-2xl font-bold text-green-600 block">
                                 {product.price && !isNaN(parseFloat(product.price)) ? formatIQDAmount(parseFloat(product.price)) : '0 IQD'}
                               </span>
-                              <span className="text-sm text-gray-500 ml-1">
+                              <span className="text-xs sm:text-sm text-gray-500">
                                 / {product.priceUnit || 'unit'}
                               </span>
                             </div>
-                            <div className="flex flex-col gap-1">
-                              <Badge variant={product.inStock ? "secondary" : "destructive"}>
+                            <div className="flex-shrink-0">
+                              <Badge variant={product.inStock ? "secondary" : "destructive"} className="text-xs">
                                 {product.inStock ? "In Stock" : "Out of Stock"}
                               </Badge>
-                              
-
                             </div>
                           </div>
                           
@@ -1444,7 +1442,7 @@ const Shop = () => {
 
 
                           {/* Modern Discount Card */}
-                          <div className="mb-3 h-24 overflow-hidden">
+                          <div className="mb-3 h-20 sm:h-24 overflow-hidden">
                             {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 ? (
                               <div className="relative h-full bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 rounded-2xl overflow-hidden shadow-md border border-purple-200">
                                 {/* Animated Background */}
@@ -1558,7 +1556,7 @@ const Shop = () => {
 
 
 
-                          <div className="space-y-2">
+                          <div className="space-y-2 mt-auto">
                             {/* Quantity Controls - Always show */}
                             <div className="flex items-center justify-center gap-2">
                               <Button
@@ -1566,8 +1564,9 @@ const Shop = () => {
                                 variant="outline"
                                 onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) - 1)}
                                 disabled={getProductQuantity(product.id) <= 1}
+                                className="h-8 w-8 p-0"
                               >
-                                <Minus className="w-4 h-4" />
+                                <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
                               </Button>
                               <input
                                 type="number"
@@ -1575,30 +1574,32 @@ const Shop = () => {
                                 max={Math.max(1, (product.stockQuantity || 0) - (cart[product.id] || 0))}
                                 value={getProductQuantity(product.id)}
                                 onChange={(e) => setProductQuantity(product.id, parseInt(e.target.value) || 1)}
-                                className="w-16 text-center border rounded px-2 py-1 font-medium"
+                                className="w-12 sm:w-16 text-center border rounded px-1 py-1 font-medium text-sm"
                               />
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
                                 disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity || (cart[product.id] || 0) + getProductQuantity(product.id) >= product.stockQuantity}
+                                className="h-8 w-8 p-0"
                               >
-                                <Plus className="w-4 h-4" />
+                                <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
                               </Button>
                             </div>
                               {/* Product Catalog and MSDS Buttons - Horizontal Layout */}
                               {(product.showCatalogToCustomers && product.pdfCatalogUrl) || (product.showMsdsToCustomers && product.msdsUrl) ? (
-                                <div className="grid grid-cols-2 gap-2 mb-2 p-2 bg-gray-50 rounded-lg border">
+                                <div className="grid grid-cols-2 gap-1 sm:gap-2 mb-2 p-1 sm:p-2 bg-gray-50 rounded-lg border">
                                   {/* Product Catalog Button */}
                                   {product.showCatalogToCustomers && product.pdfCatalogUrl && (
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      className="text-xs h-8 text-green-600 border-green-600 hover:bg-green-50"
+                                      className="text-xs h-7 sm:h-8 text-green-600 border-green-600 hover:bg-green-50 px-2"
                                       onClick={() => window.open(product.pdfCatalogUrl, '_blank')}
                                     >
                                       <Eye className="w-3 h-3 mr-1" />
-                                      کاتالوگ
+                                      <span className="hidden sm:inline">کاتالوگ</span>
+                                      <span className="sm:hidden">کاتالوگ</span>
                                     </Button>
                                   )}
 
@@ -1607,11 +1608,12 @@ const Shop = () => {
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      className="text-xs h-8 text-blue-600 border-blue-600 hover:bg-blue-50"
+                                      className="text-xs h-7 sm:h-8 text-blue-600 border-blue-600 hover:bg-blue-50 px-2"
                                       onClick={() => window.open(product.msdsUrl, '_blank')}
                                     >
                                       <FileText className="w-3 h-3 mr-1" />
-                                      MSDS
+                                      <span className="hidden sm:inline">MSDS</span>
+                                      <span className="sm:hidden">MSDS</span>
                                     </Button>
                                   )}
                                 </div>
@@ -1619,19 +1621,21 @@ const Shop = () => {
                               
                             {/* Add to Cart Button - Always show */}
                             <Button
-                              className="w-full"
+                              className="w-full h-10 text-sm"
                               onClick={() => addToCart(product.id)}
                               disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
                             >
-                              <ShoppingCart className="w-4 h-4 mr-2" />
-                              {!product.inStock || product.stockQuantity <= 0 ? 'موجود نیست' : cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
+                              <ShoppingCart className="w-4 h-4 mr-2 flex-shrink-0" />
+                              <span className="truncate">
+                                {!product.inStock || product.stockQuantity <= 0 ? 'موجود نیست' : cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
+                              </span>
                             </Button>
                           </div>
                         </CardContent>
                       </>
                     ) : (
-                      <div className="flex">
-                        <div className="w-48 h-48 bg-gray-100 flex-shrink-0 relative group cursor-pointer">
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="w-full h-48 sm:w-48 sm:h-48 bg-gray-100 flex-shrink-0 relative group cursor-pointer">
                           {(() => {
                             // Use expanded images (minimum 3 images)
                             const images = getImages(product);
