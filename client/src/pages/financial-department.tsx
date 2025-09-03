@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useForm } from "react-hook-form";
-import { Eye, CheckCircle, XCircle, Clock, DollarSign, FileText, LogOut, User, ZoomIn, ZoomOut, RotateCw, Move, X, Calculator, Wallet } from "lucide-react";
+import { Eye, CheckCircle, XCircle, Clock, DollarSign, FileText, LogOut, User, ZoomIn, ZoomOut, RotateCw, Move, X, Calculator, Wallet, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
@@ -72,6 +72,7 @@ export default function FinancialDepartment() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState<string>("");
+  const [selectedFileMimeType, setSelectedFileMimeType] = useState<string>("");
   const [user, setUser] = useState<FinancialUser | null>(null);
   const [, setLocation] = useLocation();
   
@@ -217,8 +218,9 @@ export default function FinancialDepartment() {
   };
 
   // Function to open image modal
-  const openImageModal = (imageUrl: string) => {
+  const openImageModal = (imageUrl: string, mimeType?: string) => {
     setSelectedImageUrl(imageUrl);
+    setSelectedFileMimeType(mimeType || "");
     setImageModalOpen(true);
     // Reset zoom and pan when opening new image
     setZoomLevel(1);
@@ -271,6 +273,21 @@ export default function FinancialDepartment() {
       return mimeType.startsWith('image/');
     }
     return /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+  };
+
+  // Function to determine if URL is a PDF
+  const isPdfUrl = (url: string, mimeType?: string) => {
+    if (mimeType) {
+      return mimeType === 'application/pdf';
+    }
+    return /\.pdf$/i.test(url);
+  };
+
+  // Function to get file type for display
+  const getFileType = (url: string, mimeType?: string) => {
+    if (isImageUrl(url, mimeType)) return 'image';
+    if (isPdfUrl(url, mimeType)) return 'pdf';
+    return 'unknown';
   };
 
   if (!user) {
@@ -436,10 +453,12 @@ export default function FinancialDepartment() {
                             <div 
                               className="w-8 h-8 rounded border border-gray-200 cursor-pointer hover:border-blue-400 transition-colors overflow-hidden flex items-center justify-center bg-gray-50"
                               onClick={() => {
-                                if (isImageUrl(order.receipt?.url || order.paymentReceiptUrl!, order.receipt?.mimeType)) {
-                                  openImageModal(order.receipt?.url || order.paymentReceiptUrl!);
+                                const fileUrl = order.receipt?.url || order.paymentReceiptUrl!;
+                                const mimeType = order.receipt?.mimeType;
+                                if (isImageUrl(fileUrl, mimeType) || isPdfUrl(fileUrl, mimeType)) {
+                                  openImageModal(fileUrl, mimeType);
                                 } else {
-                                  window.open(order.receipt?.url || order.paymentReceiptUrl!, '_blank');
+                                  window.open(fileUrl, '_blank');
                                 }
                               }}
                             >
@@ -573,7 +592,7 @@ export default function FinancialDepartment() {
                         {isImageUrl(selectedOrder.receipt?.url || selectedOrder.paymentReceiptUrl!, selectedOrder.receipt?.mimeType) ? (
                           <div 
                             className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:border-blue-400 transition-colors"
-                            onClick={() => openImageModal(selectedOrder.receipt?.url || selectedOrder.paymentReceiptUrl!)}
+                            onClick={() => openImageModal(selectedOrder.receipt?.url || selectedOrder.paymentReceiptUrl!, selectedOrder.receipt?.mimeType)}
                           >
                             <img 
                               src={selectedOrder.receipt?.url || selectedOrder.paymentReceiptUrl!}
@@ -755,25 +774,57 @@ export default function FinancialDepartment() {
               style={{ height: 'calc(95vh - 80px)' }}
             >
               {selectedImageUrl && (
-                <div
-                  className="w-full h-full flex items-center justify-center cursor-move select-none"
-                  onMouseDown={handleMouseDown}
-                  onMouseMove={handleMouseMove}
-                  onMouseUp={handleMouseUp}
-                  onMouseLeave={handleMouseUp}
-                  style={{ cursor: isDragging ? 'grabbing' : (zoomLevel > 1 ? 'grab' : 'default') }}
-                >
-                  <img
-                    src={selectedImageUrl}
-                    alt="فیش پرداخت"
-                    className="max-w-none transition-transform duration-200"
-                    style={{
-                      transform: `scale(${zoomLevel}) rotate(${rotation}deg) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
-                      transformOrigin: 'center center'
-                    }}
-                    draggable={false}
-                  />
-                </div>
+                <>
+                  {getFileType(selectedImageUrl, selectedFileMimeType) === 'image' ? (
+                    <div
+                      className="w-full h-full flex items-center justify-center cursor-move select-none"
+                      onMouseDown={handleMouseDown}
+                      onMouseMove={handleMouseMove}
+                      onMouseUp={handleMouseUp}
+                      onMouseLeave={handleMouseUp}
+                      style={{ cursor: isDragging ? 'grabbing' : (zoomLevel > 1 ? 'grab' : 'default') }}
+                    >
+                      <img
+                        src={selectedImageUrl}
+                        alt="فیش پرداخت"
+                        className="max-w-none transition-transform duration-200"
+                        style={{
+                          transform: `scale(${zoomLevel}) rotate(${rotation}deg) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
+                          transformOrigin: 'center center'
+                        }}
+                        draggable={false}
+                      />
+                    </div>
+                  ) : getFileType(selectedImageUrl, selectedFileMimeType) === 'pdf' ? (
+                    <div className="w-full h-full">
+                      <iframe
+                        src={selectedImageUrl}
+                        className="w-full h-full border-0"
+                        title="فیش پرداخت PDF"
+                        style={{
+                          transform: `scale(${zoomLevel}) rotate(${rotation}deg)`,
+                          transformOrigin: 'center center',
+                          transition: 'transform 0.2s ease'
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center p-8">
+                        <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <p className="text-lg text-gray-600 mb-4">نوع فایل پشتیبانی نمی‌شود</p>
+                        <Button
+                          variant="outline"
+                          onClick={() => window.open(selectedImageUrl, '_blank')}
+                          className="flex items-center gap-2"
+                        >
+                          <Eye className="w-4 h-4" />
+                          باز کردن در تب جدید
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
               
               {/* Zoom hint */}

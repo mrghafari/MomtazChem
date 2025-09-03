@@ -75,6 +75,7 @@ function FinanceOrders() {
   const [receiptAmount, setReceiptAmount] = useState("");
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState("");
+  const [selectedFileMimeType, setSelectedFileMimeType] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   
   // Enhanced image viewer states
@@ -422,12 +423,36 @@ function FinanceOrders() {
     }
     
     setSelectedImageUrl(processedUrl);
+    setSelectedFileMimeType("");
     setImageModalOpen(true);
     // Reset zoom and pan when opening new image
     setZoomLevel(1);
     setRotation(0);
     setPanPosition({ x: 0, y: 0 });
   }, [toast]);
+
+  // Function to determine if URL is an image
+  const isImageUrl = (url: string, mimeType?: string) => {
+    if (mimeType) {
+      return mimeType.startsWith('image/');
+    }
+    return /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+  };
+
+  // Function to determine if URL is a PDF
+  const isPdfUrl = (url: string, mimeType?: string) => {
+    if (mimeType) {
+      return mimeType === 'application/pdf';
+    }
+    return /\.pdf$/i.test(url);
+  };
+
+  // Function to get file type for display
+  const getFileType = (url: string, mimeType?: string) => {
+    if (isImageUrl(url, mimeType)) return 'image';
+    if (isPdfUrl(url, mimeType)) return 'pdf';
+    return 'unknown';
+  };
 
   // Enhanced image viewer functions
   const handleZoomIn = useCallback(() => {
@@ -1072,29 +1097,61 @@ function FinanceOrders() {
             style={{ height: 'calc(95vh - 80px)' }}
           >
             {selectedImageUrl && (
-              <div
-                className="w-full h-full flex items-center justify-center cursor-move select-none"
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                style={{ cursor: isDragging ? 'grabbing' : (zoomLevel > 1 ? 'grab' : 'default') }}
-              >
-                <img
-                  src={selectedImageUrl}
-                  alt="فیش پرداخت"
-                  className="max-w-none transition-transform duration-200"
-                  style={{
-                    transform: `scale(${zoomLevel}) rotate(${rotation}deg) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
-                    transformOrigin: 'center center'
-                  }}
-                  draggable={false}
-                  onError={(e) => {
-                    console.error('❌ [IMAGE MODAL] Failed to load image:', selectedImageUrl);
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              </div>
+              <>
+                {getFileType(selectedImageUrl, selectedFileMimeType) === 'image' ? (
+                  <div
+                    className="w-full h-full flex items-center justify-center cursor-move select-none"
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
+                    style={{ cursor: isDragging ? 'grabbing' : (zoomLevel > 1 ? 'grab' : 'default') }}
+                  >
+                    <img
+                      src={selectedImageUrl}
+                      alt="فیش پرداخت"
+                      className="max-w-none transition-transform duration-200"
+                      style={{
+                        transform: `scale(${zoomLevel}) rotate(${rotation}deg) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
+                        transformOrigin: 'center center'
+                      }}
+                      draggable={false}
+                      onError={(e) => {
+                        console.error('❌ [IMAGE MODAL] Failed to load image:', selectedImageUrl);
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                ) : getFileType(selectedImageUrl, selectedFileMimeType) === 'pdf' ? (
+                  <div className="w-full h-full">
+                    <iframe
+                      src={selectedImageUrl}
+                      className="w-full h-full border-0"
+                      title="فیش پرداخت PDF"
+                      style={{
+                        transform: `scale(${zoomLevel}) rotate(${rotation}deg)`,
+                        transformOrigin: 'center center',
+                        transition: 'transform 0.2s ease'
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="text-center p-8">
+                      <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-lg text-gray-600 mb-4">نوع فایل پشتیبانی نمی‌شود</p>
+                      <Button
+                        variant="outline"
+                        onClick={() => window.open(selectedImageUrl, '_blank')}
+                        className="flex items-center gap-2"
+                      >
+                        <Eye className="w-4 h-4" />
+                        باز کردن در تب جدید
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
             
             {/* Zoom hint */}
