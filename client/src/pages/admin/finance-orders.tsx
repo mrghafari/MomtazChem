@@ -652,8 +652,8 @@ function FinanceOrders() {
                 جزئیات
               </Button>
             )}
-            {order.receipt?.url && (
-              <Button size="sm" variant="outline" onClick={() => openImageModal(order.receipt.url)}>
+            {(order.receipt?.url || order.paymentReceiptUrl) && (
+              <Button size="sm" variant="outline" onClick={() => openImageModal(order.receipt?.url || order.paymentReceiptUrl)}>
                 <FileText className="w-4 h-4 mr-1" />
                 رسید
               </Button>
