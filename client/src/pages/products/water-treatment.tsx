@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { ProductInquiryForm } from "@/components/ui/product-inquiry-form";
+import { RandomCategoryProducts } from "@/components/RandomCategoryProducts";
 
 import type { ShowcaseProduct } from "@shared/showcase-schema";
 import waterTreatmentBg from "@assets/download_1749877891276.jpeg";
@@ -397,6 +398,12 @@ const WaterTreatment = () => {
           </div>
         </div>
       </section>
+
+      {/* Random Products from Shop */}
+      <RandomCategoryProducts 
+        category="water-treatment" 
+        title="محصولات پیشنهادی تصفیه آب از فروشگاه"
+      />
 
       {/* Live Chat Support */}
 

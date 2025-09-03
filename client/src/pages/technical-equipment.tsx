@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { Microscope, Settings, Gauge, Zap, GitMerge, Filter, Thermometer, Shield } from 'lucide-react';
+import { RandomCategoryProducts } from '@/components/RandomCategoryProducts';
 
 interface ContentItem {
   id: number;
@@ -181,6 +182,12 @@ export default function TechnicalEquipmentPage() {
           </div>
         </div>
       </div>
+
+      {/* Random Products from Shop */}
+      <RandomCategoryProducts 
+        category="technical-equipment" 
+        title="محصولات پیشنهادی تجهیزات فنی از فروشگاه"
+      />
 
       {/* Call to Action */}
       <div className="bg-gradient-to-r from-slate-700 to-blue-700 py-16">

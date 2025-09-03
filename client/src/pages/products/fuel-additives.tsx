@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { ProductInquiryForm } from "@/components/ui/product-inquiry-form";
+import { RandomCategoryProducts } from "@/components/RandomCategoryProducts";
 
 import type { ShowcaseProduct } from "@shared/showcase-schema";
 
@@ -384,6 +385,12 @@ const FuelAdditives = () => {
           </div>
         </div>
       </section>
+
+      {/* Random Products from Shop */}
+      <RandomCategoryProducts 
+        category="fuel-additives" 
+        title="محصولات پیشنهادی افزودنی سوخت از فروشگاه"
+      />
 
       {/* Live Chat Support */}
 

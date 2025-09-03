@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { Palette, Droplets, Car, Building, Shield, Brush } from 'lucide-react';
+import { RandomCategoryProducts } from '@/components/RandomCategoryProducts';
 
 interface ContentItem {
   id: number;
@@ -169,6 +170,12 @@ export default function PaintSolventsPage() {
           </div>
         </div>
       </div>
+
+      {/* Random Products from Shop */}
+      <RandomCategoryProducts 
+        category="paint-solvents" 
+        title="محصولات پیشنهادی رنگ و حلال از فروشگاه"
+      />
 
       {/* Call to Action */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-700 py-16">

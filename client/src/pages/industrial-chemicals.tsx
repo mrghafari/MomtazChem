@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { Factory, Beaker, Shield, Cog, Zap, Cpu } from 'lucide-react';
+import { RandomCategoryProducts } from '@/components/RandomCategoryProducts';
 
 interface ContentItem {
   id: number;
@@ -168,6 +169,12 @@ export default function IndustrialChemicalsPage() {
           </div>
         </div>
       </div>
+
+      {/* Random Products from Shop */}
+      <RandomCategoryProducts 
+        category="industrial-chemicals" 
+        title="محصولات پیشنهادی شیمیایی صنعتی از فروشگاه"
+      />
 
       {/* Call to Action */}
       <div className="bg-gradient-to-r from-emerald-600 to-blue-700 py-16">
