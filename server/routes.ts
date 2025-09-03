@@ -5399,23 +5399,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const labelConfigs = {
       small: { 
         width: '40mm', height: '28mm', padding: '1mm',
-        nameFont: '8px', skuFont: '6px', priceFont: '6px', websiteFont: '6px',
-        barcodeFont: '10px', nameMaxLength: 15, skuMaxLength: 10
+        nameFont: '12px', skuFont: '9px', priceFont: '9px', websiteFont: '8px',
+        barcodeFont: '14px', nameMaxLength: 15, skuMaxLength: 10
       },
       standard: { 
         width: '56mm', height: '36mm', padding: '2mm',
-        nameFont: '10px', skuFont: '8px', priceFont: '8px', websiteFont: '8px',
-        barcodeFont: '12px', nameMaxLength: 25, skuMaxLength: 15
+        nameFont: '16px', skuFont: '12px', priceFont: '12px', websiteFont: '10px',
+        barcodeFont: '16px', nameMaxLength: 25, skuMaxLength: 15
       },
       large: { 
         width: '72mm', height: '44mm', padding: '3mm',
-        nameFont: '14px', skuFont: '10px', priceFont: '10px', websiteFont: '10px',
-        barcodeFont: '16px', nameMaxLength: 35, skuMaxLength: 18
+        nameFont: '20px', skuFont: '14px', priceFont: '14px', websiteFont: '12px',
+        barcodeFont: '20px', nameMaxLength: 35, skuMaxLength: 18
       },
       roll: { 
         width: '48mm', height: '20mm', padding: '1mm',
-        nameFont: '7px', skuFont: '6px', priceFont: '6px', websiteFont: '6px',
-        barcodeFont: '8px', nameMaxLength: 18, skuMaxLength: 12
+        nameFont: '10px', skuFont: '8px', priceFont: '8px', websiteFont: '7px',
+        barcodeFont: '12px', nameMaxLength: 18, skuMaxLength: 12
       }
     };
     
@@ -5453,7 +5453,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         background: white;
         box-sizing: border-box;
         page-break-inside: avoid;
-        font-family: Arial, sans-serif;
+        font-family: 'Tahoma', 'Vazir', 'Segoe UI', Arial, sans-serif;
         overflow: hidden;
         position: relative;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -5493,7 +5493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               <span class="sku-text" style="
                 font-size: ${config.skuFont}; 
                 color: #333; 
-                font-family: 'Courier New', monospace;
+                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
                 font-weight: 500;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -5573,7 +5573,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           body { 
             margin: 0; 
             padding: 8mm; 
-            font-family: Arial, sans-serif;
+            font-family: 'Tahoma', 'Vazir', 'Segoe UI', Arial, sans-serif;
             font-size: 10px;
             background: white;
             color: black;
@@ -5768,7 +5768,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   body { 
                     margin: 0; 
                     padding: 20px; 
-                    font-family: Arial, sans-serif;
+                    font-family: 'Tahoma', 'Vazir', 'Segoe UI', Arial, sans-serif;
                     background: white;
                     width: 800px;
                     height: auto;
