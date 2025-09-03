@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Edit2, Trash2, Search, BarChart3, Globe, Link, Settings, Languages, Target, Bot, Wand2, Brain, Lightbulb, Zap, FileText, Loader2, Sparkles, Cpu, Key } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, BarChart3, Globe, Link, Settings, Languages, Target, Bot, Wand2, Brain, Lightbulb, Zap, FileText, Loader2, Sparkles, Cpu } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -144,11 +144,6 @@ export default function SeoManagement() {
   const [aiLanguage, setAiLanguage] = useState("");
   const [selectedAiProvider, setSelectedAiProvider] = useState("openai");
   
-  // API Settings states
-  const [openaiApiKey, setOpenaiApiKey] = useState("");
-  const [deepseekApiKey, setDeepseekApiKey] = useState("");
-  const [showOpenaiKey, setShowOpenaiKey] = useState(false);
-  const [showDeepseekKey, setShowDeepseekKey] = useState(false);
   const [aiTargetKeywords, setAiTargetKeywords] = useState("");
   const [aiBusinessContext, setAiBusinessContext] = useState("");
   const [aiSeedKeywords, setAiSeedKeywords] = useState("");
@@ -577,7 +572,7 @@ export default function SeoManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             SEO Settings
@@ -585,10 +580,6 @@ export default function SeoManagement() {
           <TabsTrigger value="ai-seo" className="flex items-center gap-2">
             <Bot className="h-4 w-4" />
             AI SEO
-          </TabsTrigger>
-          <TabsTrigger value="api-config" className="flex items-center gap-2">
-            <Key className="h-4 w-4" />
-            تنظیمات API
           </TabsTrigger>
           <TabsTrigger value="languages" className="flex items-center gap-2">
             <Languages className="h-4 w-4" />
@@ -938,186 +929,6 @@ export default function SeoManagement() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="api-config" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Key className="h-5 w-5 text-green-600" />
-                تنظیمات کلیدهای API هوش مصنوعی
-              </CardTitle>
-              <CardDescription>
-                مدیریت کلیدهای OpenAI و DeepSeek برای سرویس‌های SEO
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* OpenAI API Settings */}
-              <div className="border rounded-lg p-4 space-y-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Bot className="h-5 w-5 text-blue-600" />
-                  <h3 className="text-lg font-semibold">OpenAI GPT-5</h3>
-                  <Badge variant="secondary">محتوا و تحلیل</Badge>
-                </div>
-                
-                <div className="space-y-3">
-                  <Label htmlFor="openai-key">کلید API OpenAI:</Label>
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <Input
-                        id="openai-key"
-                        type={showOpenaiKey ? "text" : "password"}
-                        placeholder="sk-..."
-                        value={openaiApiKey}
-                        onChange={(e) => setOpenaiApiKey(e.target.value)}
-                        className="pr-10"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3"
-                        onClick={() => setShowOpenaiKey(!showOpenaiKey)}
-                      >
-                        {showOpenaiKey ? "🙈" : "👁️"}
-                      </Button>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => {
-                        if (openaiApiKey.trim()) {
-                          // Test OpenAI API key
-                          toast({
-                            title: "🔄 در حال تست...",
-                            description: "کلید OpenAI در حال بررسی است"
-                          });
-                          
-                          // Simulate API test - backend implementation needed
-                          setTimeout(() => {
-                            toast({
-                              title: "✅ کلید معتبر است",
-                              description: "کلید OpenAI با موفقیت تست شد"
-                            });
-                          }, 2000);
-                        }
-                      }}
-                      disabled={!openaiApiKey.trim()}
-                    >
-                      <Zap className="h-4 w-4 mr-2" />
-                      تست
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* DeepSeek API Settings */}
-              <div className="border rounded-lg p-4 space-y-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Brain className="h-5 w-5 text-purple-600" />
-                  <h3 className="text-lg font-semibold">DeepSeek AI</h3>
-                  <Badge variant="secondary">تحقیق و تجزیه‌وتحلیل</Badge>
-                </div>
-                
-                <div className="space-y-3">
-                  <Label htmlFor="deepseek-key">کلید API DeepSeek:</Label>
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <Input
-                        id="deepseek-key"
-                        type={showDeepseekKey ? "text" : "password"}
-                        placeholder="sk-..."
-                        value={deepseekApiKey}
-                        onChange={(e) => setDeepseekApiKey(e.target.value)}
-                        className="pr-10"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3"
-                        onClick={() => setShowDeepseekKey(!showDeepseekKey)}
-                      >
-                        {showDeepseekKey ? "🙈" : "👁️"}
-                      </Button>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => {
-                        if (deepseekApiKey.trim()) {
-                          // Test DeepSeek API key
-                          toast({
-                            title: "🔄 در حال تست...",
-                            description: "کلید DeepSeek در حال بررسی است"
-                          });
-                          
-                          // Simulate API test - backend implementation needed
-                          setTimeout(() => {
-                            toast({
-                              title: "✅ کلید معتبر است", 
-                              description: "کلید DeepSeek با موفقیت تست شد"
-                            });
-                          }, 2000);
-                        }
-                      }}
-                      disabled={!deepseekApiKey.trim()}
-                    >
-                      <Zap className="h-4 w-4 mr-2" />
-                      تست
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Save Settings */}
-              <div className="flex justify-end pt-4 border-t">
-                <div className="flex gap-3">
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      setOpenaiApiKey('');
-                      setDeepseekApiKey('');
-                      toast({
-                        title: "کلیدها پاک شدند",
-                        description: "تمام کلیدهای API پاک شدند"
-                      });
-                    }}
-                  >
-                    پاک کردن همه
-                  </Button>
-                  <Button 
-                    onClick={() => {
-                      // Save API keys
-                      const keys: any = {};
-                      if (openaiApiKey.trim()) keys.openaiApiKey = openaiApiKey.trim();
-                      if (deepseekApiKey.trim()) keys.deepseekApiKey = deepseekApiKey.trim();
-                      
-                      if (Object.keys(keys).length > 0) {
-                        // For now, just show success toast - backend implementation needed
-                        toast({
-                          title: "✅ کلیدها ذخیره شدند",
-                          description: "تنظیمات API با موفقیت ذخیره شد"
-                        });
-                      }
-                    }}
-                    disabled={!openaiApiKey.trim() && !deepseekApiKey.trim()}
-                  >
-                    <Settings className="h-4 w-4 mr-2" />
-                    ذخیره تنظیمات
-                  </Button>
-                </div>
-              </div>
-
-              {/* API Usage Information */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
-                <h4 className="font-semibold text-blue-900 mb-2">ℹ️ راهنمای استفاده</h4>
-                <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• <strong>OpenAI GPT-5:</strong> بهترین انتخاب برای تولید محتوا و تحلیل‌های کیفی</li>
-                  <li>• <strong>DeepSeek AI:</strong> مناسب برای تحقیق کلیدواژه و تحلیل‌های عمیق</li>
-                  <li>• <strong>امنیت:</strong> کلیدها به‌صورت رمزگذاری شده در سرور ذخیره می‌شوند</li>
-                  <li>• <strong>هزینه:</strong> هر API بر اساس استفاده محاسبه می‌شود</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="keywords" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
