@@ -49,6 +49,7 @@ import ProformaInvoiceConverter from "./proforma-invoice-converter";
 import { AutoInvoiceConverter } from "./auto-invoice-converter";
 import { secureObjectStorageService } from "./secureObjectStorage";
 import { fileSecurityService } from "./fileSecurityService";
+import { ObjectStorageService } from "./objectStorage";
 
 import { 
   vehicleTemplates, 
@@ -50134,16 +50135,46 @@ momtazchem.com
         });
       }
 
-      // Download file for validation
-      const fileResponse = await fetch(fileUrl);
-      if (!fileResponse.ok) {
+      // Extract object path from upload URL for validation
+      let objectPath: string;
+      try {
+        if (fileUrl.includes('storage.googleapis.com')) {
+          // Extract from Google Cloud Storage URL
+          const urlParts = fileUrl.split('?')[0]; // Remove query params
+          const pathMatch = urlParts.match(/\/([^\/]+)\/(.*)/);
+          if (pathMatch) {
+            const bucketName = pathMatch[1];
+            const objectName = pathMatch[2];
+            objectPath = `/${bucketName}/${objectName}`;
+          } else {
+            throw new Error('نمی‌توان مسیر فایل را از URL استخراج کرد');
+          }
+        } else {
+          objectPath = fileUrl;
+        }
+      } catch (error) {
         return res.status(400).json({
           success: false,
-          errors: ['امکان دانلود فایل برای اعتبارسنجی وجود ندارد']
+          errors: ['فرمت URL فایل نامعتبر است']
         });
       }
 
-      const fileBuffer = Buffer.from(await fileResponse.arrayBuffer());
+      // Download file from Object Storage for validation
+      let fileBuffer: Buffer;
+      try {
+        const objectStorageService = new ObjectStorageService();
+        const file = await objectStorageService.getObjectEntityFile(objectPath);
+        
+        // Download file content
+        const [content] = await file.download();
+        fileBuffer = content;
+      } catch (error) {
+        console.error('❌ [VALIDATION] Error downloading file from storage:', error);
+        return res.status(400).json({
+          success: false,
+          errors: ['امکان دانلود فایل از ذخیره‌ساز برای اعتبارسنجی وجود ندارد']
+        });
+      }
 
       // Use appropriate security service based on upload type
       let validationResult;
