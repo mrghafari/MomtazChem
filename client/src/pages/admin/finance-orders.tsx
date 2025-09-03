@@ -389,7 +389,7 @@ function FinanceOrders() {
   }
 
   // Force refresh function that completely clears all finance cache
-  const forceRefreshFinanceOrders = async () => {
+  const forceRefreshFinanceOrders = useCallback(async () => {
     // Clear all finance cache first
     await queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
     await queryClient.removeQueries({ queryKey: ['/api/financial/orders'] });
@@ -402,7 +402,7 @@ function FinanceOrders() {
       title: "🔄 به‌روزرسانی شد",
       description: "تمام اطلاعات مالی از سرور بازیابی شد",
     });
-  };
+  }, [queryClient, refetch, refetchApproved, toast]);
 
 
 
@@ -468,7 +468,7 @@ function FinanceOrders() {
   );
 
   // Fetch order details function for admin users
-  const fetchOrderDetails = async (orderNumber: string) => {
+  const fetchOrderDetails = useCallback(async (orderNumber: string) => {
     try {
       // For admin users, we need to find the order by orderNumber first, then get details by ID
       const findOrderResponse = await fetch(`/api/admin/orders/find-by-number/${orderNumber}`, {
@@ -512,7 +512,7 @@ function FinanceOrders() {
         description: "امکان دریافت جزئیات سفارش وجود ندارد"
       });
     }
-  };
+  }, [toast]);
 
   // Auto-refresh controlled by global settings
   useEffect(() => {
@@ -629,7 +629,7 @@ function FinanceOrders() {
   });
 
   // Load tracking codes for order
-  const loadTrackingCodes = async (orderId?: number) => {
+  const loadTrackingCodes = useCallback(async (orderId?: number) => {
     if (!orderId) return;
     
     try {
@@ -638,16 +638,16 @@ function FinanceOrders() {
     } catch (error) {
       console.error("Error loading tracking codes:", error);
     }
-  };
+  }, []);
 
   // Handle tracking modal open
-  const handleTrackingModal = (order: OrderManagement) => {
+  const handleTrackingModal = useCallback((order: OrderManagement) => {
     // setSelectedOrderForTracking(order);
     // setShowTrackingModal(true);
     // loadTrackingCodes(order.customerOrderId);
-  };
+  }, []);
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = useCallback((status: string) => {
     switch (status) {
       case 'payment_uploaded':
         return <Badge variant="outline" className="bg-yellow-50 text-yellow-700">در انتظار بررسی مالی</Badge>;
@@ -660,7 +660,7 @@ function FinanceOrders() {
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
-  };
+  }, []);
 
   const handleOrderReview = useCallback((order: OrderManagement) => {
     setSelectedOrder(order);
@@ -1089,7 +1089,7 @@ function FinanceOrders() {
   }, [orderDetails, toast]);
 
   // Handle accept order from order details modal
-  const handleAcceptOrder = () => {
+  const handleAcceptOrder = useCallback(() => {
     if (!orderDetails) return;
     
     // Find the corresponding order from allOrders using orderDetails.id (customer order ID)
@@ -1107,10 +1107,10 @@ function FinanceOrders() {
       receiptAmount: receiptAmount 
     });
     // Don't close modal here - let the mutation success handler close it
-  };
+  }, [orderDetails, allOrders, approveMutation, receiptAmount]);
 
   // Handle reject order from order details modal  
-  const handleRejectOrder = () => {
+  const handleRejectOrder = useCallback(() => {
     if (!orderDetails) return;
     
     // Find the corresponding order from allOrders using orderDetails.id (customer order ID)
@@ -1127,7 +1127,7 @@ function FinanceOrders() {
       notes: `سفارش رد شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}` 
     });
     // Don't close modal here - let the mutation success handler close it
-  };
+  }, [orderDetails, allOrders, rejectMutation]);
 
   if (isLoading) {
     return (
