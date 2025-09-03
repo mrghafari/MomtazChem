@@ -32953,7 +32953,7 @@ momtazchem.com
             </div>
         </body>
         </html>
-      */;
+      `;
 
       // Use the simple PDF generator
       const browser = await puppeteer.launch({
