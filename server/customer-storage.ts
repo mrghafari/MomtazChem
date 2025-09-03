@@ -579,16 +579,10 @@ export class CustomerStorage implements ICustomerStorage {
         createdAt: customerOrders.createdAt,
         updatedAt: customerOrders.updatedAt,
         orderNumber: customerOrders.orderNumber,
-        guestName: customerOrders.guestName,
-        guestEmail: customerOrders.guestEmail,
-        guestPhone: customerOrders.guestPhone,
         receiptPath: customerOrders.receiptPath,
-        bankReference: customerOrders.bankReference,
         notes: customerOrders.notes,
         currency: customerOrders.currency,
-        shippingCost: customerOrders.shippingCost,
-        taxAmount: customerOrders.taxAmount,
-        discountAmount: customerOrders.discountAmount
+        shippingCost: customerOrders.shippingCost
       })
         .from(customerOrders)
         .where(eq(customerOrders.customerId, customerId))
