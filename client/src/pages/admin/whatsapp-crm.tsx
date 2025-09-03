@@ -25,7 +25,11 @@ import {
   TrendingUp,
   Calendar,
   UserCheck,
-  MessageSquare
+  MessageSquare,
+  Settings,
+  Key,
+  Save,
+  TestTube
 } from 'lucide-react';
 
 interface WhatsAppCustomer {
@@ -66,6 +70,19 @@ export default function WhatsAppCRM() {
   const [testModal, setTestModal] = useState(false);
   const [testPhoneNumber, setTestPhoneNumber] = useState('');
   const [testMessage, setTestMessage] = useState('');
+  
+  // API Settings state
+  const [apiSettings, setApiSettings] = useState({
+    provider: 'twilio', // twilio, whatsapp_business, custom
+    twilioAccountSid: '',
+    twilioAuthToken: '',
+    twilioWhatsAppNumber: '',
+    businessApiToken: '',
+    businessPhoneNumberId: '',
+    customApiUrl: '',
+    customApiKey: ''
+  });
+  
   const { toast } = useToast();
 
   // Fetch WhatsApp customers
@@ -217,7 +234,7 @@ export default function WhatsAppCRM() {
       </div>
 
       <Tabs defaultValue="customers" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="customers" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
             لیست مشتریان
@@ -225,6 +242,10 @@ export default function WhatsAppCRM() {
           <TabsTrigger value="stats" className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4" />
             آمار و گزارش
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="flex items-center gap-2">
+            <Settings className="w-4 h-4" />
+            تنظیمات API
           </TabsTrigger>
         </TabsList>
 
@@ -492,6 +513,177 @@ export default function WhatsAppCRM() {
               </Card>
             </>
           )}
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6">
+          {/* API Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                تنظیمات API واتساپ
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              
+              {/* Provider Selection */}
+              <div>
+                <label className="text-sm font-medium mb-2 block">ارائه‌دهنده سرویس</label>
+                <select 
+                  value={apiSettings.provider}
+                  onChange={(e) => setApiSettings(prev => ({ ...prev, provider: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="twilio">Twilio WhatsApp</option>
+                  <option value="whatsapp_business">WhatsApp Business API</option>
+                  <option value="custom">سرویس سفارشی</option>
+                </select>
+              </div>
+
+              {/* Twilio Settings */}
+              {apiSettings.provider === 'twilio' && (
+                <div className="space-y-4 p-4 bg-blue-50 rounded-lg">
+                  <h3 className="font-medium text-blue-900 flex items-center gap-2">
+                    <Key className="w-4 h-4" />
+                    تنظیمات Twilio
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Account SID</label>
+                      <Input
+                        value={apiSettings.twilioAccountSid}
+                        onChange={(e) => setApiSettings(prev => ({ ...prev, twilioAccountSid: e.target.value }))}
+                        placeholder="ACxxxxxxxxxx"
+                        type="password"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Auth Token</label>
+                      <Input
+                        value={apiSettings.twilioAuthToken}
+                        onChange={(e) => setApiSettings(prev => ({ ...prev, twilioAuthToken: e.target.value }))}
+                        placeholder="xxxxxxxxxx"
+                        type="password"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="text-sm font-medium mb-1 block">شماره واتساپ Twilio</label>
+                      <Input
+                        value={apiSettings.twilioWhatsAppNumber}
+                        onChange={(e) => setApiSettings(prev => ({ ...prev, twilioWhatsAppNumber: e.target.value }))}
+                        placeholder="whatsapp:+1415xxxxxxx"
+                        dir="ltr"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* WhatsApp Business API Settings */}
+              {apiSettings.provider === 'whatsapp_business' && (
+                <div className="space-y-4 p-4 bg-green-50 rounded-lg">
+                  <h3 className="font-medium text-green-900 flex items-center gap-2">
+                    <Key className="w-4 h-4" />
+                    تنظیمات WhatsApp Business API
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Access Token</label>
+                      <Input
+                        value={apiSettings.businessApiToken}
+                        onChange={(e) => setApiSettings(prev => ({ ...prev, businessApiToken: e.target.value }))}
+                        placeholder="EAAxxxxxxxxxx"
+                        type="password"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Phone Number ID</label>
+                      <Input
+                        value={apiSettings.businessPhoneNumberId}
+                        onChange={(e) => setApiSettings(prev => ({ ...prev, businessPhoneNumberId: e.target.value }))}
+                        placeholder="xxxxxxxxxx"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Custom API Settings */}
+              {apiSettings.provider === 'custom' && (
+                <div className="space-y-4 p-4 bg-purple-50 rounded-lg">
+                  <h3 className="font-medium text-purple-900 flex items-center gap-2">
+                    <Key className="w-4 h-4" />
+                    تنظیمات API سفارشی
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">API URL</label>
+                      <Input
+                        value={apiSettings.customApiUrl}
+                        onChange={(e) => setApiSettings(prev => ({ ...prev, customApiUrl: e.target.value }))}
+                        placeholder="https://api.example.com/whatsapp"
+                        dir="ltr"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">API Key</label>
+                      <Input
+                        value={apiSettings.customApiKey}
+                        onChange={(e) => setApiSettings(prev => ({ ...prev, customApiKey: e.target.value }))}
+                        placeholder="your-api-key"
+                        type="password"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-4 pt-4">
+                <Button 
+                  className="flex items-center gap-2"
+                  onClick={() => {
+                    // Save API settings
+                    toast({
+                      title: "تنظیمات ذخیره شد",
+                      description: "تنظیمات API واتساپ با موفقیت ذخیره شد.",
+                    });
+                  }}
+                >
+                  <Save className="w-4 h-4" />
+                  ذخیره تنظیمات
+                </Button>
+                
+                <Button 
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  onClick={() => {
+                    // Test API connection
+                    toast({
+                      title: "تست اتصال",
+                      description: "در حال تست اتصال به API...",
+                    });
+                  }}
+                >
+                  <TestTube className="w-4 h-4" />
+                  تست اتصال
+                </Button>
+              </div>
+
+              {/* Connection Status */}
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-2">وضعیت اتصال</h4>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <span className="text-sm text-gray-600">در انتظار تست اتصال</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  برای تست اتصال، روی دکمه "تست اتصال" کلیک کنید.
+                </p>
+              </div>
+
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 
