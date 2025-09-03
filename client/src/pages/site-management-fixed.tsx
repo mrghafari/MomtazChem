@@ -306,15 +306,6 @@ export default function SiteManagement() {
       className: "border-stone-300 text-stone-600 hover:bg-stone-50",
       moduleId: "database_backup"
     },
-
-    {
-      id: "ai-settings",
-      label: "AI Control",
-      icon: Brain,
-      onClick: () => trackButtonClick("ai-settings", () => setLocation("/admin/ai-seo-assistant")),
-      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
-      moduleId: "ai_settings"
-    },
     {
       id: "user-management",
       label: "User Management",
