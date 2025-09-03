@@ -985,19 +985,36 @@ const CustomerProfile = () => {
                             </>
                           )}
                           
-                          {/* نمایش وضعیت تأیید شده برای سفارشات با رسید آپلود شده */}
+                          {/* نمایش وضعیت برای سفارشات با رسید آپلود شده */}
                           {(order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' || order.paymentMethod === 'bank_transfer_grace') && 
-                           order.receiptPath && 
-                           order.status === 'confirmed' && (
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                              <p className="text-sm text-green-800 font-medium flex items-center gap-1">
-                                <AlertCircle className="w-4 h-4" />
-                                ✅ حواله بانکی آپلود شده - سفارش تأیید شد
-                              </p>
-                              <p className="text-xs text-green-700 mt-1">
-                                سفارش شما از حالت موقت خارج شده و در حال پردازش است
-                              </p>
-                            </div>
+                           order.receiptPath && (
+                            <>
+                              {/* وضعیت در دست بررسی مالی */}
+                              {(order.status === 'payment_uploaded' || order.status === 'pending' || order.status === 'payment_grace_period') && (
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                  <p className="text-sm text-blue-800 font-medium flex items-center gap-1">
+                                    <Clock className="w-4 h-4" />
+                                    📄 حواله بانکی آپلود شده - در دست بررسی مالی
+                                  </p>
+                                  <p className="text-xs text-blue-700 mt-1">
+                                    لطفاً منتظر تایید بخش مالی باشید. پس از تایید، سفارش به انبار منتقل می‌شود.
+                                  </p>
+                                </div>
+                              )}
+                              
+                              {/* وضعیت تایید شده */}
+                              {order.status === 'confirmed' && (
+                                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                                  <p className="text-sm text-green-800 font-medium flex items-center gap-1">
+                                    <AlertCircle className="w-4 h-4" />
+                                    ✅ حواله بانکی تایید شد - سفارش در حال پردازش
+                                  </p>
+                                  <p className="text-xs text-green-700 mt-1">
+                                    سفارش شما از بخش مالی تایید شده و در حال پردازش در انبار است
+                                  </p>
+                                </div>
+                              )}
+                            </>
                           )}
                           
                           {/* 🧾 دکمه دانلود فاکتور/پیش فاکتور بر اساس نوع فاکتور */}
