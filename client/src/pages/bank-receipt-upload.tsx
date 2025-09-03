@@ -10,8 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, FileText, CheckCircle, AlertCircle, ArrowLeft, CreditCard, Building2, Shield } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import SecureFileUploader from "@/components/SecureFileUploader";
-import type { UploadResult } from "@uppy/core";
+import { SimpleBankReceiptUploader } from "@/components/SimpleBankReceiptUploader";
 
 export default function BankReceiptUpload() {
   const { orderId: paramOrderId } = useParams();
@@ -129,37 +128,15 @@ export default function BankReceiptUpload() {
     },
   });
 
-  // Handle secure file upload completion
-  const handleSecureUploadComplete = (result: UploadResult<any, any>) => {
-    if (result.successful && result.successful.length > 0) {
-      const uploadedFile = result.successful[0];
-      setUploadedFileUrl(uploadedFile.uploadURL);
-      setUploadProgress(100);
-      
-      toast({
-        title: "✅ فایل با موفقیت آپلود شد",
-        description: "فیش بانکی از تمام بررسی‌های امنیتی عبور کرد",
-      });
-
-      console.log('🔐 [SECURE UPLOAD] Bank receipt uploaded successfully:', {
-        fileName: uploadedFile.name,
-        uploadURL: uploadedFile.uploadURL
-      });
-    }
-  };
-
-  // Handle security check callback
-  const handleSecurityCheck = (fileName: string, isSecure: boolean, report?: string) => {
-    if (isSecure) {
-      setSecurityStatus(`✅ ${fileName} - بررسی امنیتی موفق`);
-    } else {
-      setSecurityStatus(`❌ ${fileName} - بررسی امنیتی ناموفق`);
-      toast({
-        title: "❌ خطای امنیتی",
-        description: report || "فایل از بررسی‌های امنیتی عبور نکرد",
-        variant: "destructive",
-      });
-    }
+  // Handle simple upload completion
+  const handleUploadComplete = (fileUrl: string) => {
+    setUploadedFileUrl(fileUrl);
+    setUploadProgress(100);
+    setSecurityStatus("✅ فایل با موفقیت آپلود و اعتبارسنجی شد");
+    
+    console.log('🔐 [SIMPLE UPLOAD] Bank receipt uploaded successfully:', {
+      uploadURL: fileUrl
+    });
   };
 
   // Secure upload handler with validation
@@ -390,26 +367,12 @@ export default function BankReceiptUpload() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Secure File Uploader */}
-          <div>
-            <Label>آپلود فیش بانکی با سیستم امن</Label>
-            <div className="mt-2">
-              <SecureFileUploader
-                maxNumberOfFiles={1}
-                maxFileSize={10 * 1024 * 1024} // 10MB
-                allowedTypes={['image/jpeg', 'image/png', 'image/webp', 'application/pdf']}
-                onUploadComplete={handleSecureUploadComplete}
-                onSecurityCheck={handleSecurityCheck}
-                enableCompression={true}
-                enableVirusScanning={true}
-                userId={customer?.id?.toString()}
-                buttonClassName="w-full"
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                انتخاب و آپلود فیش بانکی
-              </SecureFileUploader>
-            </div>
-          </div>
+          {/* Simple File Upload */}
+          <SimpleBankReceiptUploader
+            onUploadComplete={handleUploadComplete}
+            maxFileSize={5 * 1024 * 1024} // 5MB for faster processing
+            className="border-0 shadow-none"
+          />
 
           {/* Security Status Display */}
           {securityStatus && (

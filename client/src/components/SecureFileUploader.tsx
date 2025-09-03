@@ -149,7 +149,7 @@ export function SecureFileUploader({
   // Post-upload processing
   const handleUploadComplete = useCallback(async (result: UploadResult<any, any>) => {
     try {
-      if (result.successful.length > 0) {
+      if (result.successful && result.successful.length > 0) {
         const uploadedFile = result.successful[0];
         
         // Step 3: Post-upload security validation
