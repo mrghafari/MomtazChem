@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { ProductInquiryForm } from "@/components/ui/product-inquiry-form";
+import { RandomCategoryProducts } from "@/components/RandomCategoryProducts";
 
 import type { ShowcaseProduct } from "@shared/showcase-schema";
 
@@ -415,6 +416,12 @@ const PaintThinnerPage = () => {
           </div>
         </div>
       </section>
+
+      {/* Random Products from Shop */}
+      <RandomCategoryProducts 
+        category="paint-thinner" 
+        title="محصولات پیشنهادی رنگ و حلال از فروشگاه"
+      />
 
       {/* Live Chat Support */}
 

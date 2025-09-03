@@ -173,7 +173,7 @@ export default function PaintSolventsPage() {
 
       {/* Random Products from Shop */}
       <RandomCategoryProducts 
-        category="paint-solvents" 
+        category="paint-thinner" 
         title="محصولات پیشنهادی رنگ و حلال از فروشگاه"
       />
 
