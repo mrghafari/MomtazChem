@@ -8,8 +8,23 @@ export function useCustomerAuth() {
     staleTime: 5000,
     refetchOnWindowFocus: true,
     refetchInterval: 30000,
+    // Always enabled, but handle admin case in queryFn
+    enabled: true,
     queryFn: async () => {
       try {
+        // Check if admin is logged in first
+        const adminCheckResponse = await fetch("/api/admin/me", {
+          credentials: "include",
+        });
+        
+        if (adminCheckResponse.ok) {
+          const adminResult = await adminCheckResponse.json();
+          if (adminResult.success && adminResult.user) {
+            // Admin is logged in, don't call customer API
+            return { success: false, message: "Admin authenticated - not a customer" };
+          }
+        }
+
         const response = await fetch("/api/customers/me", {
           credentials: "include",
         });

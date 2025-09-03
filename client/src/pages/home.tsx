@@ -12,10 +12,16 @@ import waterTreatmentImg from "@assets/download_1749877891276.jpeg";
 
 const Home = () => {
   // Fetch all products from database
-  const { data: allProducts, isLoading } = useQuery<ShopProduct[]>({
+  const { data: productsResponse, isLoading } = useQuery({
     queryKey: ["/api/products"],
-    queryFn: () => fetch("/api/products").then(res => res.json()),
+    queryFn: async () => {
+      const res = await fetch("/api/products");
+      const data = await res.json();
+      return data;
+    },
   });
+
+  const allProducts = productsResponse?.data || [];
 
   const categoryInfo = [
     {
@@ -57,13 +63,13 @@ const Home = () => {
   ];
 
   // Group products by category
-  const productsByCategory = allProducts?.reduce((acc, product) => {
+  const productsByCategory = Array.isArray(allProducts) ? allProducts.reduce((acc, product) => {
     if (!acc[product.category]) {
       acc[product.category] = [];
     }
     acc[product.category].push(product);
     return acc;
-  }, {} as Record<string, ShopProduct[]>) || {};
+  }, {} as Record<string, ShopProduct[]>) : {};
 
   const services = [
     {
