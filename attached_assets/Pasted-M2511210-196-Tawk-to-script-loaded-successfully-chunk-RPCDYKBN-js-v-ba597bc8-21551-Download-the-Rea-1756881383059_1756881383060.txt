@@ -1,0 +1,44 @@
+M2511210:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=ba597bc8:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/admin/me:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+M2511210:168 Tawk.to Live Chat loaded successfully
+/api/admin/me:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+/api/admin/me:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+/api/admin/me:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+bank-receipt-upload.tsx:137 🔐 [SIMPLE UPLOAD] Bank receipt uploaded successfully: Object
+/api/payment/upload-receipt:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+/api/payment/upload-receipt:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+/api/admin/me:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+queryClient.ts:54  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/payment/upload-receipt 400 (Bad Request)
+apiRequest @ queryClient.ts:54
+mutationFn @ bank-receipt-upload.tsx:89
+fn @ @tanstack_react-query.js?v=ba597bc8:1189
+run @ @tanstack_react-query.js?v=ba597bc8:494
+start @ @tanstack_react-query.js?v=ba597bc8:536
+execute @ @tanstack_react-query.js?v=ba597bc8:1225

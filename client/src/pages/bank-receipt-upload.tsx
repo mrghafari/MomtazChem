@@ -88,14 +88,11 @@ export default function BankReceiptUpload() {
     mutationFn: async ({ receiptUrl, orderId, notes }: { receiptUrl: string; orderId: string; notes: string }) => {
       const response = await apiRequest('/api/payment/upload-receipt', {
         method: 'POST',
-        body: JSON.stringify({
+        body: {
           receiptUrl,
           orderId,
           notes,
           securityValidated: true // Mark as security validated
-        }),
-        headers: {
-          'Content-Type': 'application/json'
         }
       });
       return response;
