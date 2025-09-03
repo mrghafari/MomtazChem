@@ -220,10 +220,11 @@ const Shop = () => {
   console.log('🎛️ [VISIBILITY] Discount Banner:', discountBannerEnabled, 'AI Features:', aiFeaturesEnabled);
 
   // Get data from search results or fallback to regular products
-  const currentProducts = searchResults?.data?.products || products;
+  // Only use search results if there's actually a search query, otherwise use all products
+  const currentProducts = (debouncedQuery && searchResults?.data?.products) || products;
   
   // Shop products are all visible by default (no visibleInShop field needed)
-  const filteredProducts = currentProducts;
+  const filteredProducts = Array.isArray(currentProducts) ? currentProducts : [];
   
   const totalResults = searchResults?.data?.total || products.length;
   const availableFilters = searchResults?.data?.filters;
