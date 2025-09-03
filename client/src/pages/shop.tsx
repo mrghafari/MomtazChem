@@ -383,23 +383,35 @@ const Shop = () => {
         const cartQuantity = cart[product.id] || 0;
         const availableStock = Math.max(0, (product.stockQuantity || 0) - cartQuantity);
         initialDisplayStock[product.id] = availableStock;
+        console.log(`📦 [INIT DISPLAY STOCK] Product ${product.id}: Stock=${product.stockQuantity}, Cart=${cartQuantity}, Display=${availableStock}`);
       });
       setDisplayStock(initialDisplayStock);
     }
-  }, [currentProducts, cart]); // Include cart dependency for accurate display
+  }, [currentProducts]); // Remove cart dependency to prevent override during cart updates
 
-  // Force recalculation of display stock after order completion or cart sync
+  // Only recalculate display stock when cart loads initially or when products change
   useEffect(() => {
-    if (currentProducts?.length > 0 && Object.keys(cart).length > 0) {
+    if (currentProducts?.length > 0 && Object.keys(cart).length > 0 && !isCartLoading) {
       const refreshedDisplayStock: {[key: number]: number} = {};
+      let hasChanges = false;
+      
       currentProducts.forEach(product => {
         const productInCart = cart[product.id] || 0;
-        const availableStock = (product.stockQuantity || 0) - productInCart;
-        refreshedDisplayStock[product.id] = Math.max(0, availableStock);
+        const availableStock = Math.max(0, (product.stockQuantity || 0) - productInCart);
+        refreshedDisplayStock[product.id] = availableStock;
+        
+        // Only update if there's a significant difference
+        if (Math.abs((displayStock[product.id] || 0) - availableStock) > 0) {
+          hasChanges = true;
+          console.log(`🔄 [CART SYNC] Product ${product.id}: Display stock ${displayStock[product.id] || 0} -> ${availableStock}`);
+        }
       });
-      setDisplayStock(refreshedDisplayStock);
+      
+      if (hasChanges) {
+        setDisplayStock(refreshedDisplayStock);
+      }
     }
-  }, [currentProducts, cart]); // Simplified dependency array
+  }, [isCartLoading]); // Only sync when cart loading state changes
 
   // Handle customer authentication changes
   useEffect(() => {
@@ -589,14 +601,21 @@ const Shop = () => {
       return;
     }
     
+    console.log(`🛒 [ADD TO CART] Before add - Product ${productId}, Stock: ${product.stockQuantity}, Cart: ${currentInCart}, DisplayStock: ${displayStock[productId]}`);
+    
     // Add to persistent cart
     addToCartPersistent(productId, targetQuantity);
     
     // Update display stock to immediately show reduced quantity
-    setDisplayStock(prev => ({
-      ...prev,
-      [productId]: Math.max(0, (prev[productId] || 0) - targetQuantity)
-    }));
+    setDisplayStock(prev => {
+      const currentDisplayStock = prev[productId] || (product.stockQuantity || 0) - currentInCart;
+      const newDisplayStock = Math.max(0, currentDisplayStock - targetQuantity);
+      console.log(`🛒 [DISPLAY STOCK UPDATE] Product ${productId}: ${currentDisplayStock} -> ${newDisplayStock}`);
+      return {
+        ...prev,
+        [productId]: newDisplayStock
+      };
+    });
     
     // Reset product quantity input to 1
     setProductQuantity(productId, 1);
@@ -611,21 +630,30 @@ const Shop = () => {
 
   const removeFromCart = (productId: number) => {
     const currentQuantityInCart = cart[productId] || 0;
+    console.log(`🗑️ [REMOVE FROM CART] Product ${productId}, CurrentInCart: ${currentQuantityInCart}`);
     
     if (currentQuantityInCart > 1) {
       updateCartQuantity(productId, currentQuantityInCart - 1);
       // Update display stock to show returned quantity
-      setDisplayStock(prev => ({
-        ...prev,
-        [productId]: (prev[productId] || 0) + 1
-      }));
+      setDisplayStock(prev => {
+        const newDisplayStock = (prev[productId] || 0) + 1;
+        console.log(`🗑️ [DISPLAY STOCK UPDATE] Product ${productId}: ${prev[productId]} -> ${newDisplayStock}`);
+        return {
+          ...prev,
+          [productId]: newDisplayStock
+        };
+      });
     } else {
       removeFromCartPersistent(productId);
       // Return all quantity to display stock
-      setDisplayStock(prev => ({
-        ...prev,
-        [productId]: (prev[productId] || 0) + currentQuantityInCart
-      }));
+      setDisplayStock(prev => {
+        const newDisplayStock = (prev[productId] || 0) + currentQuantityInCart;
+        console.log(`🗑️ [DISPLAY STOCK UPDATE] Product ${productId}: ${prev[productId]} -> ${newDisplayStock}`);
+        return {
+          ...prev,
+          [productId]: newDisplayStock
+        };
+      });
     }
   };
 
