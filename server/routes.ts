@@ -3567,6 +3567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .set({
           paymentStatus: 'receipt_uploaded',
           receiptUrl: normalizedPath,
+          receiptPath: normalizedPath, // برای compatibility با customer profile
           receiptUploadDate: new Date(),
           receiptNotes: notes || null
         })
