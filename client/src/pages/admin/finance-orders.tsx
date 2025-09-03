@@ -379,24 +379,44 @@ function FinanceOrders() {
   const openImageModal = useCallback(async (imageUrl: string) => {
     console.log('🖼️ [IMAGE MODAL] Opening image modal with URL:', imageUrl);
     
-    // Verify image exists before opening modal
-    try {
-      const response = await fetch(imageUrl, { method: 'HEAD' });
-      if (!response.ok) {
-        console.error('❌ [IMAGE MODAL] Image not accessible:', imageUrl, 'Status:', response.status);
-        // Try to open in new tab instead
-        window.open(imageUrl, '_blank');
-        return;
+    // Convert object storage URLs to proper server endpoints
+    let processedUrl = imageUrl;
+    if (imageUrl.includes('/.private/uploads/')) {
+      // Extract the file ID from the object storage URL
+      const parts = imageUrl.split('/.private/uploads/');
+      if (parts.length === 2) {
+        const fileId = parts[1];
+        processedUrl = `/objects/uploads/${fileId}`;
+        console.log('🔄 [IMAGE MODAL] Converted object storage URL to server endpoint:', processedUrl);
       }
-      console.log('✅ [IMAGE MODAL] Image verified accessible:', imageUrl);
-    } catch (error) {
-      console.error('❌ [IMAGE MODAL] Failed to verify image:', error);
-      // Still try to open modal, let the image component handle the error
     }
     
-    setSelectedImageUrl(imageUrl);
+    // Verify image exists before opening modal
+    try {
+      const response = await fetch(processedUrl, { method: 'HEAD', credentials: 'include' });
+      if (!response.ok) {
+        console.error('❌ [IMAGE MODAL] Image not accessible:', processedUrl, 'Status:', response.status);
+        toast({
+          title: "خطا در نمایش رسید",
+          description: "امکان نمایش رسید وجود ندارد",
+          variant: "destructive"
+        });
+        return;
+      }
+      console.log('✅ [IMAGE MODAL] Image verified accessible:', processedUrl);
+    } catch (error) {
+      console.error('❌ [IMAGE MODAL] Failed to verify image:', error);
+      toast({
+        title: "خطا در دسترسی به رسید",
+        description: "مشکل در اتصال به سرور",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setSelectedImageUrl(processedUrl);
     setImageModalOpen(true);
-  }, []);
+  }, [toast]);
 
   const handlePrintOrder = useCallback(async () => {
     if (!orderDetails) return;
