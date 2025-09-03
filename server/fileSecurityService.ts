@@ -150,14 +150,30 @@ export class FileSecurityService {
         }
       }
 
-      // Layer 6: Image processing and compression
-      if (this.isImageFile(detectedType.mime) && this.config.enableImageCompression) {
+      // Layer 6: Image processing and validation
+      if (this.isImageFile(detectedType.mime)) {
         try {
-          processedBuffer = await this.processImage(fileBuffer, detectedType.mime);
-          console.log(`🖼️ [COMPRESSION] Image compressed: ${fileBuffer.length} → ${processedBuffer.length} bytes`);
+          // First try to process as image - this validates it's actually an image
+          const imageMetadata = await sharp(fileBuffer).metadata();
+          console.log(`🖼️ [VALIDATION] Valid image detected: ${imageMetadata.width}x${imageMetadata.height}, format: ${imageMetadata.format}`);
+          
+          // If it's actually an image and compression is enabled, compress it
+          if (this.config.enableImageCompression) {
+            processedBuffer = await this.processImage(fileBuffer, detectedType.mime);
+            console.log(`🖼️ [COMPRESSION] Image compressed: ${fileBuffer.length} → ${processedBuffer.length} bytes`);
+          }
         } catch (error) {
-          console.error('❌ [COMPRESSION] Image processing failed:', error);
-          errors.push('خطا در پردازش تصویر');
+          console.error('❌ [IMAGE VALIDATION] File claims to be image but processing failed:', error);
+          // If image processing fails, it's likely not a real image - scan for malicious patterns
+          console.log('🔍 [SECURITY] Performing deep scan on suspicious file...');
+          const contentStr = fileBuffer.toString('utf8');
+          for (const pattern of this.config.blockedPatterns) {
+            if (pattern.test(contentStr)) {
+              errors.push('فایل مشکوک: ادعای تصویر بودن اما حاوی کد مخرب');
+              break;
+            }
+          }
+          errors.push('فایل ادعای تصویر بودن دارد اما قابل پردازش نیست');
         }
       }
 
