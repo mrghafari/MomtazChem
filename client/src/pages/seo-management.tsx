@@ -342,7 +342,7 @@ export default function SeoManagement() {
     mutationFn: async (data: { provider: string; apiKey: string; description?: string }) => {
       return apiRequest('/api/admin/seo/api-keys', {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: data
       });
     },
     onSuccess: () => {
@@ -365,7 +365,7 @@ export default function SeoManagement() {
     mutationFn: async (data: { provider: string; apiKey: string }) => {
       return apiRequest('/api/admin/seo/api-keys/test', {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: data
       });
     },
     onSuccess: (data) => {
