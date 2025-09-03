@@ -1,15 +1,46 @@
 import OpenAI from "openai";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
+import { aiApiSettings } from "../shared/schema";
 
-// the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY 
-});
+// Helper function to get API key from database
+async function getApiKeyFromDatabase(provider: string): Promise<string | null> {
+  try {
+    const result = await db.select()
+      .from(aiApiSettings)
+      .where(eq(aiApiSettings.provider, provider))
+      .limit(1);
+    
+    if (result.length > 0 && result[0].apiKey) {
+      // Decrypt the base64 encoded key
+      return Buffer.from(result[0].apiKey, 'base64').toString();
+    }
+    return null;
+  } catch (error) {
+    console.error(`Failed to get ${provider} API key from database:`, error);
+    return null;
+  }
+}
 
-// DeepSeek AI client configuration
-const deepseekClient = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.deepseek.com'
-});
+// Dynamic client creation with database keys
+async function createOpenAIClient(): Promise<OpenAI> {
+  const apiKey = await getApiKeyFromDatabase('openai');
+  if (!apiKey) {
+    throw new Error('OpenAI API key not found in database. Please configure it in SEO Settings.');
+  }
+  return new OpenAI({ apiKey });
+}
+
+async function createDeepSeekClient(): Promise<OpenAI> {
+  const apiKey = await getApiKeyFromDatabase('deepseek');
+  if (!apiKey) {
+    throw new Error('DeepSeek API key not found in database. Please configure it in SEO Settings.');
+  }
+  return new OpenAI({
+    apiKey,
+    baseURL: 'https://api.deepseek.com'
+  });
+}
 
 // AI Provider selection enum
 export enum AIProvider {
@@ -18,14 +49,17 @@ export enum AIProvider {
 }
 
 // Helper function to get AI client based on provider
-function getAIClient(provider: AIProvider) {
+async function getAIClient(provider: AIProvider) {
   switch (provider) {
     case AIProvider.OPENAI:
-      return { client: openai, model: 'gpt-5' }; // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+      const openaiClient = await createOpenAIClient();
+      return { client: openaiClient, model: 'gpt-5' }; // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
     case AIProvider.DEEPSEEK:
+      const deepseekClient = await createDeepSeekClient();
       return { client: deepseekClient, model: 'deepseek-chat' };
     default:
-      return { client: openai, model: 'gpt-5' };
+      const defaultClient = await createOpenAIClient();
+      return { client: defaultClient, model: 'gpt-5' };
   }
 }
 
@@ -73,7 +107,7 @@ export interface SeoAnalysisRequest {
 export async function generateAdvancedSeoContent(request: SeoContentRequest) {
   try {
     const aiProvider = request.aiProvider || AIProvider.OPENAI;
-    const { client, model } = getAIClient(aiProvider);
+    const { client, model } = await getAIClient(aiProvider);
     
     const prompt = `
 نقش: شما یک متخصص حرفه‌ای SEO هستید که برای شرکت شیمیایی Momtazchem کار می‌کنید.
@@ -153,7 +187,7 @@ ${request.targetAudience ? `- مخاطب هدف: ${request.targetAudience}` : ''
 export async function generateAdvancedKeywordResearch(request: KeywordResearchRequest) {
   try {
     const aiProvider = request.aiProvider || AIProvider.DEEPSEEK; // Default to DeepSeek for keyword research
-    const { client, model } = getAIClient(aiProvider);
+    const { client, model } = await getAIClient(aiProvider);
     
     const prompt = `
 نقش: شما یک متخصص تحقیق کلیدواژه SEO هستید.
@@ -234,7 +268,7 @@ ${request.competitorUrls ? `- رقبا: ${request.competitorUrls.join(', ')}` : 
 export async function optimizeContentForSeoAdvanced(request: ContentOptimizationRequest) {
   try {
     const aiProvider = request.aiProvider || AIProvider.OPENAI; // Default to OpenAI for content optimization
-    const { client, model } = getAIClient(aiProvider);
+    const { client, model } = await getAIClient(aiProvider);
     const prompt = `
 نقش: متخصص بهینه‌سازی محتوا برای SEO
 
@@ -318,7 +352,7 @@ ${request.targetAudience ? `- مخاطب: ${request.targetAudience}` : ''}
 export async function analyzeAdvancedSeoPerformance(request: SeoAnalysisRequest) {
   try {
     const aiProvider = request.aiProvider || AIProvider.DEEPSEEK; // Default to DeepSeek for analysis
-    const { client, model } = getAIClient(aiProvider);
+    const { client, model } = await getAIClient(aiProvider);
     const prompt = `
 نقش: تحلیل‌گر پیشرفته عملکرد SEO
 
@@ -409,7 +443,7 @@ ${request.competitorUrls ? `- رقبا: ${request.competitorUrls.join(', ')}` : 
 // Schema.org Generator with dual AI support
 export async function generateSchemaMarkup(pageType: string, data: any, aiProvider: AIProvider = AIProvider.OPENAI) {
   try {
-    const { client, model } = getAIClient(aiProvider);
+    const { client, model } = await getAIClient(aiProvider);
     const prompt = `
 نقش: متخصص Schema.org markup
 
@@ -462,7 +496,7 @@ Schema types مورد نیاز:
 // SEO Audit and Recommendations with dual AI support
 export async function generateSeoAudit(url: string, aiProvider: AIProvider = AIProvider.DEEPSEEK) {
   try {
-    const { client, model } = getAIClient(aiProvider);
+    const { client, model } = await getAIClient(aiProvider);
     const prompt = `
 نقش: اودیتور SEO حرفه‌ای
 
@@ -528,7 +562,7 @@ export async function generateSeoAudit(url: string, aiProvider: AIProvider = AIP
 // Competitive Analysis with dual AI support
 export async function analyzeCompetitors(competitorUrls: string[], targetKeywords: string[], aiProvider: AIProvider = AIProvider.DEEPSEEK) {
   try {
-    const { client, model } = getAIClient(aiProvider);
+    const { client, model } = await getAIClient(aiProvider);
     const prompt = `
 نقش: تحلیل‌گر رقابت SEO
 

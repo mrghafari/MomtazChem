@@ -142,6 +142,7 @@ export default function SeoManagement() {
   // AI SEO states
   const [aiPageType, setAiPageType] = useState("");
   const [aiLanguage, setAiLanguage] = useState("");
+  const [selectedAiProvider, setSelectedAiProvider] = useState<string>("openai");
   
   // API Settings states
   const [openaiApiKey, setOpenaiApiKey] = useState("");
@@ -511,7 +512,7 @@ export default function SeoManagement() {
       language: aiLanguage,
       targetKeywords: keywords,
       businessContext: aiBusinessContext,
-
+      aiProvider: selectedAiProvider
     });
   };
 
@@ -530,7 +531,7 @@ export default function SeoManagement() {
       seedKeywords: keywords,
       language: aiLanguage || 'fa',
       industry: aiIndustry || 'chemical',
-
+      aiProvider: selectedAiProvider
     });
   };
 
@@ -549,7 +550,7 @@ export default function SeoManagement() {
       content: aiContentToOptimize,
       targetKeywords: keywords,
       language: aiLanguage || 'fa',
-
+      aiProvider: selectedAiProvider
     });
   };
 
@@ -567,7 +568,7 @@ export default function SeoManagement() {
     analyzePerformance.mutate({
       url: aiAnalyzeUrl,
       targetKeywords: keywords,
-
+      aiProvider: selectedAiProvider
     });
   };
 
@@ -770,6 +771,30 @@ export default function SeoManagement() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* AI Provider Selection */}
+                <div className="space-y-2">
+                  <Label>🤖 انتخاب هوش مصنوعی</Label>
+                  <Select value={selectedAiProvider} onValueChange={setSelectedAiProvider}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="انتخاب ارائه‌دهنده AI" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="openai">
+                        OpenAI GPT-5 (پیشرفته)
+                      </SelectItem>
+                      <SelectItem value="deepseek">
+                        DeepSeek AI (تحلیلی)
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <div className="text-xs text-gray-500">
+                    {selectedAiProvider === 'openai' ? 
+                      '🔵 OpenAI GPT-5 - بهترین برای تولید محتوا و تحلیل' : 
+                      '🟣 DeepSeek AI - مناسب برای تحقیق و تحلیل عمیق'
+                    }
+                  </div>
+                </div>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="pageType">Page Type</Label>
