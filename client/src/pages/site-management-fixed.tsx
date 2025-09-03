@@ -5,7 +5,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain, Monitor as RemoteMonitor, FileText, Edit, Server } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain, Monitor as RemoteMonitor, FileText, Edit, Server, MessageCircle } from "lucide-react";
 import { KardexSyncPanel } from "@/components/KardexSyncPanel";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -321,6 +321,14 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("sms", () => setLocation("/admin/sms-management")),
       className: "border-gray-300 text-gray-600 hover:bg-gray-50",
       moduleId: "sms"
+    },
+    {
+      id: "whatsapp-crm",
+      label: "WhatsApp CRM",
+      icon: MessageCircle,
+      onClick: () => trackButtonClick("whatsapp-crm", () => setLocation("/admin/whatsapp-crm")),
+      className: "border-green-400 text-green-600 hover:bg-green-50",
+      moduleId: "whatsapp_crm"
     },
     {
       id: "factory",

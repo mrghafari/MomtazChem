@@ -16,7 +16,7 @@ const getSiteManagementModulesCount = () => {
     "warehouse_management", "crm", "wallet_management", "finance", "payment_management",
     "geography_analytics", "inquiries", "email_settings", "content_management", 
     "seo", "categories", "barcode", "database_backup", "ai_settings", 
-    "user_management", "sms", "factory", "procedures", "refresh_control", 
+    "user_management", "sms", "whatsapp_crm", "factory", "procedures", "refresh_control", 
     "logistics_management", "ticketing_system", "remote_desktop", "server_config"
   ];
   return modules.length;
@@ -123,6 +123,7 @@ function AdminDashboardContent({ user, logout, setLocation, moduleCount, getCont
               <div>• <strong>SEO</strong> - 4-language optimization & sitemaps</div>
               <div>• <strong>Categories</strong> - Hierarchical product classification</div>
               <div>• <strong>SMS</strong> - Multilingual customer notifications</div>
+              <div>• <strong>WhatsApp CRM</strong> - Customer communication & bulk messaging</div>
               <div>• <strong>Factory</strong> - Production line management</div>
               <div>• <strong>User Management</strong> - Role-based access control</div>
               <div>• <strong>Shop</strong> - E-commerce & inventory administration</div>
