@@ -186,10 +186,8 @@ function FinanceOrders() {
     queryFn: () => fetch('/api/financial/orders', { credentials: 'include' }).then(res => res.json()),
     enabled: Boolean(adminUser?.success), // Only run if authenticated
     staleTime: 0,
-    cacheTime: 0, // Force fresh data always
-    gcTime: 0,
-    refetchOnWindowFocus: true,
-    refetchInterval: 30000,
+    refetchOnWindowFocus: false, // Disable aggressive refetching
+    refetchInterval: false, // Disable automatic refetch
   });
 
   // Fetch approved orders that have been transferred to warehouse - MOVED to top
@@ -203,9 +201,8 @@ function FinanceOrders() {
     },
     enabled: Boolean(adminUser?.success), // Only run if authenticated
     staleTime: 0,
-    gcTime: 0,
-    refetchOnWindowFocus: true,
-    refetchInterval: 30000,
+    refetchOnWindowFocus: false, // Disable aggressive refetching
+    refetchInterval: false, // Disable automatic refetch
   });
 
   // Send reminder mutation - MOVED to top to avoid conditional hooks
