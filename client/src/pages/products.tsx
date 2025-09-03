@@ -174,11 +174,11 @@ export default function ProductsPage() {
   const { toast } = useToast();
   const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Fetch categories from API
+  // Fetch categories from shop API to match with store
   const { data: categoriesData = [] } = useQuery({
-    queryKey: ["/api/admin/categories"],
+    queryKey: ["/api/shop/categories"],
     queryFn: async () => {
-      const response = await fetch("/api/admin/categories");
+      const response = await fetch("/api/shop/categories");
       if (!response.ok) {
         throw new Error("Failed to fetch categories");
       }
@@ -193,11 +193,32 @@ export default function ProductsPage() {
     icon: React.ReactNode;
   };
 
-  const categories: CategoryOption[] = [
+  // Helper function to get icon based on category slug
+  function getCategoryIcon(slug: string) {
+    switch (slug) {
+      case "water-treatment":
+        return <Droplet className="w-4 h-4" />;
+      case "fuel-additives":
+        return <Beaker className="w-4 h-4" />;
+      case "paint-thinner":
+      case "paint-solvents":
+        return <Droplet className="w-4 h-4" />;
+      case "agricultural-fertilizers":
+        return <Package className="w-4 h-4" />;
+      default:
+        return <Package className="w-4 h-4" />;
+    }
+  }
+
+  // Create categories from API data or fallback to hardcoded ones
+  const categories: CategoryOption[] = categoriesData.length > 0 ? categoriesData.map((cat: any) => ({
+    value: cat.slug,
+    label: cat.name,
+    icon: getCategoryIcon(cat.slug)
+  })) : [
     { value: "water-treatment", label: "Water Treatment", icon: <Droplet className="w-4 h-4" /> },
     { value: "fuel-additives", label: "Fuel Additives", icon: <Beaker className="w-4 h-4" /> },
     { value: "paint-solvents", label: "Paint & Solvents", icon: <Package className="w-4 h-4" /> },
-
     { value: "agricultural-fertilizers", label: "Agricultural Fertilizers", icon: <Package className="w-4 h-4" /> },
     { value: "industrial-chemicals", label: "Industrial Chemicals", icon: <Package className="w-4 h-4" /> },
     { value: "paint-thinner", label: "Paint Thinner", icon: <Droplet className="w-4 h-4" /> },

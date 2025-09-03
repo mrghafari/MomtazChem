@@ -19920,7 +19920,22 @@ Momtaz Chemical Technical Team`,
 
   app.get("/api/shop/categories", async (req, res) => {
     try {
-      const categories = await shopStorage.getShopCategories();
+      let categories = await shopStorage.getShopCategories();
+      
+      // If no categories in database, return default hardcoded categories
+      if (categories.length === 0) {
+        categories = [
+          { id: 1, name: "Water Treatment", slug: "water-treatment", description: "Water treatment chemicals and solutions", isActive: true, displayOrder: 1 },
+          { id: 2, name: "Fuel Additives", slug: "fuel-additives", description: "Fuel enhancement and additive products", isActive: true, displayOrder: 2 },
+          { id: 3, name: "Paint & Solvents", slug: "paint-solvents", description: "Paint and solvent products", isActive: true, displayOrder: 3 },
+          { id: 4, name: "Agricultural Fertilizers", slug: "agricultural-fertilizers", description: "Agricultural and fertilizer products", isActive: true, displayOrder: 4 },
+          { id: 5, name: "Industrial Chemicals", slug: "industrial-chemicals", description: "Industrial chemical products", isActive: true, displayOrder: 5 },
+          { id: 6, name: "Paint Thinner", slug: "paint-thinner", description: "Paint thinner and related products", isActive: true, displayOrder: 6 },
+          { id: 7, name: "Technical Equipment", slug: "technical-equipment", description: "Technical equipment and tools", isActive: true, displayOrder: 7 },
+          { id: 8, name: "Commercial Goods", slug: "commercial-goods", description: "Commercial and general goods", isActive: true, displayOrder: 8 }
+        ] as any[];
+      }
+      
       res.json(categories);
     } catch (error) {
       console.error("Error fetching shop categories:", error);
