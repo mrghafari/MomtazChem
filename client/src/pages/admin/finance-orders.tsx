@@ -180,12 +180,13 @@ function FinanceOrders() {
     enabled: Boolean(adminUser?.success) // Convert to boolean to avoid undefined
   });
 
-  // Get orders for financial review - MOVED to top
+  // Get orders for financial review - MOVED to top - Force fresh data
   const { data: ordersResponse, isLoading, refetch } = useQuery({
     queryKey: ['/api/financial/orders'],
     queryFn: () => fetch('/api/financial/orders', { credentials: 'include' }).then(res => res.json()),
     enabled: Boolean(adminUser?.success), // Only run if authenticated
     staleTime: 0,
+    cacheTime: 0, // Force fresh data always
     gcTime: 0,
     refetchOnWindowFocus: true,
     refetchInterval: 30000,
