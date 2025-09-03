@@ -31159,9 +31159,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
         console.log(`✓ [PERMISSIONS] Super admin Persian modules:`, persianModules);
         console.log(`🔍 [DEBUG] whatsapp_crm mapping: ${normalizedModules.includes('whatsapp_crm')} → ${persianModules.includes('مدیریت واتساپ CRM')}`);
-        console.log(`🔍 [CRITICAL DEBUG] Complete Persian modules array:`, JSON.stringify(persianModules, null, 2));
-        console.log(`🔍 [CRITICAL DEBUG] Looking for: 'مدیریت واتساپ CRM'`);
-        console.log(`🔍 [CRITICAL DEBUG] Found modules containing 'واتساپ':`, persianModules.filter(m => m.includes('واتساپ')));
         console.log(`🔍 [DEBUG] کیا شاخص‌های عملکرد (KPI) in persianModules?`, persianModules.includes('شاخص‌های عملکرد (KPI)'));
         console.log(`🔍 [DEBUG] داشبورد مدیریتی in persianModules?`, persianModules.includes('داشبورد مدیریتی'));
         console.log(`🔍 [DEBUG] finance mapping: ${normalizedModules.includes('finance')} → ${persianModules.includes('مدیریت مالی')}`);
