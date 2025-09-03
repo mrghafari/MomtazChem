@@ -37,7 +37,7 @@ import { sql, eq, and, or, isNull, isNotNull, desc, gte, inArray } from "drizzle
 import { findCorruptedOrders, getDataIntegrityStats, validateOrderIntegrity, markCorruptedOrderAsDeleted } from './data-integrity-tools';
 import { z } from "zod";
 import * as schema from "@shared/schema";
-const { crmCustomers, iraqiProvinces, iraqiCities, abandonedOrders, contentItems, footerSettings, paymentMethodSettings, shopSettings } = schema;
+const { crmCustomers, iraqiProvinces, iraqiCities, abandonedOrders, contentItems, footerSettings, paymentMethodSettings, shopSettings, aiApiSettings, insertAiApiSettingsSchema } = schema;
 import { webrtcRooms, roomParticipants, chatMessages } from "@shared/webrtc-schema";
 import { orderManagement, shippingRates, deliveryMethods, paymentReceipts } from "@shared/order-management-schema";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
@@ -24589,6 +24589,158 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         });
       }
       res.status(500).json({ success: false, message: "Failed to create redirect" });
+    }
+  });
+
+  // =============================================================================
+  // AI API KEYS MANAGEMENT ROUTES
+  // =============================================================================
+
+  // Get all AI API keys
+  app.get("/api/admin/seo/api-keys", requireAuth, async (req, res) => {
+    try {
+      const apiKeys = await db.select({
+        id: aiApiSettings.id,
+        provider: aiApiSettings.provider,
+        isActive: aiApiSettings.isActive,
+        description: aiApiSettings.description,
+        createdAt: aiApiSettings.createdAt,
+        updatedAt: aiApiSettings.updatedAt
+      }).from(aiApiSettings);
+
+      res.json({ success: true, data: apiKeys });
+    } catch (error) {
+      console.error("Error fetching API keys:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch API keys" });
+    }
+  });
+
+  // Save or update AI API key
+  app.post("/api/admin/seo/api-keys", requireAuth, async (req, res) => {
+    try {
+      const { provider, apiKey, description } = req.body;
+      
+      if (!provider || !apiKey) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Provider and API key are required" 
+        });
+      }
+
+      // Simple encryption (in production, use proper encryption)
+      const encryptedKey = Buffer.from(apiKey).toString('base64');
+
+      // Check if provider already exists
+      const existing = await db.select().from(aiApiSettings)
+        .where(eq(aiApiSettings.provider, provider))
+        .limit(1);
+
+      if (existing.length > 0) {
+        // Update existing
+        await db.update(aiApiSettings)
+          .set({
+            apiKey: encryptedKey,
+            description,
+            updatedAt: new Date(),
+            isActive: true
+          })
+          .where(eq(aiApiSettings.provider, provider));
+      } else {
+        // Create new
+        await db.insert(aiApiSettings).values({
+          provider,
+          apiKey: encryptedKey,
+          description,
+          isActive: true
+        });
+      }
+
+      res.json({ 
+        success: true, 
+        message: `API key for ${provider} saved successfully` 
+      });
+    } catch (error) {
+      console.error("Error saving API key:", error);
+      res.status(500).json({ success: false, message: "Failed to save API key" });
+    }
+  });
+
+  // Test AI API key
+  app.post("/api/admin/seo/api-keys/test", requireAuth, async (req, res) => {
+    try {
+      const { provider, apiKey } = req.body;
+      
+      if (!provider || !apiKey) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Provider and API key are required" 
+        });
+      }
+
+      let testResult = false;
+      let errorMessage = "";
+
+      if (provider === 'openai') {
+        // Test OpenAI API
+        try {
+          const response = await fetch('https://api.openai.com/v1/models', {
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          testResult = response.ok;
+          if (!testResult) {
+            errorMessage = `OpenAI API test failed: ${response.statusText}`;
+          }
+        } catch (error: any) {
+          errorMessage = `OpenAI API test failed: ${error.message}`;
+        }
+      } else if (provider === 'deepseek') {
+        // Test DeepSeek API
+        try {
+          const response = await fetch('https://api.deepseek.com/v1/models', {
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          testResult = response.ok;
+          if (!testResult) {
+            errorMessage = `DeepSeek API test failed: ${response.statusText}`;
+          }
+        } catch (error: any) {
+          errorMessage = `DeepSeek API test failed: ${error.message}`;
+        }
+      }
+
+      res.json({ 
+        success: testResult, 
+        message: testResult 
+          ? `${provider} API key is valid` 
+          : errorMessage || `${provider} API key test failed`
+      });
+    } catch (error) {
+      console.error("Error testing API key:", error);
+      res.status(500).json({ success: false, message: "Failed to test API key" });
+    }
+  });
+
+  // Delete AI API key
+  app.delete("/api/admin/seo/api-keys/:provider", requireAuth, async (req, res) => {
+    try {
+      const { provider } = req.params;
+      
+      const result = await db.delete(aiApiSettings)
+        .where(eq(aiApiSettings.provider, provider));
+
+      res.json({ 
+        success: true, 
+        message: `API key for ${provider} deleted successfully` 
+      });
+    } catch (error) {
+      console.error("Error deleting API key:", error);
+      res.status(500).json({ success: false, message: "Failed to delete API key" });
     }
   });
 

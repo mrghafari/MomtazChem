@@ -20,6 +20,27 @@ export * from "./logistics-schema";
 export * from "./webrtc-schema";
 
 // =============================================================================
+// AI API SETTINGS SYSTEM
+// =============================================================================
+
+// AI API Settings table for storing encrypted API keys
+export const aiApiSettings = pgTable("ai_api_settings", {
+  id: serial("id").primaryKey(),
+  provider: text("provider").notNull(), // 'openai', 'deepseek', etc.
+  apiKey: text("api_key").notNull(), // Encrypted API key
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  // Additional settings for each provider
+  settings: json("settings"), // Provider-specific settings like model names, limits, etc.
+  description: text("description"), // Optional description for the API key
+});
+
+export const insertAiApiSettingsSchema = createInsertSchema(aiApiSettings);
+export type InsertAiApiSettings = z.infer<typeof insertAiApiSettingsSchema>;
+export type AiApiSettings = typeof aiApiSettings.$inferSelect;
+
+// =============================================================================
 // ABANDONED ORDERS TRACKING SYSTEM
 // =============================================================================
 
