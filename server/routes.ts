@@ -48,7 +48,8 @@ import { gpsDeliveryConfirmations } from "@shared/gps-delivery-schema";
 import ProformaInvoiceConverter from "./proforma-invoice-converter";
 import { AutoInvoiceConverter } from "./auto-invoice-converter";
 import { secureObjectStorageService } from "./secureObjectStorage";
-import { fileSecurityService } from "./fileSecurityService";
+import { fileSecurityService, productImageSecurityService } from "./fileSecurityService";
+import { ObjectStorageService } from "./objectStorage";
 
 import { 
   vehicleTemplates, 
@@ -50134,16 +50135,60 @@ momtazchem.com
         });
       }
 
-      // Download file for validation
-      const fileResponse = await fetch(fileUrl);
-      if (!fileResponse.ok) {
-        return res.status(400).json({
-          success: false,
-          errors: ['امکان دانلود فایل برای اعتبارسنجی وجود ندارد']
-        });
+      // Get file from object storage instead of downloading from URL
+      let fileBuffer: Buffer;
+      
+      try {
+        // Extract object path from the URL and get file directly from storage
+        const objectStorageService = new ObjectStorageService();
+        
+        // Parse URL to get object path
+        let objectPath: string;
+        if (fileUrl.includes('googleapis.com')) {
+          // Extract path from Google Cloud Storage URL
+          const url = new URL(fileUrl);
+          objectPath = url.pathname;
+        } else {
+          // Handle other URL formats or direct paths
+          objectPath = fileUrl.startsWith('/objects/') ? fileUrl : `/objects/${fileUrl.split('/').pop()}`;
+        }
+        
+        console.log(`🔍 [VALIDATION] Attempting to get object from path: ${objectPath}`);
+        
+        // Get the file directly from object storage
+        const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
+        
+        // Read file content
+        const stream = objectFile.createReadStream();
+        const chunks: Buffer[] = [];
+        
+        for await (const chunk of stream) {
+          chunks.push(chunk);
+        }
+        
+        fileBuffer = Buffer.concat(chunks);
+        console.log(`✅ [VALIDATION] Successfully retrieved file: ${fileBuffer.length} bytes`);
+        
+      } catch (storageError) {
+        console.error('❌ [VALIDATION] Failed to get file from storage:', storageError);
+        
+        // Fallback: try downloading from URL
+        try {
+          console.log('🔄 [VALIDATION] Attempting fallback URL download...');
+          const fileResponse = await fetch(fileUrl);
+          if (!fileResponse.ok) {
+            throw new Error(`HTTP ${fileResponse.status}`);
+          }
+          fileBuffer = Buffer.from(await fileResponse.arrayBuffer());
+          console.log(`✅ [VALIDATION] Fallback download successful: ${fileBuffer.length} bytes`);
+        } catch (downloadError) {
+          console.error('❌ [VALIDATION] Both storage access and URL download failed:', downloadError);
+          return res.status(400).json({
+            success: false,
+            errors: ['امکان دسترسی به فایل برای اعتبارسنجی وجود ندارد']
+          });
+        }
       }
-
-      const fileBuffer = Buffer.from(await fileResponse.arrayBuffer());
 
       // Use appropriate security service based on upload type
       let validationResult;
