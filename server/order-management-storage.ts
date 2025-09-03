@@ -908,6 +908,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       // Customer Order fields
       totalAmount: customerOrders.totalAmount,
       currency: customerOrders.currency,
+      orderNumber: customerOrders.orderNumber,
       
       // Customer info
       customerFirstName: crmCustomers.firstName,
@@ -937,6 +938,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       deliveryCode: row.deliveryCode,
       totalAmount: row.totalAmount,
       currency: row.currency,
+      orderNumber: row.orderNumber,
       
       // Weight and delivery information
       totalWeight: row.totalWeight,
@@ -974,8 +976,12 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       } : null
     }));
 
-    // Calculate weight for orders that don't have it calculated yet (especially for warehouse and logistics)
-    if (departmentFilter === 'warehouse' || departmentFilter === 'logistics') {
+    // Calculate weight for orders that don't have it calculated yet (check status to determine if needed)
+    const needsWeightCalculation = statuses.some(status => 
+      status.includes('warehouse') || status.includes('logistics') || status.includes('dispatched')
+    );
+    
+    if (needsWeightCalculation) {
       for (const order of transformedResults) {
         if (!order.totalWeight || order.totalWeight === '0.000') {
           await this.calculateAndUpdateOrderWeight(order.customerOrderId);

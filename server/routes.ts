@@ -29887,6 +29887,81 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // DEBUG: Check what orders are returned by getOrdersByStatus 
+  app.get('/api/orders/debug-status', async (req, res) => {
+    try {
+      console.log(`🐛 [DEBUG] Checking orders by status...`);
+      const orderMgmtResult = await orderManagementStorage.getOrdersByStatus(['finance_pending', 'financial_approved', 'warehouse_pending', 'warehouse_processing', 'logistics_assigned']);
+      console.log(`🐛 [DEBUG] Found ${orderMgmtResult.length} orders`);
+      console.log(`🐛 [DEBUG] Orders:`, orderMgmtResult.map(order => ({ 
+        id: order.id, 
+        customerOrderId: order.customerOrderId, 
+        status: order.currentStatus, 
+        orderNumber: (order as any).orderNumber 
+      })));
+      
+      res.json({
+        success: true,
+        orders: orderMgmtResult.map(order => ({ 
+          id: order.id, 
+          customerOrderId: order.customerOrderId, 
+          status: order.currentStatus, 
+          orderNumber: (order as any).orderNumber 
+        }))
+      });
+    } catch (error) {
+      console.error(`❌ [DEBUG] Error:`, error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // TEST: Trigger manual consolidation for an order (temporary - no auth)
+  app.post('/api/orders/test-consolidate/:orderNumber', async (req, res) => {
+    try {
+      const { orderNumber } = req.params;
+      console.log(`📋 [TEST CONSOLIDATION] Manually triggering consolidation for order: ${orderNumber}`);
+      
+      // Get order management details first
+      const orderMgmtResult = await orderManagementStorage.getOrdersByStatus(['finance_pending', 'financial_approved', 'warehouse_pending', 'warehouse_processing', 'logistics_assigned']);
+      console.log(`📋 [TEST CONSOLIDATION] Found ${orderMgmtResult.length} orders with these orderNumbers:`, orderMgmtResult.map(order => (order as any).orderNumber));
+      const targetOrder = orderMgmtResult.find((order: any) => order.orderNumber === orderNumber);
+      console.log(`📋 [TEST CONSOLIDATION] Target order found:`, !!targetOrder);
+      
+      if (!targetOrder) {
+        return res.status(404).json({
+          success: false,
+          message: 'سفارش یافت نشد یا هنوز تایید مالی نشده است'
+        });
+      }
+      
+      const { orderConsolidationService } = await import('./order-consolidation-service');
+      const consolidatedOrder = await orderConsolidationService.consolidateOrderData(
+        targetOrder.id, 
+        targetOrder.customerOrderId
+      );
+      
+      if (consolidatedOrder) {
+        console.log(`✅ [TEST CONSOLIDATION] Successfully consolidated order: ${orderNumber}`);
+        res.json({
+          success: true,
+          message: 'اطلاعات سفارش با موفقیت متمرکز شد',
+          data: consolidatedOrder
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: 'خطا در متمرکزسازی اطلاعات سفارش'
+        });
+      }
+    } catch (error) {
+      console.error(`❌ [TEST CONSOLIDATION] Error consolidating order ${req.params.orderNumber}:`, error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در متمرکزسازی اطلاعات سفارش'
+      });
+    }
+  });
+
   // Trigger manual consolidation for an order (admin only)
   app.post('/api/orders/consolidate/:orderNumber', requireAuth, async (req, res) => {
     try {
