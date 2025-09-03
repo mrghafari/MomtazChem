@@ -36,15 +36,7 @@ export default function Header() {
   
   // Only check admin auth when in admin routes
   const isInAdminRoute = location.startsWith('/admin');
-  const { isAuthenticated: isAdminAuthenticated, logout: adminLogout } = useAuth();
-
-  // Fetch admin user info for role display (only in admin routes)
-  const { data: adminUser } = useQuery({
-    queryKey: ['/api/admin/me'],
-    enabled: isAdminAuthenticated && isInAdminRoute,
-    retry: false,
-    staleTime: 30000, // 30 seconds
-  });
+  const { isAuthenticated: isAdminAuthenticated, logout: adminLogout, user: adminUser } = useAuth();
 
   // Fetch wallet balance for authenticated customers
   const { data: walletData, isError, error } = useQuery({
@@ -55,7 +47,7 @@ export default function Header() {
     refetchOnWindowFocus: true,
   });
 
-  // Removed duplicate admin user query
+  // Use admin user from useAuth hook instead of duplicate query
 
   const rawBalance = walletData?.balance || walletData?.data?.wallet?.balance || walletData?.wallet?.balance || "0";
   const walletBalance = typeof rawBalance === 'string' ? parseFloat(rawBalance) : rawBalance;
@@ -70,11 +62,11 @@ export default function Header() {
 
   // Function to get admin role display name
   const getAdminRoleDisplay = () => {
-    if (!isAdminAuthenticated || !adminUser?.user) {
+    if (!isAdminAuthenticated || !adminUser) {
       return direction === 'rtl' ? 'مدیر' : 'Admin';
     }
     
-    const username = adminUser.user.username;
+    const username = adminUser.username;
     if (direction === 'rtl') {
       return username; // Return Persian username directly
     } else {
