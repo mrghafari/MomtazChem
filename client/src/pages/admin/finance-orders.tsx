@@ -980,18 +980,34 @@ function FinanceOrders() {
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <strong>نام:</strong> {orderDetails.customerName}
+                      <strong>نام:</strong> {orderDetails.customerName || `${orderDetails.customer?.firstName || ''} ${orderDetails.customer?.lastName || ''}`.trim()}
                     </div>
                     <div>
-                      <strong>ایمیل:</strong> {orderDetails.customerEmail}
+                      <strong>ایمیل:</strong> {orderDetails.customerEmail || orderDetails.customer?.email}
                     </div>
                     <div>
-                      <strong>تلفن:</strong> {orderDetails.customerPhone}
+                      <strong>تلفن:</strong> {orderDetails.customerPhone || orderDetails.customer?.phone}
                     </div>
                     <div>
                       <strong>تاریخ:</strong> {formatDateSafe(orderDetails.createdAt)}
                     </div>
                   </div>
+                  
+                  {/* Shipping Address */}
+                  {orderDetails.shippingAddress && (
+                    <div className="mt-4 pt-4 border-t">
+                      <h4 className="font-semibold mb-2">آدرس تحویل:</h4>
+                      <div className="text-sm text-gray-600">
+                        <p><strong>نام گیرنده:</strong> {orderDetails.shippingAddress.name}</p>
+                        <p><strong>تلفن:</strong> {orderDetails.shippingAddress.phone}</p>
+                        <p><strong>آدرس:</strong> {orderDetails.shippingAddress.address}</p>
+                        <p><strong>شهر:</strong> {orderDetails.shippingAddress.city}</p>
+                        {orderDetails.shippingAddress.postalCode && (
+                          <p><strong>کد پستی:</strong> {orderDetails.shippingAddress.postalCode}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -1003,12 +1019,58 @@ function FinanceOrders() {
                 <CardContent>
                   <div className="space-y-2">
                     {orderDetails.items?.map((item: any, index: number) => (
-                      <div key={index} className="flex justify-between items-center p-2 border rounded">
-                        <span>{item.productName || 'نامشخص'}</span>
-                        <span>تعداد: {item.quantity}</span>
-                        <span>{parseFloat(item.price || 0).toLocaleString()} IQD</span>
+                      <div key={index} className="flex justify-between items-center p-3 border rounded bg-gray-50">
+                        <div className="flex-1">
+                          <div className="font-medium">{item.productName || item.name || 'نامشخص'}</div>
+                          {item.sku && <div className="text-sm text-gray-500">SKU: {item.sku}</div>}
+                        </div>
+                        <div className="text-center px-4">
+                          <div className="text-sm text-gray-500">تعداد</div>
+                          <div className="font-medium">{item.quantity || 1}</div>
+                        </div>
+                        <div className="text-center px-4">
+                          <div className="text-sm text-gray-500">قیمت واحد</div>
+                          <div className="font-medium">{parseFloat(item.unitPrice || item.price || 0).toLocaleString()} IQD</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-sm text-gray-500">مجموع</div>
+                          <div className="font-bold text-blue-600">
+                            {(parseFloat(item.unitPrice || item.price || 0) * parseInt(item.quantity || 1)).toLocaleString()} IQD
+                          </div>
+                        </div>
                       </div>
                     ))}
+                    
+                    {/* Order Totals */}
+                    <div className="mt-4 pt-4 border-t bg-blue-50 p-4 rounded">
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span>جمع کالاها:</span>
+                          <span className="font-medium">
+                            {orderDetails.itemsTotal ? parseFloat(orderDetails.itemsTotal).toLocaleString() : 'محاسبه نشده'} IQD
+                          </span>
+                        </div>
+                        {orderDetails.shippingCost && parseFloat(orderDetails.shippingCost) > 0 && (
+                          <div className="flex justify-between">
+                            <span>هزینه ارسال:</span>
+                            <span className="font-medium">{parseFloat(orderDetails.shippingCost).toLocaleString()} IQD</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-lg font-bold text-blue-700 border-t pt-2">
+                          <span>مجموع کل:</span>
+                          <span>{parseFloat(orderDetails.totalAmount || 0).toLocaleString()} IQD</span>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <span>روش پرداخت: </span>
+                          <span className="font-medium">
+                            {orderDetails.paymentMethod === 'bank_transfer_grace' ? 'حواله بانکی (مهلت‌دار)' : 
+                             orderDetails.paymentMethod === 'bank_transfer' ? 'حواله بانکی' :
+                             orderDetails.paymentMethod === 'cash_on_delivery' ? 'پرداخت در محل' :
+                             orderDetails.paymentMethod || 'نامشخص'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
