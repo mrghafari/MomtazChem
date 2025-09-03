@@ -588,61 +588,46 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     .leftJoin(paymentReceipts, eq(paymentReceipts.customerOrderId, customerOrders.id));
     
     if (department === 'financial') {
-      // بخش مالی فقط سفارشات در انتظار بررسی و رد شده را می‌بیند
-      // سفارشات تایید شده (financial_approved) به انبار منتقل می‌شوند
-      // حذف سفارشات معلق که بیش از یک ساعت pending هستند
+      // بخش مالی فقط سفارشات در مراحل مالی را می‌بیند - جلوگیری از تکرار
       const financialStatuses = statuses || [
         'pending', // سفارشات در انتظار - مهم: این status در ابتدای سفارش ست می‌شود
         orderStatuses.PENDING_PAYMENT,
         orderStatuses.PAYMENT_UPLOADED, 
         orderStatuses.FINANCIAL_REVIEWING,
         orderStatuses.FINANCIAL_APPROVED, // نمایش سفارشات تایید شده برای visibility
-        orderStatuses.FINANCIAL_REJECTED, // فقط سفارشات رد شده در مالی باقی می‌مانند
-        orderStatuses.WAREHOUSE_PENDING, // سفارشات پرداخت شده با کیف پول که به انبار منتقل شده‌اند
-        orderStatuses.WAREHOUSE_PROCESSING, // سفارشات پرداخت شده با کیف پول در حال پردازش انبار
-        orderStatuses.WAREHOUSE_APPROVED // سفارشات پرداخت شده با کیف پول تایید شده از انبار
+        orderStatuses.FINANCIAL_REJECTED // فقط سفارشات رد شده در مالی باقی می‌مانند
       ];
       
-      console.log('🔍 [FINANCIAL] Searching for orders with statuses (including wallet-paid transferred orders):', financialStatuses);
-      console.log('💳 [WALLET VISIBILITY] Finance department now includes wallet-paid orders transferred to warehouse for complete payment tracking');
+      console.log('🔍 [FINANCIAL] Searching for orders with statuses (financial stage only):', financialStatuses);
+      console.log('🚫 [DUPLICATION FIX] Financial department shows only financial-stage orders to prevent duplication');
       
       query = query.where(inArray(orderManagement.currentStatus, financialStatuses));
     } else if (department === 'warehouse') {
-      // انبار فقط سفارشات در حال پردازش را می‌بیند - تایید شده‌ها به لجستیک منتقل می‌شوند
+      // انبار فقط سفارشات در مراحل انبار را می‌بیند - جلوگیری از تکرار
       const warehouseStatuses = statuses || [
-        orderStatuses.WAREHOUSE_PENDING, // جدید: سفارشات منتظر انبار
-        orderStatuses.FINANCIAL_APPROVED, // تایید شده توسط مالی
+        orderStatuses.WAREHOUSE_PENDING, // سفارشات منتظر انبار
+        orderStatuses.FINANCIAL_APPROVED, // تایید شده توسط مالی و آماده ورود به انبار
         orderStatuses.WAREHOUSE_NOTIFIED,
         orderStatuses.WAREHOUSE_PROCESSING,
-        'warehouse_verified', // مرحله اول تایید انبار - دو مرحله‌ای
-        orderStatuses.WAREHOUSE_APPROVED, // ارسال شده به لجستیک
-        orderStatuses.WAREHOUSE_REJECTED,
-        // همه وضعیت‌های بعدی که از warehouse عبور کرده‌اند
-        orderStatuses.LOGISTICS_ASSIGNED, // تخصیص داده شده به لجستیک
-        orderStatuses.LOGISTICS_PROCESSING, // در حال پردازش لجستیک
-        orderStatuses.LOGISTICS_DISPATCHED, // ارسال شده توسط لجستیک
-        orderStatuses.LOGISTICS_DELIVERED, // تحویل شده توسط لجستیک
-        'shipped', // ارسال شده
-        'in_transit', // در حال حمل
-        'delivered', // تحویل داده شده
-        orderStatuses.COMPLETED, // تکمیل شده
-        'confirmed' // تایید شده نهایی
+        'warehouse_verified', // مرحله اول تایید انبار
+        orderStatuses.WAREHOUSE_APPROVED, // تایید نهایی انبار
+        orderStatuses.WAREHOUSE_REJECTED // رد شده توسط انبار
       ];
-      console.log('🔍 [WAREHOUSE] Searching for orders with statuses:', warehouseStatuses);
+      console.log('🔍 [WAREHOUSE] Searching for orders with statuses (warehouse stage only):', warehouseStatuses);
+      console.log('🚫 [DUPLICATION FIX] Warehouse department shows only warehouse-stage orders to prevent duplication');
       query = query.where(inArray(orderManagement.currentStatus, warehouseStatuses));
     } else if (department === 'logistics') {
-      // لجستیک سفارشات آماده انبار و تایید شده انبار را می‌بیند
+      // لجستیک فقط سفارشات در مراحل لجستیک را می‌بیند - جلوگیری از تکرار
       const logisticsStatuses = statuses || [
-        orderStatuses.WAREHOUSE_PENDING, // سفارشات آماده انبار - اضافه شد برای نمایش سفارشات
-        orderStatuses.WAREHOUSE_APPROVED, // تایید شده توسط انبار
-        'in_transit', // 🚛 سفارشات در حال ارسال - shipped orders که باید در لجستیک نمایش داده شوند
-        'shipped', // 🚛 سفارشات ارسال شده - باید در لجستیک قابل مشاهده باشند
-        // ✅ حذف 'delivered' - سفارشات تحویل شده باید فقط در تب "تحویل شده" نمایش داده شوند
+        orderStatuses.WAREHOUSE_APPROVED, // تایید شده توسط انبار و آماده ورود به لجستیک
+        'in_transit', // در حال ارسال
+        'shipped', // ارسال شده
         orderStatuses.LOGISTICS_ASSIGNED,
         orderStatuses.LOGISTICS_PROCESSING,
         orderStatuses.LOGISTICS_DISPATCHED
       ];
-      console.log('🔍 [LOGISTICS] Searching for orders with statuses:', logisticsStatuses);
+      console.log('🔍 [LOGISTICS] Searching for orders with statuses (logistics stage only):', logisticsStatuses);
+      console.log('🚫 [DUPLICATION FIX] Logistics department shows only logistics-stage orders to prevent duplication');
       query = query.where(inArray(orderManagement.currentStatus, logisticsStatuses));
     }
     
