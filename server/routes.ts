@@ -50215,8 +50215,8 @@ momtazchem.com
       
       if (uploadType === 'product-image') {
         console.log('🖼️ [PRODUCT IMAGE] Using smart compression validation');
-        securityService = productImageSecurityService;
-        validationResult = await productImageSecurityService.validateFile(fileBuffer, fileName);
+        securityService = fileSecurityService;
+        validationResult = await fileSecurityService.validateFile(fileBuffer, fileName);
       } else {
         console.log('🔐 [GENERAL FILE] Using standard validation');
         securityService = fileSecurityService;
