@@ -993,21 +993,40 @@ function FinanceOrders() {
                     </div>
                   </div>
                   
-                  {/* Shipping Address */}
-                  {orderDetails.shippingAddress && (
-                    <div className="mt-4 pt-4 border-t">
-                      <h4 className="font-semibold mb-2">آدرس تحویل:</h4>
-                      <div className="text-sm text-gray-600">
-                        <p><strong>نام گیرنده:</strong> {orderDetails.shippingAddress.name}</p>
-                        <p><strong>تلفن:</strong> {orderDetails.shippingAddress.phone}</p>
-                        <p><strong>آدرس:</strong> {orderDetails.shippingAddress.address}</p>
-                        <p><strong>شهر:</strong> {orderDetails.shippingAddress.city}</p>
-                        {orderDetails.shippingAddress.postalCode && (
-                          <p><strong>کد پستی:</strong> {orderDetails.shippingAddress.postalCode}</p>
-                        )}
+                  {/* Addresses */}
+                  <div className="mt-4 pt-4 border-t space-y-4">
+                    {/* Shipping Address */}
+                    {orderDetails.shippingAddress && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-blue-700">📍 آدرس تحویل:</h4>
+                        <div className="text-sm bg-blue-50 p-3 rounded border-r-4 border-blue-500">
+                          <p><strong>نام گیرنده:</strong> {orderDetails.shippingAddress.name}</p>
+                          <p><strong>تلفن:</strong> {orderDetails.shippingAddress.phone}</p>
+                          <p><strong>آدرس کامل:</strong> {orderDetails.shippingAddress.address}</p>
+                          <p><strong>شهر:</strong> {orderDetails.shippingAddress.city}</p>
+                          {orderDetails.shippingAddress.postalCode && (
+                            <p><strong>کد پستی:</strong> {orderDetails.shippingAddress.postalCode}</p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                    
+                    {/* Billing Address */}
+                    {orderDetails.billingAddress && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-green-700">🏢 آدرس صورتحساب:</h4>
+                        <div className="text-sm bg-green-50 p-3 rounded border-r-4 border-green-500">
+                          <p><strong>نام:</strong> {orderDetails.billingAddress.name}</p>
+                          <p><strong>تلفن:</strong> {orderDetails.billingAddress.phone}</p>
+                          <p><strong>آدرس:</strong> {orderDetails.billingAddress.address}</p>
+                          <p><strong>شهر:</strong> {orderDetails.billingAddress.city}</p>
+                          {orderDetails.billingAddress.postalCode && (
+                            <p><strong>کد پستی:</strong> {orderDetails.billingAddress.postalCode}</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -1047,7 +1066,12 @@ function FinanceOrders() {
                         <div className="flex justify-between">
                           <span>جمع کالاها:</span>
                           <span className="font-medium">
-                            {orderDetails.itemsTotal ? parseFloat(orderDetails.itemsTotal).toLocaleString() : 'محاسبه نشده'} IQD
+                            {(() => {
+                              const itemsTotal = orderDetails.items?.reduce((sum: number, item: any) => {
+                                return sum + (parseFloat(item.unitPrice || item.price || 0) * parseInt(item.quantity || 1));
+                              }, 0) || 0;
+                              return itemsTotal.toLocaleString();
+                            })()} IQD
                           </span>
                         </div>
                         {orderDetails.shippingCost && parseFloat(orderDetails.shippingCost) > 0 && (
