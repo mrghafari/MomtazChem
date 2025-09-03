@@ -169,9 +169,10 @@ const Shop = () => {
   });
 
   // Fetch all shop products for total count
-  const { data: products = [] } = useQuery<ShopProduct[]>({
+  const { data: productsResponse } = useQuery({
     queryKey: ["/api/shop/products"],
   });
+  const products = productsResponse?.data || [];
 
   // Fetch discount settings to get the highest discount percentage
   const { data: discountResponse } = useQuery({
@@ -502,8 +503,8 @@ const Shop = () => {
     }
   };
 
-  // Legacy filter and sort products
-  const legacyFilteredProducts = products
+  // Legacy filter and sort products - ensure products is an array
+  const legacyFilteredProducts = Array.isArray(products) ? products
     .filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            product.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -521,7 +522,7 @@ const Shop = () => {
         default:
           return 0;
       }
-    });
+    }) : [];
 
   // Cart storage is now handled by usePersistentCart hook
 
