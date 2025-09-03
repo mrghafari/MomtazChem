@@ -2730,7 +2730,9 @@ function FinanceOrders() {
                                 تلاش مجدد در تب جدید
                               </button>
                             `;
-                            img.parentElement!.replaceChild(errorDiv, img);
+                            if (img.parentElement) {
+                              img.parentElement.replaceChild(errorDiv, img);
+                            }
                           }
                         }, 2000);
                       }}
