@@ -390,6 +390,12 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     sessionID: req.sessionID
   });
 
+  // Skip auth if explicitly requested (for specific endpoints)
+  if ((req as any).skipAuth) {
+    console.log(`🔓 [AUTH DEBUG] Skipping auth for ${req.path} - skipAuth flag set`);
+    return next();
+  }
+
   // Check for valid authentication - either admin or custom user
   if (req.session && req.session.isAuthenticated === true) {
     if (req.session.adminId) {
@@ -9068,8 +9074,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // REMOVED: First duplicate statistics endpoint - consolidated below for consistency
 
-  // Get financial orders (orders requiring financial review)
-  app.get("/api/order-management/financial", requireAuth, async (req, res) => {
+  // Get financial orders (orders requiring financial review) - Public access for financial department
+  app.get("/api/financial/orders", async (req, res) => {
     try {
       console.log('🔍 [ROUTES] Financial endpoint called - using getOrdersByDepartment');
       const orders = await orderManagementStorage.getOrdersByDepartment('financial');

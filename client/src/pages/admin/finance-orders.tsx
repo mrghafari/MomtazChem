@@ -451,7 +451,7 @@ function FinanceOrders() {
         description: "پرداخت تایید شد و سفارش به واحد انبار منتقل شد"
       });
       // Invalidate all finance-related queries
-      queryClient.invalidateQueries({ queryKey: ['/api/order-management/financial'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
       
@@ -491,7 +491,7 @@ function FinanceOrders() {
         description: "پرداخت رد شد و به قسمت سفارشات رد شده منتقل شد"
       });
       // Invalidate all finance-related queries
-      queryClient.invalidateQueries({ queryKey: ['/api/order-management/financial'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
       
