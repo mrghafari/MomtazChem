@@ -212,11 +212,11 @@ const Shop = () => {
   });
 
   // Extract control states - only show if explicitly enabled (no fallback to true)
-  const { discountBannerEnabled = false, aiFeaturesEnabled = false, discountBannerText = '' } = frontendControls?.data || {};
+  const { discountBannerEnabled = false, discountBannerText = '' } = frontendControls?.data || {};
   
   // Debug frontend controls
   console.log('🎛️ [FRONTEND CONTROLS] Loaded:', frontendControls);
-  console.log('🎛️ [VISIBILITY] Discount Banner:', discountBannerEnabled, 'AI Features:', aiFeaturesEnabled);
+  console.log('🎛️ [VISIBILITY] Discount Banner:', discountBannerEnabled);
 
   // Get data from search results or fallback to regular products
   const currentProducts = searchResults?.data?.products || products;
@@ -856,17 +856,6 @@ const Shop = () => {
               
               {/* Admin status removed - shop is customer-only */}
               
-              {/* AI Recommendations Button - Left - Controlled by Content Management */}
-              {aiFeaturesEnabled && (
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none hover:from-purple-600 hover:to-pink-600 shadow-lg"
-                  onClick={() => navigate('/product-recommendations')}
-                >
-                  <Sparkles className="w-5 h-5" />
-                  <span className="hidden sm:inline">AI Recommendations</span>
-                </Button>
-              )}
             </div>
             
             {/* User & Cart Section */}

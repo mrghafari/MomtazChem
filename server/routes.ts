@@ -2363,72 +2363,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // =============================================================================
-  // AI PRODUCT RECOMMENDATIONS API
-  // =============================================================================
   
-  // Generate AI-powered product recommendations
-  app.post('/api/recommendations/analyze', async (req, res) => {
-    try {
-      const { getAIProductRecommendations } = await import('./ai-recommendations.ts');
-      
-      const recommendationRequest = req.body;
-      
-      // Validate required fields
-      if (!recommendationRequest.industry || !recommendationRequest.application || !recommendationRequest.requirements) {
-        return res.status(400).json({
-          success: false,
-          message: 'Industry, application, and requirements are required fields'
-        });
-      }
 
-      const recommendations = await getAIProductRecommendations(recommendationRequest);
-      
-      res.json({
-        success: true,
-        data: recommendations
-      });
-    } catch (error) {
-      console.error('Recommendation API Error:', error);
-      res.status(500).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to generate recommendations'
-      });
-    }
-  });
-
-  // Generate follow-up recommendations based on additional information
-  app.post('/api/recommendations/follow-up', async (req, res) => {
-    try {
-      const { generateFollowUpRecommendations } = await import('./ai-recommendations.ts');
-      
-      const { originalRequest, previousRecommendations, newInformation } = req.body;
-      
-      if (!originalRequest || !previousRecommendations || !newInformation) {
-        return res.status(400).json({
-          success: false,
-          message: 'Original request, previous recommendations, and new information are required'
-        });
-      }
-
-      const updatedRecommendations = await generateFollowUpRecommendations(
-        originalRequest,
-        previousRecommendations,
-        newInformation
-      );
-      
-      res.json({
-        success: true,
-        data: updatedRecommendations
-      });
-    } catch (error) {
-      console.error('Follow-up Recommendation API Error:', error);
-      res.status(500).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to generate follow-up recommendations'
-      });
-    }
-  });
 
   // API endpoint to get active users count
   app.get("/api/active-users", requireAuth, async (req: Request, res: Response) => {
@@ -39364,17 +39300,13 @@ momtazchem.com
       const { contentItems } = await import("../shared/content-schema");
       const { eq, or } = await import("drizzle-orm");
 
-      // Fetch toggle states for discount banner and AI features
+      // Fetch toggle states for discount banner
       const toggleItems = await db.select().from(contentItems)
-        .where(or(
-          eq(contentItems.key, 'discount_banner_enabled'),
-          eq(contentItems.key, 'ai_features_enabled')
-        ));
+        .where(eq(contentItems.key, 'discount_banner_enabled'));
 
       // Create response object with default values
       const controls = {
         discountBannerEnabled: false,
-        aiFeaturesEnabled: false,
         discountBannerText: ''
       };
 
@@ -39382,8 +39314,6 @@ momtazchem.com
       toggleItems.forEach(item => {
         if (item.key === 'discount_banner_enabled') {
           controls.discountBannerEnabled = item.isActive || false;
-        } else if (item.key === 'ai_features_enabled') {
-          controls.aiFeaturesEnabled = item.isActive || false;
         }
       });
 

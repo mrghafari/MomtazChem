@@ -65,7 +65,6 @@ import Products from "@/pages/products";
 import ProductsPage from "@/pages/products";
 import BatchManagement from "@/pages/batch-management";
 
-import ProductRecommendations from "@/pages/product-recommendations";
 import ProductReviews from "@/pages/product-reviews";
 import TestProductImageUpload from "@/pages/test-product-image-upload";
 import FuelAdditives from "@/pages/products/fuel-additives";
@@ -162,7 +161,6 @@ function Router() {
           <Route path="/help" component={UserGuide} />
           <Route path="/shop" component={Shop} />
           <Route path="/payment-options" component={PaymentOptionsPage} />
-          <Route path="/product-recommendations" component={ProductRecommendations} />
           <Route path="/checkout" component={() => <Checkout cart={[]} products={[]} onOrderComplete={() => {}} />} />
           <Route path="/payment/:orderId" component={Payment} />
           <Route path="/payment/:orderNumber" component={HybridPayment} />
