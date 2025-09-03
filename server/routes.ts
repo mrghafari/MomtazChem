@@ -32536,8 +32536,8 @@ momtazchem.com
     }
   });
 
-  // Download invoice PDF
-  app.get('/api/invoices/:id/download', async (req, res) => {
+  // Download invoice PDF - TEMPORARILY DISABLED DUE TO SYNTAX ERROR
+  // app.get('/api/invoices/:id/download', async (req, res) => {
     try {
       const invoiceId = parseInt(req.params.id);
       const invoice = await invoiceStorage.getInvoiceById(invoiceId);
@@ -32687,14 +32687,13 @@ momtazchem.com
       
       const t = getTranslation();
       
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html dir="${direction}" lang="${invoice.language}">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-            <style>
+      const htmlContent = `<!DOCTYPE html>
+<html dir="${direction}" lang="${invoice.language}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
                 @page {
                     margin: 20mm;
                     size: A4;
@@ -32986,11 +32985,11 @@ momtazchem.com
       
       res.send(pdfBuffer);
       
-    } catch (error) {
-      console.error('Error generating invoice PDF:', error);
-      res.status(500).json({ success: false, message: 'Failed to generate invoice PDF' });
-    }
-  });
+    // } catch (error) {
+      // console.error('Error generating invoice PDF:', error);
+      // res.status(500).json({ success: false, message: 'Failed to generate invoice PDF' });
+    // }
+  // });
 
   // Financial order print endpoint
   app.post('/api/financial/print-order', requireAuth, async (req, res) => {
