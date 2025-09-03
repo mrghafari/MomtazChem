@@ -3478,6 +3478,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint to serve uploaded files from object storage
+  app.get("/objects/uploads/:fileId", async (req, res) => {
+    try {
+      const { fileId } = req.params;
+      console.log('🖼️ [FILE SERVE] Serving file:', fileId);
+      
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = `/objects/uploads/${fileId}`;
+      
+      // Get the file from object storage
+      const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
+      
+      // Set appropriate headers and stream the file
+      await objectStorageService.downloadObject(objectFile, res);
+      
+    } catch (error) {
+      console.error('❌ [FILE SERVE] Error serving file:', error);
+      if (error.message.includes('not found') || error.name === 'ObjectNotFoundError') {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'File not found' 
+        });
+      }
+      res.status(500).json({ 
+        success: false, 
+        message: 'Error serving file' 
+      });
+    }
+  });
+
   // Secure Object Storage upload endpoint for general file uploads
   app.post("/api/objects/upload", requireCustomerAuth, async (req, res) => {
     try {
