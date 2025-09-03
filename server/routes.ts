@@ -27998,32 +27998,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     });
   });
 
-  // Get logistics orders using centralized system
-  app.get('/api/logistics/orders', requireDepartmentAuth('logistics'), async (req, res) => {
-    try {
-      console.log('🚚 [LOGISTICS API] Using centralized order data system');
-      
-      // Get logistics relevant orders using the unified approach  
-      const orders = await orderManagementStorage.getOrdersByDepartment('logistics');
-      
-      console.log(`✅ [LOGISTICS API] Retrieved ${orders.length} orders from centralized system`);
-      
-      // Return unified format with complete information
-      res.json({
-        success: true,
-        orders: orders,
-        message: `Found ${orders.length} logistics orders`
-      });
-    } catch (error) {
-      console.error('❌ [LOGISTICS API] Error fetching logistics orders:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: "خطا در دریافت سفارشات لجستیک" 
-      });
-    }
-  });
-
-  /*
+  // Get logistics pending orders - only warehouse_approved orders
   app.get('/api/logistics/orders', requireDepartmentAuth('logistics'), async (req, res) => {
     try {
       const orders = await orderManagementStorage.getLogisticsPendingOrders();
@@ -28032,6 +28007,29 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const ordersWithWeight = await Promise.all(
         orders.map(async (order) => {
           try {
+            const weight = await orderManagementStorage.calculateOrderWeight(order.customerOrderId);
+            return {
+              ...order,
+              calculatedWeight: weight,
+              weightUnit: 'kg'
+            };
+          } catch (error) {
+            console.error(`Error calculating weight for order ${order.customerOrderId}:`, error);
+            return {
+              ...order,
+              calculatedWeight: 0,
+              weightUnit: 'kg'
+            };
+          }
+        })
+      );
+      
+      res.json({ success: true, orders: ordersWithWeight });
+    } catch (error) {
+      console.error('Error fetching logistics orders:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت سفارشات" });
+    }
+  });
 
   // Calculate order weight endpoint - accessible by all authenticated users
   app.post('/api/orders/:customerOrderId/calculate-weight', requireAuth, async (req, res) => {
@@ -32536,8 +32534,8 @@ momtazchem.com
     }
   });
 
-  // Download invoice PDF - TEMPORARILY DISABLED DUE TO SYNTAX ERROR
-  // app.get('/api/invoices/:id/download', async (req, res) => {
+  // Download invoice PDF
+  app.get('/api/invoices/:id/download', async (req, res) => {
     try {
       const invoiceId = parseInt(req.params.id);
       const invoice = await invoiceStorage.getInvoiceById(invoiceId);
@@ -32687,13 +32685,14 @@ momtazchem.com
       
       const t = getTranslation();
       
-      const htmlContent = `<!DOCTYPE html>
-<html dir="${direction}" lang="${invoice.language}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <style>
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html dir="${direction}" lang="${invoice.language}">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+            <style>
                 @page {
                     margin: 20mm;
                     size: A4;
@@ -32985,11 +32984,11 @@ momtazchem.com
       
       res.send(pdfBuffer);
       
-    // } catch (error) {
-      // console.error('Error generating invoice PDF:', error);
-      // res.status(500).json({ success: false, message: 'Failed to generate invoice PDF' });
-    // }
-  // });
+    } catch (error) {
+      console.error('Error generating invoice PDF:', error);
+      res.status(500).json({ success: false, message: 'Failed to generate invoice PDF' });
+    }
+  });
 
   // Financial order print endpoint
   app.post('/api/financial/print-order', requireAuth, async (req, res) => {
