@@ -2174,26 +2174,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Save AI Settings
   app.post("/api/ai/settings", requireAuth, async (req, res) => {
     try {
-      const { apiKey, secretKey, model, maxTokens, temperature, aiEnabled, skuGeneration, smartRecommendations } = req.body;
+      const { provider, apiKey, model, maxTokens, temperature, aiEnabled, skuGeneration, smartRecommendations, description } = req.body;
       
-      // For now, store in memory/localStorage equivalent
-      // In production, this would be stored in database
-      const settings = {
-        apiKey: apiKey || "",
-        secretKey: secretKey || "",
-        model: model || "gpt-4o",
+      if (!provider || !apiKey) {
+        return res.status(400).json({
+          success: false,
+          message: "ارائه‌دهنده و کلید API الزامی است"
+        });
+      }
+
+      // Check if settings already exist for this provider
+      const existingSettings = await storage.getActiveAiApiSettings(provider);
+      
+      const settingsData = {
+        model: model || "gpt-5",
         maxTokens: maxTokens || 1000,
         temperature: temperature || 0.7,
-        aiEnabled: aiEnabled !== false,
-        skuGeneration: skuGeneration !== false,
-        smartRecommendations: smartRecommendations !== false,
-        updatedAt: new Date()
+        aiEnabled: aiEnabled || false,
+        skuGeneration: skuGeneration || false,
+        smartRecommendations: smartRecommendations || false
       };
+
+      let result;
+      if (existingSettings) {
+        // Update existing settings
+        result = await storage.updateAiApiSettings(existingSettings.id, {
+          apiKey,
+          description,
+          settings: settingsData,
+          updatedAt: new Date()
+        });
+      } else {
+        // Create new settings
+        result = await storage.createAiApiSettings({
+          provider,
+          apiKey,
+          description: description || `تنظیمات ${provider}`,
+          settings: settingsData,
+          isActive: true
+        });
+      }
       
-      res.json({ success: true, settings });
+      res.json({ 
+        success: true, 
+        settings: result,
+        message: "تنظیمات AI با موفقیت ذخیره شد" 
+      });
     } catch (error) {
       console.error("Error saving AI settings:", error);
-      res.status(500).json({ message: "Failed to save AI settings" });
+      res.status(500).json({ 
+        success: false,
+        message: "خطا در ذخیره تنظیمات AI" 
+      });
+    }
+  });
+
+  // Get AI Settings
+  app.get("/api/ai/settings", requireAuth, async (req, res) => {
+    try {
+      const provider = req.query.provider as string;
+      const settings = await storage.getAiApiSettings(provider);
+      
+      res.json({ 
+        success: true, 
+        data: settings,
+        message: "تنظیمات AI بارگیری شد" 
+      });
+    } catch (error) {
+      console.error("Error fetching AI settings:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "خطا در بارگیری تنظیمات AI" 
+      });
     }
   });
 

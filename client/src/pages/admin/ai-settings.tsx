@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -25,26 +25,37 @@ export default function AISettings() {
   const [smartRecommendations, setSmartRecommendations] = useState(true);
   const [maxTokens, setMaxTokens] = useState("1000");
   const [temperature, setTemperature] = useState("0.7");
-  const [model, setModel] = useState("gpt-4o");
+  const [model, setModel] = useState("gpt-5");
   const [apiProvider, setApiProvider] = useState("openai");
   const [apiKey, setApiKey] = useState("");
-  const [organization, setOrganization] = useState("");
-  const [project, setProject] = useState("");
-  const [secretKey, setSecretKey] = useState("");
+  const [description, setDescription] = useState("");
+  const [currentSettings, setCurrentSettings] = useState<any>(null);
+
+  // Load AI Settings
+  const { data: settingsData, isLoading: loadingSettings, refetch: refetchSettings } = useQuery({
+    queryKey: ['/api/ai/settings'],
+    enabled: true
+  });
 
   // Save AI Settings
   const saveSettingsMutation = useMutation({
-    mutationFn: (settings: any) => apiRequest("/api/ai/settings", "POST", settings),
-    onSuccess: () => {
+    mutationFn: (settings: any) => apiRequest("/api/ai/settings", "POST", {
+      ...settings,
+      provider: apiProvider,
+      description: description || `تنظیمات ${apiProvider}`
+    }),
+    onSuccess: (response) => {
       toast({
         title: "✅ ذخیره موفق",
-        description: "تنظیمات AI با موفقیت ذخیره شد",
+        description: response.message || "تنظیمات AI با موفقیت ذخیره شد",
       });
+      refetchSettings();
+      queryClient.invalidateQueries({ queryKey: ['/api/ai/settings'] });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "❌ خطا در ذخیره",
-        description: "امکان ذخیره تنظیمات وجود ندارد",
+        description: error.message || "امکان ذخیره تنظیمات وجود ندارد",
         variant: "destructive",
       });
     },
@@ -67,6 +78,29 @@ export default function AISettings() {
       });
     },
   });
+
+  // Load settings into state when data is fetched
+  useEffect(() => {
+    if (settingsData?.success && settingsData.data && settingsData.data.length > 0) {
+      const settings = settingsData.data.find((s: any) => s.provider === apiProvider) || settingsData.data[0];
+      if (settings) {
+        setCurrentSettings(settings);
+        setApiKey(settings.apiKey || "");
+        setDescription(settings.description || "");
+        setApiProvider(settings.provider || "openai");
+        
+        // Load settings from JSON field
+        if (settings.settings) {
+          setModel(settings.settings.model || "gpt-5");
+          setMaxTokens(settings.settings.maxTokens?.toString() || "1000");
+          setTemperature(settings.settings.temperature?.toString() || "0.7");
+          setAiEnabled(settings.settings.aiEnabled !== false);
+          setSkuGeneration(settings.settings.skuGeneration !== false);
+          setSmartRecommendations(settings.settings.smartRecommendations !== false);
+        }
+      }
+    }
+  }, [settingsData, apiProvider]);
 
   // Generate Test SKU
   const generateTestSKUMutation = useMutation({
@@ -98,11 +132,8 @@ export default function AISettings() {
       maxTokens: parseInt(maxTokens),
       temperature: parseFloat(temperature),
       model,
-      apiProvider,
       apiKey,
-      organization,
-      project,
-      secretKey,
+      description
     };
     saveSettingsMutation.mutate(settings);
   };
@@ -110,7 +141,8 @@ export default function AISettings() {
   const getModelOptions = () => {
     if (apiProvider === "openai") {
       return [
-        { value: "gpt-4o", label: "GPT-4o (جدیدترین)" },
+        { value: "gpt-5", label: "GPT-5 (جدیدترین)" },
+        { value: "gpt-4o", label: "GPT-4o" },
         { value: "gpt-4-turbo", label: "GPT-4 Turbo" },
         { value: "gpt-4", label: "GPT-4" },
         { value: "gpt-3.5-turbo", label: "GPT-3.5 Turbo" },
@@ -250,44 +282,25 @@ export default function AISettings() {
                     {apiProvider === "openai" && (
                       <>
                         <div className="space-y-2">
-                          <Label htmlFor="organization">Organization ID (اختیاری)</Label>
+                          <Label htmlFor="description">توضیحات (اختیاری)</Label>
                           <Input
-                            id="organization"
+                            id="description"
                             type="text"
-                            value={organization}
-                            onChange={(e) => setOrganization(e.target.value)}
-                            placeholder="org-..."
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="توضیحات تنظیمات..."
                             className="font-mono"
                           />
-                          <p className="text-sm text-gray-500">شناسه سازمان در OpenAI</p>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="project">Project ID (اختیاری)</Label>
-                          <Input
-                            id="project"
-                            type="text"
-                            value={project}
-                            onChange={(e) => setProject(e.target.value)}
-                            placeholder="proj_..."
-                            className="font-mono"
-                          />
-                          <p className="text-sm text-gray-500">شناسه پروژه در OpenAI</p>
+                          <p className="text-sm text-gray-500">توضیحات برای این تنظیمات</p>
                         </div>
                       </>
                     )}
                     
                     <div className="space-y-2">
-                      <Label htmlFor="secretKey">Secret Key (اختیاری)</Label>
-                      <Input
-                        id="secretKey"
-                        type="password"
-                        value={secretKey}
-                        onChange={(e) => setSecretKey(e.target.value)}
-                        placeholder="کلید امنیتی اضافی"
-                        className="font-mono"
-                      />
-                      <p className="text-sm text-gray-500">کلید امنیتی اضافی برای تأیید هویت</p>
+                      <Label htmlFor="status">وضعیت تنظیمات</Label>
+                      <p className="text-sm text-green-600">
+                        {loadingSettings ? "در حال بارگیری..." : currentSettings ? "تنظیمات ذخیره شده" : "تنظیمات جدید"}
+                      </p>
                     </div>
                   </div>
                 </div>

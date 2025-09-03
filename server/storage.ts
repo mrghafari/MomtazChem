@@ -1,4 +1,4 @@
-import { users, leads, leadActivities, passwordResets, abandonedOrders, persistentCarts, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type AbandonedOrder, type InsertAbandonedOrder, type PersistentCart, type InsertPersistentCart } from "@shared/schema";
+import { users, leads, leadActivities, passwordResets, abandonedOrders, persistentCarts, aiApiSettings, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type AbandonedOrder, type InsertAbandonedOrder, type PersistentCart, type InsertPersistentCart, type AiApiSettings, type InsertAiApiSettings } from "@shared/schema";
 import { contacts, showcaseProducts, type Contact, type InsertContact, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { db } from "./db";
 import { showcaseDb } from "./showcase-db";
@@ -69,6 +69,14 @@ export interface IStorage {
   removePersistentCartItem(customerId: number, productId: number): Promise<void>;
   clearPersistentCart(customerId: number): Promise<void>;
   syncLocalCartToDatabase(customerId: number, cartData: {[key: number]: number}): Promise<void>;
+
+  // AI API Settings Management
+  createAiApiSettings(settings: InsertAiApiSettings): Promise<AiApiSettings>;
+  getAiApiSettings(provider?: string): Promise<AiApiSettings[]>;
+  getAiApiSettingById(id: number): Promise<AiApiSettings | undefined>;
+  updateAiApiSettings(id: number, settings: Partial<InsertAiApiSettings>): Promise<AiApiSettings>;
+  deleteAiApiSettings(id: number): Promise<void>;
+  getActiveAiApiSettings(provider: string): Promise<AiApiSettings | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -926,6 +934,65 @@ export class DatabaseStorage implements IStorage {
         lastReminderAt: new Date()
       })
       .where(eq(abandonedOrders.id, id));
+  }
+
+  // AI API Settings Management Implementation
+  async createAiApiSettings(insertSettings: InsertAiApiSettings): Promise<AiApiSettings> {
+    const [settings] = await db
+      .insert(aiApiSettings)
+      .values(insertSettings)
+      .returning();
+    return settings;
+  }
+
+  async getAiApiSettings(provider?: string): Promise<AiApiSettings[]> {
+    if (provider) {
+      return await db
+        .select()
+        .from(aiApiSettings)
+        .where(eq(aiApiSettings.provider, provider))
+        .orderBy(desc(aiApiSettings.createdAt));
+    }
+    return await db
+      .select()
+      .from(aiApiSettings)
+      .orderBy(desc(aiApiSettings.createdAt));
+  }
+
+  async getAiApiSettingById(id: number): Promise<AiApiSettings | undefined> {
+    const results = await db
+      .select()
+      .from(aiApiSettings)
+      .where(eq(aiApiSettings.id, id))
+      .limit(1);
+    return results[0];
+  }
+
+  async updateAiApiSettings(id: number, updateSettings: Partial<InsertAiApiSettings>): Promise<AiApiSettings> {
+    const [settings] = await db
+      .update(aiApiSettings)
+      .set({ ...updateSettings, updatedAt: new Date() })
+      .where(eq(aiApiSettings.id, id))
+      .returning();
+    return settings;
+  }
+
+  async deleteAiApiSettings(id: number): Promise<void> {
+    await db
+      .delete(aiApiSettings)
+      .where(eq(aiApiSettings.id, id));
+  }
+
+  async getActiveAiApiSettings(provider: string): Promise<AiApiSettings | undefined> {
+    const results = await db
+      .select()
+      .from(aiApiSettings)
+      .where(and(
+        eq(aiApiSettings.provider, provider),
+        eq(aiApiSettings.isActive, true)
+      ))
+      .limit(1);
+    return results[0];
   }
 
 }
