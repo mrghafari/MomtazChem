@@ -591,6 +591,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       // بخش مالی فقط سفارشات در مراحل مالی را می‌بیند - جلوگیری از تکرار
       const financialStatuses = statuses || [
         'pending', // سفارشات در انتظار - مهم: این status در ابتدای سفارش ست می‌شود
+        'finance_pending', // سفارشات آماده بررسی مالی - CRITICAL: اضافه شد برای M2511214
         orderStatuses.PENDING_PAYMENT,
         orderStatuses.PAYMENT_UPLOADED, 
         orderStatuses.FINANCIAL_REVIEWING,
