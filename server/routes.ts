@@ -50162,13 +50162,30 @@ momtazchem.com
       // Download file directly from Object Storage for validation
       let fileBuffer: Buffer;
       try {
+        console.log(`🔍 [VALIDATION] Checking file: ${bucketName}/${objectName}`);
+        
         const bucket = objectStorageClient.bucket(bucketName);
         const file = bucket.file(objectName);
         
-        // Check if file exists
-        const [exists] = await file.exists();
+        // Wait a moment for upload to complete before validation
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Check if file exists with retries
+        let exists = false;
+        let retries = 3;
+        
+        while (!exists && retries > 0) {
+          [exists] = await file.exists();
+          if (!exists) {
+            console.log(`⏳ [VALIDATION] File not found, retrying... (${retries} attempts left)`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            retries--;
+          }
+        }
+        
         if (!exists) {
-          throw new Error('فایل یافت نشد');
+          console.error(`❌ [VALIDATION] File not found after retries: ${objectName}`);
+          throw new Error('فایل یافت نشد - آپلود تکمیل نشده');
         }
         
         // Download file content
