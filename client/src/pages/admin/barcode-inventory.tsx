@@ -113,9 +113,7 @@ export default function BarcodeInventory() {
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.barcode?.includes(searchTerm) ||
-    product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (product.price && product.price.toString().includes(searchTerm)) ||
-    (product.priceUnit && product.priceUnit.toLowerCase().includes(searchTerm.toLowerCase()))
+    product.sku?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -608,24 +606,6 @@ ${optionalFields}^XZ`;
                   </th>
                   <th 
                     className="text-left p-3 border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('stockQuantity')}
-                  >
-                    <div className="flex items-center gap-2">
-                      موجودی
-                      {getSortIcon('stockQuantity')}
-                    </div>
-                  </th>
-                  <th 
-                    className="text-left p-3 border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('price')}
-                  >
-                    <div className="flex items-center gap-2">
-                      قیمت
-                      {getSortIcon('price')}
-                    </div>
-                  </th>
-                  <th 
-                    className="text-left p-3 border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
                     onClick={() => handleSort('barcode')}
                   >
                     <div className="flex items-center gap-2">
@@ -653,20 +633,6 @@ ${optionalFields}^XZ`;
                     </td>
                     <td className="p-3 border border-gray-200">
                       <Badge variant="secondary">{product.category}</Badge>
-                    </td>
-                    <td className="p-3 border border-gray-200">
-                      <div className={`flex items-center gap-2 p-2 rounded ${getStockStatusColor(product)} text-white`}>
-                        {getStockStatusIcon(product)}
-                        <span>{product.stockQuantity} {product.stockUnit}</span>
-                      </div>
-                    </td>
-                    <td className="p-3 border border-gray-200">
-                      <div className="font-medium">
-                        {product.price ? 
-                          `${Math.round(product.price).toLocaleString()} ${product.priceUnit || 'IQD'}` 
-                          : 'قیمت تعریف نشده'
-                        }
-                      </div>
                     </td>
                     <td className="p-3 border border-gray-200">
                       {product.barcode ? (

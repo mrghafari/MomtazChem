@@ -1445,18 +1445,6 @@ export default function ProductsPage() {
                           {getInventoryStatusIcon(getActualInventoryStatus(product.stockQuantity, product.minStockLevel))}
                           {getInventoryStatusLabel(getActualInventoryStatus(product.stockQuantity, product.minStockLevel))}
                         </Badge>
-                        <div className="flex flex-col items-end">
-                          {product.priceRange && (
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">
-                              {product.priceRange}
-                            </span>
-                          )}
-                          {product.unitPrice && (
-                            <span className="text-sm font-bold text-green-600">
-                              {product.unitPrice} {product.currency || 'IQD'}
-                            </span>
-                          )}
-                        </div>
                       </div>
 
                       {/* Current Selling Batch (LIFO) - Only show if product has multiple batches */}
@@ -1508,33 +1496,6 @@ export default function ProductsPage() {
                         </div>
                       )}
 
-                      {/* Stock Level Indicator */}
-                      {productGroup.totalStock !== undefined && productGroup.totalStock !== null && (
-                        <div className="space-y-1 w-full">
-                          <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 min-w-0">
-                            <span className="break-words truncate">کل موجودی: {productGroup.totalStock.toLocaleString()}</span>
-                            {product.maxStockLevel && <span className="break-words truncate ml-2">Max: {product.maxStockLevel.toLocaleString()}</span>}
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                            <div 
-                              className={`h-2 rounded-full transition-all duration-300 ${
-                                getStockLevelIndicator(
-                                  Number(product.stockQuantity) || 0, 
-                                  Number(product.minStockLevel) || 0, 
-                                  Number(product.maxStockLevel) || 1000
-                                ).color
-                              }`}
-                              style={{ 
-                                width: `${Math.min(100, getStockLevelIndicator(
-                                  Number(product.stockQuantity) || 0, 
-                                  Number(product.minStockLevel) || 0, 
-                                  Number(product.maxStockLevel) || 1000
-                                ).width)}%` 
-                              }}
-                            />
-                          </div>
-                        </div>
-                      )}
 
                       {/* Product Weight Information */}
                       {(product.netWeight || product.grossWeight || (product.weight && parseFloat(product.weight) > 0)) && (
