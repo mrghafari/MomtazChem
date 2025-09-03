@@ -819,14 +819,6 @@ export default function CRM() {
         <div className="flex gap-2">
           <Button 
             variant="outline"
-            onClick={() => setLocation('/admin/logistics-geography')}
-            className="flex items-center gap-2 bg-blue-50 border-blue-200 hover:bg-blue-100"
-          >
-            <Globe className="h-4 w-4" />
-            مدیریت جغرافیای لجستیک
-          </Button>
-          <Button 
-            variant="outline"
             onClick={() => handleExportAnalytics()}
             className="flex items-center gap-2"
           >
