@@ -1136,20 +1136,32 @@ function FinanceOrders() {
                     />
                   </div>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="text-center p-8">
-                      <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-lg text-gray-600 mb-4">نوع فایل پشتیبانی نمی‌شود</p>
-                      <Button
-                        variant="outline"
-                        onClick={() => window.open(selectedImageUrl, '_blank')}
-                        className="flex items-center gap-2"
-                      >
-                        <Eye className="w-4 h-4" />
-                        باز کردن در تب جدید
-                      </Button>
+                  // If it's a PDF file but not handled above, open directly in new tab
+                  isPdfUrl(selectedImageUrl, selectedFileMimeType) ? (
+                    window.open(selectedImageUrl, '_blank'),
+                    setImageModalOpen(false),
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center p-8">
+                        <FileText className="w-16 h-16 text-green-400 mx-auto mb-4" />
+                        <p className="text-lg text-gray-600">در حال باز کردن PDF در تب جدید...</p>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center p-8">
+                        <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <p className="text-lg text-gray-600 mb-4">نوع فایل پشتیبانی نمی‌شود</p>
+                        <Button
+                          variant="outline"
+                          onClick={() => window.open(selectedImageUrl, '_blank')}
+                          className="flex items-center gap-2"
+                        >
+                          <Eye className="w-4 h-4" />
+                          باز کردن در تب جدید
+                        </Button>
+                      </div>
+                    </div>
+                  )
                 )}
               </>
             )}
