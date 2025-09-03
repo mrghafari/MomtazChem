@@ -126,13 +126,17 @@ export class FileSecurityService {
         errors.push(`پسوند فایل مجاز نیست: ${fileExtension}`);
       }
 
-      // Layer 4: Content pattern scanning for malicious code
-      const contentStr = fileBuffer.toString('utf8');
-      for (const pattern of this.config.blockedPatterns) {
-        if (pattern.test(contentStr)) {
-          errors.push('فایل حاوی محتوای مشکوک است');
-          break;
+      // Layer 4: Content pattern scanning for malicious code (only for text files)
+      if (this.isTextFile(detectedType.mime)) {
+        const contentStr = fileBuffer.toString('utf8');
+        for (const pattern of this.config.blockedPatterns) {
+          if (pattern.test(contentStr)) {
+            errors.push('فایل حاوی محتوای مشکوک است');
+            break;
+          }
         }
+      } else {
+        console.log(`🖼️ [SECURITY] Skipping text pattern scan for image/binary file: ${detectedType.mime}`);
       }
 
       // Layer 5: Virus scanning (if available)
@@ -361,6 +365,24 @@ export class FileSecurityService {
     }
     
     return report;
+  }
+
+  /**
+   * Check if the file type is a text-based file that should be scanned for patterns
+   */
+  private isTextFile(mimeType: string): boolean {
+    const textMimeTypes = [
+      'text/plain',
+      'text/html',
+      'text/css',
+      'text/javascript',
+      'application/javascript',
+      'application/json',
+      'application/xml',
+      'text/xml'
+    ];
+    
+    return textMimeTypes.includes(mimeType) || mimeType.startsWith('text/');
   }
 }
 

@@ -85,7 +85,7 @@ export function SimpleBankReceiptUploader({
           fileUrl: uploadData.uploadUrl,
           fileName: file.name,
           userId: 'anonymous',
-          uploadType: 'general'
+          uploadType: 'bank-receipt'
         })
       });
 
