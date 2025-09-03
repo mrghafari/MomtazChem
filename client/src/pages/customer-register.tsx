@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Link, useLocation } from "wouter";
 import { z } from "zod";
+import { Move } from "lucide-react";
 
 // Enhanced registration schema with mandatory fields
 const customerRegistrationSchema = z.object({
@@ -41,6 +42,13 @@ const CustomerRegister = () => {
   const [, setLocation] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState("");
+  
+  // Draggable state and refs
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const formRef = useRef<HTMLDivElement>(null);
+  const dragHandleRef = useRef<HTMLDivElement>(null);
 
   // Fetch provinces data
   const { data: provinces = [] } = useQuery({
@@ -116,10 +124,64 @@ const CustomerRegister = () => {
     registerMutation.mutate(data);
   };
 
+  // Drag functionality
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (dragHandleRef.current && dragHandleRef.current.contains(e.target as Node)) {
+      setIsDragging(true);
+      setDragStart({
+        x: e.clientX - position.x,
+        y: e.clientY - position.y
+      });
+      e.preventDefault();
+    }
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isDragging) {
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, dragStart]);
+
   return (
     <div className="pt-20 min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-lg shadow-md p-8">
+        <div 
+          ref={formRef}
+          className={`bg-white rounded-lg shadow-md p-8 ${isDragging ? 'cursor-grabbing shadow-2xl' : 'cursor-auto'} transition-shadow duration-200`}
+          style={{
+            transform: `translate(${position.x}px, ${position.y}px)`,
+            position: 'relative',
+            zIndex: isDragging ? 1000 : 'auto'
+          }}
+          onMouseDown={handleMouseDown}
+        >
+          {/* Drag Handle */}
+          <div 
+            ref={dragHandleRef}
+            className="flex items-center justify-center w-full py-2 mb-4 border-b border-gray-200 cursor-grab active:cursor-grabbing hover:bg-gray-50 rounded-t-lg"
+          >
+            <Move className="w-5 h-5 text-gray-400" />
+            <span className="ml-2 text-sm text-gray-500 select-none">Drag to move</span>
+          </div>
+
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
             <p className="text-gray-600">
