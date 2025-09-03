@@ -566,7 +566,7 @@ export class CustomerStorage implements ICustomerStorage {
     try {
       console.log(`🔍 [COMPLETE HISTORY] Loading complete order history for customer ${customerId}`);
       
-      // Get all orders for this customer (including deleted ones) with invoice_type
+      // Get all orders for this customer (including deleted ones)
       const orders = await customerDb.select({
         id: customerOrders.id,
         customerId: customerOrders.customerId,
@@ -588,9 +588,7 @@ export class CustomerStorage implements ICustomerStorage {
         currency: customerOrders.currency,
         shippingCost: customerOrders.shippingCost,
         taxAmount: customerOrders.taxAmount,
-        discountAmount: customerOrders.discountAmount,
-        invoiceType: customerOrders.invoiceType,  // 🧾 اضافه کردن invoice_type
-        invoiceConvertedAt: customerOrders.invoiceConvertedAt  // 🧾 اضافه کردن تاریخ تبدیل
+        discountAmount: customerOrders.discountAmount
       })
         .from(customerOrders)
         .where(eq(customerOrders.customerId, customerId))
