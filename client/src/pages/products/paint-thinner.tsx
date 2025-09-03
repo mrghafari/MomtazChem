@@ -15,13 +15,6 @@ const PaintThinnerPage = () => {
     queryFn: () => fetch("/api/products?category=paint-thinner").then(res => res.json()),
   });
 
-  const { data: randomProductsData, isLoading: loadingRandomProducts } = useQuery({
-    queryKey: ["/api/products/random/paint-thinner"],
-    refetchInterval: 10000, // Refetch every 10 seconds to catch database changes
-  });
-
-  // Debug the actual data received
-  console.log('🔄 [PAINT-THINNER] useQuery randomProductsData:', randomProductsData);
 
   const benefits = [
     {
@@ -175,12 +168,10 @@ const PaintThinnerPage = () => {
                       </h3>
                       <div className="flex items-center gap-2">
                         <div className={`w-3 h-3 rounded-full ${
-                          product.inventoryStatus === 'in_stock' ? 'bg-green-500' :
-                          product.inventoryStatus === 'low_stock' ? 'bg-yellow-500' :
-                          'bg-red-500'
+                          product.stockQuantity && product.stockQuantity > 0 ? 'bg-green-500' : 'bg-red-500'
                         }`}></div>
                         <span className="text-xs text-gray-500 capitalize">
-                          {product.inventoryStatus?.replace('_', ' ')}
+                          {product.stockQuantity && product.stockQuantity > 0 ? 'In Stock' : 'Out of Stock'}
                         </span>
                       </div>
                     </div>
@@ -196,7 +187,7 @@ const PaintThinnerPage = () => {
                           {(product.features as string[]).map((feature, featureIndex) => (
                             <li key={featureIndex} className="flex items-center text-gray-700">
                               <CheckCircle className="h-4 w-4 text-secondary mr-3 flex-shrink-0" />
-                              {feature}
+                              {String(feature)}
                             </li>
                           ))}
                         </ul>
@@ -209,7 +200,7 @@ const PaintThinnerPage = () => {
                         <div className="flex flex-wrap gap-2">
                           {(product.applications as string[]).map((app, appIndex) => (
                             <span key={appIndex} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-                              {app}
+                              {String(app)}
                             </span>
                           ))}
                         </div>
@@ -268,131 +259,6 @@ const PaintThinnerPage = () => {
         </div>
       </section>
 
-      {/* Random Products Recommendations Section - Controlled by Content Management */}
-      {(() => {
-        const shouldShow = randomProductsData?.success && 
-                          Array.isArray(randomProductsData?.data) && 
-                          randomProductsData.data.length > 0;
-        console.log('🐛 [DEBUG] Random Products Conditional Check:', {
-          success: randomProductsData?.success,
-          isArray: Array.isArray(randomProductsData?.data),
-          dataLength: randomProductsData?.data?.length,
-          shouldShow: shouldShow,
-          fullData: randomProductsData
-        });
-        return shouldShow;
-      })() && (
-        <section className="py-16 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
-                <Star className="w-4 h-4" />
-                محصولات کامل و مستند
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                محصولات کاملاً مستندسازی شده
-              </h2>
-              <p className="text-lg text-gray-600 max-w-4xl mx-auto">
-                محصولاتی با کاردکس کامل، کاتالوگ فنی و برگه اطلاعات ایمنی (MSDS) برای استفاده حرفه‌ای
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {randomProductsData.data.map((product: ShowcaseProduct) => (
-                <Card key={product.id} className="h-full hover:shadow-xl transition-all duration-300 border-0 bg-white/90 backdrop-blur-sm cursor-pointer group"
-                      onClick={() => window.location.href = `/shop?product=${product.id}`}>
-                  <CardContent className="p-6 h-full flex flex-col">
-                    {product.imageUrl && (
-                      <div className="aspect-video w-full mb-4 bg-gray-100 rounded-lg overflow-hidden">
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="outline" className="text-orange-600 border-orange-600">
-                        {product.category}
-                      </Badge>
-                      <Badge className="bg-green-100 text-green-800 border-green-300">
-                        ✅ مستندسازی کامل
-                      </Badge>
-                    </div>
-                    
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">{product.name}</h3>
-                    
-                    {product.technicalName && (
-                      <p className="text-sm text-gray-600 mb-3 font-medium">{product.technicalName}</p>
-                    )}
-                    
-                    {product.description && (
-                      <p className="text-gray-600 mb-4 line-clamp-2 flex-grow">{product.description}</p>
-                    )}
-                    
-                    <div className="mt-auto space-y-3">
-                      {product.features && Array.isArray(product.features) && product.features.slice(0, 2).map((feature, index) => (
-                        <div key={index} className="flex items-center text-sm text-gray-700">
-                          <CheckCircle className="h-3 w-3 text-green-500 mr-2 flex-shrink-0" />
-                          {String(feature)}
-                        </div>
-                      ))}
-                      
-                      <div className="flex items-center gap-2 pt-2">
-                        <Badge variant="outline" className="text-xs">
-                          <Package className="w-3 h-3 mr-1" />
-                          Kardex
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          <FileText className="w-3 h-3 mr-1" />
-                          Catalog
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          <Shield className="w-3 h-3 mr-1" />
-                          MSDS
-                        </Badge>
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.location.href = `/shop?product=${product.id}`;
-                          }}
-                          className="flex-1 bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded-md text-sm font-medium transition-colors"
-                        >
-                          🛒 View in Shop
-                        </button>
-                        <div onClick={(e) => e.stopPropagation()}>
-                          <ProductInquiryForm 
-                            product={product}
-                            triggerText="Quote"
-                            triggerVariant="outline"
-                            triggerSize="sm"
-                            className="border-orange-600 text-orange-600 hover:bg-orange-50"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Settings Info */}
-            <div className="mt-8 text-center">
-              <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-4 py-2 rounded-lg text-sm">
-                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                نمایش {randomProductsData.settings?.selectedCount} محصول کامل از {randomProductsData.settings?.totalProducts} محصول موجود
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* CTA Section */}
       <section className="py-16 bg-gradient-to-r from-orange-600 to-red-600 text-white">
