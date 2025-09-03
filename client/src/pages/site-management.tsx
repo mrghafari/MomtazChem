@@ -340,14 +340,6 @@ export default function SiteManagement() {
       moduleId: "geography_analytics"
     },
     {
-      id: "ai-settings",
-      label: "AI Settings",
-      icon: Zap,
-      onClick: () => trackButtonClick("ai-settings", () => setLocation("/admin/ai-settings")),
-      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
-      moduleId: "ai_settings"
-    },
-    {
       id: "refresh-control",
       label: "Refresh Control",
       icon: RefreshCw,
