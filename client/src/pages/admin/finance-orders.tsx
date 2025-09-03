@@ -241,6 +241,111 @@ function FinanceOrders() {
     }
   });
 
+  // Mutations for approve/reject - MOVED to top to fix hooks order
+  const approveMutation = useMutation({
+    mutationFn: async ({ orderId, notes, receiptAmount }: { orderId: number; notes: string; receiptAmount?: string }) => {
+      console.log(`🔄 [FINANCE] Sending approve request for order ${orderId} with receipt amount: ${receiptAmount}`);
+      return apiRequest(`/api/finance/orders/${orderId}/approve`, {
+        method: 'POST',
+        body: { notes, receiptAmount }
+      });
+    },
+    onSuccess: (response) => {
+      console.log(`✅ [FINANCE] Order approved successfully:`, response);
+      toast({
+        title: "✅ سفارش تایید شد",
+        description: "پرداخت تایید شد و سفارش به واحد انبار منتقل شد"
+      });
+      // Invalidate all finance-related queries
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
+      
+      // Force refresh the data immediately
+      refetch();
+      refetchApproved();
+      
+      // Close modals and reset state
+      setDialogOpen(false);
+      setOrderDetailsModalOpen(false);
+      setSelectedOrder(null);
+      setOrderDetails(null);
+      setReviewNotes("");
+    },
+    onError: (error: any) => {
+      console.error(`❌ [FINANCE] Approve error:`, error);
+      toast({
+        title: "خطا در تایید",
+        description: error.message || "امکان تایید سفارش وجود ندارد",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: async ({ orderId, notes }: { orderId: number; notes: string }) => {
+      console.log(`🔄 [FINANCE] Sending reject request for order ${orderId}`);
+      return apiRequest(`/api/finance/orders/${orderId}/reject`, {
+        method: 'POST',
+        body: { notes }
+      });
+    },
+    onSuccess: (response) => {
+      console.log(`❌ [FINANCE] Order rejected successfully:`, response);
+      toast({
+        title: "❌ سفارش رد شد",
+        description: "پرداخت رد شد و به قسمت سفارشات رد شده منتقل شد"
+      });
+      // Invalidate all finance-related queries
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
+      
+      // Force refresh the data immediately
+      refetch();
+      refetchApproved();
+      
+      // Close modals and reset state
+      setDialogOpen(false);
+      setOrderDetailsModalOpen(false);
+      setSelectedOrder(null);
+      setOrderDetails(null);
+      setReviewNotes("");
+    },
+    onError: (error: any) => {
+      console.error(`❌ [FINANCE] Reject error:`, error);
+      toast({
+        title: "خطا در رد سفارش",
+        description: error.message || "امکان رد سفارش وجود ندارد",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Payment workflow automation - fix incomplete payments - MOVED to top
+  const paymentAutomationMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest('/api/admin/fix-incomplete-payments', {
+        method: 'POST'
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "✅ بهبود کیف پول",
+        description: "پرداخت‌های ناتمام تصحیح شدند"
+      });
+      refetch();
+      refetchApproved();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در بهبود پرداخت",
+        description: error.message || "خطا در تصحیح پرداخت‌های ناتمام",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Early return for loading state - AFTER all hooks are called
   if (isCheckingAuth) {
     return (
@@ -446,113 +551,7 @@ function FinanceOrders() {
     }
   }, [ordersResponse, refetch, refetchApproved]);
 
-
-  // Mutations for approve/reject
-  const approveMutation = useMutation({
-    mutationFn: async ({ orderId, notes, receiptAmount }: { orderId: number; notes: string; receiptAmount?: string }) => {
-      console.log(`🔄 [FINANCE] Sending approve request for order ${orderId} with receipt amount: ${receiptAmount}`);
-      return apiRequest(`/api/finance/orders/${orderId}/approve`, {
-        method: 'POST',
-        body: { notes, receiptAmount }
-      });
-    },
-    onSuccess: (response) => {
-      console.log(`✅ [FINANCE] Order approved successfully:`, response);
-      toast({
-        title: "✅ سفارش تایید شد",
-        description: "پرداخت تایید شد و سفارش به واحد انبار منتقل شد"
-      });
-      // Invalidate all finance-related queries
-      queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
-      
-      // Force refresh the data immediately
-      refetch();
-      refetchApproved();
-      
-      // Close modals and reset state
-      setDialogOpen(false);
-      setOrderDetailsModalOpen(false);
-      setSelectedOrder(null);
-      setOrderDetails(null);
-      setReviewNotes("");
-    },
-    onError: (error: any) => {
-      console.error(`❌ [FINANCE] Approve error:`, error);
-      toast({
-        title: "خطا در تایید",
-        description: error.message || "امکان تایید سفارش وجود ندارد",
-        variant: "destructive"
-      });
-    }
-  });
-
-  const rejectMutation = useMutation({
-    mutationFn: async ({ orderId, notes }: { orderId: number; notes: string }) => {
-      console.log(`🔄 [FINANCE] Sending reject request for order ${orderId}`);
-      return apiRequest(`/api/finance/orders/${orderId}/reject`, {
-        method: 'POST',
-        body: { notes }
-      });
-    },
-    onSuccess: (response) => {
-      console.log(`❌ [FINANCE] Order rejected successfully:`, response);
-      toast({
-        title: "❌ سفارش رد شد",
-        description: "پرداخت رد شد و به قسمت سفارشات رد شده منتقل شد"
-      });
-      // Invalidate all finance-related queries
-      queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
-      
-      // Force refresh the data immediately
-      refetch();
-      refetchApproved();
-      
-      // Close modals and reset state
-      setDialogOpen(false);
-      setOrderDetailsModalOpen(false);
-      setSelectedOrder(null);
-      setOrderDetails(null);
-      setReviewNotes("");
-    },
-    onError: (error: any) => {
-      console.error(`❌ [FINANCE] Reject error:`, error);
-      toast({
-        title: "خطا در رد سفارش",
-        description: error.message || "امکان رد سفارش وجود ندارد",
-        variant: "destructive"
-      });
-    }
-  });
-
-  // Payment workflow automation - fix incomplete payments
-  const paymentAutomationMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest('/api/admin/fix-incomplete-payments', {
-        method: 'POST'
-      });
-    },
-    onSuccess: (response) => {
-      toast({
-        title: "تصحیح خودکار workflow انجام شد",
-        description: `${response.ordersFixed?.length || 0} سفارش تصحیح شد: ${response.ordersFixed?.join(', ') || 'هیچ موردی'}`
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
-      refetch();
-      refetchApproved();
-    },
-    onError: (error: any) => {
-      toast({
-        title: "خطا در تصحیح workflow",
-        description: error.message || "امکان تصحیح workflow وجود ندارد",
-        variant: "destructive"
-      });
-    }
-  });
+  // DUPLICATE MUTATIONS REMOVED - using mutations defined at top of component
 
   // Process pending bank gateway payments
   const processPendingBankPayments = useMutation({
