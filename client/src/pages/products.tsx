@@ -193,17 +193,36 @@ export default function ProductsPage() {
     icon: React.ReactNode;
   };
 
-  const categories: CategoryOption[] = [
-    { value: "water-treatment", label: "Water Treatment", icon: <Droplet className="w-4 h-4" /> },
-    { value: "fuel-additives", label: "Fuel Additives", icon: <Beaker className="w-4 h-4" /> },
-    { value: "paint-solvents", label: "Paint & Solvents", icon: <Package className="w-4 h-4" /> },
+  // Function to get icon based on category name
+  function getIconForCategory(categoryName: string): React.ReactNode {
+    const name = categoryName.toLowerCase();
+    if (name.includes('water') || name.includes('treatment')) return <Droplet className="w-4 h-4" />;
+    if (name.includes('fuel') || name.includes('additive')) return <Beaker className="w-4 h-4" />;
+    if (name.includes('paint') || name.includes('solvent')) return <Package className="w-4 h-4" />;
+    if (name.includes('fertilizer') || name.includes('agricultural')) return <Package className="w-4 h-4" />;
+    if (name.includes('chemical') || name.includes('industrial')) return <Package className="w-4 h-4" />;
+    if (name.includes('equipment') || name.includes('technical')) return <Package className="w-4 h-4" />;
+    if (name.includes('commercial') || name.includes('goods')) return <Package className="w-4 h-4" />;
+    return <Package className="w-4 h-4" />; // Default icon
+  }
 
-    { value: "agricultural-fertilizers", label: "Agricultural Fertilizers", icon: <Package className="w-4 h-4" /> },
-    { value: "industrial-chemicals", label: "Industrial Chemicals", icon: <Package className="w-4 h-4" /> },
-    { value: "paint-thinner", label: "Paint Thinner", icon: <Droplet className="w-4 h-4" /> },
-    { value: "technical-equipment", label: "Technical Equipment", icon: <Package className="w-4 h-4" /> },
-    { value: "commercial-goods", label: "Commercial Goods", icon: <Package className="w-4 h-4" /> },
-  ];
+  // Convert API categories to dropdown options with fallback
+  const categories: CategoryOption[] = categoriesData && categoriesData.length > 0 
+    ? categoriesData.map((cat: any) => ({
+        value: cat.name, // Use the actual category name
+        label: cat.name,
+        icon: getIconForCategory(cat.name)
+      }))
+    : [
+        // Fallback categories if API fails
+        { value: "Water Treatment", label: "Water Treatment", icon: <Droplet className="w-4 h-4" /> },
+        { value: "Fuel Additives", label: "Fuel Additives", icon: <Beaker className="w-4 h-4" /> },
+        { value: "Paint & Solvents", label: "Paint & Solvents", icon: <Package className="w-4 h-4" /> },
+        { value: "Agricultural Fertilizers", label: "Agricultural Fertilizers", icon: <Package className="w-4 h-4" /> },
+        { value: "Industrial Chemicals", label: "Industrial Chemicals", icon: <Package className="w-4 h-4" /> },
+        { value: "Technical equipment", label: "Technical equipment", icon: <Package className="w-4 h-4" /> },
+        { value: "Commercial goods", label: "Commercial goods", icon: <Package className="w-4 h-4" /> },
+      ];
 
   const { data: products, isLoading, refetch } = useQuery<ShowcaseProduct[]>({
     queryKey: ["/api/products"],
