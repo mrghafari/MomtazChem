@@ -549,7 +549,7 @@ export default function WhatsAppCRM() {
                 پیام برای {selectedCustomers.length} مشتری ارسال خواهد شد.
               </p>
               <p className="text-xs text-blue-600 mt-1">
-                از {{customerName}} برای شخصی‌سازی پیام استفاده کنید.
+                از {'{'}{'{'} customerName {'}'}{'}'} برای شخصی‌سازی پیام استفاده کنید.
               </p>
             </div>
             <div>
@@ -557,7 +557,7 @@ export default function WhatsAppCRM() {
               <Textarea
                 value={bulkMessage}
                 onChange={(e) => setBulkMessage(e.target.value)}
-                placeholder="سلام {{customerName}} عزیز، ..."
+                placeholder="سلام {'{{'}customerName{'}'} عزیز، ..."
                 rows={6}
               />
             </div>
