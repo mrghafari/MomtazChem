@@ -27998,7 +27998,32 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     });
   });
 
-  // Get logistics pending orders - only warehouse_approved orders
+  // Get logistics orders using centralized system
+  app.get('/api/logistics/orders', requireDepartmentAuth('logistics'), async (req, res) => {
+    try {
+      console.log('🚚 [LOGISTICS API] Using centralized order data system');
+      
+      // Get logistics relevant orders using the unified approach  
+      const orders = await orderManagementStorage.getOrdersByDepartment('logistics');
+      
+      console.log(`✅ [LOGISTICS API] Retrieved ${orders.length} orders from centralized system`);
+      
+      // Return unified format with complete information
+      res.json({
+        success: true,
+        orders: orders,
+        message: `Found ${orders.length} logistics orders`
+      });
+    } catch (error) {
+      console.error('❌ [LOGISTICS API] Error fetching logistics orders:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت سفارشات لجستیک" 
+      });
+    }
+  });
+
+  /*
   app.get('/api/logistics/orders', requireDepartmentAuth('logistics'), async (req, res) => {
     try {
       const orders = await orderManagementStorage.getLogisticsPendingOrders();
@@ -28007,29 +28032,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const ordersWithWeight = await Promise.all(
         orders.map(async (order) => {
           try {
-            const weight = await orderManagementStorage.calculateOrderWeight(order.customerOrderId);
-            return {
-              ...order,
-              calculatedWeight: weight,
-              weightUnit: 'kg'
-            };
-          } catch (error) {
-            console.error(`Error calculating weight for order ${order.customerOrderId}:`, error);
-            return {
-              ...order,
-              calculatedWeight: 0,
-              weightUnit: 'kg'
-            };
-          }
-        })
-      );
-      
-      res.json({ success: true, orders: ordersWithWeight });
-    } catch (error) {
-      console.error('Error fetching logistics orders:', error);
-      res.status(500).json({ success: false, message: "خطا در دریافت سفارشات" });
-    }
-  });
 
   // Calculate order weight endpoint - accessible by all authenticated users
   app.post('/api/orders/:customerOrderId/calculate-weight', requireAuth, async (req, res) => {
