@@ -49,7 +49,6 @@ import ProformaInvoiceConverter from "./proforma-invoice-converter";
 import { AutoInvoiceConverter } from "./auto-invoice-converter";
 import { secureObjectStorageService } from "./secureObjectStorage";
 import { fileSecurityService } from "./fileSecurityService";
-import { ObjectStorageService, objectStorageClient } from "./objectStorage";
 
 import { 
   vehicleTemplates, 
@@ -5399,23 +5398,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const labelConfigs = {
       small: { 
         width: '40mm', height: '28mm', padding: '1mm',
-        nameFont: '12px', skuFont: '9px', priceFont: '9px', websiteFont: '8px',
-        barcodeFont: '14px', nameMaxLength: 15, skuMaxLength: 10
+        nameFont: '8px', skuFont: '6px', priceFont: '6px', websiteFont: '6px',
+        barcodeFont: '10px', nameMaxLength: 15, skuMaxLength: 10
       },
       standard: { 
         width: '56mm', height: '36mm', padding: '2mm',
-        nameFont: '16px', skuFont: '12px', priceFont: '12px', websiteFont: '10px',
-        barcodeFont: '16px', nameMaxLength: 25, skuMaxLength: 15
+        nameFont: '10px', skuFont: '8px', priceFont: '8px', websiteFont: '8px',
+        barcodeFont: '12px', nameMaxLength: 25, skuMaxLength: 15
       },
       large: { 
         width: '72mm', height: '44mm', padding: '3mm',
-        nameFont: '20px', skuFont: '14px', priceFont: '14px', websiteFont: '12px',
-        barcodeFont: '20px', nameMaxLength: 35, skuMaxLength: 18
+        nameFont: '14px', skuFont: '10px', priceFont: '10px', websiteFont: '10px',
+        barcodeFont: '16px', nameMaxLength: 35, skuMaxLength: 18
       },
       roll: { 
         width: '48mm', height: '20mm', padding: '1mm',
-        nameFont: '10px', skuFont: '8px', priceFont: '8px', websiteFont: '7px',
-        barcodeFont: '12px', nameMaxLength: 18, skuMaxLength: 12
+        nameFont: '7px', skuFont: '6px', priceFont: '6px', websiteFont: '6px',
+        barcodeFont: '8px', nameMaxLength: 18, skuMaxLength: 12
       }
     };
     
@@ -5453,7 +5452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         background: white;
         box-sizing: border-box;
         page-break-inside: avoid;
-        font-family: 'Tahoma', 'Vazir', 'Segoe UI', Arial, sans-serif;
+        font-family: Arial, sans-serif;
         overflow: hidden;
         position: relative;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -5493,7 +5492,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               <span class="sku-text" style="
                 font-size: ${config.skuFont}; 
                 color: #333; 
-                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+                font-family: 'Courier New', monospace;
                 font-weight: 500;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -5573,7 +5572,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           body { 
             margin: 0; 
             padding: 8mm; 
-            font-family: 'Tahoma', 'Vazir', 'Segoe UI', Arial, sans-serif;
+            font-family: Arial, sans-serif;
             font-size: 10px;
             background: white;
             color: black;
@@ -5768,7 +5767,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   body { 
                     margin: 0; 
                     padding: 20px; 
-                    font-family: 'Tahoma', 'Vazir', 'Segoe UI', Arial, sans-serif;
+                    font-family: Arial, sans-serif;
                     background: white;
                     width: 800px;
                     height: auto;
@@ -50135,79 +50134,16 @@ momtazchem.com
         });
       }
 
-      // Extract bucket and object name from upload URL for validation
-      let bucketName: string;
-      let objectName: string;
-      try {
-        if (fileUrl.includes('storage.googleapis.com')) {
-          // Extract from Google Cloud Storage URL
-          const url = new URL(fileUrl);
-          const pathname = url.pathname;
-          
-          // URL format: https://storage.googleapis.com/bucket-name/object-path
-          // Pathname format: /bucket-name/object-path
-          const pathParts = pathname.substring(1).split('/'); // Remove leading slash and split
-          
-          if (pathParts.length >= 2) {
-            bucketName = pathParts[0];
-            objectName = pathParts.slice(1).join('/'); // Join remaining parts with slash
-          } else {
-            throw new Error('نمی‌توان مسیر فایل را از URL استخراج کرد');
-          }
-          
-          console.log(`🔍 [URL PARSING] Bucket: ${bucketName}, Object: ${objectName}`);
-        } else {
-          throw new Error('فرمت URL نامعتبر است');
-        }
-      } catch (error) {
-        console.error('❌ [URL PARSING] Error:', error);
+      // Download file for validation
+      const fileResponse = await fetch(fileUrl);
+      if (!fileResponse.ok) {
         return res.status(400).json({
           success: false,
-          errors: ['فرمت URL فایل نامعتبر است']
+          errors: ['امکان دانلود فایل برای اعتبارسنجی وجود ندارد']
         });
       }
 
-      // Download file directly from Object Storage for validation
-      let fileBuffer: Buffer;
-      try {
-        console.log(`🔍 [VALIDATION] Checking file: ${bucketName}/${objectName}`);
-        
-        const bucket = objectStorageClient.bucket(bucketName);
-        const file = bucket.file(objectName);
-        
-        // Wait a moment for upload to complete before validation
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Check if file exists with retries
-        let exists = false;
-        let retries = 3;
-        
-        while (!exists && retries > 0) {
-          [exists] = await file.exists();
-          if (!exists) {
-            console.log(`⏳ [VALIDATION] File not found, retrying... (${retries} attempts left)`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            retries--;
-          }
-        }
-        
-        if (!exists) {
-          console.error(`❌ [VALIDATION] File not found after retries: ${objectName}`);
-          throw new Error('فایل یافت نشد - آپلود تکمیل نشده');
-        }
-        
-        // Download file content
-        const [content] = await file.download();
-        fileBuffer = content;
-        
-        console.log(`✅ [VALIDATION] Successfully downloaded file: ${objectName} (${fileBuffer.length} bytes)`);
-      } catch (error) {
-        console.error('❌ [VALIDATION] Error downloading file from storage:', error);
-        return res.status(400).json({
-          success: false,
-          errors: ['امکان دانلود فایل از ذخیره‌ساز برای اعتبارسنجی وجود ندارد']
-        });
-      }
+      const fileBuffer = Buffer.from(await fileResponse.arrayBuffer());
 
       // Use appropriate security service based on upload type
       let validationResult;
@@ -50215,8 +50151,8 @@ momtazchem.com
       
       if (uploadType === 'product-image') {
         console.log('🖼️ [PRODUCT IMAGE] Using smart compression validation');
-        securityService = fileSecurityService;
-        validationResult = await fileSecurityService.validateFile(fileBuffer, fileName);
+        securityService = productImageSecurityService;
+        validationResult = await productImageSecurityService.validateFile(fileBuffer, fileName);
       } else {
         console.log('🔐 [GENERAL FILE] Using standard validation');
         securityService = fileSecurityService;

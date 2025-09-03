@@ -67,6 +67,7 @@ import BatchManagement from "@/pages/batch-management";
 
 import ProductRecommendations from "@/pages/product-recommendations";
 import ProductReviews from "@/pages/product-reviews";
+import TestProductImageUpload from "@/pages/test-product-image-upload";
 import FuelAdditives from "@/pages/products/fuel-additives";
 import WaterTreatment from "@/pages/products/water-treatment";
 import PaintThinner from "@/pages/products/paint-thinner";
@@ -307,6 +308,7 @@ function Router() {
           
           <Route path="/analytics/sales" component={SalesAnalytics} />
           <Route path="/products" component={Products} />
+          <Route path="/test-product-image-upload" component={TestProductImageUpload} />
           <Route path="/products/fuel-additives" component={FuelAdditives} />
           <Route path="/products/water-treatment" component={WaterTreatment} />
           <Route path="/products/paint-thinner" component={PaintThinner} />

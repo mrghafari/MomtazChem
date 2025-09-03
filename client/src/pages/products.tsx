@@ -664,98 +664,54 @@ export default function ProductsPage() {
   const handleImageUpload = async (file: File) => {
     if (!file) return;
 
-    // Validate file size (5MB max with smart compression)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
       toast({
-        title: "حجم فایل زیاد",
-        description: "حجم تصویر نباید از 5 مگابایت بیشتر باشد",
+        title: "File Too Large",
+        description: "Image must be less than 2MB. Please compress or resize the image.",
         variant: "destructive",
       });
       return;
     }
 
-    // Validate file format (now supports GIF and WebP)
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    // Validate file format
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       toast({
-        title: "فرمت نامعتبر",
-        description: "فقط تصاویر JPEG، PNG، WebP و GIF مجاز هستند",
+        title: "Invalid Format",
+        description: "Only JPEG, PNG, and WebP images are allowed for optimal customer display.",
         variant: "destructive",
       });
       return;
     }
 
     setUploadingImage(true);
+    const formData = new FormData();
+    formData.append('file', file);
 
     try {
-      // Step 1: Get secure upload URL for product images
-      const uploadResponse = await fetch('/api/secure-upload/product-image', {
+      const response = await fetch('/api/upload', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName: file.name,
-          fileSize: file.size,
-          mimeType: file.type,
-          userId: 'product-manager'
-        })
+        body: formData,
       });
 
-      if (!uploadResponse.ok) {
-        const error = await uploadResponse.json();
-        throw new Error(error.errors?.[0] || 'خطا در دریافت لینک آپلود');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Upload failed');
       }
 
-      const uploadData = await uploadResponse.json();
-
-      // Step 2: Upload file to secure storage
-      const uploadResult = await fetch(uploadData.uploadUrl, {
-        method: 'PUT',
-        body: file,
-        headers: { 'Content-Type': file.type }
+      const { url } = await response.json();
+      form.setValue('imageUrl', url);
+      setImagePreview(url);
+      
+      toast({
+        title: "Success",
+        description: "Image uploaded successfully - optimized for customer display",
       });
-
-      if (!uploadResult.ok) {
-        throw new Error('خطا در آپلود فایل');
-      }
-
-      // Step 3: Validate uploaded file with smart compression
-      const validationResponse = await fetch('/api/secure-upload/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileUrl: uploadData.uploadUrl,
-          fileName: file.name,
-          userId: 'product-manager',
-          uploadType: 'product-image'
-        })
-      });
-
-      const validationResult = await validationResponse.json();
-
-      if (validationResult.success) {
-        // Convert storage URL to normalized path
-        const normalizedPath = uploadData.uploadUrl.includes('storage.googleapis.com') 
-          ? `/objects/${uploadData.uploadUrl.split('/.private/')[1]}` 
-          : uploadData.uploadUrl;
-
-        form.setValue('imageUrl', normalizedPath);
-        setImagePreview(normalizedPath);
-        
-        const compressionMessage = validationResult.compressionApplied ? 
-          "تصویر با فشردگی هوشمند آپلود شد" : 
-          "تصویر بدون نیاز به فشردگی آپلود شد";
-        
-        toast({
-          title: "موفقیت",
-          description: compressionMessage,
-        });
-      } else {
-        throw new Error(validationResult.errors?.[0] || 'خطا در اعتبارسنجی فایل');
-      }
     } catch (error) {
       toast({
-        title: "خطای آپلود",
-        description: error instanceof Error ? error.message : "آپلود تصویر ناموفق بود",
+        title: "Upload Error",
+        description: error instanceof Error ? error.message : "Failed to upload image",
         variant: "destructive",
       });
     } finally {
@@ -763,26 +719,26 @@ export default function ProductsPage() {
     }
   };
 
-  // Multiple image upload handler with smart compression (supports up to 3 images)
+  // Multiple image upload handler (supports up to 3 images including GIF)
   const handleMultipleImageUpload = async (file: File, index: number) => {
     if (!file || index < 0 || index > 2) return;
 
-    // Validate file size (5MB max with smart compression)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
       toast({
-        title: "حجم فایل زیاد",
-        description: "حجم تصویر نباید از 5 مگابایت بیشتر باشد",
+        title: "File Too Large",
+        description: "Image must be less than 2MB. Please compress or resize the image.",
         variant: "destructive",
       });
       return;
     }
 
-    // Validate file format - supports JPEG, PNG, WebP, and GIF
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    // Validate file format - now includes GIF support
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
     if (!allowedTypes.includes(file.type)) {
       toast({
-        title: "فرمت نامعتبر", 
-        description: "فقط تصاویر JPEG، PNG، WebP و GIF مجاز هستند",
+        title: "Invalid Format", 
+        description: "Only JPEG, PNG, and GIF images are allowed.",
         variant: "destructive",
       });
       return;
@@ -793,87 +749,45 @@ export default function ProductsPage() {
     newUploadingImages[index] = true;
     setUploadingImages(newUploadingImages);
 
+    const formData = new FormData();
+    formData.append('file', file);
+
     try {
-      // Step 1: Get secure upload URL for product images
-      const uploadResponse = await fetch('/api/secure-upload/product-image', {
+      const response = await fetch('/api/upload', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName: file.name,
-          fileSize: file.size,
-          mimeType: file.type,
-          userId: 'product-manager'
-        })
+        body: formData,
       });
 
-      if (!uploadResponse.ok) {
-        const error = await uploadResponse.json();
-        throw new Error(error.errors?.[0] || 'خطا در دریافت لینک آپلود');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Upload failed');
       }
 
-      const uploadData = await uploadResponse.json();
-
-      // Step 2: Upload file to secure storage
-      const uploadResult = await fetch(uploadData.uploadUrl, {
-        method: 'PUT',
-        body: file,
-        headers: { 'Content-Type': file.type }
+      const { url } = await response.json();
+      
+      // Update image previews
+      const newPreviews = [...imagePreviews];
+      newPreviews[index] = url;
+      setImagePreviews(newPreviews);
+      
+      // Update form imageUrls array
+      const currentUrls = form.getValues('imageUrls') || [];
+      const newUrls = [...currentUrls];
+      newUrls[index] = url;
+      // Remove empty strings and update form
+      form.setValue('imageUrls', newUrls.filter(url => url));
+      
+      // Update legacy imageUrl field with primary image for backward compatibility
+      if (index === primaryImageIndex) {
+        form.setValue('imageUrl', url);
+        setImagePreview(url);
+        console.log('Set primary image URL:', url, 'at index:', index);
+      }
+      
+      toast({
+        title: "موفقیت",
+        description: `تصویر ${index + 1} با موفقیت آپلود شد`,
       });
-
-      if (!uploadResult.ok) {
-        throw new Error('خطا در آپلود فایل');
-      }
-
-      // Step 3: Validate uploaded file with smart compression
-      const validationResponse = await fetch('/api/secure-upload/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileUrl: uploadData.uploadUrl,
-          fileName: file.name,
-          userId: 'product-manager',
-          uploadType: 'product-image'
-        })
-      });
-
-      const validationResult = await validationResponse.json();
-
-      if (validationResult.success) {
-        // Convert storage URL to normalized path
-        const normalizedPath = uploadData.uploadUrl.includes('storage.googleapis.com') 
-          ? `/objects/${uploadData.uploadUrl.split('/.private/')[1]}` 
-          : uploadData.uploadUrl;
-
-        // Update image previews
-        const newPreviews = [...imagePreviews];
-        newPreviews[index] = normalizedPath;
-        setImagePreviews(newPreviews);
-        
-        // Update form imageUrls array
-        const currentUrls = form.getValues('imageUrls') || [];
-        const newUrls = [...currentUrls];
-        newUrls[index] = normalizedPath;
-        // Remove empty strings and update form
-        form.setValue('imageUrls', newUrls.filter(url => url));
-        
-        // Update legacy imageUrl field with primary image for backward compatibility
-        if (index === primaryImageIndex) {
-          form.setValue('imageUrl', normalizedPath);
-          setImagePreview(normalizedPath);
-          console.log('Set primary image URL:', normalizedPath, 'at index:', index);
-        }
-        
-        const compressionMessage = validationResult.compressionApplied ? 
-          `تصویر ${index + 1} با فشردگی هوشمند آپلود شد` : 
-          `تصویر ${index + 1} بدون نیاز به فشردگی آپلود شد`;
-        
-        toast({
-          title: "موفقیت",
-          description: compressionMessage,
-        });
-      } else {
-        throw new Error(validationResult.errors?.[0] || 'خطا در اعتبارسنجی فایل');
-      }
     } catch (error) {
       toast({
         title: "خطای آپلود",
