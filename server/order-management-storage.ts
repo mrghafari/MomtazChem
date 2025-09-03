@@ -33,6 +33,7 @@ import { pool as dbPool } from "./db";
 import { eq, and, desc, asc, inArray, sql, isNotNull } from "drizzle-orm";
 import ProformaInvoiceConverter from "./proforma-invoice-converter";
 import { AutoInvoiceConverter } from "./auto-invoice-converter";
+import { orderConsolidationService } from "./order-consolidation-service";
 
 export interface IOrderManagementStorage {
   // Order Management
@@ -258,6 +259,18 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       updateData.financialReviewerId = changedBy;
       updateData.financialReviewedAt = new Date();
       if (notes) updateData.financialNotes = notes;
+      
+      // 📋 CONSOLIDATION: After financial approval, consolidate complete order data
+      if (newStatus === orderStatuses.FINANCIAL_APPROVED) {
+        try {
+          console.log(`📋 [CONSOLIDATION] Starting consolidation for financial approval of order ${currentOrder.id}`);
+          await orderConsolidationService.consolidateOrderData(currentOrder.id, currentOrder.customerOrderId);
+          console.log(`✅ [CONSOLIDATION] Order data successfully consolidated for order ${currentOrder.id}`);
+        } catch (consolidationError) {
+          console.error(`❌ [CONSOLIDATION] Failed to consolidate order ${currentOrder.id}:`, consolidationError);
+          // Don't fail the order update if consolidation fails - it can be retried later
+        }
+      }
     } else if (department === 'warehouse') {
       updateData.warehouseAssigneeId = changedBy;
       updateData.warehouseProcessedAt = new Date();

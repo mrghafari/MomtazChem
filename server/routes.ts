@@ -29827,6 +29827,111 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // =============================================================================
+  // CONSOLIDATED ORDER DATA API ENDPOINTS
+  // =============================================================================
+
+  // Get consolidated order data (unified access for all departments)
+  app.get('/api/orders/consolidated/:orderNumber', requireAuth, async (req, res) => {
+    try {
+      const { orderNumber } = req.params;
+      console.log(`📋 [CONSOLIDATED API] Fetching consolidated data for order: ${orderNumber}`);
+      
+      const { orderConsolidationService } = await import('./order-consolidation-service');
+      const consolidatedOrder = await orderConsolidationService.getCompleteOrderDetails(orderNumber);
+      
+      if (!consolidatedOrder) {
+        return res.status(404).json({
+          success: false,
+          message: 'سفارش یافت نشد یا هنوز در سیستم متمرکز ثبت نشده است'
+        });
+      }
+      
+      console.log(`✅ [CONSOLIDATED API] Successfully retrieved consolidated data for order: ${orderNumber}`);
+      res.json({
+        success: true,
+        data: consolidatedOrder
+      });
+    } catch (error) {
+      console.error(`❌ [CONSOLIDATED API] Error fetching consolidated order ${req.params.orderNumber}:`, error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت اطلاعات سفارش'
+      });
+    }
+  });
+
+  // Get consolidated orders by status (for department filtering)
+  app.get('/api/orders/consolidated/by-status/:status', requireAuth, async (req, res) => {
+    try {
+      const { status } = req.params;
+      const statusArray = status.includes(',') ? status.split(',') : [status];
+      
+      console.log(`📋 [CONSOLIDATED API] Fetching consolidated orders by status: ${statusArray.join(', ')}`);
+      
+      const { orderConsolidationService } = await import('./order-consolidation-service');
+      const consolidatedOrders = await orderConsolidationService.getConsolidatedOrdersByStatus(statusArray);
+      
+      console.log(`✅ [CONSOLIDATED API] Retrieved ${consolidatedOrders.length} consolidated orders for status: ${statusArray.join(', ')}`);
+      res.json({
+        success: true,
+        data: consolidatedOrders,
+        count: consolidatedOrders.length
+      });
+    } catch (error) {
+      console.error(`❌ [CONSOLIDATED API] Error fetching consolidated orders by status:`, error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت سفارشات'
+      });
+    }
+  });
+
+  // Trigger manual consolidation for an order (admin only)
+  app.post('/api/orders/consolidate/:orderNumber', requireAuth, async (req, res) => {
+    try {
+      const { orderNumber } = req.params;
+      console.log(`📋 [MANUAL CONSOLIDATION] Manually triggering consolidation for order: ${orderNumber}`);
+      
+      // Get order management details first
+      const orderMgmtResult = await orderManagementStorage.getOrdersByStatus(['financial_approved', 'warehouse_pending', 'warehouse_processing', 'logistics_assigned']);
+      const targetOrder = orderMgmtResult.find((order: any) => order.orderNumber === orderNumber);
+      
+      if (!targetOrder) {
+        return res.status(404).json({
+          success: false,
+          message: 'سفارش یافت نشد یا هنوز تایید مالی نشده است'
+        });
+      }
+      
+      const { orderConsolidationService } = await import('./order-consolidation-service');
+      const consolidatedOrder = await orderConsolidationService.consolidateOrderData(
+        targetOrder.id, 
+        targetOrder.customerOrderId
+      );
+      
+      if (consolidatedOrder) {
+        console.log(`✅ [MANUAL CONSOLIDATION] Successfully consolidated order: ${orderNumber}`);
+        res.json({
+          success: true,
+          message: 'اطلاعات سفارش با موفقیت متمرکز شد',
+          data: consolidatedOrder
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: 'خطا در متمرکزسازی اطلاعات سفارش'
+        });
+      }
+    } catch (error) {
+      console.error(`❌ [MANUAL CONSOLIDATION] Error consolidating order ${req.params.orderNumber}:`, error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در متمرکزسازی اطلاعات سفارش'
+      });
+    }
+  });
+
   // Financial reject order (for financial department users)
   app.get('/api/finance/orders/:id/reject', requireDepartmentAuth('financial'), async (req, res) => {
     try {

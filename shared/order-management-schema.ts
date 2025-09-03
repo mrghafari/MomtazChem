@@ -356,6 +356,109 @@ export const insertOrderCounterSchema = createInsertSchema(orderCounter).omit({
 export type OrderCounter = typeof orderCounter.$inferSelect;
 export type InsertOrderCounter = z.infer<typeof insertOrderCounterSchema>;
 
+// Consolidated Order Data - Complete order information after financial approval
+export const consolidatedOrderData = pgTable("consolidated_order_data", {
+  id: serial("id").primaryKey(),
+  orderManagementId: integer("order_management_id").notNull().unique(),
+  customerOrderId: integer("customer_order_id").notNull().unique(),
+  orderNumber: varchar("order_number", { length: 20 }).notNull().unique(),
+  
+  // Customer information (consolidated)
+  customerId: integer("customer_id").notNull(),
+  customerFirstName: text("customer_first_name").notNull(),
+  customerLastName: text("customer_last_name").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  customerPhone: text("customer_phone").notNull(),
+  
+  // Order totals and pricing (consolidated)
+  totalAmount: decimal("total_amount", { precision: 12, scale: 2 }).notNull(),
+  itemsTotal: decimal("items_total", { precision: 12, scale: 2 }).notNull(),
+  shippingCost: decimal("shipping_cost", { precision: 12, scale: 2 }).default("0.00"),
+  taxAmount: decimal("tax_amount", { precision: 12, scale: 2 }).default("0.00"),
+  discountAmount: decimal("discount_amount", { precision: 12, scale: 2 }).default("0.00"),
+  currency: varchar("currency", { length: 10 }).notNull().default("IQD"),
+  
+  // Payment information (consolidated)
+  paymentMethod: varchar("payment_method", { length: 50 }).notNull(),
+  paymentStatus: varchar("payment_status", { length: 50 }).notNull().default("confirmed"),
+  paymentSourceLabel: text("payment_source_label"),
+  walletAmountUsed: decimal("wallet_amount_used", { precision: 12, scale: 2 }).default("0.00"),
+  bankAmountPaid: decimal("bank_amount_paid", { precision: 12, scale: 2 }).default("0.00"),
+  paymentReceiptUrl: text("payment_receipt_url"),
+  paymentReceiptFileName: text("payment_receipt_file_name"),
+  paymentReceiptMimeType: text("payment_receipt_mime_type"),
+  
+  // Complete address information
+  shippingAddress: json("shipping_address").notNull(),
+  billingAddress: json("billing_address"),
+  
+  // Recipient and delivery information
+  recipientName: text("recipient_name"),
+  recipientPhone: text("recipient_phone"),
+  recipientAddress: text("recipient_address"),
+  deliveryMethod: varchar("delivery_method", { length: 50 }).default("courier"),
+  deliveryNotes: text("delivery_notes"),
+  
+  // GPS and location information
+  gpsLatitude: decimal("gps_latitude", { precision: 10, scale: 8 }),
+  gpsLongitude: decimal("gps_longitude", { precision: 11, scale: 8 }),
+  locationAccuracy: decimal("location_accuracy", { precision: 6, scale: 2 }),
+  hasGpsLocation: boolean("has_gps_location").default(false),
+  
+  // Weight and logistics
+  totalWeight: decimal("total_weight", { precision: 10, scale: 3 }),
+  weightUnit: varchar("weight_unit", { length: 10 }).default("kg"),
+  
+  // Order items (JSON array with complete item details)
+  orderItems: json("order_items").notNull(),
+  
+  // Current status and workflow
+  currentStatus: varchar("current_status", { length: 50 }).notNull(),
+  
+  // Financial approval information
+  financialReviewerId: integer("financial_reviewer_id"),
+  financialReviewedAt: timestamp("financial_reviewed_at"),
+  financialNotes: text("financial_notes"),
+  
+  // Warehouse information
+  warehouseAssigneeId: integer("warehouse_assignee_id"),
+  warehouseProcessedAt: timestamp("warehouse_processed_at"),
+  warehouseNotes: text("warehouse_notes"),
+  
+  // Logistics information
+  logisticsAssigneeId: integer("logistics_assignee_id"),
+  logisticsProcessedAt: timestamp("logistics_processed_at"),
+  logisticsNotes: text("logistics_notes"),
+  trackingNumber: varchar("tracking_number", { length: 100 }),
+  estimatedDeliveryDate: timestamp("estimated_delivery_date"),
+  actualDeliveryDate: timestamp("actual_delivery_date"),
+  
+  // Invoice information
+  invoiceType: varchar("invoice_type", { length: 20 }).default("proforma"),
+  invoiceConvertedAt: timestamp("invoice_converted_at"),
+  
+  // System timestamps
+  consolidatedAt: timestamp("consolidated_at").notNull().defaultNow(),
+  lastUpdatedAt: timestamp("last_updated_at").notNull().defaultNow(),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("consolidated_order_data_order_number_idx").on(table.orderNumber),
+  index("consolidated_order_data_customer_idx").on(table.customerId),
+  index("consolidated_order_data_status_idx").on(table.currentStatus),
+  index("consolidated_order_data_order_mgmt_idx").on(table.orderManagementId),
+]);
+
+export const insertConsolidatedOrderDataSchema = createInsertSchema(consolidatedOrderData).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type ConsolidatedOrderData = typeof consolidatedOrderData.$inferSelect;
+export type InsertConsolidatedOrderData = z.infer<typeof insertConsolidatedOrderDataSchema>;
+
 export const insertDeliveryMethodSchema = createInsertSchema(deliveryMethods).omit({
   id: true,
   createdAt: true,
