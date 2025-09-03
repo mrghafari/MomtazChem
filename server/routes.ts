@@ -50147,7 +50147,16 @@ momtazchem.com
         if (fileUrl.includes('googleapis.com')) {
           // Extract path from Google Cloud Storage URL
           const url = new URL(fileUrl);
-          objectPath = url.pathname;
+          // Convert GCS path to our object entity path format
+          const gcsPath = url.pathname; // e.g., /bucket-name/.private/uploads/file-id
+          const pathParts = gcsPath.split('/');
+          
+          // Find the file ID in the path (usually last part)
+          const fileId = pathParts[pathParts.length - 1];
+          objectPath = `/objects/uploads/${fileId}`;
+          
+          console.log(`🔍 [URL PARSING] GCS URL: ${fileUrl}`);
+          console.log(`🔍 [URL PARSING] Extracted object path: ${objectPath}`);
         } else {
           // Handle other URL formats or direct paths
           objectPath = fileUrl.startsWith('/objects/') ? fileUrl : `/objects/${fileUrl.split('/').pop()}`;

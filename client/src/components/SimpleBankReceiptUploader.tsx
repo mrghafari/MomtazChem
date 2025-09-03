@@ -84,7 +84,8 @@ export function SimpleBankReceiptUploader({
         body: JSON.stringify({
           fileUrl: uploadData.uploadUrl,
           fileName: file.name,
-          userId: 'anonymous'
+          userId: 'anonymous',
+          uploadType: 'general'
         })
       });
 
