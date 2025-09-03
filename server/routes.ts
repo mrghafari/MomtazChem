@@ -50141,18 +50141,26 @@ momtazchem.com
       try {
         if (fileUrl.includes('storage.googleapis.com')) {
           // Extract from Google Cloud Storage URL
-          const urlParts = fileUrl.split('?')[0]; // Remove query params
-          const pathMatch = urlParts.match(/\/([^\/]+)\/(.*)/);
-          if (pathMatch) {
-            bucketName = pathMatch[1];
-            objectName = pathMatch[2];
+          const url = new URL(fileUrl);
+          const pathname = url.pathname;
+          
+          // URL format: https://storage.googleapis.com/bucket-name/object-path
+          // Pathname format: /bucket-name/object-path
+          const pathParts = pathname.substring(1).split('/'); // Remove leading slash and split
+          
+          if (pathParts.length >= 2) {
+            bucketName = pathParts[0];
+            objectName = pathParts.slice(1).join('/'); // Join remaining parts with slash
           } else {
             throw new Error('نمی‌توان مسیر فایل را از URL استخراج کرد');
           }
+          
+          console.log(`🔍 [URL PARSING] Bucket: ${bucketName}, Object: ${objectName}`);
         } else {
           throw new Error('فرمت URL نامعتبر است');
         }
       } catch (error) {
+        console.error('❌ [URL PARSING] Error:', error);
         return res.status(400).json({
           success: false,
           errors: ['فرمت URL فایل نامعتبر است']
