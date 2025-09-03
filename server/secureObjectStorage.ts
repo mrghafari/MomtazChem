@@ -1,5 +1,5 @@
 import { ObjectStorageService } from './objectStorage';
-import { fileSecurityService, FileValidationResult } from './fileSecurityService';
+import { fileSecurityService, productImageSecurityService, FileValidationResult } from './fileSecurityService';
 import { randomUUID } from 'crypto';
 
 export interface SecureUploadResult {
@@ -17,6 +17,7 @@ export interface SecureUploadRequest {
   userId?: string;
   allowedTypes?: string[];
   customSizeLimit?: number;
+  uploadType?: string; // 'product-image', 'general', etc.
 }
 
 export class SecureObjectStorageService extends ObjectStorageService {
@@ -28,24 +29,39 @@ export class SecureObjectStorageService extends ObjectStorageService {
     try {
       const errors: string[] = [];
 
+      // Determine upload configuration based on type
+      let sizeLimit: number;
+      let allowedExtensions: string[];
+      let allowedMimeTypes: string[];
+      let compressionType: string;
+
+      if (request.uploadType === 'product-image') {
+        sizeLimit = 5 * 1024 * 1024; // 5MB for product images
+        allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+        allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        compressionType = 'smart-product-compression';
+        console.log('🖼️ [PRODUCT IMAGE CONFIG] Using optimized settings: 5MB limit, smart compression');
+      } else {
+        sizeLimit = request.customSizeLimit || 10 * 1024 * 1024; // 10MB default
+        allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.pdf', '.txt', '.doc', '.docx'];
+        allowedMimeTypes = request.allowedTypes || ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+        compressionType = 'standard-compression';
+      }
+
       // Pre-upload validation
-      const sizeLimit = request.customSizeLimit || 10 * 1024 * 1024; // 10MB default
       if (request.fileSize > sizeLimit) {
         errors.push(`حجم فایل نباید بیشتر از ${this.formatFileSize(sizeLimit)} باشد`);
       }
 
       // Validate file extension
-      const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.pdf', '.txt', '.doc', '.docx'];
       const fileExtension = this.getFileExtension(request.fileName);
       if (!allowedExtensions.includes(fileExtension)) {
         errors.push(`پسوند فایل مجاز نیست: ${fileExtension}`);
       }
 
       // Validate MIME type if provided
-      if (request.mimeType && request.allowedTypes) {
-        if (!request.allowedTypes.includes(request.mimeType)) {
-          errors.push(`نوع فایل مجاز نیست: ${request.mimeType}`);
-        }
+      if (request.mimeType && !allowedMimeTypes.includes(request.mimeType)) {
+        errors.push(`نوع فایل مجاز نیست: ${request.mimeType}`);
       }
 
       if (errors.length > 0) {
@@ -60,9 +76,13 @@ export class SecureObjectStorageService extends ObjectStorageService {
       // Get upload URL from parent class
       const uploadUrl = await this.getObjectEntityUploadURL();
 
-      console.log(`🔐 [SECURE UPLOAD] Generated secure upload URL for: ${finalFileName}`);
-      console.log(`📊 [SECURE UPLOAD] File size: ${this.formatFileSize(request.fileSize)}`);
-      console.log(`👤 [SECURE UPLOAD] User: ${request.userId || 'anonymous'}`);
+      const logMessage = request.uploadType === 'product-image' ? 
+        `🖼️ [PRODUCT IMAGE] Generated smart compression upload URL for: ${finalFileName}` :
+        `🔐 [SECURE UPLOAD] Generated secure upload URL for: ${finalFileName}`;
+      
+      console.log(logMessage);
+      console.log(`📊 [UPLOAD CONFIG] File size: ${this.formatFileSize(request.fileSize)}, Type: ${request.uploadType || 'general'}`);
+      console.log(`👤 [UPLOAD CONFIG] User: ${request.userId || 'anonymous'}, Compression: ${compressionType}`);
 
       return {
         success: true,

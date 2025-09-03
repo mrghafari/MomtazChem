@@ -50027,7 +50027,7 @@ momtazchem.com
     try {
       console.log('🔐 [SECURE UPLOAD] Generating upload URL with validation');
       
-      const { fileName, fileSize, mimeType, userId, allowedTypes, customSizeLimit } = req.body;
+      const { fileName, fileSize, mimeType, userId, allowedTypes, customSizeLimit, uploadType } = req.body;
 
       if (!fileName || !fileSize) {
         return res.status(400).json({
@@ -50042,7 +50042,8 @@ momtazchem.com
         mimeType,
         userId,
         allowedTypes,
-        customSizeLimit
+        customSizeLimit,
+        uploadType // Pass upload type for specialized handling
       });
 
       res.json(result);
@@ -50055,12 +50056,76 @@ momtazchem.com
     }
   });
 
+  // Specialized endpoint for product image uploads with optimized compression
+  app.post('/api/secure-upload/product-image', async (req, res) => {
+    try {
+      console.log('🖼️ [PRODUCT IMAGE] Generating product image upload URL with smart compression');
+      
+      const { fileName, fileSize, mimeType, userId } = req.body;
+
+      if (!fileName || !fileSize) {
+        return res.status(400).json({
+          success: false,
+          errors: ['نام فایل و حجم فایل الزامی است']
+        });
+      }
+
+      // Check if file is an image
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      if (!allowedTypes.includes(mimeType)) {
+        return res.status(400).json({
+          success: false,
+          errors: ['فقط فایل‌های تصویری مجاز هستند: JPEG, PNG, WebP, GIF']
+        });
+      }
+
+      // Check file size (5MB limit)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (fileSize > maxSize) {
+        return res.status(400).json({
+          success: false,
+          errors: [`حجم فایل نباید بیش از 5 مگابایت باشد. حجم فعلی: ${(fileSize / 1024 / 1024).toFixed(2)}MB`]
+        });
+      }
+
+      const result = await secureObjectStorageService.generateSecureUploadUrl({
+        fileName,
+        fileSize,
+        mimeType,
+        userId,
+        allowedTypes,
+        customSizeLimit: maxSize,
+        uploadType: 'product-image'
+      });
+
+      // Add product-specific metadata
+      const productResult = {
+        ...result,
+        compressionInfo: {
+          maxQualityTarget: 95,
+          smartCompressionEnabled: true,
+          maxDimensions: { width: 2048, height: 2048 },
+          estimatedCompressionRatio: '10-40%'
+        }
+      };
+
+      console.log('✅ [PRODUCT IMAGE] Upload URL generated with smart compression config');
+      res.json(productResult);
+    } catch (error) {
+      console.error('❌ [PRODUCT IMAGE] Error generating upload URL:', error);
+      res.status(500).json({
+        success: false,
+        errors: ['خطا در تولید لینک آپلود تصویر محصول']
+      });
+    }
+  });
+
   // Validate uploaded file after upload
   app.post('/api/secure-upload/validate', async (req, res) => {
     try {
       console.log('🔍 [SECURE UPLOAD] Starting post-upload validation');
       
-      const { fileUrl, fileName, userId } = req.body;
+      const { fileUrl, fileName, userId, uploadType } = req.body;
 
       if (!fileUrl || !fileName) {
         return res.status(400).json({
@@ -50080,15 +50145,26 @@ momtazchem.com
 
       const fileBuffer = Buffer.from(await fileResponse.arrayBuffer());
 
-      // Comprehensive security validation
-      const validationResult = await fileSecurityService.validateFile(fileBuffer, fileName);
+      // Use appropriate security service based on upload type
+      let validationResult;
+      let securityService;
+      
+      if (uploadType === 'product-image') {
+        console.log('🖼️ [PRODUCT IMAGE] Using smart compression validation');
+        securityService = productImageSecurityService;
+        validationResult = await productImageSecurityService.validateFile(fileBuffer, fileName);
+      } else {
+        console.log('🔐 [GENERAL FILE] Using standard validation');
+        securityService = fileSecurityService;
+        validationResult = await fileSecurityService.validateFile(fileBuffer, fileName);
+      }
       
       if (!validationResult.isValid) {
-        console.log('❌ [SECURE UPLOAD] File validation failed:', validationResult.errors);
+        console.log(`❌ [${uploadType === 'product-image' ? 'PRODUCT IMAGE' : 'SECURE UPLOAD'}] File validation failed:`, validationResult.errors);
         return res.json({
           success: false,
           errors: validationResult.errors,
-          securityReport: fileSecurityService.generateSecurityReport(validationResult)
+          securityReport: securityService.generateSecurityReport(validationResult)
         });
       }
 
@@ -50102,13 +50178,20 @@ momtazchem.com
         });
       }
 
-      console.log('✅ [SECURE UPLOAD] File validation successful');
+      const successMessage = uploadType === 'product-image' ? 
+        '✅ [PRODUCT IMAGE] Smart compression validation successful' :
+        '✅ [SECURE UPLOAD] File validation successful';
+      
+      console.log(successMessage);
       
       res.json({
         success: true,
-        message: 'فایل با موفقیت اعتبارسنجی شد',
-        securityReport: fileSecurityService.generateSecurityReport(validationResult),
-        metadata: validationResult.metadata
+        message: uploadType === 'product-image' ? 
+          'تصویر محصول با فشردگی هوشمند اعتبارسنجی شد' : 
+          'فایل با موفقیت اعتبارسنجی شد',
+        securityReport: securityService.generateSecurityReport(validationResult),
+        metadata: validationResult.metadata,
+        compressionApplied: uploadType === 'product-image' && validationResult.metadata?.compressedSize ? true : false
       });
 
     } catch (error) {

@@ -218,7 +218,7 @@ export class FileSecurityService {
   }
 
   /**
-   * Process and compress images
+   * Process and compress images with intelligent optimization
    */
   private async processImage(imageBuffer: Buffer, mimeType: string): Promise<Buffer> {
     const image = sharp(imageBuffer);
@@ -238,26 +238,64 @@ export class FileSecurityService {
       }
     }
 
-    // Apply compression based on format
-    switch (mimeType) {
-      case 'image/jpeg':
-        return await processedImage
-          .jpeg({ quality: this.config.compressionQuality, progressive: true })
-          .toBuffer();
+    // Apply intelligent compression with multiple quality levels
+    return await this.smartCompress(processedImage, mimeType, imageBuffer.length);
+  }
+
+  /**
+   * Smart compression that tries multiple quality levels to find optimal balance
+   */
+  private async smartCompress(image: sharp.Sharp, mimeType: string, originalSize: number): Promise<Buffer> {
+    const targetMaxSize = Math.min(this.config.maxSizeBytes, originalSize * 0.8); // Target 80% of original or max allowed
+    const qualityLevels = [95, 90, 85, 80, 75, 70]; // Try from high to low quality
+    
+    for (const quality of qualityLevels) {
+      let compressedBuffer: Buffer;
       
-      case 'image/png':
-        return await processedImage
-          .png({ quality: this.config.compressionQuality, compressionLevel: 9 })
-          .toBuffer();
+      switch (mimeType) {
+        case 'image/jpeg':
+          compressedBuffer = await image
+            .jpeg({ 
+              quality, 
+              progressive: true,
+              mozjpeg: true // Use mozjpeg for better compression
+            })
+            .toBuffer();
+          break;
+        
+        case 'image/png':
+          compressedBuffer = await image
+            .png({ 
+              quality, 
+              compressionLevel: 9,
+              palette: true // Use palette for smaller files when possible
+            })
+            .toBuffer();
+          break;
+        
+        case 'image/webp':
+          compressedBuffer = await image
+            .webp({ 
+              quality,
+              effort: 6, // Higher effort for better compression
+              smartSubsample: true
+            })
+            .toBuffer();
+          break;
+        
+        default:
+          return await image.toBuffer(); // Return processed for unsupported formats
+      }
       
-      case 'image/webp':
-        return await processedImage
-          .webp({ quality: this.config.compressionQuality })
-          .toBuffer();
-      
-      default:
-        return imageBuffer; // Return original for unsupported formats
+      // If file is within target size or we're at minimum quality, return it
+      if (compressedBuffer.length <= targetMaxSize || quality === qualityLevels[qualityLevels.length - 1]) {
+        console.log(`🎯 [SMART COMPRESSION] Optimized at ${quality}% quality: ${originalSize} → ${compressedBuffer.length} bytes`);
+        return compressedBuffer;
+      }
     }
+    
+    // Fallback (should not reach here)
+    return await image.toBuffer();
   }
 
   /**
@@ -326,11 +364,34 @@ export class FileSecurityService {
   }
 }
 
-// Export configured instance
+// Export configured instance for general files
 export const fileSecurityService = new FileSecurityService({
   maxSizeBytes: 10 * 1024 * 1024, // 10MB for production
   enableImageCompression: true,
   compressionQuality: 85,
   maxImageDimensions: { width: 1920, height: 1080 },
   enableVirusScanning: true,
+});
+
+// Specialized instance for product images with optimized settings
+export const productImageSecurityService = new FileSecurityService({
+  maxSizeBytes: 5 * 1024 * 1024, // 5MB limit for product images
+  allowedMimeTypes: [
+    'image/jpeg',
+    'image/png', 
+    'image/webp',
+    'image/gif'
+  ],
+  allowedExtensions: ['.jpg', '.jpeg', '.png', '.webp', '.gif'],
+  enableImageCompression: true,
+  compressionQuality: 95, // Start with high quality, smart compression will optimize
+  maxImageDimensions: { width: 2048, height: 2048 }, // Higher resolution for product photos
+  enableVirusScanning: true,
+  blockedPatterns: [
+    /<script[\s\S]*?>[\s\S]*?<\/script>/gi,
+    /javascript:/gi,
+    /on\w+\s*=/gi,
+    /<%[\s\S]*?%>/gi,
+    /\$\{[\s\S]*?\}/gi,
+  ],
 });
