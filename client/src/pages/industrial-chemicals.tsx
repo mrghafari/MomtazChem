@@ -172,8 +172,8 @@ export default function IndustrialChemicalsPage() {
 
       {/* Random Products from Shop */}
       <RandomCategoryProducts 
-        category="agricultural-fertilizers" 
-        title="محصولات پیشنهادی شیمیایی از فروشگاه"
+        category="industrial-chemicals" 
+        title="محصولات پیشنهادی شیمیایی صنعتی از فروشگاه"
       />
 
       {/* Call to Action */}
