@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertTriangle, CheckCircle, Clock, CreditCard, DollarSign, RefreshCw, Timer, ChevronRight, XCircle, FileText, Eye, Download, Truck, MapPin } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock, CreditCard, DollarSign, RefreshCw, Timer, ChevronRight, XCircle, FileText, Eye, Download, Truck, MapPin, ZoomIn, ZoomOut, RotateCw, Move, X } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { OrderManagement } from "@/shared/order-management-schema";
 
@@ -76,6 +76,13 @@ function FinanceOrders() {
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // Enhanced image viewer states
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("pending");
   const [orderDetailsModalOpen, setOrderDetailsModalOpen] = useState(false);
@@ -416,7 +423,50 @@ function FinanceOrders() {
     
     setSelectedImageUrl(processedUrl);
     setImageModalOpen(true);
+    // Reset zoom and pan when opening new image
+    setZoomLevel(1);
+    setRotation(0);
+    setPanPosition({ x: 0, y: 0 });
   }, [toast]);
+
+  // Enhanced image viewer functions
+  const handleZoomIn = useCallback(() => {
+    setZoomLevel(prev => Math.min(prev * 1.5, 5));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setZoomLevel(prev => Math.max(prev / 1.5, 0.5));
+  }, []);
+
+  const handleResetView = useCallback(() => {
+    setZoomLevel(1);
+    setRotation(0);
+    setPanPosition({ x: 0, y: 0 });
+  }, []);
+
+  const handleRotate = useCallback(() => {
+    setRotation(prev => (prev + 90) % 360);
+  }, []);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (zoomLevel > 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - panPosition.x, y: e.clientY - panPosition.y });
+    }
+  }, [zoomLevel, panPosition]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (isDragging && zoomLevel > 1) {
+      setPanPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  }, [isDragging, zoomLevel, dragStart]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
 
   const handlePrintOrder = useCallback(async () => {
     if (!orderDetails) return;
@@ -943,22 +993,116 @@ function FinanceOrders() {
         </DialogContent>
       </Dialog>
 
-      {/* Image Modal */}
+      {/* Enhanced Image Modal for Receipt Viewing with Zoom */}
       <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>رسید پرداخت</DialogTitle>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0" style={{ width: '95vw', height: '95vh' }}>
+          <DialogHeader className="p-4 pb-2 border-b">
+            <DialogTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" />
+                مشاهده فیش پرداخت
+              </span>
+              <div className="flex items-center gap-2">
+                {/* Zoom Controls */}
+                <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleZoomOut}
+                    disabled={zoomLevel <= 0.5}
+                    className="h-8 w-8 p-0 hover:bg-gray-200"
+                    title="کوچک‌تر کردن"
+                  >
+                    <ZoomOut className="h-4 w-4" />
+                  </Button>
+                  
+                  <span className="text-xs px-2 font-mono min-w-[50px] text-center">
+                    {Math.round(zoomLevel * 100)}%
+                  </span>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleZoomIn}
+                    disabled={zoomLevel >= 5}
+                    className="h-8 w-8 p-0 hover:bg-gray-200"
+                    title="بزرگ‌تر کردن"
+                  >
+                    <ZoomIn className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Action Controls */}
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRotate}
+                    className="h-8 w-8 p-0 hover:bg-gray-200"
+                    title="چرخاندن ۹۰ درجه"
+                  >
+                    <RotateCw className="h-4 w-4" />
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleResetView}
+                    className="h-8 w-8 p-0 hover:bg-gray-200"
+                    title="بازگشت به حالت اولیه"
+                  >
+                    <Move className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setImageModalOpen(false)}
+                  className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </DialogTitle>
           </DialogHeader>
-          <div className="flex justify-center">
-            <img 
-              src={selectedImageUrl} 
-              alt="رسید پرداخت" 
-              className="max-w-full max-h-96 object-contain"
-              onError={(e) => {
-                console.error('❌ [IMAGE MODAL] Failed to load image:', selectedImageUrl);
-                e.currentTarget.style.display = 'none';
-              }}
-            />
+          
+          <div 
+            className="flex-1 overflow-hidden bg-gray-50 relative"
+            style={{ height: 'calc(95vh - 80px)' }}
+          >
+            {selectedImageUrl && (
+              <div
+                className="w-full h-full flex items-center justify-center cursor-move select-none"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                style={{ cursor: isDragging ? 'grabbing' : (zoomLevel > 1 ? 'grab' : 'default') }}
+              >
+                <img
+                  src={selectedImageUrl}
+                  alt="فیش پرداخت"
+                  className="max-w-none transition-transform duration-200"
+                  style={{
+                    transform: `scale(${zoomLevel}) rotate(${rotation}deg) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
+                    transformOrigin: 'center center'
+                  }}
+                  draggable={false}
+                  onError={(e) => {
+                    console.error('❌ [IMAGE MODAL] Failed to load image:', selectedImageUrl);
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
+            
+            {/* Zoom hint */}
+            {zoomLevel > 1 && (
+              <div className="absolute bottom-4 left-4 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+                برای جابجایی تصویر آن را بکشید
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

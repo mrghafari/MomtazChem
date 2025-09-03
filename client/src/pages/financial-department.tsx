@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useForm } from "react-hook-form";
-import { Eye, CheckCircle, XCircle, Clock, DollarSign, FileText, LogOut, User, ZoomIn, X, Calculator, Wallet } from "lucide-react";
+import { Eye, CheckCircle, XCircle, Clock, DollarSign, FileText, LogOut, User, ZoomIn, ZoomOut, RotateCw, Move, X, Calculator, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
@@ -74,6 +74,13 @@ export default function FinancialDepartment() {
   const [selectedImageUrl, setSelectedImageUrl] = useState<string>("");
   const [user, setUser] = useState<FinancialUser | null>(null);
   const [, setLocation] = useLocation();
+  
+  // Enhanced image viewer states
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const { toast } = useToast();
 
   const form = useForm({
@@ -213,6 +220,49 @@ export default function FinancialDepartment() {
   const openImageModal = (imageUrl: string) => {
     setSelectedImageUrl(imageUrl);
     setImageModalOpen(true);
+    // Reset zoom and pan when opening new image
+    setZoomLevel(1);
+    setRotation(0);
+    setPanPosition({ x: 0, y: 0 });
+  };
+
+  // Enhanced image viewer functions
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev * 1.5, 5));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev / 1.5, 0.5));
+  };
+
+  const handleResetView = () => {
+    setZoomLevel(1);
+    setRotation(0);
+    setPanPosition({ x: 0, y: 0 });
+  };
+
+  const handleRotate = () => {
+    setRotation(prev => (prev + 90) % 360);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoomLevel > 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - panPosition.x, y: e.clientY - panPosition.y });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && zoomLevel > 1) {
+      setPanPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
   };
 
   // Function to determine if URL is an image
@@ -626,29 +676,111 @@ export default function FinancialDepartment() {
           </DialogContent>
         </Dialog>
 
-        {/* Image Modal for Receipt Viewing */}
+        {/* Enhanced Image Modal for Receipt Viewing with Zoom */}
         <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-            <DialogHeader className="p-4 pb-2">
+          <DialogContent className="max-w-[95vw] max-h-[95vh] p-0" style={{ width: '95vw', height: '95vh' }}>
+            <DialogHeader className="p-4 pb-2 border-b">
               <DialogTitle className="flex items-center justify-between">
-                <span>مشاهده فیش پرداخت</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setImageModalOpen(false)}
-                  className="h-8 w-8 p-0"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+                <span className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  مشاهده فیش پرداخت
+                </span>
+                <div className="flex items-center gap-2">
+                  {/* Zoom Controls */}
+                  <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleZoomOut}
+                      disabled={zoomLevel <= 0.5}
+                      className="h-8 w-8 p-0 hover:bg-gray-200"
+                      title="کوچک‌تر کردن"
+                    >
+                      <ZoomOut className="h-4 w-4" />
+                    </Button>
+                    
+                    <span className="text-xs px-2 font-mono min-w-[50px] text-center">
+                      {Math.round(zoomLevel * 100)}%
+                    </span>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleZoomIn}
+                      disabled={zoomLevel >= 5}
+                      className="h-8 w-8 p-0 hover:bg-gray-200"
+                      title="بزرگ‌تر کردن"
+                    >
+                      <ZoomIn className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Action Controls */}
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRotate}
+                      className="h-8 w-8 p-0 hover:bg-gray-200"
+                      title="چرخاندن ۹۰ درجه"
+                    >
+                      <RotateCw className="h-4 w-4" />
+                    </Button>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleResetView}
+                      className="h-8 w-8 p-0 hover:bg-gray-200"
+                      title="بازگشت به حالت اولیه"
+                    >
+                      <Move className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setImageModalOpen(false)}
+                    className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
               </DialogTitle>
             </DialogHeader>
-            <div className="flex items-center justify-center p-4">
+            
+            <div 
+              className="flex-1 overflow-hidden bg-gray-50 relative"
+              style={{ height: 'calc(95vh - 80px)' }}
+            >
               {selectedImageUrl && (
-                <img
-                  src={selectedImageUrl}
-                  alt="فیش پرداخت"
-                  className="max-w-full max-h-[70vh] object-contain rounded-lg"
-                />
+                <div
+                  className="w-full h-full flex items-center justify-center cursor-move select-none"
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                  style={{ cursor: isDragging ? 'grabbing' : (zoomLevel > 1 ? 'grab' : 'default') }}
+                >
+                  <img
+                    src={selectedImageUrl}
+                    alt="فیش پرداخت"
+                    className="max-w-none transition-transform duration-200"
+                    style={{
+                      transform: `scale(${zoomLevel}) rotate(${rotation}deg) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
+                      transformOrigin: 'center center'
+                    }}
+                    draggable={false}
+                  />
+                </div>
+              )}
+              
+              {/* Zoom hint */}
+              {zoomLevel > 1 && (
+                <div className="absolute bottom-4 left-4 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+                  برای جابجایی تصویر آن را بکشید
+                </div>
               )}
             </div>
           </DialogContent>
