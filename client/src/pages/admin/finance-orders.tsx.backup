@@ -155,6 +155,424 @@ const getCustomerInfo = (order: OrderManagement) => {
   };
 };
 
+// OrderCard Component
+interface OrderCardProps {
+  order: OrderManagement;
+  onOrderSelect?: () => void;
+  readOnly?: boolean;
+  fetchOrderDetails?: (orderNumber: string) => void;
+}
+
+function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }: OrderCardProps) {
+  const customerInfo = getCustomerInfo(order);
+  
+  // Check if this is a wallet-paid order that has been transferred to warehouse
+  const isWalletTransferred = ['warehouse_pending', 'warehouse_processing', 'warehouse_approved'].includes(order.currentStatus);
+  
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'pending_payment':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'payment_uploaded':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'financial_reviewing':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'financial_approved':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'financial_rejected':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'warehouse_pending':
+        return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'warehouse_processing':
+        return 'bg-teal-100 text-teal-800 border-teal-200';
+      case 'warehouse_approved':
+        return 'bg-green-100 text-green-800 border-green-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusDisplayName = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'در انتظار';
+      case 'pending_payment':
+        return 'در انتظار پرداخت';
+      case 'payment_uploaded':
+        return 'رسید آپلود شده';
+      case 'financial_reviewing':
+        return 'در حال بررسی مالی';
+      case 'financial_approved':
+        return 'تایید شده توسط مالی';
+      case 'financial_rejected':
+        return 'رد شده توسط مالی';
+      case 'warehouse_pending':
+        return 'در انتظار انبار';
+      case 'warehouse_processing':
+        return 'در حال پردازش انبار';
+      case 'warehouse_approved':
+        return 'تایید شده انبار';
+      default:
+        return status;
+    }
+  };
+
+  const formatCurrency = (amount: string | number) => {
+    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return new Intl.NumberFormat('fa-IR').format(num);
+  };
+
+  const receiptUrl = order.paymentReceiptUrl || order.receipt?.url;
+
+  return (
+    <Card className={`hover:shadow-lg transition-shadow ${
+      order.currentStatus === 'financial_rejected' 
+        ? 'border-l-4 border-l-red-500'
+        : isWalletTransferred
+        ? 'border-l-4 border-l-green-500'
+        : 'border-l-4 border-l-blue-500'
+    }`}>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-4 space-x-reverse">
+            <div className={`p-2 rounded-lg ${
+              order.currentStatus === 'financial_rejected'
+                ? 'bg-red-100'
+                : isWalletTransferred
+                ? 'bg-green-100'
+                : 'bg-blue-100'
+            }`}>
+              {order.currentStatus === 'financial_rejected' ? (
+                <X className={`h-5 w-5 ${
+                  order.currentStatus === 'financial_rejected'
+                    ? 'text-red-600'
+                    : isWalletTransferred
+                    ? 'text-green-600'
+                    : 'text-blue-600'
+                }`} />
+              ) : isWalletTransferred ? (
+                <CheckCircle className="h-5 w-5 text-green-600" />
+              ) : (
+                <DollarSign className="h-5 w-5 text-blue-600" />
+              )}
+            </div>
+            <div>
+              <h3 className="font-bold text-lg text-gray-900">سفارش {order.orderNumber || 'در حال بارگذاری...'}</h3>
+              <p className="text-sm text-gray-600">{customerInfo.firstName} {customerInfo.lastName}</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3 space-x-reverse">
+            <Badge className={`border ${getStatusBadgeColor(order.currentStatus)}`}>
+              {getStatusDisplayName(order.currentStatus)}
+            </Badge>
+            <div className="text-left">
+              <p className="font-bold text-lg text-green-600">
+                {formatCurrency(order.totalAmount || 0)} {order.currency || 'IQD'}
+              </p>
+              <p className="text-xs text-gray-500">
+                {new Date(order.createdAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-gray-600">
+              <User className="h-4 w-4" />
+              <span>{customerInfo.firstName} {customerInfo.lastName}</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-600">
+              <Phone className="h-4 w-4" />
+              <span>{customerInfo.phone}</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-600">
+              <Mail className="h-4 w-4" />
+              <span>{customerInfo.email}</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-gray-600">
+              <CreditCard className="h-4 w-4" />
+              <span>روش پرداخت: {(() => {
+                const paymentMethod = order.paymentMethod;
+                if (paymentMethod === 'wallet_full') {
+                  return 'کیف پول (کامل)';
+                } else if (paymentMethod === 'wallet_partial') {
+                  return 'ترکیبی (کیف پول + بانکی)';
+                } else if (paymentMethod === 'bank_transfer') {
+                  return 'انتقال بانکی';
+                } else if (paymentMethod === 'bank_transfer_grace') {
+                  return 'انتقال بانکی (مهلت‌دار)';
+                } else if (paymentMethod === 'bank_gateway') {
+                  return 'درگاه بانکی';
+                } else {
+                  return paymentMethod || 'نامشخص';
+                }
+              })()}</span>
+            </div>
+            {order.trackingNumber && (
+              <div className="flex items-center gap-2 text-gray-600">
+                <Package className="h-4 w-4" />
+                <span>کد رهگیری: {order.trackingNumber}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {receiptUrl && (
+          <div className="mb-4">
+            <p className="text-sm font-medium text-gray-700 mb-2">رسید پرداخت:</p>
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="flex-shrink-0">
+                <ImageIcon className="h-5 w-5 text-gray-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">رسید پرداخت</p>
+                <p className="text-xs text-gray-500">کلیک کنید تا مشاهده کنید</p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => window.open(receiptUrl, '_blank')}
+                className="flex-shrink-0"
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {isWalletTransferred && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-sm font-medium text-green-900">تایید شده توسط بخش مالی</span>
+              <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                ارجاع شده به انبار
+              </Badge>
+            </div>
+          </div>
+        )}
+
+        {order.currentStatus === 'financial_rejected' && order.financialNotes && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+            <div className="flex items-start space-x-2 space-x-reverse">
+              <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-red-800 mb-1">دلیل رد:</p>
+                <p className="text-sm text-red-700">{order.financialNotes}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {order.financialNotes && order.currentStatus !== 'financial_rejected' && (
+          <div className="bg-gray-50 rounded-lg p-3 mb-4">
+            <p className="text-sm font-medium text-gray-700 mb-1">یادداشت مالی:</p>
+            <p className="text-sm text-gray-600">{order.financialNotes}</p>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        {!readOnly && (
+          <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+            <div className="flex gap-3">
+              {fetchOrderDetails && order.orderNumber && (
+                <Button 
+                  onClick={() => fetchOrderDetails(order.orderNumber || '')}
+                  size="sm"
+                  variant="outline"
+                  className="flex items-center space-x-2 space-x-reverse hover:bg-blue-50 hover:border-blue-300"
+                >
+                  <FileText className="h-4 w-4" />
+                  <span>مشاهده جزئیات کامل</span>
+                </Button>
+              )}
+              {onOrderSelect && (
+                <Button 
+                  onClick={onOrderSelect}
+                  size="sm"
+                  className="flex items-center space-x-2 space-x-reverse bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>بررسی سفارش</span>
+                </Button>
+              )}
+            </div>
+            <div className="text-xs text-gray-500">
+              آخرین بروزرسانی: {new Date(order.updatedAt).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// TransferredOrderCard Component for approved orders sent to warehouse
+interface TransferredOrderCardProps {
+  order: OrderManagement;
+}
+
+function TransferredOrderCard({ order }: TransferredOrderCardProps) {
+  const customerInfo = getCustomerInfo(order);
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'warehouse_pending':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'warehouse_notified':
+        return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+      case 'warehouse_processing':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'warehouse_approved':
+        return 'bg-green-100 text-green-800 border-green-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusDisplayName = (status: string) => {
+    switch (status) {
+      case 'warehouse_pending':
+        return 'در انتظار بررسی انبار';
+      case 'warehouse_notified':
+        return 'اطلاع رسانی انبار';
+      case 'warehouse_processing':
+        return 'در حال پردازش انبار';
+      case 'warehouse_approved':
+        return 'تایید نهایی انبار';
+      default:
+        return status;
+    }
+  };
+
+  return (
+    <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-4 space-x-reverse">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <ChevronRight className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg text-gray-900">سفارش {order.orderNumber || 'در حال بارگذاری...'}</h3>
+              <p className="text-sm text-gray-600">{customerInfo.firstName} {customerInfo.lastName}</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3 space-x-reverse">
+            <Badge className={`border ${getStatusBadgeColor(order.currentStatus)}`}>
+              {getStatusDisplayName(order.currentStatus)}
+            </Badge>
+            <div className="text-left">
+              <p className="font-bold text-lg text-green-600">
+                {new Intl.NumberFormat('fa-IR').format(parseFloat(order.totalAmount || '0'))} {order.currency || 'IQD'}
+              </p>
+              <p className="text-xs text-gray-500">
+                {new Date(order.createdAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-gray-600">
+              <User className="h-4 w-4" />
+              <span>{customerInfo.firstName} {customerInfo.lastName}</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-600">
+              <Phone className="h-4 w-4" />
+              <span>{customerInfo.phone}</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-600">
+              <Mail className="h-4 w-4" />
+              <span>{customerInfo.email}</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              {(() => {
+                const paymentMethod = order.paymentMethod;
+                if (paymentMethod === 'wallet_full') {
+                  return (
+                    <>
+                      <Wallet className="h-4 w-4 text-green-600" />
+                      <span className="text-sm text-green-700 font-medium">کیف پول</span>
+                    </>
+                  );
+                } else if (paymentMethod === 'wallet_partial') {
+                  return (
+                    <>
+                      <DollarSign className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm text-purple-700 font-medium">ترکیبی</span>
+                    </>
+                  );
+                } else if (paymentMethod === 'bank_transfer_grace') {
+                  return (
+                    <>
+                      <Clock className="h-4 w-4 text-orange-600" />
+                      <span className="text-sm text-orange-700 font-medium">مهلت‌دار</span>
+                    </>
+                  );
+                } else if (paymentMethod === 'bank_gateway') {
+                  return (
+                    <>
+                      <CreditCard className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm text-blue-700 font-medium">درگاه بانکی</span>
+                    </>
+                  );
+                } else {
+                  return (
+                    <>
+                      <CreditCard className="h-4 w-4 text-gray-400" />
+                      <span className="text-sm text-gray-600">{paymentMethod || 'نامشخص'}</span>
+                    </>
+                  );
+                }
+              })()
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <span className="text-sm font-medium text-green-900">تایید شده توسط بخش مالی</span>
+            <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+              ارجاع شده به انبار
+            </Badge>
+          </div>
+        </div>
+
+        {order.financialNotes && (
+          <div className="bg-gray-50 rounded-lg p-3 mb-4">
+            <p className="text-sm font-medium text-gray-700 mb-1">یادداشت مالی:</p>
+            <p className="text-sm text-gray-600">{order.financialNotes}</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function FinanceOrders() {
   const { toast } = useToast();
   const [selectedOrder, setSelectedOrder] = useState<OrderManagement | null>(null);
