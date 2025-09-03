@@ -374,21 +374,23 @@ const Shop = () => {
     }
   }, [selectedImageForZoom, selectedProductForZoom, zoomedImageIndex]);
 
-  // Initialize display stock from actual database values (not affected by cart)
+  // Initialize display stock from actual database values, reduced by cart items
   useEffect(() => {
     if (currentProducts?.length > 0) {
       const initialDisplayStock: {[key: number]: number} = {};
       currentProducts.forEach(product => {
-        // Show actual stock quantity from database, not reduced by cart items
-        initialDisplayStock[product.id] = product.stockQuantity || 0;
+        // Calculate available stock after considering cart items
+        const cartQuantity = cart[product.id] || 0;
+        const availableStock = Math.max(0, (product.stockQuantity || 0) - cartQuantity);
+        initialDisplayStock[product.id] = availableStock;
       });
       setDisplayStock(initialDisplayStock);
     }
-  }, [currentProducts]); // Removed cart dependency to prevent UI stock reduction
+  }, [currentProducts, cart]); // Include cart dependency for accurate display
 
-  // Force recalculation of display stock after order completion
+  // Force recalculation of display stock after order completion or cart sync
   useEffect(() => {
-    if (Object.keys(displayStock).length === 0 && currentProducts?.length > 0) {
+    if (currentProducts?.length > 0 && Object.keys(cart).length > 0) {
       const refreshedDisplayStock: {[key: number]: number} = {};
       currentProducts.forEach(product => {
         const productInCart = cart[product.id] || 0;
@@ -397,7 +399,7 @@ const Shop = () => {
       });
       setDisplayStock(refreshedDisplayStock);
     }
-  }, [currentProducts, displayStock, cart]);
+  }, [currentProducts, cart]); // Simplified dependency array
 
   // Handle customer authentication changes
   useEffect(() => {
@@ -569,8 +571,42 @@ const Shop = () => {
 
   const addToCart = (productId: number) => {
     const targetQuantity = getProductQuantity(productId);
+    
+    // Find the product to verify stock availability
+    const product = currentProducts.find(p => p.id === productId);
+    if (!product) return;
+    
+    // Check if enough stock is available
+    const currentInCart = cart[productId] || 0;
+    const availableStock = (product.stockQuantity || 0) - currentInCart;
+    
+    if (availableStock < targetQuantity) {
+      toast({
+        title: "موجودی ناکافی",
+        description: `تنها ${availableStock} عدد از این محصول موجود است`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Add to persistent cart
     addToCartPersistent(productId, targetQuantity);
+    
+    // Update display stock to immediately show reduced quantity
+    setDisplayStock(prev => ({
+      ...prev,
+      [productId]: Math.max(0, (prev[productId] || 0) - targetQuantity)
+    }));
+    
+    // Reset product quantity input to 1
     setProductQuantity(productId, 1);
+    
+    // Show success message
+    toast({
+      title: "به سبد خرید اضافه شد",
+      description: `${targetQuantity} عدد ${product.name} به سبد خرید اضافه شد`,
+      variant: "default",
+    });
   };
 
   const removeFromCart = (productId: number) => {
@@ -578,8 +614,18 @@ const Shop = () => {
     
     if (currentQuantityInCart > 1) {
       updateCartQuantity(productId, currentQuantityInCart - 1);
+      // Update display stock to show returned quantity
+      setDisplayStock(prev => ({
+        ...prev,
+        [productId]: (prev[productId] || 0) + 1
+      }));
     } else {
       removeFromCartPersistent(productId);
+      // Return all quantity to display stock
+      setDisplayStock(prev => ({
+        ...prev,
+        [productId]: (prev[productId] || 0) + currentQuantityInCart
+      }));
     }
   };
 
