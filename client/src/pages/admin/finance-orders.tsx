@@ -180,28 +180,16 @@ function FinanceOrders() {
     enabled: Boolean(adminUser?.success) // Convert to boolean to avoid undefined
   });
 
-  // Get orders for financial review - MOVED to top - Force fresh data
+  // Get orders for financial review - MOVED to top - Using global refresh control
   const { data: ordersResponse, isLoading, refetch } = useQuery({
-    queryKey: ['/api/financial/orders', Date.now()], // Force cache bust with timestamp
+    queryKey: ['/api/financial/orders'],
     queryFn: async () => {
-      const res = await fetch('/api/financial/orders', { 
-        credentials: 'include',
-        cache: 'no-cache', // Force no cache
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      });
+      const res = await fetch('/api/financial/orders', { credentials: 'include' });
       const data = await res.json();
-      console.log('🔍 [FINANCE DEBUG] Orders received:', data?.orders?.length, 'orders');
-      console.log('🔍 [FINANCE DEBUG] Order numbers:', data?.orders?.map((o: any) => o.orderNumber));
       return data;
     },
     enabled: Boolean(adminUser?.success), // Only run if authenticated
     staleTime: 0,
-    gcTime: 0, // Force immediate garbage collection
-    refetchOnWindowFocus: true, // Re-enable refetch
-    refetchInterval: 5000, // Refetch every 5 seconds for debugging
   });
 
   // Fetch approved orders that have been transferred to warehouse - MOVED to top
@@ -419,7 +407,7 @@ function FinanceOrders() {
 
   // Auto-refresh controlled by global settings
   useEffect(() => {
-    if (allOrders && allOrders.length >= 0) {
+    if (ordersResponse?.orders && ordersResponse.orders.length >= 0) { // Start auto-refresh after successful data load
       const checkRefreshSettings = () => {
         const globalSettings = localStorage.getItem('global-refresh-settings');
         if (globalSettings) {
@@ -431,14 +419,15 @@ function FinanceOrders() {
               ? settings.globalInterval 
               : financeSettings.interval;
             
-            return refreshInterval * 1000;
+            return refreshInterval * 1000; // Convert seconds to milliseconds
           }
         }
-        return 600000;
+        return 600000; // Default 10 minutes if no settings found
       };
 
       const intervalMs = checkRefreshSettings();
       const interval = setInterval(() => {
+        // Check if refresh is still enabled before executing
         const currentSettings = localStorage.getItem('global-refresh-settings');
         if (currentSettings) {
           const settings = JSON.parse(currentSettings);
@@ -451,7 +440,8 @@ function FinanceOrders() {
 
       return () => clearInterval(interval);
     }
-  }, [allOrders, refetch, refetchApproved]);
+  }, [ordersResponse, refetch, refetchApproved]);
+
 
   // Mutations for approve/reject
   const approveMutation = useMutation({
