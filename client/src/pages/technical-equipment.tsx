@@ -185,8 +185,8 @@ export default function TechnicalEquipmentPage() {
 
       {/* Random Products from Shop */}
       <RandomCategoryProducts 
-        category="technical-equipment" 
-        title="محصولات پیشنهادی تجهیزات فنی از فروشگاه"
+        category="agricultural-fertilizers" 
+        title="محصولات پیشنهادی شیمیایی از فروشگاه"
       />
 
       {/* Call to Action */}

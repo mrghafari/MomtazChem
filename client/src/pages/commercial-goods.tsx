@@ -171,8 +171,8 @@ export default function CommercialGoodsPage() {
 
       {/* Random Products from Shop */}
       <RandomCategoryProducts 
-        category="commercial-goods" 
-        title="محصولات پیشنهادی تجاری از فروشگاه"
+        category="paint-thinner" 
+        title="محصولات پیشنهادی شیمیایی از فروشگاه"
       />
 
       {/* Call to Action */}

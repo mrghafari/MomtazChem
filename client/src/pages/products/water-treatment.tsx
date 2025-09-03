@@ -401,8 +401,8 @@ const WaterTreatment = () => {
 
       {/* Random Products from Shop */}
       <RandomCategoryProducts 
-        category="water-treatment" 
-        title="محصولات پیشنهادی تصفیه آب از فروشگاه"
+        category="paint-thinner" 
+        title="محصولات پیشنهادی شیمیایی از فروشگاه"
       />
 
       {/* Live Chat Support */}
