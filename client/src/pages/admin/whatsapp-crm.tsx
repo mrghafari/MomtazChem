@@ -70,6 +70,8 @@ export default function WhatsAppCRM() {
   const [testModal, setTestModal] = useState(false);
   const [testPhoneNumber, setTestPhoneNumber] = useState('');
   const [testMessage, setTestMessage] = useState('');
+  const [viewModal, setViewModal] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<WhatsAppCustomer | null>(null);
   
   // API Settings state
   const [apiSettings, setApiSettings] = useState({
@@ -361,6 +363,10 @@ export default function WhatsAppCRM() {
                                 size="sm"
                                 variant="ghost"
                                 className="flex items-center gap-1"
+                                onClick={() => {
+                                  setSelectedCustomer(customer);
+                                  setViewModal(true);
+                                }}
                               >
                                 <Eye className="w-3 h-3" />
                                 مشاهده
@@ -757,6 +763,92 @@ export default function WhatsAppCRM() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Customer Details Modal */}
+      <Dialog open={viewModal} onOpenChange={setViewModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCheck className="w-5 h-5" />
+              جزئیات مشتری
+            </DialogTitle>
+          </DialogHeader>
+          {selectedCustomer && (
+            <div className="space-y-6">
+              {/* Basic Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">اطلاعات شخصی</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <label className="text-xs text-gray-500">نام کامل</label>
+                      <p className="font-medium">{selectedCustomer.first_name} {selectedCustomer.last_name}</p>
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500">ایمیل</label>
+                      <p className="font-mono text-sm">{selectedCustomer.email}</p>
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500">شماره تلفن</label>
+                      <p className="font-mono text-sm">{selectedCustomer.phone}</p>
+                    </div>
+                    {selectedCustomer.whatsapp_number && (
+                      <div>
+                        <label className="text-xs text-gray-500">شماره واتساپ</label>
+                        <p className="font-mono text-sm">{selectedCustomer.whatsapp_number}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">تنظیمات ارتباط</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <label className="text-xs text-gray-500">ترجیح ارتباط</label>
+                      <div className="flex items-center gap-2">
+                        {getPreferenceIcon(selectedCustomer.communication_preference)}
+                        <span className="capitalize">{selectedCustomer.communication_preference}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500">تاریخ عضویت</label>
+                      <p>{formatDate(selectedCustomer.created_at)}</p>
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500">وضعیت</label>
+                      <Badge variant="secondary" className="text-green-600">فعال</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-center gap-3">
+                <Button
+                  onClick={() => {
+                    setTestPhoneNumber(selectedCustomer.whatsapp_number || selectedCustomer.phone);
+                    setTestMessage(`سلام ${selectedCustomer.first_name} عزیز!`);
+                    setViewModal(false);
+                    setTestModal(true);
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  ارسال پیام واتساپ
+                </Button>
+                <Button variant="outline" onClick={() => setViewModal(false)}>
+                  بستن
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
