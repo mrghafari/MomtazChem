@@ -21269,6 +21269,115 @@ Momtaz Chemical Technical Team`,
     }
   });
 
+  // REAL ORDERS API - DIFFERENT PATH TO AVOID MIDDLEWARE 
+  app.get("/api/orders/all", async (req, res) => {
+    console.log('🔍 [REAL ORDERS DEBUG] Real orders API called!');
+    
+    try {
+      // Query with JOIN to get all orders with customer names
+      const query = `
+        SELECT co.id, co.order_number, co.customer_id, co.total_amount, co.status, 
+               co.payment_method, co.created_at, co.updated_at, co.carrier,
+               c.first_name as customer_first_name, c.last_name as customer_last_name, 
+               c.email as customer_email, c.phone as customer_phone, c.company as customer_company,
+               c.address as customer_address
+        FROM customer_orders co
+        LEFT JOIN customers c ON co.customer_id = c.id
+        ORDER BY co.created_at DESC
+        LIMIT 50
+      `;
+      
+      const result = await db.execute(sql.raw(query));
+      console.log(`✅ [REAL ORDERS DEBUG] SQL Result type:`, typeof result);
+      
+      // Handle different result formats safely
+      let orders = [];
+      if (Array.isArray(result)) {
+        orders = result;
+      } else if (result && result.rows) {
+        orders = result.rows;
+      } else if (result && Array.isArray(result.records)) {
+        orders = result.records;
+      }
+      console.log(`✅ [REAL ORDERS DEBUG] Found ${orders.length} orders`);
+      
+      // Format for frontend 
+      const formattedOrders = await Promise.all(
+        orders.map(async (order: any) => {
+          // Get order items
+          try {
+            const itemsQuery = `SELECT * FROM order_items WHERE order_id = ${order.id}`;
+            const itemsResult = await db.execute(sql.raw(itemsQuery));
+            const items = itemsResult?.rows || [];
+
+            // Create customer object
+            let customer = null;
+            if (order.customer_id && order.customer_first_name) {
+              customer = {
+                id: order.customer_id,
+                firstName: order.customer_first_name,
+                lastName: order.customer_last_name,
+                email: order.customer_email,
+                phone: order.customer_phone,
+                company: order.customer_company,
+                address: order.customer_address
+              };
+            }
+
+            return {
+              id: order.id,
+              customerId: order.customer_id,
+              orderNumber: order.order_number,
+              totalAmount: order.total_amount,
+              status: order.status,
+              paymentMethod: order.payment_method,
+              carrier: order.carrier,
+              createdAt: order.created_at,
+              updatedAt: order.updated_at,
+              orderDate: order.created_at,
+              items: items,
+              customer: customer,
+              customerName: customer ? `${customer.firstName} ${customer.lastName}` : 'نامشخص',
+              mobileNumber: customer?.phone || 'نامشخص',
+              email: customer?.email || 'نامشخص',
+              walletAmountUsed: 0,
+            };
+          } catch (itemError) {
+            console.error(`Error getting items for order ${order.id}:`, itemError);
+            return {
+              id: order.id,
+              customerId: order.customer_id,
+              orderNumber: order.order_number,
+              totalAmount: order.total_amount,
+              status: order.status,
+              paymentMethod: order.payment_method,
+              carrier: order.carrier,
+              createdAt: order.created_at,
+              updatedAt: order.updated_at,
+              orderDate: order.created_at,
+              items: [],
+              customer: null,
+              customerName: 'نامشخص',
+              mobileNumber: 'نامشخص',
+              email: 'نامشخص',
+              walletAmountUsed: 0,
+            };
+          }
+        })
+      );
+      
+      console.log(`🎯 [REAL ORDERS DEBUG] Returning ${formattedOrders.length} real orders`);
+      res.json(formattedOrders);
+    } catch (error: any) {
+      console.error('🚨 [REAL ORDERS ERROR]:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در دریافت سفارشات',
+        error: error.message 
+      });
+    }
+  });
+
   // Get paid orders only for invoice management - SIMPLE DB QUERY (NO AUTH FOR TESTING)
   app.get("/api/shop/orders/paid", async (req, res) => {
     console.log('🔍 [INVOICE DEBUG] API called - fetching REAL invoices');

@@ -135,7 +135,7 @@ export default function ShopAdmin() {
 
   // Fetch orders
   const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
-    queryKey: ["/api/shop/orders"],
+    queryKey: ["/api/orders/all"],
     enabled: isAuthenticated,
   });
 
@@ -358,7 +358,7 @@ export default function ShopAdmin() {
       return apiRequest(`/api/shop/orders/${orderId}`, { method: "PATCH", body: updates });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/orders/all"] });
       queryClient.invalidateQueries({ queryKey: ["/api/shop/statistics"] });
       toast({
         title: "Order Updated",
@@ -424,7 +424,7 @@ export default function ShopAdmin() {
       });
     },
     onSuccess: (data: any) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/orders/all"] });
       toast({
         title: "موفقیت",
         description: data.message || "سفارش با موفقیت از پیش‌فاکتور به فاکتور تبدیل شد",
