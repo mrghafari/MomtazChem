@@ -259,21 +259,21 @@ export default function ShopInvoiceManagement() {
             position: relative;
           }
           .company-logo { 
-            width: 80px; 
-            height: 80px;
+            width: 60px; 
+            height: 60px;
             object-fit: contain;
-            margin-bottom: 10px;
-            border-radius: 6px;
+            margin-bottom: 8px;
+            border-radius: 4px;
             background: white;
-            padding: 6px;
+            padding: 4px;
             display: block;
             margin-left: auto;
             margin-right: auto;
           }
           .company-name { 
-            font-size: 22px; 
+            font-size: 18px; 
             font-weight: bold; 
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
           }
           .invoice-title { 
@@ -411,7 +411,7 @@ export default function ShopInvoiceManagement() {
                 <img src="${companyInfo.data.logoUrl}" alt="لوگوی شرکت" class="company-logo" 
                      onload="console.log('Logo loaded successfully')" 
                      onerror="console.log('Logo failed to load'); this.style.display='none'" />` : 
-                `<div style="width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 6px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white;">لوگو</div>`}
+                `<div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 4px; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white;">لوگو</div>`}
             </div>
             <div class="company-name">${companyInfo?.data?.companyNameAr || companyInfo?.data?.companyNameEn || 'شرکت ممتاز شیمی'}</div>
             <div class="invoice-title">فاکتور فروش</div>
