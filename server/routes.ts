@@ -21192,38 +21192,48 @@ Momtaz Chemical Technical Team`,
     }]);
   });
 
-  // Get paid orders only for invoice management - TEST WITHOUT AUTH
-  app.get("/api/shop/orders/paid", (req, res) => {
-    console.log('🔍 [INVOICE DEBUG] API called - NO AUTH REQUIRED');
+  // Get paid orders only for invoice management - REAL DATA FROM DB
+  app.get("/api/shop/orders/paid", requireAuth, async (req, res) => {
+    console.log('🔍 [INVOICE DEBUG] API called - fetching REAL invoices from database');
     
-    // Return simple hardcoded data immediately
-    const invoices = [
-      {
-        id: 1,
-        orderNumber: "M2025001",
-        customerFirstName: "احمد",
-        customerLastName: "علی‌پور", 
-        customerEmail: "ahmad@example.com",
-        customerPhone: "07901234567",
-        totalAmount: "150000",
-        currency: "IQD",
-        paymentMethod: "bank_transfer",
-        paymentDate: "2025-09-04T16:00:00.000Z",
-        createdAt: "2025-09-04T16:00:00.000Z",
-        status: "completed",
-        items: [
-          {
-            productName: "محصول نمونه",
-            quantity: 2,
-            unitPrice: "75000",
-            totalPrice: "150000"
-          }
-        ]
-      }
-    ];
-    
-    console.log('✅ [INVOICE DEBUG] Returning 1 sample invoice');
-    res.json(invoices);
+    try {
+      // Get all customer orders
+      const allOrders = await customerStorage.getAllOrders();
+      console.log(`🔍 [INVOICE DEBUG] Found ${allOrders.length} total orders`);
+      
+      // Filter for completed/paid orders only
+      const paidOrders = allOrders.filter(order => {
+        const isPaid = order.status === 'completed' || 
+                      order.status === 'delivered' ||
+                      (order.paymentMethod && ['wallet_full', 'wallet_partial', 'bank_transfer'].includes(order.paymentMethod));
+        return isPaid;
+      });
+      
+      console.log(`✅ [INVOICE DEBUG] Found ${paidOrders.length} paid orders for invoices`);
+      
+      // Format orders for invoice display
+      const invoices = paidOrders.map(order => ({
+        id: order.id,
+        orderNumber: order.orderNumber,
+        customerFirstName: order.customerFirstName || 'N/A',
+        customerLastName: order.customerLastName || 'N/A',
+        customerEmail: order.customerEmail || 'N/A',
+        customerPhone: order.customerPhone || 'N/A',
+        totalAmount: order.totalAmount || '0',
+        currency: order.currency || 'IQD',
+        paymentMethod: order.paymentMethod || 'unknown',
+        paymentDate: order.updatedAt || order.createdAt,
+        createdAt: order.createdAt,
+        status: order.status,
+        items: order.items || []
+      }));
+      
+      console.log(`🎯 [INVOICE DEBUG] Returning ${invoices.length} formatted invoices`);
+      res.json(invoices);
+    } catch (error) {
+      console.error("❌ [INVOICE DEBUG] Error fetching paid orders:", error);
+      res.status(500).json({ success: false, message: `Failed to fetch paid orders: ${error.message}` });
+    }
   });
 
   // Get invoice statistics for shop admin
