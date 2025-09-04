@@ -21180,43 +21180,38 @@ Momtaz Chemical Technical Team`,
     }
   });
 
-  // Get paid orders only for invoice management - SIMPLIFIED VERSION
-  app.get("/api/shop/orders/paid", requireAuth, async (req, res) => {
-    console.log('🔍 [INVOICE DEBUG] API called successfully - authentication passed');
+  // Get paid orders only for invoice management - ULTRA SIMPLE VERSION
+  app.get("/api/shop/orders/paid", requireAuth, (req, res) => {
+    console.log('🔍 [INVOICE DEBUG] API called - authentication passed');
     
-    try {
-      // Simple hardcoded response for now to test frontend
-      const sampleInvoices = [
-        {
-          id: 1,
-          orderNumber: "M2025001",
-          customerFirstName: "احمد",
-          customerLastName: "علی‌پور", 
-          customerEmail: "ahmad@example.com",
-          customerPhone: "07901234567",
-          totalAmount: "150000",
-          currency: "IQD",
-          paymentMethod: "bank_transfer",
-          paymentDate: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          status: "completed",
-          items: [
-            {
-              productName: "محصول نمونه",
-              quantity: 2,
-              unitPrice: "75000",
-              totalPrice: "150000"
-            }
-          ]
-        }
-      ];
-      
-      console.log('✅ [INVOICE DEBUG] Returning sample invoices for testing');
-      res.json(sampleInvoices);
-    } catch (error) {
-      console.error("❌ [INVOICE DEBUG] Error fetching paid orders:", error);
-      res.status(400).json({ success: false, message: `Invalid or failed to fetch paid orders: ${error.message}` });
-    }
+    // Return simple hardcoded data immediately
+    const invoices = [
+      {
+        id: 1,
+        orderNumber: "M2025001",
+        customerFirstName: "احمد",
+        customerLastName: "علی‌پور", 
+        customerEmail: "ahmad@example.com",
+        customerPhone: "07901234567",
+        totalAmount: "150000",
+        currency: "IQD",
+        paymentMethod: "bank_transfer",
+        paymentDate: "2025-09-04T16:00:00.000Z",
+        createdAt: "2025-09-04T16:00:00.000Z",
+        status: "completed",
+        items: [
+          {
+            productName: "محصول نمونه",
+            quantity: 2,
+            unitPrice: "75000",
+            totalPrice: "150000"
+          }
+        ]
+      }
+    ];
+    
+    console.log('✅ [INVOICE DEBUG] Returning 1 sample invoice');
+    res.json(invoices);
   });
 
   // Get invoice statistics for shop admin
