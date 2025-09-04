@@ -303,47 +303,47 @@ export default function WhatsAppCRM() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-12">
+                        <TableHead className="w-12 text-center">
                           <Checkbox
                             checked={selectedCustomers.length === customers.length && customers.length > 0}
                             onCheckedChange={handleSelectAll}
                           />
                         </TableHead>
-                        <TableHead>نام</TableHead>
-                        <TableHead>ایمیل</TableHead>
-                        <TableHead>شماره واتساپ</TableHead>
-                        <TableHead>ترجیح ارتباط</TableHead>
-                        <TableHead>تاریخ عضویت</TableHead>
-                        <TableHead>عملیات</TableHead>
+                        <TableHead className="text-right">نام</TableHead>
+                        <TableHead className="text-right">ایمیل</TableHead>
+                        <TableHead className="text-right">شماره واتساپ</TableHead>
+                        <TableHead className="text-center">ترجیح ارتباط</TableHead>
+                        <TableHead className="text-center">تاریخ عضویت</TableHead>
+                        <TableHead className="text-center">عملیات</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {customers.map((customer: WhatsAppCustomer) => (
                         <TableRow key={customer.id}>
-                          <TableCell>
+                          <TableCell className="text-center">
                             <Checkbox
                               checked={selectedCustomers.includes(customer.id)}
                               onCheckedChange={(checked) => handleSelectCustomer(customer.id, checked as boolean)}
                             />
                           </TableCell>
-                          <TableCell className="font-medium">
+                          <TableCell className="font-medium text-right">
                             {customer.first_name} {customer.last_name}
                           </TableCell>
-                          <TableCell>{customer.email}</TableCell>
-                          <TableCell className="font-mono text-sm">
+                          <TableCell className="text-right">{customer.email}</TableCell>
+                          <TableCell className="font-mono text-sm text-right">
                             {customer.whatsapp_number}
                           </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
+                          <TableCell className="text-center">
+                            <div className="flex items-center justify-center gap-2">
                               {getPreferenceIcon(customer.communication_preference)}
                               <span className="capitalize">{customer.communication_preference}</span>
                             </div>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="text-center">
                             {formatDate(customer.created_at)}
                           </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
+                          <TableCell className="text-center">
+                            <div className="flex items-center justify-center gap-2">
                               <Button
                                 size="sm"
                                 variant="outline"
