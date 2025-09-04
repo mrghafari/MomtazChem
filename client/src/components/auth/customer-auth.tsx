@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
-import { User, Mail, Lock, Phone, MapPin, Building, AlertCircle, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
+import { User, Mail, Lock, Phone, MapPin, Building, AlertCircle, Eye, EyeOff, ChevronDown, ChevronUp, Settings } from "lucide-react";
 
 // Form schemas
 const loginSchema = z.object({
@@ -737,12 +737,12 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                 {/* Basic Information Section */}
                 <Collapsible open={basicInfoOpen} onOpenChange={setBasicInfoOpen}>
                   <CollapsibleTrigger asChild>
-                    <Button variant="outline" className="w-full justify-between">
+                    <Button variant="outline" className="w-full justify-between bg-blue-50 hover:bg-blue-100 border-blue-200 py-3 text-base font-semibold text-blue-800">
                       <span className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
+                        <User className="h-5 w-5 text-blue-600" />
                         Basic Information
                       </span>
-                      {basicInfoOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      {basicInfoOpen ? <ChevronUp className="h-5 w-5 text-blue-600" /> : <ChevronDown className="h-5 w-5 text-blue-600" />}
                     </Button>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-4 mt-4">
@@ -869,12 +869,12 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                 {/* Contact Information Section */}
                 <Collapsible open={contactInfoOpen} onOpenChange={setContactInfoOpen}>
                   <CollapsibleTrigger asChild>
-                    <Button variant="outline" className="w-full justify-between">
+                    <Button variant="outline" className="w-full justify-between bg-green-50 hover:bg-green-100 border-green-200 py-3 text-base font-semibold text-green-800">
                       <span className="flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
+                        <Phone className="h-5 w-5 text-green-600" />
                         Contact Information
                       </span>
-                      {contactInfoOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      {contactInfoOpen ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
                     </Button>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-4 mt-4">
@@ -932,12 +932,12 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                 {/* Address Information Section */}
                 <Collapsible open={addressInfoOpen} onOpenChange={setAddressInfoOpen}>
                   <CollapsibleTrigger asChild>
-                    <Button variant="outline" className="w-full justify-between">
+                    <Button variant="outline" className="w-full justify-between bg-orange-50 hover:bg-orange-100 border-orange-200 py-3 text-base font-semibold text-orange-800">
                       <span className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
+                        <MapPin className="h-5 w-5 text-orange-600" />
                         Address Information
                       </span>
-                      {addressInfoOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      {addressInfoOpen ? <ChevronUp className="h-5 w-5 text-orange-600" /> : <ChevronDown className="h-5 w-5 text-orange-600" />}
                     </Button>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-4 mt-4">
@@ -1040,9 +1040,12 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                 {/* Additional Information Section */}
                 <Collapsible open={additionalInfoOpen} onOpenChange={setAdditionalInfoOpen}>
                   <CollapsibleTrigger asChild>
-                    <Button variant="outline" className="w-full justify-between">
-                      <span>Additional Information (Optional)</span>
-                      {additionalInfoOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    <Button variant="outline" className="w-full justify-between bg-purple-50 hover:bg-purple-100 border-purple-200 py-3 text-base font-semibold text-purple-800">
+                      <span className="flex items-center gap-2">
+                        <Settings className="h-5 w-5 text-purple-600" />
+                        Additional Information (Optional)
+                      </span>
+                      {additionalInfoOpen ? <ChevronUp className="h-5 w-5 text-purple-600" /> : <ChevronDown className="h-5 w-5 text-purple-600" />}
                     </Button>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-4 mt-4">
