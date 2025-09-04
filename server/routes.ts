@@ -21244,22 +21244,71 @@ Momtaz Chemical Technical Team`,
       }
       console.log(`✅ [REAL INVOICE DEBUG] Found ${orders.length} orders`);
       
-      // Format for frontend - using snake_case database column names with customer data
-      const invoices = orders.map((order: any) => ({
-        id: order.id,
-        orderNumber: order.order_number || `M-${order.id}`,
-        customerFirstName: order.customer_first_name || 'مشتری',
-        customerLastName: order.customer_last_name || 'محترم',
-        customerEmail: order.customer_email || 'N/A',
-        customerPhone: order.customer_phone || 'N/A',
-        totalAmount: order.total_amount || '0',
-        currency: order.currency || 'IQD',
-        paymentMethod: order.payment_method || 'bank_transfer',
-        paymentDate: order.updated_at || order.created_at,
-        createdAt: order.created_at,
-        status: order.status,
-        items: []
-      }));
+      // Get order items for each order
+      const invoices = [];
+      for (const order of orders) {
+        try {
+          // Query order items with simple approach
+          const itemsResult = await db.execute(sql`
+            SELECT id, product_id, quantity, unit_price, total_price,
+                   product_name, product_sku
+            FROM order_items
+            WHERE order_id = ${order.id}
+            ORDER BY id
+          `);
+          let orderItems = [];
+          if (Array.isArray(itemsResult)) {
+            orderItems = itemsResult;
+          } else if (itemsResult && itemsResult.rows) {
+            orderItems = itemsResult.rows;
+          }
+          
+          // Format items for frontend
+          const items = orderItems.map((item: any) => ({
+            id: item.id,
+            productId: item.product_id,
+            productName: item.product_name || item.sku || 'محصول نامشخص',
+            quantity: item.quantity,
+            unitPrice: item.unit_price,
+            totalPrice: item.total_price
+          }));
+          
+          // Format order for frontend
+          invoices.push({
+            id: order.id,
+            orderNumber: order.order_number || `M-${order.id}`,
+            customerFirstName: order.customer_first_name || 'مشتری',
+            customerLastName: order.customer_last_name || 'محترم',
+            customerEmail: order.customer_email || 'N/A',
+            customerPhone: order.customer_phone || 'N/A',
+            totalAmount: order.total_amount || '0',
+            currency: order.currency || 'IQD',
+            paymentMethod: order.payment_method || 'bank_transfer',
+            paymentDate: order.updated_at || order.created_at,
+            createdAt: order.created_at,
+            status: order.status,
+            items: items
+          });
+        } catch (itemError) {
+          console.error(`❌ [INVOICE ITEMS] Error getting items for order ${order.id}:`, itemError);
+          // Add order without items if there's an error
+          invoices.push({
+            id: order.id,
+            orderNumber: order.order_number || `M-${order.id}`,
+            customerFirstName: order.customer_first_name || 'مشتری',
+            customerLastName: order.customer_last_name || 'محترم',
+            customerEmail: order.customer_email || 'N/A',
+            customerPhone: order.customer_phone || 'N/A',
+            totalAmount: order.total_amount || '0',
+            currency: order.currency || 'IQD',
+            paymentMethod: order.payment_method || 'bank_transfer',
+            paymentDate: order.updated_at || order.created_at,
+            createdAt: order.created_at,
+            status: order.status,
+            items: []
+          });
+        }
+      }
       
       console.log(`🎯 [REAL INVOICE DEBUG] Returning ${invoices.length} real invoices`);
       res.json(invoices);
