@@ -439,28 +439,6 @@ export default function ShopAdmin() {
     },
   });
 
-  // Convert all shipped proformas to invoices
-  const convertAllShippedProformasMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest('/api/admin/orders/convert-all-shipped-proformas', { 
-        method: 'POST' 
-      });
-    },
-    onSuccess: (data: any) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/orders"] });
-      toast({
-        title: "موفقیت",
-        description: data.message || "تمام پیش‌فاکتورهای ارسال شده با موفقیت تبدیل شدند",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "خطا", 
-        description: error?.message || "خطا در تبدیل دسته‌ای پیش‌فاکتورها",
-        variant: "destructive",
-      });
-    },
-  });
 
   // Returns handlers
   const handleDeleteReturn = async (returnId: number) => {
@@ -586,23 +564,6 @@ export default function ShopAdmin() {
                     <ShoppingCart className="w-5 h-5" />
                     Order Management
                   </CardTitle>
-                  <Button
-                    variant="default"
-                    onClick={() => {
-                      if (confirm('آیا می‌خواهید تمام سفارشات ارسال شده که هنوز پیش‌فاکتور هستند را به فاکتور تبدیل کنید؟')) {
-                        convertAllShippedProformasMutation.mutate();
-                      }
-                    }}
-                    disabled={convertAllShippedProformasMutation.isPending}
-                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-                  >
-                    {convertAllShippedProformasMutation.isPending ? (
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <FileText className="w-4 h-4" />
-                    )}
-                    {convertAllShippedProformasMutation.isPending ? 'در حال تبدیل...' : 'تبدیل همه پیش‌فاکتورها'}
-                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
