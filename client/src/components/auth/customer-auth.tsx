@@ -28,6 +28,7 @@ const registerSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
   phone: z.string().min(10, "Phone number is required"),
+  whatsappNumber: z.string().optional(),
   company: z.string().optional(),
   country: z.string().min(2, "Country is required"),
   province: z.string().min(1, "Province is required"),
@@ -132,6 +133,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
       password: "",
       confirmPassword: "",
       phone: "",
+      whatsappNumber: "",
       company: "",
       country: "",
       province: "",
@@ -155,6 +157,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
         password: "", // Don't pre-fill password
         confirmPassword: "",
         phone: existingCustomer.phone || "",
+        whatsappNumber: existingCustomer.whatsappNumber || "",
         company: existingCustomer.company || "",
         country: existingCustomer.country || "",
         province: existingCustomer.province || "",
@@ -878,6 +881,26 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                     )}
                   />
                 </div>
+
+                <FormField
+                  control={registerForm.control}
+                  name="whatsappNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        WhatsApp Number (if different)
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="WhatsApp number (optional)" {...field} />
+                      </FormControl>
+                      <FormDescription className="text-xs text-gray-500">
+                        Leave empty if same as mobile number
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <div className="grid grid-cols-1 gap-4">
                   <FormField
