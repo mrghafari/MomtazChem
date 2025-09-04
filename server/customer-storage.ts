@@ -54,7 +54,7 @@ export interface ICustomerStorage {
   getOrderById(id: number): Promise<CustomerOrder | undefined>;
   getOrdersByCustomer(customerId: number): Promise<CustomerOrder[]>;
   updateOrder(id: number, order: Partial<InsertCustomerOrder>): Promise<CustomerOrder>;
-  getAllOrders(): Promise<CustomerOrder[]>;
+  getAllOrders(): Promise<any[]>;
   deleteTemporaryOrder(id: number): Promise<{ success: boolean; releasedProducts: any[] }>;
   
   // Order items
@@ -510,10 +510,28 @@ export class CustomerStorage implements ICustomerStorage {
     return 'pending';
   }
 
-  async getAllOrders(): Promise<CustomerOrder[]> {
+  async getAllOrders(): Promise<any[]> {
     return await customerDb
-      .select()
+      .select({
+        id: customerOrders.id,
+        customerId: customerOrders.customerId,
+        orderNumber: customerOrders.orderNumber,
+        totalAmount: customerOrders.totalAmount,
+        status: customerOrders.status,
+        paymentMethod: customerOrders.paymentMethod,
+        carrier: customerOrders.carrier,
+        createdAt: customerOrders.createdAt,
+        updatedAt: customerOrders.updatedAt,
+        // Customer details from JOIN
+        customerFirstName: customers.firstName,
+        customerLastName: customers.lastName,
+        customerEmail: customers.email,
+        customerPhone: customers.phone,
+        customerCompany: customers.company,
+        customerAddress: customers.address,
+      })
       .from(customerOrders)
+      .leftJoin(customers, eq(customerOrders.customerId, customers.id))
       .orderBy(desc(customerOrders.createdAt));
   }
 

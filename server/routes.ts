@@ -20911,11 +20911,21 @@ Momtaz Chemical Technical Team`,
       
       // Get detailed order information with items and customer details
       const detailedOrders = await Promise.all(
-        orders.map(async (order) => {
+        orders.map(async (order: any) => {
           const items = await customerStorage.getOrderItems(order.id);
+          
+          // Customer details are now included from the JOIN, create customer object
           let customer = null;
-          if (order.customerId) {
-            customer = await customerStorage.getCustomerById(order.customerId);
+          if (order.customerId && order.customerFirstName) {
+            customer = {
+              id: order.customerId,
+              firstName: order.customerFirstName,
+              lastName: order.customerLastName,
+              email: order.customerEmail,
+              phone: order.customerPhone,
+              company: order.customerCompany,
+              address: order.customerAddress
+            };
           }
 
           // Calculate wallet amount used for payment source display
@@ -20951,6 +20961,10 @@ Momtaz Chemical Technical Team`,
             paymentMethod: order.paymentMethod,
             // Add wallet amount used for payment source display
             walletAmountUsed: walletAmountUsed,
+            // Add direct customer info for display (for compatibility)
+            customerName: customer ? `${customer.firstName} ${customer.lastName}` : 'نامشخص',
+            mobileNumber: customer?.phone || 'نامشخص',
+            email: customer?.email || 'نامشخص'
           };
         })
       );
