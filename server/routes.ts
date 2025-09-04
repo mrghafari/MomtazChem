@@ -21183,72 +21183,68 @@ Momtaz Chemical Technical Team`,
   // Get paid orders only for invoice management
   app.get("/api/shop/orders/paid", requireAuth, async (req, res) => {
     try {
-      console.log('🔍 [INVOICE DEBUG] Fetching paid orders...');
+      console.log('🔍 [INVOICE DEBUG] Starting invoice API call...');
       
-      // Get all customer orders that are paid/settled
-      const allOrders = await customerStorage.getAllOrders();
-      console.log(`🔍 [INVOICE DEBUG] Total orders found: ${allOrders.length}`);
+      // Use direct SQL query to avoid Drizzle schema issues
+      const { pool } = await import('./db');
+      const ordersQuery = `
+        SELECT 
+          id, customer_id, order_number, total_amount, currency, 
+          payment_method, status, created_at, updated_at, 
+          payment_confirmed_at
+        FROM customer_orders 
+        WHERE status IN ('completed', 'delivered', 'financial_approved')
+           OR payment_method IN ('wallet_full', 'wallet_partial', 'bank_transfer')
+        ORDER BY created_at DESC
+      `;
       
-      // Filter for orders with completed payments (settled orders)
-      const paidOrders = allOrders.filter(order => {
-        if (!order) return false;
-        
-        const isPaid = order.status === 'completed' || 
-                      order.status === 'delivered' ||
-                      order.status === 'financial_approved' ||
-                      (order.paymentMethod && ['wallet_full', 'wallet_partial', 'bank_transfer'].includes(order.paymentMethod));
-        
-        if (isPaid) {
-          console.log(`✅ [INVOICE DEBUG] Paid order found: ${order.orderNumber || 'N/A'} - Status: ${order.status}, Payment: ${order.paymentMethod || 'N/A'}`);
-        }
-        return isPaid;
-      });
+      const ordersResult = await pool.query(ordersQuery);
+      const paidOrders = ordersResult.rows;
+      console.log(`🔍 [INVOICE DEBUG] Found ${paidOrders.length} paid orders via direct SQL`);
       
-      console.log(`🔍 [INVOICE DEBUG] Paid orders filtered: ${paidOrders.length}`);
-      
-      // Get detailed information for each paid order including items
+      // Get detailed information for each paid order including items  
       const detailedPaidOrders = await Promise.all(
         paidOrders.map(async (order) => {
           try {
-            let items = [];
+            // Get order items using direct SQL
+            const itemsQuery = `
+              SELECT product_name, quantity, unit_price, total_price 
+              FROM customer_order_items 
+              WHERE order_id = $1
+            `;
+            const itemsResult = await pool.query(itemsQuery, [order.id]);
+            const items = itemsResult.rows;
+            
+            // Get customer info using direct SQL  
             let customer = null;
-            
-            // Safely get order items with error handling
-            try {
-              items = await customerStorage.getOrderItems(order.id) || [];
-            } catch (itemError) {
-              console.error(`Error fetching items for order ${order.orderNumber}:`, itemError);
-              items = [];
-            }
-            
-            // Safely get customer info with error handling
-            if (order.customerId) {
-              try {
-                customer = await customerStorage.getCustomerById(order.customerId);
-              } catch (error) {
-                console.error(`Error fetching customer ${order.customerId} for order ${order.orderNumber}:`, error);
-                // Continue without customer info if there's a database error
-              }
+            if (order.customer_id) {
+              const customerQuery = `
+                SELECT first_name, last_name, email, phone 
+                FROM customers 
+                WHERE id = $1
+              `;
+              const customerResult = await pool.query(customerQuery, [order.customer_id]);
+              customer = customerResult.rows[0] || null;
             }
 
             return {
               id: order.id,
-              orderNumber: order.orderNumber || `ORD-${order.id}`,
-              customerFirstName: customer?.firstName || 'نامشخص',
-              customerLastName: customer?.lastName || '',
+              orderNumber: order.order_number || `ORD-${order.id}`,
+              customerFirstName: customer?.first_name || 'نامشخص',
+              customerLastName: customer?.last_name || '',
               customerEmail: customer?.email || '',
               customerPhone: customer?.phone || '',
-              totalAmount: order.totalAmount || '0',
+              totalAmount: order.total_amount || '0',
               currency: order.currency || 'IQD',
-              paymentMethod: order.paymentMethod || 'نامشخص',
-              paymentDate: order.paymentConfirmedAt || order.updatedAt || order.createdAt,
-              createdAt: order.createdAt,
+              paymentMethod: order.payment_method || 'نامشخص',
+              paymentDate: order.payment_confirmed_at || order.updated_at || order.created_at,
+              createdAt: order.created_at,
               status: order.status,
               items: (items || []).map(item => ({
-                productName: item?.productName || 'محصول نامشخص',
+                productName: item?.product_name || 'محصول نامشخص',
                 quantity: item?.quantity || 0,
-                unitPrice: item?.unitPrice || '0',
-                totalPrice: item?.totalPrice || '0'
+                unitPrice: item?.unit_price || '0',
+                totalPrice: item?.total_price || '0'
               }))
             };
           } catch (orderError) {
