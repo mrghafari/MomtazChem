@@ -11,6 +11,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import PaymentMethodBadge from "@/components/PaymentMethodBadge";
+import { BankReceiptUploadModal } from "@/components/BankReceiptUploadModal";
 
 // کامپوننت کنتور زمانی برای ارسال حواله بانکی
 const BankTransferCountdown = ({ orderDate, gracePeriodHours = 72 }: { orderDate: string, gracePeriodHours?: number }) => {
@@ -91,6 +92,10 @@ const CustomerProfile = () => {
   const [csvStartDate, setCsvStartDate] = useState("");
   const [csvEndDate, setCsvEndDate] = useState("");
   const [isExportingCsv, setIsExportingCsv] = useState(false);
+  
+  // Bank receipt upload modal states
+  const [showBankReceiptModal, setShowBankReceiptModal] = useState(false);
+  const [selectedOrderNumber, setSelectedOrderNumber] = useState<string>("");
   
   // Get customer information
   const { data: customerData, isLoading: customerLoading, error: customerError } = useQuery<any>({
@@ -347,6 +352,17 @@ const CustomerProfile = () => {
     } finally {
       setIsExportingCsv(false);
     }
+  };
+
+  // Handle opening bank receipt upload modal
+  const handleOpenBankReceiptModal = (orderNumber: string) => {
+    setSelectedOrderNumber(orderNumber);
+    setShowBankReceiptModal(true);
+  };
+
+  // Handle modal success (refresh orders)
+  const handleModalSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/customers/orders"] });
   };
 
   const formatTimeRemaining = (hours: number) => {
@@ -785,7 +801,7 @@ const CustomerProfile = () => {
                                       <Button 
                                         size="sm" 
                                         className="bg-orange-600 hover:bg-orange-700 text-white text-xs"
-                                        onClick={() => setLocation(`/customer/bank-receipt-upload/${order.orderNumber}`)}
+                                        onClick={() => handleOpenBankReceiptModal(order.orderNumber)}
                                       >
                                         <Upload className="w-3 h-3 mr-1" />
                                         آپلود حواله بانکی
@@ -963,7 +979,7 @@ const CustomerProfile = () => {
                               {/* دکمه آپلود رسید بانکی */}
                               <Button
                                 size="sm"
-                                onClick={() => window.open(`/customer/bank-receipt-upload/${order.orderNumber}`, '_blank')}
+                                onClick={() => handleOpenBankReceiptModal(order.orderNumber)}
                                 className="bg-orange-600 hover:bg-orange-700 text-white"
                               >
                                 <Upload className="w-4 h-4 mr-2" />
@@ -1483,6 +1499,14 @@ const CustomerProfile = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Bank Receipt Upload Modal */}
+      <BankReceiptUploadModal
+        open={showBankReceiptModal}
+        onOpenChange={setShowBankReceiptModal}
+        orderNumber={selectedOrderNumber}
+        onSuccess={handleModalSuccess}
+      />
     </>
   );
 };
