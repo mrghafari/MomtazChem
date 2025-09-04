@@ -1760,16 +1760,6 @@ export default function ShopAdmin() {
                 >
                   بستن
                 </Button>
-                <Button
-                  variant="default"
-                  onClick={() => {
-                    // Update order status functionality can be added here
-                    console.log('Update order status for:', selectedOrder.id);
-                  }}
-                >
-                  <Edit className="w-4 h-4 mr-1" />
-                  ویرایش سفارش
-                </Button>
               </div>
             </div>
           </DialogContent>
