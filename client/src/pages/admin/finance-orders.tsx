@@ -1000,10 +1000,11 @@ function FinanceOrders() {
 
       {/* Order Details Modal */}
       <Dialog open={orderDetailsDialogOpen} onOpenChange={setOrderDetailsDialogOpen}>
-            <DialogTitle className="flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-blue-600" />
-                مشاهده فیش پرداخت
+        {/* Complex modal removed - using SimpleReceiptViewer instead */}
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>جزئیات سفارش</DialogTitle>
+          </DialogHeader>
               </span>
               <div className="flex items-center gap-2">
                 {/* Zoom Controls */}
