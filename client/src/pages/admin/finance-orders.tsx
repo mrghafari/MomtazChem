@@ -405,69 +405,62 @@ function FinanceOrders() {
     setReceiptAmount("");
     setDialogOpen(true);
     
-    // Fetch wallet balance for this customer
+    // Fetch wallet balance for this customer - simplified and more reliable approach
     if (order.customerOrderId) {
       setWalletLoading(true);
       try {
-        // Try to get customer ID from order structure first
-        let customerId = null;
+        console.log('🔍 [WALLET DEBUG] Starting wallet fetch for order:', order.orderNumber);
         
-        // Method 1: Check if customer field exists in order
-        if (order.customer?.email) {
-          // Find customer by email
-          const customerSearchResponse = await fetch(`/api/admin/customers/search?email=${encodeURIComponent(order.customer.email)}`, {
-            credentials: 'include'
-          });
-          if (customerSearchResponse.ok) {
-            const searchResult = await customerSearchResponse.json();
-            if (searchResult.success && searchResult.data && searchResult.data.length > 0) {
-              customerId = searchResult.data[0].id;
-            }
-          }
-        }
+        // Get order details to get the customer ID directly
+        const orderResponse = await fetch(`/api/admin/orders/${order.customerOrderId}/details`, {
+          credentials: 'include'
+        });
         
-        // Method 2: If not found, get from order details
-        if (!customerId) {
-          const orderResponse = await fetch(`/api/admin/orders/${order.customerOrderId}/details`, {
-            credentials: 'include'
-          });
+        console.log('🔍 [WALLET DEBUG] Order details response status:', orderResponse.status);
+        
+        if (orderResponse.ok) {
+          const orderData = await orderResponse.json();
+          console.log('🔍 [WALLET DEBUG] Order data received:', orderData);
           
-          if (orderResponse.ok) {
-            const orderData = await orderResponse.json();
-            if (orderData.success && orderData.order?.customerId) {
-              customerId = orderData.order.customerId;
+          if (orderData.success && orderData.order?.customerId) {
+            const customerId = orderData.order.customerId;
+            console.log('🔍 [WALLET DEBUG] Found customer ID:', customerId);
+            
+            // Get wallet balance using customer ID
+            const walletResponse = await fetch(`/api/wallet/balance/${customerId}`, {
+              credentials: 'include'
+            });
+            console.log('🔍 [WALLET DEBUG] Wallet response status:', walletResponse.status);
+            
+            if (walletResponse.ok) {
+              const walletResult = await walletResponse.json();
+              console.log('🔍 [WALLET DEBUG] Wallet result:', walletResult);
+              const balance = walletResult.data?.balance || 0;
+              console.log('🔍 [WALLET DEBUG] Final balance:', balance);
+              setWalletBalance(balance);
+            } else {
+              const errorText = await walletResponse.text();
+              console.error('🔍 [WALLET DEBUG] Wallet API failed:', walletResponse.status, errorText);
+              setWalletBalance(0);
             }
-          }
-        }
-        
-        // Now get wallet balance using customer ID
-        if (customerId) {
-          console.log('🔍 [WALLET DEBUG] Fetching wallet balance for customer ID:', customerId);
-          const walletResponse = await fetch(`/api/wallet/balance/${customerId}`, {
-            credentials: 'include'
-          });
-          console.log('🔍 [WALLET DEBUG] Wallet response status:', walletResponse.status);
-          if (walletResponse.ok) {
-            const walletResult = await walletResponse.json();
-            console.log('🔍 [WALLET DEBUG] Wallet result:', walletResult);
-            const balance = walletResult.data?.balance || 0;
-            console.log('🔍 [WALLET DEBUG] Final balance:', balance);
-            setWalletBalance(balance);
           } else {
-            const errorText = await walletResponse.text();
-            console.error('🔍 [WALLET DEBUG] Wallet API failed:', walletResponse.status, errorText);
+            console.error('🔍 [WALLET DEBUG] No customer ID in order data:', orderData);
             setWalletBalance(0);
           }
         } else {
-          console.error('🔍 [WALLET DEBUG] Customer ID not found');
+          const errorText = await orderResponse.text();
+          console.error('🔍 [WALLET DEBUG] Order details API failed:', orderResponse.status, errorText);
           setWalletBalance(0);
         }
       } catch (error) {
-        console.error('Error fetching wallet balance:', error);
+        console.error('🔍 [WALLET DEBUG] Exception during wallet fetch:', error);
         setWalletBalance(0);
       } finally {
         setWalletLoading(false);
       }
+    } else {
+      console.error('🔍 [WALLET DEBUG] No customerOrderId in order');
+      setWalletBalance(0);
     }
   }, []);
 
