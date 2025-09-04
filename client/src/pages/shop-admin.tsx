@@ -565,21 +565,17 @@ export default function ShopAdmin() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="orders" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="orders">Orders</TabsTrigger>
-              <TabsTrigger value="discounts">Discount Settings</TabsTrigger>
-              <TabsTrigger value="bulk-purchases">Bulk Purchases</TabsTrigger>
-              <TabsTrigger value="proforma-deadline">Purchase Proforma Deadline</TabsTrigger>
-              <TabsTrigger value="inventory">Inventory</TabsTrigger>
-            </TabsList>
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="invoices">Invoice Management</TabsTrigger>
-              <TabsTrigger value="returns">Returned Items</TabsTrigger>
-              <TabsTrigger value="abandoned-cart">Abandoned Cart</TabsTrigger>
-              <TabsTrigger value="reports">Sales Reports</TabsTrigger>
-            </TabsList>
-          </div>
+          <TabsList className="flex flex-wrap gap-1 h-auto p-2 bg-gray-100 rounded-lg">
+            <TabsTrigger value="orders" className="flex-1 min-w-[120px] text-sm">Orders</TabsTrigger>
+            <TabsTrigger value="discounts" className="flex-1 min-w-[120px] text-sm">Discount Settings</TabsTrigger>
+            <TabsTrigger value="bulk-purchases" className="flex-1 min-w-[120px] text-sm">Bulk Purchases</TabsTrigger>
+            <TabsTrigger value="proforma-deadline" className="flex-1 min-w-[150px] text-sm">Purchase Proforma Deadline</TabsTrigger>
+            <TabsTrigger value="inventory" className="flex-1 min-w-[120px] text-sm">Inventory</TabsTrigger>
+            <TabsTrigger value="invoices" className="flex-1 min-w-[140px] text-sm">Invoice Management</TabsTrigger>
+            <TabsTrigger value="returns" className="flex-1 min-w-[120px] text-sm">Returned Items</TabsTrigger>
+            <TabsTrigger value="abandoned-cart" className="flex-1 min-w-[130px] text-sm">Abandoned Cart</TabsTrigger>
+            <TabsTrigger value="reports" className="flex-1 min-w-[120px] text-sm">Sales Reports</TabsTrigger>
+          </TabsList>
 
           {/* Orders Tab */}
           <TabsContent value="orders" className="space-y-6">
