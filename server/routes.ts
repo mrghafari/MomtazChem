@@ -21197,34 +21197,48 @@ Momtaz Chemical Technical Team`,
     console.log('🔍 [REAL INVOICE DEBUG] Real invoices API called!');
     
     try {
-      // Direct SQL query
+      // Simple test query first
+      const testQuery = `SELECT COUNT(*) as total FROM customer_orders LIMIT 1`;
+      const testResult = await db.execute(sql.raw(testQuery));
+      console.log(`🔍 [TEST DEBUG] Test result:`, testResult);
+      
+      // Simple query for paid orders
       const query = `
-        SELECT co.*, c.firstName as customerFirstName, c.lastName as customerLastName, 
-               c.email as customerEmail, c.phone as customerPhone
-        FROM customer_orders co
-        LEFT JOIN customers c ON co.customerId = c.id
-        WHERE co.status IN ('completed', 'delivered')
-           OR co.paymentMethod IN ('wallet_full', 'wallet_partial', 'bank_transfer')
-        ORDER BY co.createdAt DESC
+        SELECT id, order_number, customer_id, total_amount, status, payment_method, created_at
+        FROM customer_orders
+        WHERE status IN ('completed', 'delivered')
+           OR payment_method IN ('wallet_full', 'wallet_partial', 'bank_transfer')
+        ORDER BY created_at DESC
         LIMIT 10
       `;
       
       const result = await db.execute(sql.raw(query));
-      console.log(`✅ [REAL INVOICE DEBUG] Found ${result.length} orders`);
+      console.log(`✅ [REAL INVOICE DEBUG] SQL Result type:`, typeof result, result);
       
-      // Format for frontend
-      const invoices = result.map((order: any) => ({
+      // Handle different result formats safely
+      let orders = [];
+      if (Array.isArray(result)) {
+        orders = result;
+      } else if (result && result.rows) {
+        orders = result.rows;
+      } else if (result && Array.isArray(result.records)) {
+        orders = result.records;
+      }
+      console.log(`✅ [REAL INVOICE DEBUG] Found ${orders.length} orders`);
+      
+      // Format for frontend - using snake_case database column names
+      const invoices = orders.map((order: any) => ({
         id: order.id,
-        orderNumber: order.orderNumber || `M-${order.id}`,
+        orderNumber: order.order_number || `M-${order.id}`,
         customerFirstName: order.customerFirstName || 'مشتری',
         customerLastName: order.customerLastName || 'محترم',
         customerEmail: order.customerEmail || 'N/A',
         customerPhone: order.customerPhone || 'N/A',
-        totalAmount: order.totalAmount || '0',
+        totalAmount: order.total_amount || '0',
         currency: order.currency || 'IQD',
-        paymentMethod: order.paymentMethod || 'bank_transfer',
-        paymentDate: order.updatedAt || order.createdAt,
-        createdAt: order.createdAt,
+        paymentMethod: order.payment_method || 'bank_transfer',
+        paymentDate: order.updated_at || order.created_at,
+        createdAt: order.created_at,
         status: order.status,
         items: []
       }));
