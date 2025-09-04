@@ -119,10 +119,25 @@ export class CustomerStorage implements ICustomerStorage {
   async getCustomerById(id: number): Promise<Customer | undefined> {
     try {
       const [customer] = await customerDb
-        .select()
+        .select({
+          id: customers.id,
+          email: customers.email,
+          firstName: customers.firstName,
+          lastName: customers.lastName,
+          phone: customers.phone,
+          country: customers.country,
+          state: customers.state,
+          // cityRegion: customers.cityRegion, // Skip problematic column for now
+          address: customers.address,
+          postalCode: customers.postalCode,
+          passwordHash: customers.passwordHash,
+          isActive: customers.isActive,
+          createdAt: customers.createdAt,
+          updatedAt: customers.updatedAt
+        })
         .from(customers)
         .where(eq(customers.id, id));
-      return customer;
+      return customer as Customer;
     } catch (error) {
       console.error("Error fetching customer:", error);
       return undefined;
