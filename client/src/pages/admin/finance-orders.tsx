@@ -12,7 +12,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertTriangle, CheckCircle, Clock, CreditCard, DollarSign, RefreshCw, Timer, ChevronRight, XCircle, FileText, Eye, Download, Truck, MapPin, ZoomIn, ZoomOut, RotateCw, Move, X, Wallet, Calculator } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-// type { OrderManagement } - using interface from API
+
+// OrderManagement interface
+interface OrderManagement {
+  id: number;
+  customerOrderId: number;
+  orderNumber: string;
+  totalAmount: string;
+  paymentMethod: string;
+  currentStatus: string;
+  createdAt: string;
+  customerName?: string;
+  customerFirstName?: string;
+  customerLastName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  customer?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+  };
+  paymentReceiptUrl?: string;
+  financialNotes?: string;
+  [key: string]: any; // For additional properties
+}
+
 // Temporarily remove SimpleReceiptViewer import - needs to be created
 // 
 // Helper function for safe date formatting - OUTSIDE component
@@ -1117,6 +1142,46 @@ function FinanceOrders() {
                 </div>
               </div>
             </div>
+
+            {/* Visual Hint for Sufficient Wallet Balance */}
+            {selectedOrder && selectedOrder.paymentMethod === 'wallet' && walletBalance >= parseFloat(selectedOrder.totalAmount || '0') && (
+              <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-300 shadow-lg">
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <div className="p-3 bg-green-500 rounded-full">
+                    <Wallet className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-2xl font-bold text-green-700 mb-2">
+                      ✅ موجودی کیف پول کافی است
+                    </h3>
+                    <p className="text-lg text-green-600 font-medium">
+                      این سفارش فقط نیاز به تایید مدیریت دارد
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="p-4 bg-white rounded-lg border border-green-200">
+                    <p className="text-sm text-gray-600 mb-1">مبلغ سفارش</p>
+                    <p className="text-xl font-bold text-green-700">
+                      {parseFloat(selectedOrder.totalAmount || '0').toLocaleString()} IQD
+                    </p>
+                  </div>
+                  <div className="p-4 bg-white rounded-lg border border-green-200">
+                    <p className="text-sm text-gray-600 mb-1">موجودی کیف پول</p>
+                    <p className="text-xl font-bold text-green-700">
+                      {walletBalance.toLocaleString()} IQD
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="mt-4 p-3 bg-green-100 rounded-lg text-center">
+                  <p className="text-green-800 font-medium">
+                    💡 پرداخت از کیف پول انجام شده - فقط تایید مدیریت باقی مانده است
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Live Calculations */}
             {receiptAmount && selectedOrder && (
