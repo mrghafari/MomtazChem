@@ -13380,7 +13380,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // WHATSAPP CRM MANAGEMENT
   // =============================================================================
 
-  // Get customers with WhatsApp numbers
+  // Get customers with mobile/WhatsApp numbers (using phone or whatsapp_number as WhatsApp contact)
   app.get("/api/admin/whatsapp/customers", requireAuth, async (req, res) => {
     try {
       const { pool } = await import('./db');
@@ -13395,15 +13395,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           c.email,
           c.phone,
           c.whatsapp_number,
+          COALESCE(c.whatsapp_number, c.phone) as whatsapp_contact,
           c.communication_preference,
           c.created_at,
-          c.last_login,
+          c.last_contact_date,
+          c.updated_at,
           COUNT(co.id) as total_orders,
           COALESCE(SUM(co.total_amount::numeric), 0) as total_spent
         FROM customers c
         LEFT JOIN customer_orders co ON c.id = co.customer_id
-        WHERE c.whatsapp_number IS NOT NULL 
-          AND c.whatsapp_number != ''
+        WHERE (
+          (c.whatsapp_number IS NOT NULL AND c.whatsapp_number != '') OR
+          (c.phone IS NOT NULL AND c.phone != '')
+        )
       `;
 
       const params = [];
@@ -13412,6 +13416,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           c.first_name ILIKE $1 OR 
           c.last_name ILIKE $1 OR 
           c.email ILIKE $1 OR 
+          c.phone ILIKE $1 OR
           c.whatsapp_number ILIKE $1
         )`;
         params.push(`%${search}%`);
@@ -13419,7 +13424,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       query += `
         GROUP BY c.id, c.first_name, c.last_name, c.email, c.phone, 
-                 c.whatsapp_number, c.communication_preference, c.created_at, c.last_login
+                 c.whatsapp_number, c.communication_preference, c.created_at, 
+                 c.last_contact_date, c.updated_at
         ORDER BY c.created_at DESC
         LIMIT $${params.length + 1} OFFSET $${params.length + 2}
       `;
@@ -13432,8 +13438,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let countQuery = `
         SELECT COUNT(*) as total
         FROM customers c
-        WHERE c.whatsapp_number IS NOT NULL 
-          AND c.whatsapp_number != ''
+        WHERE (
+          (c.whatsapp_number IS NOT NULL AND c.whatsapp_number != '') OR
+          (c.phone IS NOT NULL AND c.phone != '')
+        )
       `;
 
       const countParams = [];
@@ -13442,6 +13450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           c.first_name ILIKE $1 OR 
           c.last_name ILIKE $1 OR 
           c.email ILIKE $1 OR 
+          c.phone ILIKE $1 OR
           c.whatsapp_number ILIKE $1
         )`;
         countParams.push(`%${search}%`);
