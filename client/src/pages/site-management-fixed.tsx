@@ -323,14 +323,6 @@ export default function SiteManagement() {
       moduleId: "sms"
     },
     {
-      id: "whatsapp-crm",
-      label: "WhatsApp CRM",
-      icon: MessageCircle,
-      onClick: () => trackButtonClick("whatsapp-crm", () => setLocation("/admin/whatsapp-crm")),
-      className: "border-green-400 text-green-600 hover:bg-green-50",
-      moduleId: "whatsapp_crm"
-    },
-    {
       id: "factory",
       label: "Factory Management",
       icon: Factory,
@@ -418,6 +410,14 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("super-admin-order-management", () => setLocation("/admin/super-admin-order-management")),
       className: "border-red-300 text-red-600 hover:bg-red-50 font-semibold",
       moduleId: "order_management"
+    },
+    {
+      id: "whatsapp-crm",
+      label: "WhatsApp CRM",
+      icon: MessageCircle,
+      onClick: () => trackButtonClick("whatsapp-crm", () => setLocation("/admin/whatsapp-crm")),
+      className: "border-green-400 text-green-600 hover:bg-green-50",
+      moduleId: "whatsapp_crm"
     }
 
   ];
