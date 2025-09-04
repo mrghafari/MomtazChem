@@ -128,6 +128,15 @@ export default function ShopInvoiceManagement() {
     }
   };
 
+  // Get customer address display
+  const getCustomerAddress = (order: any) => {
+    const parts = [];
+    if (order.customerAddress) parts.push(order.customerAddress);
+    if (order.customerCity) parts.push(order.customerCity);
+    if (order.customerProvince) parts.push(order.customerProvince);
+    return parts.length > 0 ? parts.join(', ') : '';
+  };
+
   // Print invoice
   const handlePrintInvoice = async (order: PaidOrder) => {
     try {
@@ -404,10 +413,15 @@ export default function ShopInvoiceManagement() {
                 <div class="info-label">شماره تماس</div>
                 <div class="info-value">${order.customerPhone || 'ثبت نشده'}</div>
               </div>
-              <div class="info-item" style="grid-column: 1 / -1;">
+              <div class="info-item">
                 <div class="info-label">ایمیل</div>
                 <div class="info-value">${order.customerEmail || 'ثبت نشده'}</div>
               </div>
+              ${getCustomerAddress(order) ? `
+              <div class="info-item" style="grid-column: 1 / -1;">
+                <div class="info-label">آدرس مشتری</div>
+                <div class="info-value">${getCustomerAddress(order)}</div>
+              </div>` : ''}
             </div>
           </div>
 
@@ -445,7 +459,13 @@ export default function ShopInvoiceManagement() {
           </div>
 
           <div class="footer">
-            <p>🏢 این فاکتور توسطسیستم فروشگاه آنلاین ممتاز شیمی تولید شده است</p>
+            <p>🏢 این فاکتور توسط سیستم فروشگاه آنلاین ممتاز شیمی تولید شده است</p>
+            <div class="company-contact" style="font-size: 11px; color: #666; margin: 10px 0; text-align: center; line-height: 1.4;">
+              ${companyInfo?.data?.address ? `📍 آدرس: ${companyInfo.data.address}` : ''}
+              ${companyInfo?.data?.phoneNumber ? ` | 📞 تلفن: ${companyInfo.data.phoneNumber}` : ''}
+              ${companyInfo?.data?.email ? ` | 📧 ایمیل: ${companyInfo.data.email}` : ''}
+              ${companyInfo?.data?.website ? ` | 🌐 وبسایت: ${companyInfo.data.website}` : ''}
+            </div>
             <div class="print-date">تاریخ چاپ: ${currentDate}</div>
           </div>
         </div>
