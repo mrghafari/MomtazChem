@@ -115,7 +115,7 @@ function AdminDashboardContent({ user, logout, setLocation, moduleCount, getCont
           
           <div className="mb-4">
             <h3 className="text-lg font-medium text-gray-900 mb-2">Complete {moduleCount}-Module Administrative Suite:</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 text-xs text-gray-600">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-sm font-bold text-gray-700">
               <div>• <strong>Syncing Shop</strong> - کاردکس/فروشگاه synchronization</div>
               <div>• <strong>Inquiries</strong> - Customer inquiry & response management</div>
               <div>• <strong>Barcode</strong> - GS1-compliant EAN-13 generation</div>
