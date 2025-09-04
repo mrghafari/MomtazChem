@@ -17,7 +17,9 @@ const getSiteManagementModulesCount = () => {
     "geography_analytics", "inquiries", "email_settings", "content_management", 
     "seo", "categories", "barcode", "database_backup", "ai_settings", 
     "user_management", "sms", "whatsapp_crm", "factory", "procedures", "refresh_control", 
-    "logistics_management", "ticketing_system", "remote_desktop", "server_config"
+    "logistics_management", "ticketing_system", "remote_desktop", "server_config",
+    "reports_analytics", "security_management", "notification_center", "system_monitoring", 
+    "api_management", "integration_hub"
   ];
   return modules.length;
 };
@@ -142,6 +144,12 @@ function AdminDashboardContent({ user, logout, setLocation, moduleCount, getCont
               <div>• <strong>Ticketing System</strong> - Support ticket management</div>
               <div>• <strong>Remote Desktop</strong> - RustDesk international support</div>
               <div>• <strong>Server Config</strong> - Production migration & hosting</div>
+              <div>• <strong>Reports Analytics</strong> - Advanced business intelligence & KPIs</div>
+              <div>• <strong>Security Management</strong> - Access control & audit trails</div>
+              <div>• <strong>Notification Center</strong> - System alerts & communication hub</div>
+              <div>• <strong>System Monitoring</strong> - Performance metrics & health checks</div>
+              <div>• <strong>API Management</strong> - External integrations & endpoints</div>
+              <div>• <strong>Integration Hub</strong> - Third-party service connections</div>
             </div>
           </div>
           
