@@ -331,7 +331,7 @@ export default function WhatsAppCRM() {
                           </TableCell>
                           <TableCell className="text-right">{customer.email}</TableCell>
                           <TableCell className="font-mono text-sm text-right">
-                            {customer.whatsapp_number}
+                            {customer.whatsapp_number || customer.phone}
                           </TableCell>
                           <TableCell className="text-center">
                             <div className="flex items-center justify-center gap-2">
@@ -349,7 +349,7 @@ export default function WhatsAppCRM() {
                                 variant="outline"
                                 className="flex items-center gap-1"
                                 onClick={() => {
-                                  setTestPhoneNumber(customer.whatsapp_number);
+                                  setTestPhoneNumber(customer.whatsapp_number || customer.phone);
                                   setTestMessage(`سلام ${customer.first_name} عزیز!`);
                                   setTestModal(true);
                                 }}
