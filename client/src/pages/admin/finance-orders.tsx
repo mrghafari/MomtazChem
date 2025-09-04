@@ -997,10 +997,7 @@ function FinanceOrders() {
                       <OrderCard 
                         key={order.id} 
                         order={order} 
-                        onOrderSelect={() => {
-                          setSelectedOrder(order);
-                          setDialogOpen(true);
-                        }} 
+                        onOrderSelect={() => handleOrderReview(order)} 
                         fetchOrderDetails={fetchOrderDetails} 
                       />
                     ))}
@@ -1020,10 +1017,7 @@ function FinanceOrders() {
                       <OrderCard 
                         key={order.id} 
                         order={order} 
-                        onOrderSelect={() => {
-                          setSelectedOrder(order);
-                          setDialogOpen(true);
-                        }} 
+                        onOrderSelect={() => handleOrderReview(order)} 
                         fetchOrderDetails={fetchOrderDetails} 
                       />
                     ))}
