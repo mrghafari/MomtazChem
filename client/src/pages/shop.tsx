@@ -1165,7 +1165,7 @@ const Shop = () => {
             {/* View Toggle */}
             <div className="flex items-center justify-between mb-6">
               <p className="text-gray-600">
-                نمایش {totalResults} محصول{totalResults !== 1 ? ' ' : ''} {currentPage > 0 ? `(صفحه ${currentPage + 1} از ${totalPages})` : ''}
+                Showing {totalResults} product{totalResults !== 1 ? 's' : ''} {currentPage > 0 ? `(page ${currentPage + 1} of ${totalPages})` : ''}
               </p>
               <div className="flex items-center gap-2">
                 <Button
