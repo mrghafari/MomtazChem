@@ -238,6 +238,11 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
     try {
       const { confirmPassword, ...registerData } = data;
       
+      // If WhatsApp number is not provided, use mobile phone number as default
+      if (!registerData.whatsappNumber || registerData.whatsappNumber.trim() === '') {
+        registerData.whatsappNumber = registerData.phone;
+      }
+      
       // Check if this is profile completion mode for existing customer
       if (existingCustomer) {
         // This is profile completion, update existing customer

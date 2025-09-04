@@ -14275,6 +14275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password, 
         passwordHash, // Support both password and passwordHash
         phone, 
+        whatsappNumber,
         company, 
         country, 
         city, 
@@ -14331,6 +14332,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const finalPassword = password || passwordHash;
       const hashedPassword = await bcrypt.hash(finalPassword, 10);
 
+      // Use mobile phone number as WhatsApp number if not provided
+      const finalWhatsappNumber = whatsappNumber && whatsappNumber.trim() !== '' ? whatsappNumber : phone;
+
       // Create CRM customer first (central repository) with password for unified auth
       const crmCustomerData = {
         email,
@@ -14339,6 +14343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastName,
         company: company || null,
         phone,
+        whatsappNumber: finalWhatsappNumber,
         alternatePhone: alternatePhone || null,
         country,
         province: province || null,
@@ -15498,6 +15503,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const customerId = parseInt(req.params.id);
       const updateData = req.body;
+      
+      // Use mobile phone number as WhatsApp number if not provided
+      if (updateData.phone && (!updateData.whatsappNumber || updateData.whatsappNumber.trim() === '')) {
+        updateData.whatsappNumber = updateData.phone;
+      }
       
       // Get session customer ID
       const sessionCustomerId = (req.session as any)?.customerId;
