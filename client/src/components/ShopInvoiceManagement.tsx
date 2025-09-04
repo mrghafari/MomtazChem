@@ -490,15 +490,21 @@ export default function ShopInvoiceManagement() {
 
           <div class="footer">
             <p>🏢 این فاکتور توسط سیستم فروشگاه آنلاین ممتاز شیمی تولید شده است</p>
-            <div class="company-contact" style="font-size: 10px; color: #666; margin: 8px 0; text-align: center; line-height: 1.3; border-top: 1px solid #e5e7eb; padding-top: 8px;">
-              <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 15px;">
-                ${companyInfo?.data?.address ? `<span>📍 ${companyInfo.data.address}</span>` : ''}
-                ${companyInfo?.data?.phoneNumber ? `<span>📞 ${companyInfo.data.phoneNumber}</span>` : ''}
-                ${companyInfo?.data?.email ? `<span>📧 ${companyInfo.data.email}</span>` : ''}
-                ${companyInfo?.data?.website ? `<span>🌐 ${companyInfo.data.website}</span>` : ''}
+            <div class="print-date">تاریخ چاپ: ${currentDate}</div>
+            
+            <!-- آدرس و اطلاعات تماس شرکت در انتهایی‌ترین قسمت -->
+            <div class="company-details" style="margin-top: 15px; padding-top: 10px; border-top: 2px solid #000; text-align: center;">
+              ${companyInfo?.data?.address ? `
+                <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px; color: #000;">
+                  📍 آدرس شرکت: ${companyInfo.data.address}
+                </div>` : ''}
+              
+              <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; font-size: 11px; color: #333;">
+                ${companyInfo?.data?.phoneNumber ? `<span>📞 تلفن: ${companyInfo.data.phoneNumber}</span>` : ''}
+                ${companyInfo?.data?.email ? `<span>📧 ایمیل: ${companyInfo.data.email}</span>` : ''}
+                ${companyInfo?.data?.website ? `<span>🌐 وبسایت: ${companyInfo.data.website}</span>` : ''}
               </div>
             </div>
-            <div class="print-date">تاریخ چاپ: ${currentDate}</div>
           </div>
         </div>
       </body>
