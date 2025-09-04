@@ -21202,13 +21202,17 @@ Momtaz Chemical Technical Team`,
       const testResult = await db.execute(sql.raw(testQuery));
       console.log(`🔍 [TEST DEBUG] Test result:`, testResult);
       
-      // Simple query for paid orders
+      // Query with JOIN to get customer names
       const query = `
-        SELECT id, order_number, customer_id, total_amount, status, payment_method, created_at
-        FROM customer_orders
-        WHERE status IN ('completed', 'delivered')
-           OR payment_method IN ('wallet_full', 'wallet_partial', 'bank_transfer')
-        ORDER BY created_at DESC
+        SELECT co.id, co.order_number, co.customer_id, co.total_amount, co.status, 
+               co.payment_method, co.created_at, co.updated_at,
+               c.first_name as customer_first_name, c.last_name as customer_last_name, 
+               c.email as customer_email, c.phone as customer_phone
+        FROM customer_orders co
+        LEFT JOIN customers c ON co.customer_id = c.id
+        WHERE co.status IN ('completed', 'delivered')
+           OR co.payment_method IN ('wallet_full', 'wallet_partial', 'bank_transfer')
+        ORDER BY co.created_at DESC
         LIMIT 10
       `;
       
@@ -21226,14 +21230,14 @@ Momtaz Chemical Technical Team`,
       }
       console.log(`✅ [REAL INVOICE DEBUG] Found ${orders.length} orders`);
       
-      // Format for frontend - using snake_case database column names
+      // Format for frontend - using snake_case database column names with customer data
       const invoices = orders.map((order: any) => ({
         id: order.id,
         orderNumber: order.order_number || `M-${order.id}`,
-        customerFirstName: order.customerFirstName || 'مشتری',
-        customerLastName: order.customerLastName || 'محترم',
-        customerEmail: order.customerEmail || 'N/A',
-        customerPhone: order.customerPhone || 'N/A',
+        customerFirstName: order.customer_first_name || 'مشتری',
+        customerLastName: order.customer_last_name || 'محترم',
+        customerEmail: order.customer_email || 'N/A',
+        customerPhone: order.customer_phone || 'N/A',
         totalAmount: order.total_amount || '0',
         currency: order.currency || 'IQD',
         paymentMethod: order.payment_method || 'bank_transfer',
