@@ -2747,11 +2747,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Standard admin user
         user = await storage.getUserById(req.session.adminId);
         userType = 'admin';
+      } else if (req.session.customUserId) {
+        // Custom user - fetch from custom_users table
+        const { pool } = await import('./db');
+        const result = await pool.query(`
+          SELECT cu.id, cu.full_name as username, cu.email, cu.role_id,
+                 cr.name as role_name, cr.display_name as role_display_name
+          FROM custom_users cu
+          LEFT JOIN custom_roles cr ON cu.role_id = cr.id
+          WHERE cu.id = $1 AND cu.is_active = true
+        `, [req.session.customUserId]);
+        
+        if (result.rows.length === 0) {
+          return res.status(404).json({ 
+            success: false, 
+            message: "User not found" 
+          });
+        }
+        
+        const customUser = result.rows[0];
+        user = {
+          id: customUser.id,
+          username: customUser.username,
+          email: customUser.email,
+          roleId: customUser.role_id,
+          roleName: customUser.role_name,
+          roleDisplayName: customUser.role_display_name
+        };
+        userType = 'custom';
       } else {
-        // This endpoint is only for admin users, not customers
-        return res.status(403).json({ 
+        return res.status(401).json({ 
           success: false, 
-          message: "Access denied. This endpoint is for administrators only." 
+          message: "Authentication required" 
         });
       }
       
