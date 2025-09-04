@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertTriangle, CheckCircle, Clock, CreditCard, DollarSign, RefreshCw, Timer, ChevronRight, XCircle, FileText, Eye, Download, Truck, MapPin, ZoomIn, ZoomOut, RotateCw, Move, X, Wallet, Calculator } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import type { OrderManagement } from "@/shared/order-management-schema";
+// type { OrderManagement } - using interface from API
 // Temporarily remove SimpleReceiptViewer import - needs to be created
 // 
 // Helper function for safe date formatting - OUTSIDE component
@@ -26,11 +26,12 @@ const formatDateSafe = (dateString: string | undefined, locale: string = 'en-US'
 };
 
 // Helper to get customer info safely
-const getCustomerInfo = (order: OrderManagement) => {
+const getCustomerInfo = (order: any) => {
   // Try individual name fields first
   if (order.customerFirstName || order.customerLastName) {
     const nameParts = [order.customerFirstName, order.customerLastName].filter(Boolean);
     return {
+      name: nameParts.join(' '),
       firstName: order.customerFirstName || '',
       lastName: order.customerLastName || '',
       email: order.customerEmail || '',
@@ -38,10 +39,22 @@ const getCustomerInfo = (order: OrderManagement) => {
     };
   }
 
+  // Try customer object if it exists
+  if (order.customer) {
+    return {
+      name: `${order.customer.firstName || ''} ${order.customer.lastName || ''}`.trim(),
+      firstName: order.customer.firstName || '',
+      lastName: order.customer.lastName || '',
+      email: order.customer.email || '',
+      phone: order.customer.phone || ''
+    };
+  }
+
   // Try to extract from customer name field if it exists
   if (order.customerName) {
     const nameParts = order.customerName.split(' ');
     return {
+      name: order.customerName,
       firstName: nameParts[0] || '',
       lastName: nameParts.slice(1).join(' ') || '',
       email: order.customerEmail || '',
@@ -393,10 +406,6 @@ function FinanceOrders() {
     setDialogOpen(true);
     
     // Fetch wallet balance for this customer
-    const customer = getCustomerInfo(order);
-    console.log('🔍 [WALLET DEBUG] Order data:', order);
-    console.log('🔍 [WALLET DEBUG] Customer info extracted:', customer);
-    
     if (order.customerOrderId) {
       setWalletLoading(true);
       try {
@@ -413,7 +422,6 @@ function FinanceOrders() {
             const searchResult = await customerSearchResponse.json();
             if (searchResult.success && searchResult.data && searchResult.data.length > 0) {
               customerId = searchResult.data[0].id;
-              console.log('🔍 [WALLET DEBUG] Found customer by email:', customerId);
             }
           }
         }
@@ -428,7 +436,6 @@ function FinanceOrders() {
             const orderData = await orderResponse.json();
             if (orderData.success && orderData.order?.customerId) {
               customerId = orderData.order.customerId;
-              console.log('🔍 [WALLET DEBUG] Found customer from order details:', customerId);
             }
           }
         }
@@ -440,19 +447,15 @@ function FinanceOrders() {
           });
           if (walletResponse.ok) {
             const walletResult = await walletResponse.json();
-            const balance = walletResult.data?.balance || 0;
-            console.log('🔍 [WALLET DEBUG] Wallet balance result:', balance);
-            setWalletBalance(balance);
+            setWalletBalance(walletResult.data?.balance || 0);
           } else {
-            console.error('🔍 [WALLET DEBUG] Wallet API failed');
             setWalletBalance(0);
           }
         } else {
-          console.error('🔍 [WALLET DEBUG] Customer ID not found');
           setWalletBalance(0);
         }
       } catch (error) {
-        console.error('🔍 [WALLET DEBUG] Error fetching wallet balance:', error);
+        console.error('Error fetching wallet balance:', error);
         setWalletBalance(0);
       } finally {
         setWalletLoading(false);
@@ -1071,6 +1074,17 @@ function FinanceOrders() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>بررسی سفارش #{selectedOrder?.orderNumber}</DialogTitle>
+            {selectedOrder && (
+              <div className="mt-2 p-3 bg-blue-50 rounded-lg border">
+                <div className="text-right text-sm text-gray-600 mb-1">مشتری:</div>
+                <div className="text-right font-medium text-blue-900">
+                  {getCustomerInfo(selectedOrder).name}
+                </div>
+                <div className="text-right text-xs text-gray-500">
+                  {getCustomerInfo(selectedOrder).email}
+                </div>
+              </div>
+            )}
             <DialogDescription>
               لطفاً تصمیم خود را اعلام کنید
             </DialogDescription>
