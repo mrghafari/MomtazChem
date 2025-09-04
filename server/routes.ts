@@ -38949,6 +38949,37 @@ momtazchem.com
     }
   });
 
+  // Warehouse Department - Get orders sent to logistics (NO AUTHENTICATION - Legacy)  
+  app.get("/api/warehouse/sent-orders-noauth", async (req: Request, res: Response) => {
+    try {
+      console.log('📦 [WAREHOUSE-SENT] Getting orders sent to logistics...');
+      
+      // Get orders that were processed by warehouse and sent to logistics
+      const sentStatuses = [
+        'logistics_assigned',    // Orders in logistics phase
+        'logistics_processing',  // Orders being processed by logistics  
+        'logistics_dispatched',  // Orders dispatched by logistics
+        'in_transit',           // Orders in transit
+        'shipped',              // Orders that have been shipped
+        'delivered',            // Orders that have been delivered
+        'completed'             // Orders marked as completed
+      ];
+
+      const orders = await orderManagementStorage.getOrdersByStatus(sentStatuses);
+      
+      console.log('📦 [WAREHOUSE-SENT] Retrieved', orders.length, 'orders sent to logistics');
+      
+      res.json({ success: true, orders });
+    } catch (error) {
+      console.error('📦 [WAREHOUSE-SENT] Error fetching sent orders:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت سفارشات ارسال شده",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Warehouse Department - Get approved/completed orders (orders that have left warehouse)
   app.get("/api/warehouse/approved-orders", requireAuth, async (req: Request, res: Response) => {
     try {
