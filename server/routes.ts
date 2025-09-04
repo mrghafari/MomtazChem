@@ -6413,6 +6413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'ai_settings': 'تنظیمات هوش مصنوعی',
       'refresh_control': 'کنترل تازه‌سازی',
       'content_management': 'مدیریت محتوا',
+      'marketing_module': 'ماژول مارکتینگ',
       'warehouse_management': 'مدیریت انبار',
       'logistics_management': 'مدیریت لجستیک',
       'ticketing_system': 'سیستم تیکتینگ',
@@ -31138,7 +31139,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "crm", "seo", "categories", "sms", "whatsapp_crm", "factory", "user_management",
           "shop_management", "procedures", "order_management", "product_management",
           "payment_management", "finance", "wallet_management", "geography_analytics", "ai_settings",
-          "refresh_control", "content_management",
+          "refresh_control", "content_management", "marketing_module",
           "warehouse_management", "logistics_management", "ticketing_system", "remote_desktop",
           "server_config", "company_information", "user_guide", "site_management"
         ];
