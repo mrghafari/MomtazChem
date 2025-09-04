@@ -64,7 +64,10 @@ interface WhatsAppStats {
 export default function WhatsAppCRM() {
   const [selectedCustomers, setSelectedCustomers] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [page, setPage] = useState(1);
+  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [bulkMessageModal, setBulkMessageModal] = useState(false);
   const [bulkMessage, setBulkMessage] = useState('');
   const [testModal, setTestModal] = useState(false);
@@ -89,7 +92,8 @@ export default function WhatsAppCRM() {
 
   // Fetch WhatsApp customers
   const { data: customersData, isLoading: customersLoading } = useQuery({
-    queryKey: ['/api/admin/whatsapp/customers', page, searchTerm],
+    queryKey: ['/api/admin/whatsapp/customers', page, debouncedSearchTerm],
+    enabled: debouncedSearchTerm.length === 0 || debouncedSearchTerm.length >= 3,
     staleTime: 30000,
   });
 
@@ -151,13 +155,37 @@ export default function WhatsAppCRM() {
     }
   });
 
-  // Handle search
+  // Handle search debouncing - only search after 3 characters or empty
   useEffect(() => {
     const timer = setTimeout(() => {
-      setPage(1); // Reset to first page when searching
-    }, 300);
+      if (searchTerm.length === 0 || searchTerm.length >= 3) {
+        setDebouncedSearchTerm(searchTerm);
+        setPage(1); // Reset to first page when searching
+      }
+    }, 500);
     return () => clearTimeout(timer);
   }, [searchTerm]);
+
+  // Generate search suggestions from existing customers
+  useEffect(() => {
+    if (searchTerm.length >= 3 && customers.length > 0) {
+      const suggestions = customers
+        .filter((customer: WhatsAppCustomer) => 
+          customer.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          customer.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          customer.phone.includes(searchTerm)
+        )
+        .slice(0, 5)
+        .map((customer: WhatsAppCustomer) => `${customer.first_name} ${customer.last_name}`);
+      
+      setSearchSuggestions([...new Set(suggestions)]);
+      setShowSuggestions(suggestions.length > 0 && searchTerm.length >= 3);
+    } else {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [searchTerm, customers]);
 
   const customers = (customersData as any)?.data?.customers || [];
   const pagination = (customersData as any)?.data?.pagination || {};
@@ -262,13 +290,41 @@ export default function WhatsAppCRM() {
             </CardHeader>
             <CardContent>
               <div className="flex gap-4">
-                <div className="flex-1">
+                <div className="flex-1 relative">
                   <Input
-                    placeholder="جستجو در نام، ایمیل یا شماره واتساپ..."
+                    placeholder="جستجو در نام، ایمیل یا شماره واتساپ... (حداقل ۳ حرف)"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    onFocus={() => setShowSuggestions(searchTerm.length >= 3 && searchSuggestions.length > 0)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                     className="w-full"
                   />
+                  {showSuggestions && searchSuggestions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 mt-1">
+                      <div className="py-2">
+                        <div className="px-3 py-1 text-xs text-gray-500 border-b">پیشنهادات:</div>
+                        {searchSuggestions.map((suggestion, index) => (
+                          <button
+                            key={index}
+                            className="w-full text-right px-3 py-2 hover:bg-gray-50 text-sm"
+                            onClick={() => {
+                              setSearchTerm(suggestion);
+                              setShowSuggestions(false);
+                            }}
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {searchTerm.length > 0 && searchTerm.length < 3 && (
+                    <div className="absolute top-full left-0 right-0 bg-yellow-50 border border-yellow-200 rounded-md shadow-sm z-10 mt-1">
+                      <div className="px-3 py-2 text-xs text-yellow-700">
+                        حداقل ۳ حرف برای جستجو وارد کنید
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <Button variant="outline" className="flex items-center gap-2">
                   <Filter className="w-4 h-4" />
