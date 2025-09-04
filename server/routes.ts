@@ -31229,7 +31229,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         const allModules = [
           'syncing_shop', 'inquiry_management', 'barcode_management', 'email_management',
           'backup_management', 'crm_management', 'seo_management', 'category_management',
-          'sms_management', 'factory_management', 'super_admin', 'user_management',
+          'sms_management', 'whatsapp_crm', 'factory_management', 'super_admin', 'user_management',
           'shop_management', 'procedures_management', 'order_management',
           'product_management', 'payment_management', 'wallet_management', 'geography_analytics',
           'ai_management', 'refresh_control',
