@@ -112,6 +112,22 @@ export default function ShopInvoiceManagement() {
     });
   };
 
+  // Get customer display name with fallback
+  const getCustomerDisplayName = (order: PaidOrder) => {
+    const firstName = order.customerFirstName?.trim();
+    const lastName = order.customerLastName?.trim();
+    
+    if (firstName && lastName) {
+      return `${firstName} ${lastName}`;
+    } else if (firstName) {
+      return firstName;
+    } else if (lastName) {
+      return lastName;
+    } else {
+      return 'مشتری گرامی';
+    }
+  };
+
   // Print invoice
   const handlePrintInvoice = async (order: PaidOrder) => {
     try {
@@ -193,6 +209,7 @@ export default function ShopInvoiceManagement() {
     const currentDate = formatGregorianDate(new Date().toISOString());
     const orderDate = formatGregorianDate(order.createdAt);
     const paymentDate = formatGregorianDate(order.paymentDate);
+    const customerName = getCustomerDisplayName(order);
 
     return `
       <!DOCTYPE html>
@@ -381,11 +398,11 @@ export default function ShopInvoiceManagement() {
             <div class="info-grid">
               <div class="info-item">
                 <div class="info-label">نام مشتری</div>
-                <div class="info-value">${order.customerFirstName} ${order.customerLastName}</div>
+                <div class="info-value">${customerName}</div>
               </div>
               <div class="info-item">
                 <div class="info-label">شماره تماس</div>
-                <div class="info-value">${order.customerPhone}</div>
+                <div class="info-value">${order.customerPhone || 'ثبت نشده'}</div>
               </div>
               <div class="info-item" style="grid-column: 1 / -1;">
                 <div class="info-label">ایمیل</div>
