@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { SimpleReceiptViewer } from "@/components/SimpleReceiptViewer";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -74,9 +73,9 @@ function FinanceOrders() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [reviewNotes, setReviewNotes] = useState("");
   const [receiptAmount, setReceiptAmount] = useState("");
-  const [simpleReceiptOpen, setSimpleReceiptOpen] = useState(false);
-  const [selectedReceiptUrl, setSelectedReceiptUrl] = useState("");
-  const [selectedReceiptMimeType, setSelectedReceiptMimeType] = useState("");
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState("");
+  const [selectedFileMimeType, setSelectedFileMimeType] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   
   // Enhanced image viewer states
@@ -385,23 +384,52 @@ function FinanceOrders() {
     });
   }, [selectedOrder, rejectMutation, reviewNotes]);
 
-  // Simple receipt viewer function
-  const openReceiptViewer = (url: string, mimeType: string = "") => {
+  const openImageModal = useCallback(async (imageUrl: string) => {
+    console.log('🖼️ [IMAGE MODAL] Opening image modal with URL:', imageUrl);
+    
     // Convert object storage URLs to proper server endpoints
-    let processedUrl = url;
-    if (url.includes('/.private/uploads/')) {
+    let processedUrl = imageUrl;
+    if (imageUrl.includes('/.private/uploads/')) {
       // Extract the file ID from the object storage URL
-      const parts = url.split('/.private/uploads/');
+      const parts = imageUrl.split('/.private/uploads/');
       if (parts.length === 2) {
         const fileId = parts[1];
         processedUrl = `/objects/uploads/${fileId}`;
+        console.log('🔄 [IMAGE MODAL] Converted object storage URL to server endpoint:', processedUrl);
       }
     }
     
-    setSelectedReceiptUrl(processedUrl);
-    setSelectedReceiptMimeType(mimeType);
-    setSimpleReceiptOpen(true);
-  };
+    // Verify image exists before opening modal
+    try {
+      const response = await fetch(processedUrl, { method: 'HEAD', credentials: 'include' });
+      if (!response.ok) {
+        console.error('❌ [IMAGE MODAL] Image not accessible:', processedUrl, 'Status:', response.status);
+        toast({
+          title: "خطا در نمایش رسید",
+          description: "امکان نمایش رسید وجود ندارد",
+          variant: "destructive"
+        });
+        return;
+      }
+      console.log('✅ [IMAGE MODAL] Image verified accessible:', processedUrl);
+    } catch (error) {
+      console.error('❌ [IMAGE MODAL] Failed to verify image:', error);
+      toast({
+        title: "خطا در دسترسی به رسید",
+        description: "مشکل در اتصال به سرور",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setSelectedImageUrl(processedUrl);
+    setSelectedFileMimeType("");
+    setImageModalOpen(true);
+    // Reset zoom and pan when opening new image
+    setZoomLevel(1);
+    setRotation(0);
+    setPanPosition({ x: 0, y: 0 });
+  }, [toast]);
 
   // Function to determine if URL is an image
   const isImageUrl = (url: string, mimeType?: string) => {
@@ -720,7 +748,7 @@ function FinanceOrders() {
               </Button>
             )}
             {(order.receipt?.url || order.paymentReceiptUrl) && (
-              <Button size="sm" variant="outline" onClick={() => openReceiptViewer(order.receipt?.url || order.paymentReceiptUrl)}>
+              <Button size="sm" variant="outline" onClick={() => openImageModal(order.receipt?.url || order.paymentReceiptUrl)}>
                 <FileText className="w-4 h-4 mr-1" />
                 رسید
               </Button>
@@ -990,21 +1018,14 @@ function FinanceOrders() {
         </DialogContent>
       </Dialog>
 
-      {/* Simple Receipt Viewer */}
-      <SimpleReceiptViewer
-        open={simpleReceiptOpen}
-        onOpenChange={setSimpleReceiptOpen}
-        receiptUrl={selectedReceiptUrl}
-        mimeType={selectedReceiptMimeType}
-      />
-
-      {/* Order Details Modal */}
-      <Dialog open={orderDetailsDialogOpen} onOpenChange={setOrderDetailsDialogOpen}>
-        {/* Complex modal removed - using SimpleReceiptViewer instead */}
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>جزئیات سفارش</DialogTitle>
-          </DialogHeader>
+      {/* Enhanced Image Modal for Receipt Viewing with Zoom */}
+      <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0" style={{ width: '95vw', height: '95vh' }}>
+          <DialogHeader className="p-4 pb-2 border-b">
+            <DialogTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" />
+                مشاهده فیش پرداخت
               </span>
               <div className="flex items-center gap-2">
                 {/* Zoom Controls */}
@@ -1152,6 +1173,11 @@ function FinanceOrders() {
               </div>
             )}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Order Details Modal */}
+      <Dialog open={orderDetailsModalOpen} onOpenChange={setOrderDetailsModalOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>جزئیات سفارش #{orderDetails?.orderNumber}</DialogTitle>

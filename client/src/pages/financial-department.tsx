@@ -14,7 +14,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
 import VatManagement from "@/components/VatManagement";
-import { SimpleReceiptViewer } from "@/components/SimpleReceiptViewer";
 
 interface OrderManagement {
   id: number;
@@ -71,18 +70,18 @@ interface FinancialUser {
 export default function FinancialDepartment() {
   const [selectedOrder, setSelectedOrder] = useState<OrderManagement | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [simpleReceiptOpen, setSimpleReceiptOpen] = useState(false);
-  const [selectedReceiptUrl, setSelectedReceiptUrl] = useState<string>("");
-  const [selectedReceiptMimeType, setSelectedReceiptMimeType] = useState<string>("");
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string>("");
+  const [selectedFileMimeType, setSelectedFileMimeType] = useState<string>("");
   const [user, setUser] = useState<FinancialUser | null>(null);
   const [, setLocation] = useLocation();
   
-  // Simple receipt viewer function
-  const openReceiptViewer = (url: string, mimeType: string = "") => {
-    setSelectedReceiptUrl(url);
-    setSelectedReceiptMimeType(mimeType);
-    setSimpleReceiptOpen(true);
-  };
+  // Enhanced image viewer states
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const { toast } = useToast();
 
   const form = useForm({
@@ -218,7 +217,55 @@ export default function FinancialDepartment() {
     }
   };
 
+  // Function to open image modal
+  const openImageModal = (imageUrl: string, mimeType?: string) => {
+    setSelectedImageUrl(imageUrl);
+    setSelectedFileMimeType(mimeType || "");
+    setImageModalOpen(true);
+    // Reset zoom and pan when opening new image
+    setZoomLevel(1);
+    setRotation(0);
+    setPanPosition({ x: 0, y: 0 });
+  };
 
+  // Enhanced image viewer functions
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev * 1.5, 5));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev / 1.5, 0.5));
+  };
+
+  const handleResetView = () => {
+    setZoomLevel(1);
+    setRotation(0);
+    setPanPosition({ x: 0, y: 0 });
+  };
+
+  const handleRotate = () => {
+    setRotation(prev => (prev + 90) % 360);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoomLevel > 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - panPosition.x, y: e.clientY - panPosition.y });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && zoomLevel > 1) {
+      setPanPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
 
   // Function to determine if URL is an image
   const isImageUrl = (url: string, mimeType?: string) => {
@@ -409,7 +456,7 @@ export default function FinancialDepartment() {
                                 const fileUrl = order.receipt?.url || order.paymentReceiptUrl!;
                                 const mimeType = order.receipt?.mimeType;
                                 if (isImageUrl(fileUrl, mimeType) || isPdfUrl(fileUrl, mimeType)) {
-                                  openReceiptViewer(fileUrl, mimeType);
+                                  openImageModal(fileUrl, mimeType);
                                 } else {
                                   window.open(fileUrl, '_blank');
                                 }
@@ -545,7 +592,7 @@ export default function FinancialDepartment() {
                         {isImageUrl(selectedOrder.receipt?.url || selectedOrder.paymentReceiptUrl!, selectedOrder.receipt?.mimeType) ? (
                           <div 
                             className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:border-blue-400 transition-colors"
-                            onClick={() => openReceiptViewer(selectedOrder.receipt?.url || selectedOrder.paymentReceiptUrl!, selectedOrder.receipt?.mimeType)}
+                            onClick={() => openImageModal(selectedOrder.receipt?.url || selectedOrder.paymentReceiptUrl!, selectedOrder.receipt?.mimeType)}
                           >
                             <img 
                               src={selectedOrder.receipt?.url || selectedOrder.paymentReceiptUrl!}
@@ -648,13 +695,159 @@ export default function FinancialDepartment() {
           </DialogContent>
         </Dialog>
 
-        {/* Simple Receipt Viewer */}
-        <SimpleReceiptViewer
-          open={simpleReceiptOpen}
-          onOpenChange={setSimpleReceiptOpen}
-          receiptUrl={selectedReceiptUrl}
-          mimeType={selectedReceiptMimeType}
-        />
+        {/* Enhanced Image Modal for Receipt Viewing with Zoom */}
+        <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
+          <DialogContent className="max-w-[95vw] max-h-[95vh] p-0" style={{ width: '95vw', height: '95vh' }}>
+            <DialogHeader className="p-4 pb-2 border-b">
+              <DialogTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  مشاهده فیش پرداخت
+                </span>
+                <div className="flex items-center gap-2">
+                  {/* Zoom Controls */}
+                  <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleZoomOut}
+                      disabled={zoomLevel <= 0.5}
+                      className="h-8 w-8 p-0 hover:bg-gray-200"
+                      title="کوچک‌تر کردن"
+                    >
+                      <ZoomOut className="h-4 w-4" />
+                    </Button>
+                    
+                    <span className="text-xs px-2 font-mono min-w-[50px] text-center">
+                      {Math.round(zoomLevel * 100)}%
+                    </span>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleZoomIn}
+                      disabled={zoomLevel >= 5}
+                      className="h-8 w-8 p-0 hover:bg-gray-200"
+                      title="بزرگ‌تر کردن"
+                    >
+                      <ZoomIn className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Action Controls */}
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRotate}
+                      className="h-8 w-8 p-0 hover:bg-gray-200"
+                      title="چرخاندن ۹۰ درجه"
+                    >
+                      <RotateCw className="h-4 w-4" />
+                    </Button>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleResetView}
+                      className="h-8 w-8 p-0 hover:bg-gray-200"
+                      title="بازگشت به حالت اولیه"
+                    >
+                      <Move className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setImageModalOpen(false)}
+                    className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div 
+              className="flex-1 overflow-hidden bg-gray-50 relative"
+              style={{ height: 'calc(95vh - 80px)' }}
+            >
+              {selectedImageUrl && (
+                <>
+                  {getFileType(selectedImageUrl, selectedFileMimeType) === 'image' ? (
+                    <div
+                      className="w-full h-full flex items-center justify-center cursor-move select-none"
+                      onMouseDown={handleMouseDown}
+                      onMouseMove={handleMouseMove}
+                      onMouseUp={handleMouseUp}
+                      onMouseLeave={handleMouseUp}
+                      style={{ cursor: isDragging ? 'grabbing' : (zoomLevel > 1 ? 'grab' : 'default') }}
+                    >
+                      <img
+                        src={selectedImageUrl}
+                        alt="فیش پرداخت"
+                        className="max-w-none transition-transform duration-200"
+                        style={{
+                          transform: `scale(${zoomLevel}) rotate(${rotation}deg) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
+                          transformOrigin: 'center center'
+                        }}
+                        draggable={false}
+                      />
+                    </div>
+                  ) : getFileType(selectedImageUrl, selectedFileMimeType) === 'pdf' ? (
+                    <div className="w-full h-full">
+                      <iframe
+                        src={selectedImageUrl}
+                        className="w-full h-full border-0"
+                        title="فیش پرداخت PDF"
+                        style={{
+                          transform: `scale(${zoomLevel}) rotate(${rotation}deg)`,
+                          transformOrigin: 'center center',
+                          transition: 'transform 0.2s ease'
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    // If it's a PDF file but not handled above, open directly in new tab
+                    isPdfUrl(selectedImageUrl, selectedFileMimeType) ? (
+                      window.open(selectedImageUrl, '_blank'),
+                      setImageModalOpen(false),
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="text-center p-8">
+                          <FileText className="w-16 h-16 text-green-400 mx-auto mb-4" />
+                          <p className="text-lg text-gray-600">در حال باز کردن PDF در تب جدید...</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="text-center p-8">
+                          <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                          <p className="text-lg text-gray-600 mb-4">نوع فایل پشتیبانی نمی‌شود</p>
+                          <Button
+                            variant="outline"
+                            onClick={() => window.open(selectedImageUrl, '_blank')}
+                            className="flex items-center gap-2"
+                          >
+                            <Eye className="w-4 h-4" />
+                            باز کردن در تب جدید
+                          </Button>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </>
+              )}
+              
+              {/* Zoom hint */}
+              {zoomLevel > 1 && (
+                <div className="absolute bottom-4 left-4 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+                  برای جابجایی تصویر آن را بکشید
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
