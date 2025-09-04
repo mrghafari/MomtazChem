@@ -155,6 +155,10 @@ export default function WhatsAppCRM() {
     }
   });
 
+  const customers = (customersData as any)?.data?.customers || [];
+  const pagination = (customersData as any)?.data?.pagination || {};
+  const stats = (statsData as any)?.data as WhatsAppStats;
+
   // Handle search debouncing - only search after 3 characters or empty
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -186,10 +190,6 @@ export default function WhatsAppCRM() {
       setShowSuggestions(false);
     }
   }, [searchTerm, customers]);
-
-  const customers = (customersData as any)?.data?.customers || [];
-  const pagination = (customersData as any)?.data?.pagination || {};
-  const stats = (statsData as any)?.data as WhatsAppStats;
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
