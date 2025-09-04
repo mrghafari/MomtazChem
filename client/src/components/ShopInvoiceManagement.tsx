@@ -244,19 +244,18 @@ export default function ShopInvoiceManagement() {
             max-width: 800px; 
             margin: 0 auto; 
             background: white;
-            border: 2px solid #2563eb;
-            border-radius: 10px;
-            overflow: hidden;
+            border: 2px solid #000;
             position: relative;
             transform: translateZ(0);
             backface-visibility: hidden;
           }
           .header { 
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            color: white; 
+            background: white;
+            color: #1f2937; 
             padding: 20px; 
             text-align: center; 
             position: relative;
+            border-bottom: 2px solid #000;
           }
           .company-logo { 
             width: 60px; 
@@ -264,7 +263,7 @@ export default function ShopInvoiceManagement() {
             object-fit: contain;
             margin-bottom: 8px;
             border-radius: 4px;
-            background: white;
+            border: 1px solid #ccc;
             padding: 4px;
             display: block;
             margin-left: auto;
@@ -274,20 +273,21 @@ export default function ShopInvoiceManagement() {
             font-size: 18px; 
             font-weight: bold; 
             margin-bottom: 5px;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            color: #000;
           }
           .invoice-title { 
             font-size: 16px; 
             margin-bottom: 10px;
-            background: rgba(255,255,255,0.2);
             padding: 8px 16px;
-            border-radius: 20px;
+            border: 1px solid #000;
+            border-radius: 4px;
             display: inline-block;
+            font-weight: bold;
           }
           .invoice-info { 
             padding: 20px; 
-            background: #f8fafc;
-            border-bottom: 1px solid #e2e8f0;
+            background: white;
+            border-bottom: 1px solid #000;
           }
           .info-grid { 
             display: grid; 
@@ -304,9 +304,7 @@ export default function ShopInvoiceManagement() {
           .info-item { 
             background: white;
             padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            border: 1px solid #ccc;
           }
           .info-label { 
             font-weight: bold; 
@@ -327,41 +325,38 @@ export default function ShopInvoiceManagement() {
           .section-title { 
             font-size: 16px; 
             font-weight: bold; 
-            color: #2563eb;
+            color: #000;
             margin-bottom: 12px;
-            border-bottom: 2px solid #2563eb;
+            border-bottom: 2px solid #000;
             padding-bottom: 6px;
           }
           .items-table th { 
-            background: #2563eb; 
-            color: white; 
+            background: white; 
+            color: #000; 
             padding: 15px; 
             text-align: right;
             font-weight: bold;
             font-size: 14px;
+            border: 1px solid #000;
           }
           .items-table td { 
             padding: 12px 15px; 
-            border-bottom: 1px solid #e2e8f0;
+            border: 1px solid #ccc;
             text-align: right;
-          }
-          .items-table tr:nth-child(even) { 
-            background-color: #f8fafc; 
           }
           .items-table { 
             width: 100%; 
             border-collapse: collapse; 
             background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transform: translateZ(0);
+            border: 2px solid #000;
           }
           .total-section { 
-            background: #1e293b;
-            color: white;
+            background: white;
+            color: #000;
             padding: 18px;
             text-align: center;
+            border: 2px solid #000;
+            margin-top: 10px;
           }
           .total-amount { 
             font-size: 20px; 
@@ -373,17 +368,17 @@ export default function ShopInvoiceManagement() {
             opacity: 0.9;
           }
           .footer { 
-            background: #f1f5f9;
+            background: white;
             padding: 15px; 
             text-align: center; 
             font-size: 11px; 
-            color: #64748b;
-            border-top: 1px solid #e2e8f0;
+            color: #666;
+            border-top: 1px solid #000;
           }
           .print-date { 
             margin-top: 10px;
             font-weight: bold;
-            color: #2563eb;
+            color: #000;
           }
           @media print { 
             body { 
@@ -411,7 +406,7 @@ export default function ShopInvoiceManagement() {
                 <img src="${companyInfo.data.logoUrl}" alt="لوگوی شرکت" class="company-logo" 
                      onload="console.log('Logo loaded successfully')" 
                      onerror="console.log('Logo failed to load'); this.style.display='none'" />` : 
-                `<div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 4px; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white;">لوگو</div>`}
+                `<div style="width: 60px; height: 60px; border: 1px solid #ccc; border-radius: 4px; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #666;">لوگو</div>`}
             </div>
             <div class="company-name">${companyInfo?.data?.companyNameAr || companyInfo?.data?.companyNameEn || 'شرکت ممتاز شیمی'}</div>
             <div class="invoice-title">فاکتور فروش</div>
