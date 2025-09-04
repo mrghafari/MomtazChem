@@ -1,0 +1,82 @@
+VM23481 admin:51 Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Auth check result: Object
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:118283)
+    at t.value (twk-chunk-common.js:2:151367)
+    at p.updateUUID (twk-chunk-common.js:2:203019)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:125298)
+    at twk-chunk-common.js:2:124609
+value @ twk-chunk-common.js:2
+VM23481 admin:23 Tawk.to Live Chat loaded successfully
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+ Auth check result: Object
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+ 🔍 [DEBUG] userPermissions modules: Array(35)
+ 🔍 [DEBUG] Full userPermissions response: Object
+ 🔍 [DEBUG] userPermissions.modules: Array(35)
+ 🔍 [DEBUG] userPermissions.permissions: Array(35)
+ 🔍 [DEBUG] Total allButtons count: 35
+ 🔍 [DEBUG] AI Settings exists in allButtons: false
+ 🔍 [DEBUG] Content Management exists in allButtons: true
+ 🔍 [DEBUG] allowedModules: Array(35)
+ 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+ 🔍 [DEBUG] management_dashboard in allowedModules? true
+ 🔍 [DEBUG] finance in allowedModules? true
+ 🔍 [DEBUG] geography_analytics in allowedModules? true
+ 🔍 [DEBUG] ai_settings in allowedModules? true
+ 🔍 [DEBUG] content_management in allowedModules? true
+ 🔍 [CRITICAL] Missing button detection:
+ 🔍 [MISSING] order-tracking-view Order Management & Tracking - View Only moduleId: order_tracking
+ 🔍 [CRITICAL] Missing buttons count: 1
+ 🔍 [DEBUG] finance button found in allButtons? Object
+ 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+ 🔍 [DEBUG] ai_settings button found in allButtons? undefined
+ 🔍 [DEBUG] content_management button found in allButtons? Object
+ 🔍 [DEBUG] finance button in filtered? Object
+ 🔍 [DEBUG] geography_analytics button in filtered? Object
+ 🔍 [DEBUG] ai_settings button in filtered? undefined
+ 🔍 [DEBUG] content_management button in filtered? Object
+ 🔍 [DEBUG] filtered buttons count: 34
+ 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+ 🔍 [DEBUG] AI Control button in filtered: undefined
+ 🔍 [DEBUG] Content Management button in filtered: Object
+ 🔍 [DEBUG] Site Management component initialized
+ 📄 [PROFORMA DEADLINE] Raw response: undefined
+ 📄 [PROFORMA DEADLINE] Parsed settings: Array(0)
+ 📄 [PROFORMA DEADLINE] Raw response: undefined
+ 📄 [PROFORMA DEADLINE] Parsed settings: Array(0)
+ 📄 [PROFORMA DEADLINE] Raw response: undefined
+ 📄 [PROFORMA DEADLINE] Parsed settings: Array(0)
+ 📄 [PROFORMA DEADLINE] Raw response: undefined
+ 📄 [PROFORMA DEADLINE] Parsed settings: Array(0)
+ 📄 [PROFORMA DEADLINE] Raw response: undefined
+ 📄 [PROFORMA DEADLINE] Parsed settings: Array(0)
+ 📄 [PROFORMA DEADLINE] Raw response: undefined
+ 📄 [PROFORMA DEADLINE] Parsed settings: Array(0)
+ 📄 [PROFORMA DEADLINE] Raw response: undefined
+ 📄 [PROFORMA DEADLINE] Parsed settings: Array(0)
+ 📄 [PROFORMA DEADLINE] Raw response: undefined
+ 📄 [PROFORMA DEADLINE] Parsed settings: Array(0)
+ 📄 [PROFORMA DEADLINE] Raw response: undefined
+ 📄 [PROFORMA DEADLINE] Parsed settings: Array(0)
+ 📄 [PROFORMA DEADLINE] Raw response: undefined
+ 📄 [PROFORMA DEADLINE] Parsed settings: Array(0)
+ 📄 [PROFORMA DEADLINE] Raw response: undefined
+ 📄 [PROFORMA DEADLINE] Parsed settings: Array(0)
+/api/shop/returns/stats:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+ 📄 [PROFORMA DEADLINE] Raw response: undefined
+ 📄 [PROFORMA DEADLINE] Parsed settings: Array(0)
+ 📄 [PROFORMA DEADLINE] Raw response: Object
+ 📄 [PROFORMA DEADLINE] Parsed settings: Array(1)
+ 📄 [PROFORMA DEADLINE] Found setting: Object
+ 📄 [PROFORMA DEADLINE] Setting state to: 2
+ Auth check result: Object
+ Auth check result: {success: true, user: {…}}

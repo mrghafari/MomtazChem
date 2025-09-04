@@ -42588,19 +42588,6 @@ momtazchem.com
     }
   });
 
-  // Send abandoned cart notification
-  app.post("/api/admin/abandoned-cart/notify/:cartId", requireAuth, async (req: Request, res: Response) => {
-    try {
-      const { cartId } = req.params;
-      const { message, discountCode } = req.body;
-      
-      await cartStorage.sendAbandonedCartNotification(parseInt(cartId), message, discountCode);
-      res.json({ success: true, message: "Notification sent successfully" });
-    } catch (error) {
-      console.error("Error sending abandoned cart notification:", error);
-      res.status(500).json({ success: false, message: "Internal server error" });
-    }
-  });
 
 
   
@@ -42653,9 +42640,12 @@ momtazchem.com
       const cartId = parseInt(req.params.cartId);
       const { title, message, notificationType } = req.body;
       
-      // Get cart session info
-      const cartSessions = await cartStorage.getActiveCartSessions();
-      const cartSession = cartSessions.find(cart => cart.id === cartId);
+      // Get cart session info (check both active and abandoned carts)
+      const [activeCarts, abandonedCarts] = await Promise.all([
+        cartStorage.getActiveCartSessions(),
+        cartStorage.getAbandonedCarts(1440) // Search in last 24 hours
+      ]);
+      const cartSession = [...activeCarts, ...abandonedCarts].find(cart => cart.id === cartId);
       
       if (!cartSession) {
         return res.status(404).json({ success: false, message: "Cart session not found" });
