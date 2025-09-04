@@ -21191,13 +21191,15 @@ Momtaz Chemical Technical Team`,
       
       // Filter for orders with completed payments (settled orders)
       const paidOrders = allOrders.filter(order => {
+        if (!order) return false;
+        
         const isPaid = order.status === 'completed' || 
                       order.status === 'delivered' ||
                       order.status === 'financial_approved' ||
                       (order.paymentMethod && ['wallet_full', 'wallet_partial', 'bank_transfer'].includes(order.paymentMethod));
         
         if (isPaid) {
-          console.log(`✅ [INVOICE DEBUG] Paid order found: ${order.orderNumber} - Status: ${order.status}, Payment: ${order.paymentMethod}`);
+          console.log(`✅ [INVOICE DEBUG] Paid order found: ${order.orderNumber || 'N/A'} - Status: ${order.status}, Payment: ${order.paymentMethod || 'N/A'}`);
         }
         return isPaid;
       });
@@ -21207,44 +21209,60 @@ Momtaz Chemical Technical Team`,
       // Get detailed information for each paid order including items
       const detailedPaidOrders = await Promise.all(
         paidOrders.map(async (order) => {
-          const items = await customerStorage.getOrderItems(order.id);
-          let customer = null;
-          
-          // Safely get customer info with error handling
-          if (order.customerId) {
+          try {
+            let items = [];
+            let customer = null;
+            
+            // Safely get order items with error handling
             try {
-              customer = await customerStorage.getCustomerById(order.customerId);
-            } catch (error) {
-              console.error(`Error fetching customer ${order.customerId} for order ${order.orderNumber}:`, error);
-              // Continue without customer info if there's a database error
+              items = await customerStorage.getOrderItems(order.id) || [];
+            } catch (itemError) {
+              console.error(`Error fetching items for order ${order.orderNumber}:`, itemError);
+              items = [];
             }
-          }
+            
+            // Safely get customer info with error handling
+            if (order.customerId) {
+              try {
+                customer = await customerStorage.getCustomerById(order.customerId);
+              } catch (error) {
+                console.error(`Error fetching customer ${order.customerId} for order ${order.orderNumber}:`, error);
+                // Continue without customer info if there's a database error
+              }
+            }
 
-          return {
-            id: order.id,
-            orderNumber: order.orderNumber,
-            customerFirstName: customer?.firstName || 'نامشخص',
-            customerLastName: customer?.lastName || '',
-            customerEmail: customer?.email || '',
-            customerPhone: customer?.phone || '',
-            totalAmount: order.totalAmount,
-            currency: order.currency || 'IQD',
-            paymentMethod: order.paymentMethod || 'نامشخص',
-            paymentDate: order.paymentConfirmedAt || order.updatedAt,
-            createdAt: order.createdAt,
-            status: order.status,
-            items: items.map(item => ({
-              productName: item.productName,
-              quantity: item.quantity,
-              unitPrice: item.unitPrice,
-              totalPrice: item.totalPrice
-            }))
-          };
+            return {
+              id: order.id,
+              orderNumber: order.orderNumber || `ORD-${order.id}`,
+              customerFirstName: customer?.firstName || 'نامشخص',
+              customerLastName: customer?.lastName || '',
+              customerEmail: customer?.email || '',
+              customerPhone: customer?.phone || '',
+              totalAmount: order.totalAmount || '0',
+              currency: order.currency || 'IQD',
+              paymentMethod: order.paymentMethod || 'نامشخص',
+              paymentDate: order.paymentConfirmedAt || order.updatedAt || order.createdAt,
+              createdAt: order.createdAt,
+              status: order.status,
+              items: (items || []).map(item => ({
+                productName: item?.productName || 'محصول نامشخص',
+                quantity: item?.quantity || 0,
+                unitPrice: item?.unitPrice || '0',
+                totalPrice: item?.totalPrice || '0'
+              }))
+            };
+          } catch (orderError) {
+            console.error(`❌ [INVOICE DEBUG] Error processing order ${order?.id}:`, orderError);
+            return null;
+          }
         })
       );
 
-      console.log(`✅ [INVOICE DEBUG] Returning ${detailedPaidOrders.length} detailed paid orders`);
-      res.json(detailedPaidOrders);
+      // Filter out any null results from error handling
+      const validPaidOrders = detailedPaidOrders.filter(order => order !== null);
+      
+      console.log(`✅ [INVOICE DEBUG] Returning ${validPaidOrders.length} detailed paid orders`);
+      res.json(validPaidOrders);
     } catch (error) {
       console.error("❌ [INVOICE DEBUG] Error fetching paid orders:", error);
       res.status(400).json({ success: false, message: `Invalid or failed to fetch paid orders: ${error.message}` });
