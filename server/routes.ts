@@ -9736,6 +9736,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         order: {
           id: order.id,
           customerOrderId: order.id, // USE SAME ID FOR COMPATIBILITY WITH FRONTEND
+          customerId: order.customer_id, // ADD CUSTOMER ID FOR WALLET BALANCE FETCH
           orderNumber: order.order_number,
           totalAmount: order.total_amount,
           shippingCost: order.shipping_cost,
