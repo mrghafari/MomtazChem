@@ -523,6 +523,9 @@ export default function AbandonedCartManagement() {
                       <option value="sms">
                         {language === 'fa' ? 'پیامک' : language === 'ar' ? 'رسالة نصية' : language === 'ku' ? 'پەیامی دەقی' : 'SMS'}
                       </option>
+                      <option value="whatsapp">
+                        {language === 'fa' ? 'واتساپ' : language === 'ar' ? 'واتساب' : language === 'ku' ? 'واتساپ' : 'WhatsApp'}
+                      </option>
                     </select>
                   </div>
 
