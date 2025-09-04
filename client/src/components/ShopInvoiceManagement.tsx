@@ -247,49 +247,55 @@ export default function ShopInvoiceManagement() {
           .header { 
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             color: white; 
-            padding: 30px; 
+            padding: 20px; 
             text-align: center; 
             position: relative;
           }
           .company-logo { 
-            width: 120px; 
+            width: 80px; 
             height: auto; 
-            margin-bottom: 15px;
-            border-radius: 8px;
+            margin-bottom: 10px;
+            border-radius: 6px;
             background: white;
-            padding: 10px;
+            padding: 6px;
           }
           .company-name { 
-            font-size: 28px; 
+            font-size: 22px; 
             font-weight: bold; 
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
           }
           .invoice-title { 
-            font-size: 20px; 
-            margin-bottom: 15px;
+            font-size: 16px; 
+            margin-bottom: 10px;
             background: rgba(255,255,255,0.2);
-            padding: 10px 20px;
-            border-radius: 25px;
+            padding: 8px 16px;
+            border-radius: 20px;
             display: inline-block;
           }
           .invoice-info { 
-            padding: 25px; 
+            padding: 20px; 
             background: #f8fafc;
             border-bottom: 1px solid #e2e8f0;
           }
           .info-grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
-            gap: 20px; 
-            margin-bottom: 20px;
+            gap: 15px; 
+            margin-bottom: 15px;
+          }
+          .info-grid-3 { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr 1fr; 
+            gap: 12px; 
+            margin-bottom: 15px;
           }
           .info-item { 
             background: white;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 6px;
             border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
           }
           .info-label { 
             font-weight: bold; 
@@ -305,15 +311,15 @@ export default function ShopInvoiceManagement() {
             font-weight: 600;
           }
           .items-section { 
-            padding: 25px;
+            padding: 18px;
           }
           .section-title { 
-            font-size: 18px; 
+            font-size: 16px; 
             font-weight: bold; 
             color: #2563eb;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             border-bottom: 2px solid #2563eb;
-            padding-bottom: 8px;
+            padding-bottom: 6px;
           }
           .items-table { 
             width: 100%; 
@@ -345,13 +351,13 @@ export default function ShopInvoiceManagement() {
           .total-section { 
             background: #1e293b;
             color: white;
-            padding: 25px;
+            padding: 18px;
             text-align: center;
           }
           .total-amount { 
-            font-size: 24px; 
+            font-size: 20px; 
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
           }
           .payment-info { 
             font-size: 14px;
@@ -359,9 +365,9 @@ export default function ShopInvoiceManagement() {
           }
           .footer { 
             background: #f1f5f9;
-            padding: 20px; 
+            padding: 15px; 
             text-align: center; 
-            font-size: 12px; 
+            font-size: 11px; 
             color: #64748b;
             border-top: 1px solid #e2e8f0;
           }
@@ -404,7 +410,7 @@ export default function ShopInvoiceManagement() {
               </div>
             </div>
 
-            <div class="info-grid">
+            <div class="info-grid-3">
               <div class="info-item">
                 <div class="info-label">نام مشتری</div>
                 <div class="info-value">${customerName}</div>
@@ -417,12 +423,14 @@ export default function ShopInvoiceManagement() {
                 <div class="info-label">ایمیل</div>
                 <div class="info-value">${order.customerEmail || 'ثبت نشده'}</div>
               </div>
-              ${getCustomerAddress(order) ? `
+            </div>
+            ${getCustomerAddress(order) ? `
+            <div class="info-grid">
               <div class="info-item" style="grid-column: 1 / -1;">
                 <div class="info-label">آدرس مشتری</div>
                 <div class="info-value">${getCustomerAddress(order)}</div>
-              </div>` : ''}
-            </div>
+              </div>
+            </div>` : ''}
           </div>
 
           <div class="items-section">
@@ -460,11 +468,13 @@ export default function ShopInvoiceManagement() {
 
           <div class="footer">
             <p>🏢 این فاکتور توسط سیستم فروشگاه آنلاین ممتاز شیمی تولید شده است</p>
-            <div class="company-contact" style="font-size: 11px; color: #666; margin: 10px 0; text-align: center; line-height: 1.4;">
-              ${companyInfo?.data?.address ? `📍 آدرس: ${companyInfo.data.address}` : ''}
-              ${companyInfo?.data?.phoneNumber ? ` | 📞 تلفن: ${companyInfo.data.phoneNumber}` : ''}
-              ${companyInfo?.data?.email ? ` | 📧 ایمیل: ${companyInfo.data.email}` : ''}
-              ${companyInfo?.data?.website ? ` | 🌐 وبسایت: ${companyInfo.data.website}` : ''}
+            <div class="company-contact" style="font-size: 10px; color: #666; margin: 8px 0; text-align: center; line-height: 1.3; border-top: 1px solid #e5e7eb; padding-top: 8px;">
+              <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 15px;">
+                ${companyInfo?.data?.address ? `<span>📍 ${companyInfo.data.address}</span>` : ''}
+                ${companyInfo?.data?.phoneNumber ? `<span>📞 ${companyInfo.data.phoneNumber}</span>` : ''}
+                ${companyInfo?.data?.email ? `<span>📧 ${companyInfo.data.email}</span>` : ''}
+                ${companyInfo?.data?.website ? `<span>🌐 ${companyInfo.data.website}</span>` : ''}
+              </div>
             </div>
             <div class="print-date">تاریخ چاپ: ${currentDate}</div>
           </div>
