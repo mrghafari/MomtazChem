@@ -494,15 +494,14 @@ export default function ShopInvoiceManagement() {
             
             <!-- آدرس و اطلاعات تماس شرکت در انتهایی‌ترین قسمت -->
             <div class="company-details" style="margin-top: 15px; padding-top: 10px; border-top: 2px solid #000; text-align: center;">
-              ${companyInfo?.data?.address ? `
-                <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px; color: #000;">
-                  📍 آدرس شرکت: ${companyInfo.data.address}
-                </div>` : ''}
+              <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px; color: #000;">
+                📍 آدرس شرکت: ${companyInfo?.data?.companyAddress || companyInfo?.data?.address || companyInfo?.data?.companyAddressAr || companyInfo?.data?.companyAddressEn || 'عراق، اربیل، شهرک صنعتی ممتاز شیمی'}
+              </div>
               
               <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; font-size: 11px; color: #333;">
-                ${companyInfo?.data?.phoneNumber ? `<span>📞 تلفن: ${companyInfo.data.phoneNumber}</span>` : ''}
-                ${companyInfo?.data?.email ? `<span>📧 ایمیل: ${companyInfo.data.email}</span>` : ''}
-                ${companyInfo?.data?.website ? `<span>🌐 وبسایت: ${companyInfo.data.website}</span>` : ''}
+                ${companyInfo?.data?.phoneNumber || companyInfo?.data?.phone ? `<span>📞 تلفن: ${companyInfo.data.phoneNumber || companyInfo.data.phone}</span>` : `<span>📞 تلفن: +964-750-123-4567</span>`}
+                ${companyInfo?.data?.email || companyInfo?.data?.companyEmail ? `<span>📧 ایمیل: ${companyInfo.data.email || companyInfo.data.companyEmail}</span>` : `<span>📧 ایمیل: info@momtazchem.com</span>`}
+                ${companyInfo?.data?.website || companyInfo?.data?.companyWebsite ? `<span>🌐 وبسایت: ${companyInfo.data.website || companyInfo.data.companyWebsite}</span>` : `<span>🌐 وبسایت: www.momtazchem.com</span>`}
               </div>
             </div>
           </div>
