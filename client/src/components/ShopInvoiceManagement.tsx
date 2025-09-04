@@ -70,6 +70,13 @@ export default function ShopInvoiceManagement() {
     staleTime: 60000, // Cache for 1 minute
   });
 
+  // Fetch company information for logo
+  const { data: companyInfo } = useQuery({
+    queryKey: ['/api/admin/company-information'],
+    queryFn: () => fetch('/api/admin/company-information', { credentials: 'include' }).then(res => res.json()),
+    staleTime: 300000, // Cache for 5 minutes
+  });
+
   const paidOrders: PaidOrder[] = ordersResponse || [];
   const stats: InvoiceStats = statsResponse || {
     totalPaidOrders: 0,
@@ -113,8 +120,8 @@ export default function ShopInvoiceManagement() {
         description: 'در حال آماده‌سازی فاکتور برای چاپ...',
       });
 
-      // Generate invoice HTML content
-      const invoiceHTML = generateInvoiceHTML(order);
+      // Generate invoice HTML content with company info
+      const invoiceHTML = generateInvoiceHTML(order, companyInfo);
       
       // Open print window
       const printWindow = window.open('', '_blank');
@@ -153,8 +160,8 @@ export default function ShopInvoiceManagement() {
         description: 'در حال تولید فایل فاکتور...',
       });
 
-      // Generate invoice HTML content
-      const invoiceHTML = generateInvoiceHTML(order);
+      // Generate invoice HTML content with company info
+      const invoiceHTML = generateInvoiceHTML(order, companyInfo);
       
       // Create blob and download
       const blob = new Blob([invoiceHTML], { type: 'text/html;charset=utf-8' });
@@ -182,7 +189,7 @@ export default function ShopInvoiceManagement() {
   };
 
   // Generate professional invoice HTML with company logo
-  const generateInvoiceHTML = (order: PaidOrder) => {
+  const generateInvoiceHTML = (order: PaidOrder, companyInfo?: any) => {
     const currentDate = formatGregorianDate(new Date().toISOString());
     const orderDate = formatGregorianDate(order.createdAt);
     const paymentDate = formatGregorianDate(order.paymentDate);
@@ -346,8 +353,8 @@ export default function ShopInvoiceManagement() {
       <body>
         <div class="invoice-container">
           <div class="header">
-            <img src="/uploads/Logo_1753245273579.jpeg" alt="لوگوی شرکت" class="company-logo" />
-            <div class="company-name">شرکت ممتاز شیمی</div>
+            <img src="${companyInfo?.data?.logoUrl || '/uploads/Logo_1753245273579.jpeg'}" alt="لوگوی شرکت" class="company-logo" onerror="this.src='/uploads/Logo_1753245273579.jpeg'" />
+            <div class="company-name">${companyInfo?.data?.companyNameAr || companyInfo?.data?.companyNameEn || 'شرکت ممتاز شیمی'}</div>
             <div class="invoice-title">فاکتور فروش</div>
           </div>
 
