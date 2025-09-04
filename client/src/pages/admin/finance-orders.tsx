@@ -421,6 +421,8 @@ function FinanceOrders() {
         if (orderResponse.ok) {
           const orderData = await orderResponse.json();
           console.log('🔍 [WALLET DEBUG] Order data received:', orderData);
+          console.log('🔍 [WALLET DEBUG] Order object:', orderData.order);
+          console.log('🔍 [WALLET DEBUG] customerId value:', orderData.order?.customerId);
           
           if (orderData.success && orderData.order?.customerId) {
             const customerId = orderData.order.customerId;
