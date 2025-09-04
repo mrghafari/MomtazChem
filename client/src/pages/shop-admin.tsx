@@ -565,17 +565,21 @@ export default function ShopAdmin() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9">
-            <TabsTrigger value="orders">Orders</TabsTrigger>
-            <TabsTrigger value="discounts">Discount Settings</TabsTrigger>
-            <TabsTrigger value="bulk-purchases">Bulk Purchases</TabsTrigger>
-            <TabsTrigger value="proforma-deadline">Purchase Proforma Deadline</TabsTrigger>
-            <TabsTrigger value="inventory">Inventory</TabsTrigger>
-            <TabsTrigger value="invoices">Invoice Management</TabsTrigger>
-            <TabsTrigger value="returns">Returned Items</TabsTrigger>
-            <TabsTrigger value="abandoned-cart">Abandoned Cart</TabsTrigger>
-            <TabsTrigger value="reports">Sales Reports</TabsTrigger>
-          </TabsList>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="orders">Orders</TabsTrigger>
+              <TabsTrigger value="discounts">Discount Settings</TabsTrigger>
+              <TabsTrigger value="bulk-purchases">Bulk Purchases</TabsTrigger>
+              <TabsTrigger value="proforma-deadline">Purchase Proforma Deadline</TabsTrigger>
+              <TabsTrigger value="inventory">Inventory</TabsTrigger>
+            </TabsList>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="invoices">Invoice Management</TabsTrigger>
+              <TabsTrigger value="returns">Returned Items</TabsTrigger>
+              <TabsTrigger value="abandoned-cart">Abandoned Cart</TabsTrigger>
+              <TabsTrigger value="reports">Sales Reports</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Orders Tab */}
           <TabsContent value="orders" className="space-y-6">
