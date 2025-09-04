@@ -88,8 +88,8 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
   // Collapsible sections state
   const [basicInfoOpen, setBasicInfoOpen] = useState(true);
   const [contactInfoOpen, setContactInfoOpen] = useState(true);
-  const [addressInfoOpen, setAddressInfoOpen] = useState(false);
-  const [additionalInfoOpen, setAdditionalInfoOpen] = useState(false);
+  const [addressInfoOpen, setAddressInfoOpen] = useState(true);
+  const [additionalInfoOpen, setAdditionalInfoOpen] = useState(true);
 
   // Fetch provinces
   const { data: provincesResponse } = useQuery({
