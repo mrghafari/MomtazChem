@@ -283,15 +283,15 @@ export class CartStorage {
           eq(cartSessions.isAbandoned, true)
         ));
       
-      // Find carts to delete (4 hours)
-      const fourHoursAgo = new Date(now.getTime() - (4 * 60 * 60 * 1000));
+      // Find carts to delete (48 hours)
+      const fortyEightHoursAgo = new Date(now.getTime() - (48 * 60 * 60 * 1000));
       const cartsToDelete = await cartDb
         .select()
         .from(cartSessions)
         .where(and(
           eq(cartSessions.isActive, true),
           gte(cartSessions.itemCount, 1),
-          lte(cartSessions.lastActivity, fourHoursAgo)
+          lte(cartSessions.lastActivity, fortyEightHoursAgo)
         ));
       
       console.log(`🛒 [CART CLEANUP] Found ${cartsForFirstNotification.length} carts for first notification`);
