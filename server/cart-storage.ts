@@ -119,6 +119,7 @@ export class CartStorage {
   }
 
   async getAbandonedCarts(timeoutMinutes: number = 30) {
+    // Get all carts that are already marked as abandoned OR should be marked as abandoned
     const timeoutDate = new Date();
     timeoutDate.setMinutes(timeoutDate.getMinutes() - timeoutMinutes);
 
@@ -126,9 +127,9 @@ export class CartStorage {
       .select()
       .from(cartSessions)
       .where(and(
-        eq(cartSessions.isActive, true),
-        eq(cartSessions.isAbandoned, false),
-        lte(cartSessions.lastActivity, timeoutDate)
+        gte(cartSessions.itemCount, 1), // Has items in cart
+        // Show both: already abandoned carts OR active carts that are now abandoned
+        sql`(${cartSessions.isAbandoned} = true OR (${cartSessions.isActive} = true AND ${cartSessions.isAbandoned} = false AND ${cartSessions.lastActivity} <= ${timeoutDate.toISOString()}))`
       ))
       .orderBy(desc(cartSessions.lastActivity));
   }
@@ -141,6 +142,49 @@ export class CartStorage {
         updatedAt: new Date()
       })
       .where(eq(cartSessions.customerId, customerId));
+  }
+
+  async getAbandonedCartAnalytics() {
+    // Get basic analytics for abandoned carts
+    const [
+      totalAbandoned,
+      recentAbandoned,
+      totalValue
+    ] = await Promise.all([
+      // Total abandoned carts
+      cartDb
+        .select({ count: sql`count(*)` })
+        .from(cartSessions)
+        .where(and(
+          eq(cartSessions.isAbandoned, true),
+          gte(cartSessions.itemCount, 1)
+        )),
+      
+      // Recent abandoned carts (last 7 days)
+      cartDb
+        .select({ count: sql`count(*)` })
+        .from(cartSessions)
+        .where(and(
+          eq(cartSessions.isAbandoned, true),
+          gte(cartSessions.itemCount, 1),
+          gte(cartSessions.abandonedAt, sql`NOW() - INTERVAL '7 days'`)
+        )),
+      
+      // Total value of abandoned carts
+      cartDb
+        .select({ sum: sql`COALESCE(SUM(CAST(total_value AS NUMERIC)), 0)` })
+        .from(cartSessions)
+        .where(and(
+          eq(cartSessions.isAbandoned, true),
+          gte(cartSessions.itemCount, 1)
+        ))
+    ]);
+
+    return {
+      totalAbandoned: totalAbandoned[0]?.count || 0,
+      recentAbandoned: recentAbandoned[0]?.count || 0,
+      totalValue: totalValue[0]?.sum || 0,
+    };
   }
 
   async getAbandonedCartsByCustomer(customerId: number): Promise<CartSession[]> {
