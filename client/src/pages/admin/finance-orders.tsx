@@ -320,14 +320,18 @@ function FinanceOrders() {
         setOrderDetails(detailsData.order);
         setOrderDocuments(detailsData.documents || []);
         
-        // Fetch wallet balance for this customer
+        // Fetch wallet balance for this customer using customer ID
         try {
-          const walletResponse = await fetch(`/api/wallet/balance/${detailsData.order.id}`, {
-            credentials: 'include'
-          });
-          if (walletResponse.ok) {
-            const walletResult = await walletResponse.json();
-            setOrderDetailsWalletBalance(walletResult.data?.balance || 0);
+          if (detailsData.order?.customerId) {
+            const walletResponse = await fetch(`/api/wallet/balance/${detailsData.order.customerId}`, {
+              credentials: 'include'
+            });
+            if (walletResponse.ok) {
+              const walletResult = await walletResponse.json();
+              setOrderDetailsWalletBalance(walletResult.data?.balance || 0);
+            } else {
+              setOrderDetailsWalletBalance(0);
+            }
           } else {
             setOrderDetailsWalletBalance(0);
           }
@@ -392,12 +396,27 @@ function FinanceOrders() {
     if (order.customerOrderId) {
       setWalletLoading(true);
       try {
-        const response = await fetch(`/api/wallet/balance/${order.customerOrderId}`, {
+        // First get customer ID from order ID
+        const orderResponse = await fetch(`/api/admin/orders/${order.customerOrderId}/details`, {
           credentials: 'include'
         });
-        if (response.ok) {
-          const result = await response.json();
-          setWalletBalance(result.data?.balance || 0);
+        
+        if (orderResponse.ok) {
+          const orderData = await orderResponse.json();
+          if (orderData.success && orderData.order?.customerId) {
+            // Now get wallet balance using customer ID
+            const walletResponse = await fetch(`/api/wallet/balance/${orderData.order.customerId}`, {
+              credentials: 'include'
+            });
+            if (walletResponse.ok) {
+              const walletResult = await walletResponse.json();
+              setWalletBalance(walletResult.data?.balance || 0);
+            } else {
+              setWalletBalance(0);
+            }
+          } else {
+            setWalletBalance(0);
+          }
         } else {
           setWalletBalance(0);
         }
