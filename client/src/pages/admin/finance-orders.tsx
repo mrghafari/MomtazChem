@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertTriangle, CheckCircle, Clock, CreditCard, DollarSign, RefreshCw, Timer, ChevronRight, XCircle, FileText, Eye, Download, Truck, MapPin, ZoomIn, ZoomOut, RotateCw, Move, X } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock, CreditCard, DollarSign, RefreshCw, Timer, ChevronRight, XCircle, FileText, Eye, Download, Truck, MapPin, ZoomIn, ZoomOut, RotateCw, Move, X, Wallet, Calculator } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { OrderManagement } from "@/shared/order-management-schema";
 // Temporarily remove SimpleReceiptViewer import - needs to be created
@@ -74,6 +74,8 @@ function FinanceOrders() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [reviewNotes, setReviewNotes] = useState("");
   const [receiptAmount, setReceiptAmount] = useState("");
+  const [walletBalance, setWalletBalance] = useState<number>(0);
+  const [walletLoading, setWalletLoading] = useState(false);
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState("");
   const [selectedFileMimeType, setSelectedFileMimeType] = useState("");
@@ -90,6 +92,7 @@ function FinanceOrders() {
   const [orderDetailsModalOpen, setOrderDetailsModalOpen] = useState(false);
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [orderDocuments, setOrderDocuments] = useState<any[]>([]);
+  const [orderDetailsWalletBalance, setOrderDetailsWalletBalance] = useState<number>(0);
 
   // Check admin authentication - MOVED to top to avoid conditional hooks
   const { data: adminUser, isLoading: isCheckingAuth, error: authError } = useQuery({
@@ -316,6 +319,23 @@ function FinanceOrders() {
         console.log('📋 [ORDER DETAILS] Items data:', detailsData.order.items);
         setOrderDetails(detailsData.order);
         setOrderDocuments(detailsData.documents || []);
+        
+        // Fetch wallet balance for this customer
+        try {
+          const walletResponse = await fetch(`/api/wallet/balance/${detailsData.order.id}`, {
+            credentials: 'include'
+          });
+          if (walletResponse.ok) {
+            const walletResult = await walletResponse.json();
+            setOrderDetailsWalletBalance(walletResult.data?.balance || 0);
+          } else {
+            setOrderDetailsWalletBalance(0);
+          }
+        } catch (walletError) {
+          console.error('Error fetching wallet balance for order details:', walletError);
+          setOrderDetailsWalletBalance(0);
+        }
+        
         setOrderDetailsModalOpen(true);
       } else {
         throw new Error(detailsData.message || 'Failed to get order details');
@@ -362,10 +382,32 @@ function FinanceOrders() {
     }
   }, []);
 
-  const handleOrderReview = useCallback((order: OrderManagement) => {
+  const handleOrderReview = useCallback(async (order: OrderManagement) => {
     setSelectedOrder(order);
     setReviewNotes(order.financialNotes || "");
+    setReceiptAmount("");
     setDialogOpen(true);
+    
+    // Fetch wallet balance for this customer
+    if (order.customerOrderId) {
+      setWalletLoading(true);
+      try {
+        const response = await fetch(`/api/wallet/balance/${order.customerOrderId}`, {
+          credentials: 'include'
+        });
+        if (response.ok) {
+          const result = await response.json();
+          setWalletBalance(result.data?.balance || 0);
+        } else {
+          setWalletBalance(0);
+        }
+      } catch (error) {
+        console.error('Error fetching wallet balance:', error);
+        setWalletBalance(0);
+      } finally {
+        setWalletLoading(false);
+      }
+    }
   }, []);
 
   const handleApprove = useCallback(() => {
@@ -985,6 +1027,98 @@ function FinanceOrders() {
           </DialogHeader>
           
           <div className="space-y-4">
+            {/* Order and Wallet Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg border">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="w-4 h-4 text-blue-600" />
+                  <Label className="font-semibold text-blue-700">مبلغ سفارش</Label>
+                </div>
+                <div className="text-lg font-bold text-blue-600">
+                  {selectedOrder?.totalAmount ? parseFloat(selectedOrder.totalAmount).toLocaleString() : '0'} IQD
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Wallet className="w-4 h-4 text-green-600" />
+                  <Label className="font-semibold text-green-700">موجودی کیف پول</Label>
+                </div>
+                <div className="text-lg font-bold text-green-600">
+                  {walletLoading ? (
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      در حال بارگذاری...
+                    </div>
+                  ) : (
+                    `${walletBalance.toLocaleString()} IQD`
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Live Calculations */}
+            {receiptAmount && selectedOrder && (
+              <div className="p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
+                <h4 className="font-semibold text-yellow-800 mb-3 flex items-center gap-2">
+                  <Calculator className="w-4 h-4" />
+                  محاسبات زنده
+                </h4>
+                {(() => {
+                  const orderTotal = parseFloat(selectedOrder.totalAmount || '0');
+                  const receiptAmountNum = parseFloat(receiptAmount) || 0;
+                  const shortfall = orderTotal - receiptAmountNum;
+                  const canApprove = shortfall <= 0 || shortfall <= walletBalance;
+                  
+                  return (
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>مبلغ رسید واریزی:</span>
+                        <span className="font-medium">{receiptAmountNum.toLocaleString()} IQD</span>
+                      </div>
+                      {shortfall > 0 && (
+                        <div className="flex justify-between">
+                          <span>کسری واریزی:</span>
+                          <span className="font-medium text-red-600">{shortfall.toLocaleString()} IQD</span>
+                        </div>
+                      )}
+                      {shortfall > 0 && (
+                        <div className="flex justify-between">
+                          <span>کفایت کیف پول:</span>
+                          <span className={`font-medium ${canApprove ? 'text-green-600' : 'text-red-600'}`}>
+                            {canApprove ? '✅ کافی است' : '❌ ناکافی'}
+                          </span>
+                        </div>
+                      )}
+                      <div className="border-t pt-2 mt-2">
+                        <div className="flex justify-between font-semibold">
+                          <span>وضعیت تایید:</span>
+                          <span className={canApprove ? 'text-green-600' : 'text-red-600'}>
+                            {canApprove ? '✅ قابل تایید' : '❌ غیرقابل تایید'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            <div>
+              <Label htmlFor="receiptAmount">مبلغ رسید واریزی</Label>
+              <Input 
+                id="receiptAmount"
+                type="number"
+                value={receiptAmount}
+                onChange={(e) => setReceiptAmount(e.target.value)}
+                placeholder="مبلغ واریز شده را وارد کنید"
+                className="mt-1"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                مبلغی که مشتری واقعاً واریز کرده است
+              </p>
+            </div>
+            
             <div>
               <Label htmlFor="notes">یادداشت‌ها</Label>
               <Textarea 
@@ -992,15 +1126,6 @@ function FinanceOrders() {
                 value={reviewNotes}
                 onChange={(e) => setReviewNotes(e.target.value)}
                 placeholder="یادداشت‌های خود را وارد کنید..."
-              />
-            </div>
-            <div>
-              <Label htmlFor="receiptAmount">مبلغ رسید (اختیاری)</Label>
-              <Input 
-                id="receiptAmount"
-                value={receiptAmount}
-                onChange={(e) => setReceiptAmount(e.target.value)}
-                placeholder="مبلغ رسید"
               />
             </div>
           </div>
@@ -1012,7 +1137,24 @@ function FinanceOrders() {
             <Button variant="destructive" onClick={handleReject}>
               رد
             </Button>
-            <Button onClick={handleApprove}>
+            <Button 
+              onClick={handleApprove}
+              disabled={(() => {
+                if (!receiptAmount || !selectedOrder) return false;
+                const orderTotal = parseFloat(selectedOrder.totalAmount || '0');
+                const receiptAmountNum = parseFloat(receiptAmount) || 0;
+                const shortfall = orderTotal - receiptAmountNum;
+                return shortfall > 0 && shortfall > walletBalance;
+              })()}
+              className={(() => {
+                if (!receiptAmount || !selectedOrder) return "";
+                const orderTotal = parseFloat(selectedOrder.totalAmount || '0');
+                const receiptAmountNum = parseFloat(receiptAmount) || 0;
+                const shortfall = orderTotal - receiptAmountNum;
+                const canApprove = shortfall <= 0 || shortfall <= walletBalance;
+                return canApprove ? "bg-green-600 hover:bg-green-700" : "";
+              })()}
+            >
               تایید
             </Button>
           </DialogFooter>
@@ -1204,6 +1346,19 @@ function FinanceOrders() {
                     </div>
                     <div>
                       <strong>تاریخ:</strong> {formatDateSafe(orderDetails.createdAt)}
+                    </div>
+                  </div>
+                  
+                  {/* Wallet Balance Information */}
+                  <div className="mt-4 pt-4 border-t">
+                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border">
+                      <div className="flex items-center gap-2">
+                        <Wallet className="w-5 h-5 text-green-600" />
+                        <span className="font-semibold text-green-700">موجودی کیف پول مشتری</span>
+                      </div>
+                      <div className="text-lg font-bold text-green-600">
+                        {orderDetailsWalletBalance.toLocaleString()} IQD
+                      </div>
                     </div>
                   </div>
                   
