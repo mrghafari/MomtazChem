@@ -61,7 +61,7 @@ interface WhatsAppStats {
   }>;
 }
 
-export default function WhatsAppCRM() {
+export default function WhatsAppCRMEnglish() {
   const [selectedCustomers, setSelectedCustomers] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
@@ -107,8 +107,8 @@ export default function WhatsAppCRM() {
     },
     onSuccess: (data) => {
       toast({
-        title: "موفقیت",
-        description: data.message || "پیام واتساپ با موفقیت ارسال شد",
+        title: "Success",
+        description: data.message || "WhatsApp message sent successfully",
       });
       setTestModal(false);
       setTestPhoneNumber('');
@@ -116,8 +116,8 @@ export default function WhatsAppCRM() {
     },
     onError: (error: any) => {
       toast({
-        title: "خطا",
-        description: error?.message || "خطا در ارسال پیام واتساپ",
+        title: "Error",
+        description: error?.message || "Failed to send WhatsApp message",
         variant: "destructive",
       });
     }
@@ -133,8 +133,8 @@ export default function WhatsAppCRM() {
     },
     onSuccess: (data) => {
       toast({
-        title: "موفقیت",
-        description: data.message || "پیام‌های انبوه با موفقیت ارسال شد",
+        title: "Success",
+        description: data.message || "Bulk messages sent successfully",
       });
       setBulkMessageModal(false);
       setBulkMessage('');
@@ -142,8 +142,8 @@ export default function WhatsAppCRM() {
     },
     onError: (error: any) => {
       toast({
-        title: "خطا",
-        description: error?.message || "خطا در ارسال پیام‌های انبوه",
+        title: "Error",
+        description: error?.message || "Failed to send bulk messages",
         variant: "destructive",
       });
     }
@@ -193,23 +193,30 @@ export default function WhatsAppCRM() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fa-IR').format(amount) + ' تومان';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fa-IR');
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
   return (
-    <div className="container mx-auto px-4 py-8" dir="rtl">
+    <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <MessageCircle className="w-8 h-8 text-green-600" />
-            مدیریت واتساپ CRM
+            WhatsApp CRM Management
           </h1>
           <p className="text-lg text-gray-600 mt-2">
-            مدیریت مشتریان واتساپ و ارسال پیام‌های انبوه
+            Manage WhatsApp customers and send bulk messages
           </p>
         </div>
         
@@ -219,16 +226,16 @@ export default function WhatsAppCRM() {
             variant="outline"
             className="flex items-center gap-2"
           >
-            <Send className="w-4 h-4" />
-            تست واتساپ
+            <TestTube className="w-4 h-4" />
+            Test WhatsApp
           </Button>
           <Button 
             onClick={() => setBulkMessageModal(true)}
             disabled={selectedCustomers.length === 0}
             className="flex items-center gap-2"
           >
-            <Users className="w-4 h-4" />
-            پیام انبوه ({selectedCustomers.length})
+            <Send className="w-4 h-4" />
+            Bulk Message ({selectedCustomers.length})
           </Button>
         </div>
       </div>
@@ -237,15 +244,15 @@ export default function WhatsAppCRM() {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="customers" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
-            لیست مشتریان
+            Customer List
           </TabsTrigger>
           <TabsTrigger value="stats" className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4" />
-            آمار و گزارش
+            Statistics & Reports
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="w-4 h-4" />
-            تنظیمات API
+            API Settings
           </TabsTrigger>
         </TabsList>
 
@@ -255,14 +262,14 @@ export default function WhatsAppCRM() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Search className="w-5 h-5" />
-                جستجو و فیلتر
+                Search & Filter
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex gap-4">
                 <div className="flex-1">
                   <Input
-                    placeholder="جستجو در نام، ایمیل یا شماره واتساپ..."
+                    placeholder="Search by name, email, or WhatsApp number..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full"
@@ -270,7 +277,7 @@ export default function WhatsAppCRM() {
                 </div>
                 <Button variant="outline" className="flex items-center gap-2">
                   <Filter className="w-4 h-4" />
-                  فیلتر
+                  Filter
                 </Button>
               </div>
             </CardContent>
@@ -282,14 +289,14 @@ export default function WhatsAppCRM() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Users className="w-5 h-5" />
-                  مشتریان واتساپ ({pagination.total || 0})
+                  WhatsApp Customers ({pagination.total || 0})
                 </CardTitle>
                 <div className="flex items-center gap-2">
                   <Checkbox
                     checked={selectedCustomers.length === customers.length && customers.length > 0}
                     onCheckedChange={handleSelectAll}
                   />
-                  <span className="text-sm text-gray-600">انتخاب همه</span>
+                  <span className="text-sm text-gray-600">Select All</span>
                 </div>
               </div>
             </CardHeader>
@@ -309,14 +316,14 @@ export default function WhatsAppCRM() {
                             onCheckedChange={handleSelectAll}
                           />
                         </TableHead>
-                        <TableHead>نام</TableHead>
-                        <TableHead>ایمیل</TableHead>
-                        <TableHead>شماره واتساپ</TableHead>
-                        <TableHead>ترجیح ارتباط</TableHead>
-                        <TableHead>تعداد سفارش</TableHead>
-                        <TableHead>مجموع خرید</TableHead>
-                        <TableHead>تاریخ عضویت</TableHead>
-                        <TableHead>عملیات</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>WhatsApp Number</TableHead>
+                        <TableHead>Communication Preference</TableHead>
+                        <TableHead>Orders</TableHead>
+                        <TableHead>Total Spent</TableHead>
+                        <TableHead>Join Date</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -360,12 +367,12 @@ export default function WhatsAppCRM() {
                                 className="flex items-center gap-1"
                                 onClick={() => {
                                   setTestPhoneNumber(customer.whatsapp_number);
-                                  setTestMessage(`سلام ${customer.first_name} عزیز!`);
+                                  setTestMessage(`Hello ${customer.first_name}!`);
                                   setTestModal(true);
                                 }}
                               >
                                 <MessageCircle className="w-3 h-3" />
-                                پیام
+                                Message
                               </Button>
                               <Button
                                 size="sm"
@@ -373,7 +380,7 @@ export default function WhatsAppCRM() {
                                 className="flex items-center gap-1"
                               >
                                 <Eye className="w-3 h-3" />
-                                مشاهده
+                                View
                               </Button>
                             </div>
                           </TableCell>
@@ -388,7 +395,7 @@ export default function WhatsAppCRM() {
               {pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between mt-6">
                   <div className="text-sm text-gray-600">
-                    نمایش {((pagination.page - 1) * pagination.limit) + 1} تا {Math.min(pagination.page * pagination.limit, pagination.total)} از {pagination.total} مشتری
+                    Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} customers
                   </div>
                   <div className="flex gap-2">
                     <Button
@@ -397,7 +404,7 @@ export default function WhatsAppCRM() {
                       onClick={() => setPage(Math.max(1, page - 1))}
                       disabled={page === 1}
                     >
-                      قبلی
+                      Previous
                     </Button>
                     <Button
                       variant="outline"
@@ -405,7 +412,7 @@ export default function WhatsAppCRM() {
                       onClick={() => setPage(Math.min(pagination.totalPages, page + 1))}
                       disabled={page === pagination.totalPages}
                     >
-                      بعدی
+                      Next
                     </Button>
                   </div>
                 </div>
@@ -425,48 +432,48 @@ export default function WhatsAppCRM() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">کل مشتریان</CardTitle>
+                    <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
                     <Users className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.overview.total_customers?.toLocaleString('fa-IR')}</div>
-                    <p className="text-xs text-muted-foreground">تعداد کل مشتریان سیستم</p>
+                    <div className="text-2xl font-bold">{stats.overview.total_customers?.toLocaleString('en-US')}</div>
+                    <p className="text-xs text-muted-foreground">All customers in system</p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">مشتریان واتساپ</CardTitle>
+                    <CardTitle className="text-sm font-medium">WhatsApp Customers</CardTitle>
                     <MessageCircle className="h-4 w-4 text-green-600" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-green-600">{stats.overview.whatsapp_customers?.toLocaleString('fa-IR')}</div>
+                    <div className="text-2xl font-bold text-green-600">{stats.overview.whatsapp_customers?.toLocaleString('en-US')}</div>
                     <p className="text-xs text-muted-foreground">
-                      {stats.overview.total_customers > 0 ? Math.round((stats.overview.whatsapp_customers / stats.overview.total_customers) * 100) : 0}% از کل مشتریان
+                      {stats.overview.total_customers > 0 ? Math.round((stats.overview.whatsapp_customers / stats.overview.total_customers) * 100) : 0}% of all customers
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">ترجیح واتساپ</CardTitle>
+                    <CardTitle className="text-sm font-medium">WhatsApp Preference</CardTitle>
                     <UserCheck className="h-4 w-4 text-blue-600" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-blue-600">{stats.overview.whatsapp_preferred?.toLocaleString('fa-IR')}</div>
-                    <p className="text-xs text-muted-foreground">مشتریانی که واتساپ را ترجیح می‌دهند</p>
+                    <div className="text-2xl font-bold text-blue-600">{stats.overview.whatsapp_preferred?.toLocaleString('en-US')}</div>
+                    <p className="text-xs text-muted-foreground">Customers who prefer WhatsApp</p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">سایر ترجیحات</CardTitle>
+                    <CardTitle className="text-sm font-medium">Other Preferences</CardTitle>
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-sm space-y-1">
                       <div className="flex justify-between">
-                        <span>ایمیل:</span>
+                        <span>Email:</span>
                         <span>{stats.overview.email_preferred}</span>
                       </div>
                       <div className="flex justify-between">
@@ -474,7 +481,7 @@ export default function WhatsAppCRM() {
                         <span>{stats.overview.sms_preferred}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>تلفن:</span>
+                        <span>Phone:</span>
                         <span>{stats.overview.phone_preferred}</span>
                       </div>
                     </div>
@@ -487,7 +494,7 @@ export default function WhatsAppCRM() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="w-5 h-5" />
-                    فعالیت ۳۰ روز اخیر - مشتریان جدید واتساپ
+                    Last 30 Days Activity - New WhatsApp Customers
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -501,7 +508,7 @@ export default function WhatsAppCRM() {
                           }}
                         />
                         <div className="text-xs mt-1 text-center">
-                          {new Date(activity.date).toLocaleDateString('fa-IR', { month: 'short', day: 'numeric' })}
+                          {new Date(activity.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </div>
                         <div className="text-xs font-bold text-green-600">
                           {activity.new_customers}
@@ -521,14 +528,14 @@ export default function WhatsAppCRM() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="w-5 h-5" />
-                تنظیمات API واتساپ
+                WhatsApp API Settings
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               
               {/* Provider Selection */}
               <div>
-                <label className="text-sm font-medium mb-2 block">ارائه‌دهنده سرویس</label>
+                <label className="text-sm font-medium mb-2 block">Service Provider</label>
                 <select 
                   value={apiSettings.provider}
                   onChange={(e) => setApiSettings(prev => ({ ...prev, provider: e.target.value }))}
@@ -536,7 +543,7 @@ export default function WhatsAppCRM() {
                 >
                   <option value="twilio">Twilio WhatsApp</option>
                   <option value="whatsapp_business">WhatsApp Business API</option>
-                  <option value="custom">سرویس سفارشی</option>
+                  <option value="custom">Custom Service</option>
                 </select>
               </div>
 
@@ -545,7 +552,7 @@ export default function WhatsAppCRM() {
                 <div className="space-y-4 p-4 bg-blue-50 rounded-lg">
                   <h3 className="font-medium text-blue-900 flex items-center gap-2">
                     <Key className="w-4 h-4" />
-                    تنظیمات Twilio
+                    Twilio Settings
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -567,12 +574,11 @@ export default function WhatsAppCRM() {
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="text-sm font-medium mb-1 block">شماره واتساپ Twilio</label>
+                      <label className="text-sm font-medium mb-1 block">WhatsApp Phone Number</label>
                       <Input
                         value={apiSettings.twilioWhatsAppNumber}
                         onChange={(e) => setApiSettings(prev => ({ ...prev, twilioWhatsAppNumber: e.target.value }))}
-                        placeholder="whatsapp:+1415xxxxxxx"
-                        dir="ltr"
+                        placeholder="whatsapp:+1234567890"
                       />
                     </div>
                   </div>
@@ -583,8 +589,8 @@ export default function WhatsAppCRM() {
               {apiSettings.provider === 'whatsapp_business' && (
                 <div className="space-y-4 p-4 bg-green-50 rounded-lg">
                   <h3 className="font-medium text-green-900 flex items-center gap-2">
-                    <Key className="w-4 h-4" />
-                    تنظیمات WhatsApp Business API
+                    <MessageCircle className="w-4 h-4" />
+                    WhatsApp Business API Settings
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -592,7 +598,7 @@ export default function WhatsAppCRM() {
                       <Input
                         value={apiSettings.businessApiToken}
                         onChange={(e) => setApiSettings(prev => ({ ...prev, businessApiToken: e.target.value }))}
-                        placeholder="EAAxxxxxxxxxx"
+                        placeholder="Bearer token"
                         type="password"
                       />
                     </div>
@@ -601,7 +607,7 @@ export default function WhatsAppCRM() {
                       <Input
                         value={apiSettings.businessPhoneNumberId}
                         onChange={(e) => setApiSettings(prev => ({ ...prev, businessPhoneNumberId: e.target.value }))}
-                        placeholder="xxxxxxxxxx"
+                        placeholder="Phone Number ID"
                       />
                     </div>
                   </div>
@@ -612,8 +618,8 @@ export default function WhatsAppCRM() {
               {apiSettings.provider === 'custom' && (
                 <div className="space-y-4 p-4 bg-purple-50 rounded-lg">
                   <h3 className="font-medium text-purple-900 flex items-center gap-2">
-                    <Key className="w-4 h-4" />
-                    تنظیمات API سفارشی
+                    <Settings className="w-4 h-4" />
+                    Custom API Settings
                   </h3>
                   <div className="space-y-4">
                     <div>
@@ -622,7 +628,6 @@ export default function WhatsAppCRM() {
                         value={apiSettings.customApiUrl}
                         onChange={(e) => setApiSettings(prev => ({ ...prev, customApiUrl: e.target.value }))}
                         placeholder="https://api.example.com/whatsapp"
-                        dir="ltr"
                       />
                     </div>
                     <div>
@@ -630,7 +635,7 @@ export default function WhatsAppCRM() {
                       <Input
                         value={apiSettings.customApiKey}
                         onChange={(e) => setApiSettings(prev => ({ ...prev, customApiKey: e.target.value }))}
-                        placeholder="your-api-key"
+                        placeholder="Your API Key"
                         type="password"
                       />
                     </div>
@@ -638,50 +643,10 @@ export default function WhatsAppCRM() {
                 </div>
               )}
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-4 pt-4">
-                <Button 
-                  className="flex items-center gap-2"
-                  onClick={() => {
-                    // Save API settings
-                    toast({
-                      title: "تنظیمات ذخیره شد",
-                      description: "تنظیمات API واتساپ با موفقیت ذخیره شد.",
-                    });
-                  }}
-                >
-                  <Save className="w-4 h-4" />
-                  ذخیره تنظیمات
-                </Button>
-                
-                <Button 
-                  variant="outline"
-                  className="flex items-center gap-2"
-                  onClick={() => {
-                    // Test API connection
-                    toast({
-                      title: "تست اتصال",
-                      description: "در حال تست اتصال به API...",
-                    });
-                  }}
-                >
-                  <TestTube className="w-4 h-4" />
-                  تست اتصال
-                </Button>
-              </div>
-
-              {/* Connection Status */}
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <h4 className="font-medium text-gray-900 mb-2">وضعیت اتصال</h4>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                  <span className="text-sm text-gray-600">در انتظار تست اتصال</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  برای تست اتصال، روی دکمه "تست اتصال" کلیک کنید.
-                </p>
-              </div>
-
+              <Button className="w-full flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                Save API Settings
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -689,40 +654,49 @@ export default function WhatsAppCRM() {
 
       {/* Test WhatsApp Modal */}
       <Dialog open={testModal} onOpenChange={setTestModal}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>تست ارسال پیام واتساپ</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <TestTube className="w-5 h-5" />
+              Test WhatsApp Message
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium">شماره واتساپ</label>
+              <label className="text-sm font-medium mb-1 block">Phone Number</label>
               <Input
                 value={testPhoneNumber}
                 onChange={(e) => setTestPhoneNumber(e.target.value)}
-                placeholder="مثال: +964xxxxxxxxx"
-                dir="ltr"
+                placeholder="+1234567890"
               />
             </div>
             <div>
-              <label className="text-sm font-medium">پیام</label>
+              <label className="text-sm font-medium mb-1 block">Message</label>
               <Textarea
                 value={testMessage}
                 onChange={(e) => setTestMessage(e.target.value)}
-                placeholder="پیام تست..."
+                placeholder="Enter your test message..."
                 rows={4}
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setTestModal(false)}
+              >
+                Cancel
+              </Button>
               <Button
                 onClick={() => testWhatsAppMutation.mutate({ phoneNumber: testPhoneNumber, message: testMessage })}
                 disabled={!testPhoneNumber || !testMessage || testWhatsAppMutation.isPending}
                 className="flex items-center gap-2"
               >
-                <Send className="w-4 h-4" />
-                {testWhatsAppMutation.isPending ? 'در حال ارسال...' : 'ارسال'}
-              </Button>
-              <Button variant="outline" onClick={() => setTestModal(false)}>
-                انصراف
+                {testWhatsAppMutation.isPending ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+                Send Test
               </Button>
             </div>
           </div>
@@ -731,39 +705,41 @@ export default function WhatsAppCRM() {
 
       {/* Bulk Message Modal */}
       <Dialog open={bulkMessageModal} onOpenChange={setBulkMessageModal}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>ارسال پیام انبوه واتساپ</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="w-5 h-5" />
+              Send Bulk Message to {selectedCustomers.length} Customers
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="bg-blue-50 p-3 rounded-lg">
-              <p className="text-sm text-blue-700">
-                پیام برای {selectedCustomers.length} مشتری ارسال خواهد شد.
-              </p>
-              <p className="text-xs text-blue-600 mt-1">
-                از {'{'}{'{'} customerName {'}'}{'}'} برای شخصی‌سازی پیام استفاده کنید.
-              </p>
-            </div>
             <div>
-              <label className="text-sm font-medium">پیام</label>
+              <label className="text-sm font-medium mb-1 block">Message</label>
               <Textarea
                 value={bulkMessage}
                 onChange={(e) => setBulkMessage(e.target.value)}
-                placeholder="سلام {'{{'}customerName{'}'} عزیز، ..."
+                placeholder="Enter your bulk message..."
                 rows={6}
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setBulkMessageModal(false)}
+              >
+                Cancel
+              </Button>
               <Button
                 onClick={() => bulkMessageMutation.mutate({ customerIds: selectedCustomers, message: bulkMessage })}
                 disabled={!bulkMessage || bulkMessageMutation.isPending}
                 className="flex items-center gap-2"
               >
-                <Send className="w-4 h-4" />
-                {bulkMessageMutation.isPending ? 'در حال ارسال...' : 'ارسال انبوه'}
-              </Button>
-              <Button variant="outline" onClick={() => setBulkMessageModal(false)}>
-                انصراف
+                {bulkMessageMutation.isPending ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+                Send to {selectedCustomers.length} Customers
               </Button>
             </div>
           </div>

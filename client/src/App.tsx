@@ -124,6 +124,7 @@ import RemoteDesktop from "@/pages/admin/remote-desktop";
 import TemplateDistribution from "@/pages/admin/template-distribution";
 import TemplateNumberingSystem from "@/pages/admin/template-numbering-system";
 import WhatsAppCRM from "@/pages/admin/whatsapp-crm";
+import WhatsAppCRMEnglish from "@/pages/admin/whatsapp-crm-en";
 
 import BankReceiptUpload from "@/pages/bank-receipt-upload";
 import WalletCorrection from "@/pages/admin/wallet-correction";
@@ -226,6 +227,7 @@ function Router() {
           <Route path="/seo-management" component={SeoManagement} />
           <Route path="/admin/sms-management" component={AdminSmsManagement} />
           <Route path="/admin/whatsapp-crm" component={WhatsAppCRM} />
+          <Route path="/admin/whatsapp-crm-en" component={WhatsAppCRMEnglish} />
           <Route path="/admin/email-logs" component={lazy(() => import("@/pages/admin-email-logs"))} />
           <Route path="/admin/sms" component={AdminSmsManagement} />
           <Route path="/admin/widgets" component={WidgetRecommendations} />
