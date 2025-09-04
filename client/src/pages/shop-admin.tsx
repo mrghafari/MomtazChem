@@ -51,6 +51,7 @@ import type { ShopProduct, Customer, Order } from "@shared/shop-schema";
 import SalesReport from "@/pages/sales-report";
 import InvoiceManagement from "@/pages/admin/invoice-management";
 import ShopInvoiceManagement from "@/components/ShopInvoiceManagement";
+import AbandonedCartManagement from "@/pages/abandoned-cart-management";
 import PaymentMethodBadge from "@/components/PaymentMethodBadge";
 import BulkPurchaseProductCard from "@/components/BulkPurchaseProductCard";
 
@@ -564,7 +565,7 @@ export default function ShopAdmin() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="discounts">Discount Settings</TabsTrigger>
             <TabsTrigger value="bulk-purchases">Bulk Purchases</TabsTrigger>
@@ -572,6 +573,7 @@ export default function ShopAdmin() {
             <TabsTrigger value="inventory">Inventory</TabsTrigger>
             <TabsTrigger value="invoices">Invoice Management</TabsTrigger>
             <TabsTrigger value="returns">Returned Items</TabsTrigger>
+            <TabsTrigger value="abandoned-cart">Abandoned Cart</TabsTrigger>
             <TabsTrigger value="reports">Sales Reports</TabsTrigger>
           </TabsList>
 
@@ -1521,6 +1523,11 @@ export default function ShopAdmin() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Abandoned Cart Tab */}
+          <TabsContent value="abandoned-cart" className="space-y-6">
+            <AbandonedCartManagement />
           </TabsContent>
 
           {/* Sales Reports Tab */}
