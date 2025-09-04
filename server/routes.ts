@@ -6421,9 +6421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'server_config': 'تنظیمات سرور',
       'company_information': 'اطلاعات شرکت',
       'user_guide': 'User Guide',
-      'site_management': 'مدیریت سایت',
-      'marketing_module': 'ماژول مارکتینگ',
-      'order_management': 'مدیریت و پیگیری سفارشات'
+      'site_management': 'مدیریت سایت'
     };
 
     return technicalToPersianMap[moduleId] || moduleId;
@@ -13385,6 +13383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get customers with WhatsApp numbers
   app.get("/api/admin/whatsapp/customers", requireAuth, async (req, res) => {
     try {
+      const { pool } = await import('./db');
       const { page = 1, limit = 20, search = '' } = req.query;
       const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
 
@@ -13472,6 +13471,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get WhatsApp statistics
   app.get("/api/admin/whatsapp/stats", requireAuth, async (req, res) => {
     try {
+      const { pool } = await import('./db');
       const stats = await pool.query(`
         SELECT 
           COUNT(*) as total_customers,
