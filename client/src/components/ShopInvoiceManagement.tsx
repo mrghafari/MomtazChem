@@ -227,6 +227,9 @@ export default function ShopInvoiceManagement() {
         <meta charset="UTF-8">
         <title>فاکتور سفارش ${order.orderNumber}</title>
         <style>
+          * { 
+            box-sizing: border-box; 
+          }
           body { 
             font-family: 'Tahoma', 'Arial', sans-serif; 
             margin: 0; 
@@ -235,6 +238,7 @@ export default function ShopInvoiceManagement() {
             background: white;
             font-size: 14px;
             line-height: 1.6;
+            overflow-x: hidden;
           }
           .invoice-container { 
             max-width: 800px; 
@@ -243,6 +247,9 @@ export default function ShopInvoiceManagement() {
             border: 2px solid #2563eb;
             border-radius: 10px;
             overflow: hidden;
+            position: relative;
+            transform: translateZ(0);
+            backface-visibility: hidden;
           }
           .header { 
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
@@ -253,11 +260,15 @@ export default function ShopInvoiceManagement() {
           }
           .company-logo { 
             width: 80px; 
-            height: auto; 
+            height: 80px;
+            object-fit: contain;
             margin-bottom: 10px;
             border-radius: 6px;
             background: white;
             padding: 6px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
           }
           .company-name { 
             font-size: 22px; 
@@ -321,14 +332,6 @@ export default function ShopInvoiceManagement() {
             border-bottom: 2px solid #2563eb;
             padding-bottom: 6px;
           }
-          .items-table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-          }
           .items-table th { 
             background: #2563eb; 
             color: white; 
@@ -345,8 +348,14 @@ export default function ShopInvoiceManagement() {
           .items-table tr:nth-child(even) { 
             background-color: #f8fafc; 
           }
-          .items-table tr:hover { 
-            background-color: #e0f2fe; 
+          .items-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateZ(0);
           }
           .total-section { 
             background: #1e293b;
@@ -377,15 +386,33 @@ export default function ShopInvoiceManagement() {
             color: #2563eb;
           }
           @media print { 
-            body { margin: 0; padding: 0; }
-            .invoice-container { border: none; }
+            body { 
+              margin: 0; 
+              padding: 0; 
+              -webkit-print-color-adjust: exact;
+              color-adjust: exact;
+            }
+            .invoice-container { 
+              border: none; 
+              box-shadow: none;
+              max-width: 100%;
+            }
+            .items-table tr:hover { 
+              background-color: transparent; 
+            }
           }
         </style>
       </head>
       <body>
         <div class="invoice-container">
           <div class="header">
-            <img src="${companyInfo?.data?.logoUrl || '/uploads/Logo_1753245273579.jpeg'}" alt="لوگوی شرکت" class="company-logo" onerror="this.src='/uploads/Logo_1753245273579.jpeg'" />
+            <div style="text-align: center; margin-bottom: 10px;">
+              ${companyInfo?.data?.logoUrl ? `
+                <img src="${companyInfo.data.logoUrl}" alt="لوگوی شرکت" class="company-logo" 
+                     onload="console.log('Logo loaded successfully')" 
+                     onerror="console.log('Logo failed to load'); this.style.display='none'" />` : 
+                `<div style="width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 6px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white;">لوگو</div>`}
+            </div>
             <div class="company-name">${companyInfo?.data?.companyNameAr || companyInfo?.data?.companyNameEn || 'شرکت ممتاز شیمی'}</div>
             <div class="invoice-title">فاکتور فروش</div>
           </div>
