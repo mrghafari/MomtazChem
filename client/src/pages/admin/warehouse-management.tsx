@@ -163,9 +163,6 @@ const WarehouseManagement: React.FC = () => {
   const [wasteQuantity, setWasteQuantity] = useState<number>(0);
   const [wasteAmounts, setWasteAmounts] = useState<{[key: string]: number}>({});
   
-  // Order sub-tab state
-  const [orderSubTab, setOrderSubTab] = useState('pending');
-  
   // Header filter states
   const [orderIdFilter, setOrderIdFilter] = useState('');
   const [customerNameFilter, setCustomerNameFilter] = useState('');
@@ -422,17 +419,7 @@ const WarehouseManagement: React.FC = () => {
     staleTime: 10000,
   });
   
-  // Fetch orders sent to logistics
-  const { data: sentOrdersResponse, isLoading: sentOrdersLoading, refetch: refetchSentOrders } = useQuery({
-    queryKey: ['/api/warehouse/sent-orders-noauth'],
-    staleTime: 10000,
-  });
-  
-  const pendingOrders = ordersResponse?.orders || [];
-  const sentOrders = sentOrdersResponse?.orders || [];
-  
-  // Choose which orders to show based on sub-tab
-  const orders = orderSubTab === 'pending' ? pendingOrders : sentOrders;
+  const orders = ordersResponse?.orders || [];
 
 
   // Fetch unified products for inventory management
@@ -953,26 +940,6 @@ const WarehouseManagement: React.FC = () => {
         </TabsList>
 
         <TabsContent value="orders" className="space-y-6">
-          {/* Order Sub-Tabs */}
-          <div className="flex items-center space-x-4 mb-4">
-            <Button
-              variant={orderSubTab === 'pending' ? 'default' : 'outline'}
-              onClick={() => setOrderSubTab('pending')}
-              className="flex items-center gap-2"
-            >
-              <Clock className="w-4 h-4" />
-              سفارشات باز ({pendingOrders.length})
-            </Button>
-            <Button
-              variant={orderSubTab === 'sent' ? 'default' : 'outline'}
-              onClick={() => setOrderSubTab('sent')}
-              className="flex items-center gap-2"
-            >
-              <Truck className="w-4 h-4" />
-              سفارشات ارسال شده ({sentOrders.length})
-            </Button>
-          </div>
-
           {/* Search and Filter */}
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -993,21 +960,11 @@ const WarehouseManagement: React.FC = () => {
                 onChange={(e) => setSelectedStatus(e.target.value)}
               >
                 <option value="all">همه وضعیت‌ها</option>
-                {orderSubTab === 'pending' ? (
-                  <>
-                    <option value="warehouse_pending">در انتظار انبار</option>
-                    <option value="financial_approved">تایید مالی - آماده انبار</option>
-                    <option value="warehouse_processing">در حال پردازش انبار</option>
-                    <option value="warehouse_fulfilled">آماده ارسال به لجستیک</option>
-                  </>
-                ) : (
-                  <>
-                    <option value="logistics_assigned">تخصیص یافته به لجستیک</option>
-                    <option value="logistics_processing">در حال پردازش لجستیک</option>
-                    <option value="logistics_dispatched">ارسال شده</option>
-                    <option value="delivered">تحویل شده</option>
-                  </>
-                )}
+                <option value="warehouse_pending">در انتظار انبار</option>
+                <option value="financial_approved">تایید مالی - آماده انبار</option>
+                <option value="warehouse_processing">در حال پردازش انبار</option>
+                <option value="warehouse_fulfilled">آماده ارسال به لجستیک</option>
+                <option value="warehouse_approved">ارسال شده به لجستیک</option>
               </select>
             </div>
           </div>
@@ -1016,41 +973,20 @@ const WarehouseManagement: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                {orderSubTab === 'pending' ? (
-                  <>
-                    <Package className="w-5 h-5" />
-                    سفارشات باز در انبار
-                  </>
-                ) : (
-                  <>
-                    <Truck className="w-5 h-5" />
-                    سفارشات ارسال شده به لجستیک
-                  </>
-                )}
+                <Package className="w-5 h-5" />
+                سفارشات تایید شده توسط واحد مالی
               </CardTitle>
               <p className="text-sm text-gray-600">
-                {orderSubTab === 'pending' 
-                  ? 'سفارشات آماده برای پردازش انبار'
-                  : 'سفارشات که از انبار خارج شده و به لجستیک ارسال شده‌اند'
-                }
+                سفارشات آماده برای پردازش انبار و ارسال به بخش لجستیک
               </p>
             </CardHeader>
             <CardContent>
-              {(orderSubTab === 'pending' ? ordersLoading : sentOrdersLoading) ? (
+              {ordersLoading ? (
                 <div className="text-center py-8">در حال بارگیری...</div>
               ) : !orders || orders.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  {orderSubTab === 'pending' ? (
-                    <>
-                      <Package className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                      <p>هیچ سفارش باز در انبار وجود ندارد</p>
-                    </>
-                  ) : (
-                    <>
-                      <Truck className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                      <p>هیچ سفارش ارسال شده‌ای یافت نشد</p>
-                    </>
-                  )}
+                  <Package className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <p>هیچ سفارش تایید شده‌ای در انتظار پردازش انبار نیست</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -1187,51 +1123,41 @@ const WarehouseManagement: React.FC = () => {
                                 <Eye className="w-4 h-4 mr-1" />
                                 جزئیات
                               </Button>
-                              {orderSubTab === 'pending' ? (
+                              {(order.currentStatus === 'financial_approved' || order.currentStatus === 'warehouse_pending') && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleStartProcessing(order)}
+                                  className="text-green-600 hover:text-green-800"
+                                >
+                                  <Play className="w-4 h-4 mr-1" />
+                                  شروع پردازش
+                                </Button>
+                              )}
+                              {order.currentStatus === 'warehouse_processing' && (
                                 <>
-                                  {(order.currentStatus === 'financial_approved' || order.currentStatus === 'warehouse_pending') && (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => handleStartProcessing(order)}
-                                      className="text-green-600 hover:text-green-800"
-                                    >
-                                      <Play className="w-4 h-4 mr-1" />
-                                      شروع پردازش
-                                    </Button>
-                                  )}
-                                  {order.currentStatus === 'warehouse_processing' && (
-                                    <>
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                          setSelectedOrder(order);
-                                          setWarehouseNotes(order.warehouseNotes || '');
-                                          setShowOrderDetails(true);
-                                        }}
-                                        className="text-blue-600 hover:text-blue-800"
-                                      >
-                                        <Settings className="w-4 h-4 mr-1" />
-                                        ویرایش
-                                      </Button>
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleApproveToLogistics(order)}
-                                        className="text-green-600 hover:text-green-800"
-                                      >
-                                        <CheckCircle className="w-4 h-4 mr-1" />
-                                        تایید و ارسال به لجستیک
-                                      </Button>
-                                    </>
-                                  )}
-                                </>
-                              ) : (
-                                <>
-                                  <Badge variant="secondary" className="bg-green-100 text-green-800">
-                                    تاریخ پردازش انبار: {order.warehouseProcessedAt ? formatDate(order.warehouseProcessedAt) : 'نامشخص'}
-                                  </Badge>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedOrder(order);
+                                      setWarehouseNotes(order.warehouseNotes || '');
+                                      setShowOrderDetails(true);
+                                    }}
+                                    className="text-blue-600 hover:text-blue-800"
+                                  >
+                                    <Settings className="w-4 h-4 mr-1" />
+                                    ویرایش
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleApproveToLogistics(order)}
+                                    className="text-green-600 hover:text-green-800"
+                                  >
+                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                    تایید و ارسال به لجستیک
+                                  </Button>
                                 </>
                               )}
                             </div>
