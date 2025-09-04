@@ -386,7 +386,7 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     exists: !!req.session,
     isAuthenticated: req.session?.isAuthenticated,
     adminId: req.session?.adminId,
-    customerId: req.session?.customerId,
+    customUserId: req.session?.customUserId,
     sessionID: req.sessionID
   });
 
@@ -402,8 +402,8 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
       console.log(`✅ Admin authentication successful for admin ${req.session.adminId}`);
       console.log(`🔄 Dual session mode: Admin=${req.session.adminId}, Customer=${req.session.customerId || 'none'}`);
       next();
-    } else if (req.session.customerId) {
-      console.log(`✅ Custom user authentication successful for user ${req.session.customerId}`);
+    } else if (req.session.customUserId) {
+      console.log(`✅ Custom user authentication successful for user ${req.session.customUserId}`);
       next();
     } else {
       console.log('❌ Authentication failed - no valid user ID in session');
@@ -417,11 +417,11 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     console.log('❌ Session details:', {
       isAuthenticated: req.session?.isAuthenticated,
       adminId: req.session?.adminId,
-      customerId: req.session?.customerId
+      customUserId: req.session?.customUserId
     });
     
     // If only customer session exists, show specific error
-    if (req.session?.customerId && !req.session?.adminId) {
+    if (req.session?.customUserId && !req.session?.adminId) {
       return res.status(403).json({ 
         success: false, 
         message: "دسترسی به بخش مدیریت نیاز به ورود مدیر دارد" 
@@ -2620,10 +2620,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Set up session with appropriate user type
       if (isCustomUser) {
-        req.session.customerId = user.id;
+        req.session.customUserId = user.id;
         req.session.isAuthenticated = true;
         console.log(`✅ [LOGIN] Session configured for custom user ${user.id} (customer session cleared):`, {
-          customerId: req.session.customerId,
+          customUserId: req.session.customUserId,
           isAuthenticated: req.session.isAuthenticated,
           sessionId: req.sessionID
         });
