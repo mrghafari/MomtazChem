@@ -313,8 +313,6 @@ export default function WhatsAppCRM() {
                         <TableHead>ایمیل</TableHead>
                         <TableHead>شماره واتساپ</TableHead>
                         <TableHead>ترجیح ارتباط</TableHead>
-                        <TableHead>تعداد سفارش</TableHead>
-                        <TableHead>مجموع خرید</TableHead>
                         <TableHead>تاریخ عضویت</TableHead>
                         <TableHead>عملیات</TableHead>
                       </TableRow>
@@ -340,14 +338,6 @@ export default function WhatsAppCRM() {
                               {getPreferenceIcon(customer.communication_preference)}
                               <span className="capitalize">{customer.communication_preference}</span>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="secondary">
-                              {customer.total_orders}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {formatCurrency(Number(customer.total_spent))}
                           </TableCell>
                           <TableCell>
                             {formatDate(customer.created_at)}
