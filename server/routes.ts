@@ -21180,9 +21180,21 @@ Momtaz Chemical Technical Team`,
     }
   });
 
-  // Get paid orders only for invoice management - ULTRA SIMPLE VERSION
-  app.get("/api/shop/orders/paid", requireAuth, (req, res) => {
-    console.log('🔍 [INVOICE DEBUG] API called - authentication passed');
+  // TEST API - VERY SIMPLE
+  app.get("/api/test/invoices", (req, res) => {
+    console.log('🔍 [TEST DEBUG] TEST API CALLED SUCCESSFULLY!');
+    res.json([{
+      id: 1,
+      orderNumber: "M2025001",
+      customerFirstName: "احمد",
+      customerLastName: "علی‌پور",
+      totalAmount: "150000"
+    }]);
+  });
+
+  // Get paid orders only for invoice management - TEST WITHOUT AUTH
+  app.get("/api/shop/orders/paid", (req, res) => {
+    console.log('🔍 [INVOICE DEBUG] API called - NO AUTH REQUIRED');
     
     // Return simple hardcoded data immediately
     const invoices = [

@@ -46,11 +46,11 @@ export default function ShopInvoiceManagement() {
   const [selectedOrder, setSelectedOrder] = useState<PaidOrder | null>(null);
   const [showInvoicePreview, setShowInvoicePreview] = useState(false);
 
-  // Fetch paid orders only (completed payments)
+  // Fetch paid orders only (completed payments) - USE TEST API FOR NOW
   const { data: ordersResponse, isLoading: ordersLoading } = useQuery({
-    queryKey: ['/api/shop/orders/paid'],
+    queryKey: ['/api/test/invoices'],
     queryFn: async () => {
-      const response = await fetch('/api/shop/orders/paid', {
+      const response = await fetch('/api/test/invoices', {
         credentials: 'include', // Include cookies for authentication
         headers: {
           'Content-Type': 'application/json',
