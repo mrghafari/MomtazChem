@@ -1068,6 +1068,7 @@ function FinanceOrders() {
                   const orderTotal = parseFloat(selectedOrder.totalAmount || '0');
                   const receiptAmountNum = parseFloat(receiptAmount) || 0;
                   const shortfall = orderTotal - receiptAmountNum;
+                  const excess = receiptAmountNum - orderTotal; // اضافه واریزی
                   const canApprove = shortfall <= 0 || shortfall <= walletBalance;
                   
                   return (
@@ -1076,12 +1077,21 @@ function FinanceOrders() {
                         <span>مبلغ رسید واریزی:</span>
                         <span className="font-medium">{receiptAmountNum.toLocaleString()} IQD</span>
                       </div>
+                      
                       {shortfall > 0 && (
                         <div className="flex justify-between">
                           <span>کسری واریزی:</span>
                           <span className="font-medium text-red-600">{shortfall.toLocaleString()} IQD</span>
                         </div>
                       )}
+                      
+                      {excess > 0 && (
+                        <div className="flex justify-between">
+                          <span>اضافه واریزی:</span>
+                          <span className="font-medium text-blue-600">+{excess.toLocaleString()} IQD</span>
+                        </div>
+                      )}
+                      
                       {shortfall > 0 && (
                         <div className="flex justify-between">
                           <span>کفایت کیف پول:</span>
@@ -1090,6 +1100,15 @@ function FinanceOrders() {
                           </span>
                         </div>
                       )}
+                      
+                      {excess > 0 && (
+                        <div className="p-2 bg-blue-50 rounded border-l-4 border-blue-400 mt-2">
+                          <p className="text-blue-700 text-xs">
+                            💰 مبلغ اضافی <strong>{excess.toLocaleString()} IQD</strong> به کیف پول مشتری اضافه خواهد شد
+                          </p>
+                        </div>
+                      )}
+                      
                       <div className="border-t pt-2 mt-2">
                         <div className="flex justify-between font-semibold">
                           <span>وضعیت تایید:</span>
