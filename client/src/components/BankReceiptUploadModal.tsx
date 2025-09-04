@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, CheckCircle, AlertCircle, Shield, Building2, X } from "lucide-react";
+import { Upload, CheckCircle, AlertCircle, Shield, Building2, X, Eye, FileText, Image } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { SimpleBankReceiptUploader } from "@/components/SimpleBankReceiptUploader";
 
@@ -168,6 +168,89 @@ export function BankReceiptUploadModal({
     }).format(amount);
   };
 
+  // Helper function to detect file type
+  const getFileType = (filePath: string): 'pdf' | 'image' | 'unknown' => {
+    const extension = filePath.split('.').pop()?.toLowerCase();
+    if (extension === 'pdf') return 'pdf';
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension || '')) return 'image';
+    return 'unknown';
+  };
+
+  // Helper function to render existing receipt
+  const renderExistingReceipt = (receiptPath: string) => {
+    const fileType = getFileType(receiptPath);
+    const fullPath = receiptPath.startsWith('http') ? receiptPath : `/${receiptPath}`;
+    
+    return (
+      <div className="border rounded-lg p-4 bg-green-50 dark:bg-green-900/20">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="font-medium text-green-800 dark:text-green-200 flex items-center gap-2">
+            <CheckCircle className="w-5 h-5" />
+            فیش بانکی آپلود شده
+          </h4>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.open(fullPath, '_blank')}
+            className="text-green-700 border-green-300 hover:bg-green-100"
+          >
+            <Eye className="w-4 h-4 ml-2" />
+            مشاهده در صفحه جدید
+          </Button>
+        </div>
+
+        {fileType === 'pdf' ? (
+          <div className="bg-white dark:bg-gray-800 rounded-lg border">
+            <div className="p-4 border-b flex items-center justify-center gap-2 text-blue-700">
+              <FileText className="w-6 h-6" />
+              <span className="font-medium">فایل PDF</span>
+            </div>
+            <div className="aspect-video bg-gray-100 dark:bg-gray-700 rounded-b-lg overflow-hidden">
+              <iframe
+                src={fullPath}
+                className="w-full h-full"
+                title="فیش بانکی PDF"
+              />
+            </div>
+          </div>
+        ) : fileType === 'image' ? (
+          <div className="bg-white dark:bg-gray-800 rounded-lg border overflow-hidden">
+            <div className="p-3 border-b flex items-center justify-center gap-2 text-green-700">
+              <Image className="w-5 h-5" />
+              <span className="font-medium">تصویر فیش بانکی</span>
+            </div>
+            <div className="p-2">
+              <img
+                src={fullPath}
+                alt="فیش بانکی"
+                className="w-full h-auto max-h-96 object-contain rounded-lg"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const errorDiv = document.createElement('div');
+                  errorDiv.className = 'p-8 text-center text-gray-500';
+                  errorDiv.innerHTML = '⚠️ خطا در نمایش تصویر';
+                  target.parentNode?.appendChild(errorDiv);
+                }}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-center">
+            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              فیش بانکی آپلود شده - نوع فایل: {receiptPath.split('.').pop()?.toUpperCase()}
+            </p>
+          </div>
+        )}
+
+        <div className="mt-3 text-xs text-green-700 dark:text-green-300">
+          ✅ این سفارش قبلاً فیش بانکی دارد و در انتظار تایید مالی است
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" dir="rtl">
@@ -242,13 +325,21 @@ export function BankReceiptUploadModal({
             )}
           </div>
 
-          {/* File Upload */}
-          <div className="border rounded-lg p-4">
-            <SimpleBankReceiptUploader
-              onUploadComplete={handleUploadComplete}
-              maxFileSize={5 * 1024 * 1024}
-              className="border-0 shadow-none"
-            />
+          {/* Display Existing Receipt (if available) */}
+          {order?.receiptPath && (
+            <div>
+              {renderExistingReceipt(order.receiptPath)}
+            </div>
+          )}
+
+          {/* File Upload - Only show if no existing receipt */}
+          {!order?.receiptPath && (
+            <div className="border rounded-lg p-4">
+              <SimpleBankReceiptUploader
+                onUploadComplete={handleUploadComplete}
+                maxFileSize={5 * 1024 * 1024}
+                className="border-0 shadow-none"
+              />
 
             {/* Security Status */}
             {securityStatus && (
@@ -278,9 +369,11 @@ export function BankReceiptUploadModal({
                 <Progress value={uploadProgress} />
               </div>
             )}
-          </div>
+            </div>
+          )}
 
-          {/* Receipt Amount */}
+          {/* Receipt Amount - Only show if no existing receipt */}
+          {!order?.receiptPath && (
           <div className="space-y-3">
             <Label htmlFor="receipt-amount" className="flex items-center gap-2">
               مبلغ فیش بانکی (اجباری)
@@ -324,49 +417,67 @@ export function BankReceiptUploadModal({
                 )}
               </div>
             )}
-          </div>
+            </div>
+          )}
 
-          {/* Notes */}
-          <div className="space-y-2">
-            <Label htmlFor="notes">توضیحات (اختیاری)</Label>
-            <Textarea
-              id="notes"
-              placeholder="توضیحات اضافی..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-            />
-          </div>
+          {/* Notes - Only show if no existing receipt */}
+          {!order?.receiptPath && (
+            <div className="space-y-2">
+              <Label htmlFor="notes">توضیحات (اختیاری)</Label>
+              <Textarea
+                id="notes"
+                placeholder="توضیحات اضافی..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={3}
+              />
+            </div>
+          )}
 
-          {/* Submit Button */}
-          <div className="flex gap-3 pt-4 border-t">
-            <Button
-              onClick={handleSecureUpload}
-              disabled={!uploadedFileUrl || !receiptAmount || uploadMutation.isPending}
-              className="flex-1"
-              size="lg"
-            >
-              {uploadMutation.isPending ? (
-                <>
-                  <Shield className="w-4 h-4 ml-2 animate-spin" />
-                  در حال ثبت...
-                </>
-              ) : (
-                <>
-                  <Shield className="w-4 h-4 ml-2" />
-                  ثبت نهایی فیش بانکی
-                </>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={uploadMutation.isPending}
-            >
-              <X className="w-4 h-4 ml-2" />
-              لغو
-            </Button>
-          </div>
+          {/* Submit Button - Only show if no existing receipt */}
+          {!order?.receiptPath && (
+            <div className="flex gap-3 pt-4 border-t">
+              <Button
+                onClick={handleSecureUpload}
+                disabled={!uploadedFileUrl || !receiptAmount || uploadMutation.isPending}
+                className="flex-1"
+                size="lg"
+              >
+                {uploadMutation.isPending ? (
+                  <>
+                    <Shield className="w-4 h-4 ml-2 animate-spin" />
+                    در حال ثبت...
+                  </>
+                ) : (
+                  <>
+                    <Shield className="w-4 h-4 ml-2" />
+                    ثبت نهایی فیش بانکی
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={uploadMutation.isPending}
+              >
+                <X className="w-4 h-4 ml-2" />
+                لغو
+              </Button>
+            </div>
+          )}
+
+          {/* Close button for existing receipts */}
+          {order?.receiptPath && (
+            <div className="flex justify-end pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                <X className="w-4 h-4 ml-2" />
+                بستن
+              </Button>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
