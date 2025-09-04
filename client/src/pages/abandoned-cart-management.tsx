@@ -96,7 +96,7 @@ export default function AbandonedCartManagement() {
     mutationFn: (data: AbandonedCartSettings) => 
       apiRequest('/api/admin/abandoned-cart/settings', {
         method: 'PUT',
-        body: JSON.stringify(data)
+        body: data
       }),
     onSuccess: () => {
       toast({
@@ -119,7 +119,7 @@ export default function AbandonedCartManagement() {
     mutationFn: ({ cartId, notification }: { cartId: number, notification: any }) =>
       apiRequest(`/api/admin/abandoned-cart/notify/${cartId}`, {
         method: 'POST',
-        body: JSON.stringify(notification)
+        body: notification
       }),
     onSuccess: () => {
       toast({
