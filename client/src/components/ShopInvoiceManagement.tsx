@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Download, Eye, Search, Filter, Receipt, Calendar, Building, CheckCircle } from 'lucide-react';
+import { FileText, Download, Eye, Search, Filter, Receipt, Calendar, Building, CheckCircle, Printer } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import PaymentMethodBadge from '@/components/PaymentMethodBadge';
@@ -93,18 +93,18 @@ export default function ShopInvoiceManagement() {
     });
   };
 
-  // Generate and download invoice PDF
-  const handleDownloadInvoice = async (order: PaidOrder) => {
+  // Print invoice
+  const handlePrintInvoice = async (order: PaidOrder) => {
     try {
       toast({
-        title: '📄 تولید فاکتور',
-        description: 'در حال تولید فاکتور PDF...',
+        title: '🖨️ آماده‌سازی چاپ',
+        description: 'در حال آماده‌سازی فاکتور برای چاپ...',
       });
 
       // Generate invoice HTML content
       const invoiceHTML = generateInvoiceHTML(order);
       
-      // Convert to PDF using browser print
+      // Open print window
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
         throw new Error('امکان باز کردن پنجره چاپ وجود ندارد');
@@ -120,14 +120,50 @@ export default function ShopInvoiceManagement() {
       }, 500);
 
       toast({
-        title: '✅ فاکتور آماده شد',
-        description: `فاکتور سفارش ${order.orderNumber} تولید شد`,
+        title: '✅ آماده چاپ',
+        description: `فاکتور سفارش ${order.orderNumber} آماده چاپ شد`,
       });
     } catch (error) {
-      console.error('خطا در تولید فاکتور:', error);
+      console.error('خطا در چاپ فاکتور:', error);
       toast({
-        title: '❌ خطا در تولید فاکتور',
-        description: 'امکان تولید فاکتور وجود ندارد',
+        title: '❌ خطا در چاپ',
+        description: 'امکان چاپ فاکتور وجود ندارد',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  // Download invoice as HTML file
+  const handleDownloadInvoice = async (order: PaidOrder) => {
+    try {
+      toast({
+        title: '📄 تولید فایل',
+        description: 'در حال تولید فایل فاکتور...',
+      });
+
+      // Generate invoice HTML content
+      const invoiceHTML = generateInvoiceHTML(order);
+      
+      // Create blob and download
+      const blob = new Blob([invoiceHTML], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice-${order.orderNumber}.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: '✅ فایل دانلود شد',
+        description: `فاکتور ${order.orderNumber} دانلود شد`,
+      });
+    } catch (error) {
+      console.error('خطا در دانلود فاکتور:', error);
+      toast({
+        title: '❌ خطا در دانلود',
+        description: 'امکان دانلود فاکتور وجود ندارد',
         variant: 'destructive'
       });
     }
@@ -400,6 +436,46 @@ export default function ShopInvoiceManagement() {
     setShowInvoicePreview(true);
   };
 
+  // Download all invoices as ZIP
+  const handleDownloadAllInvoices = async () => {
+    try {
+      toast({
+        title: '📦 تولید فایل‌های گروهی',
+        description: 'در حال تولید تمامی فاکتورها...',
+      });
+
+      // Create a simple CSV report for now
+      const csvContent = [
+        'شماره فاکتور,مشتری,مبلغ,روش پرداخت,تاریخ پرداخت',
+        ...filteredOrders.map(order => 
+          `${order.orderNumber},"${order.customerFirstName} ${order.customerLastName}",${order.totalAmount},${getPaymentMethodName(order.paymentMethod)},${formatGregorianDate(order.paymentDate)}`
+        )
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoices-report-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: '✅ گزارش دانلود شد',
+        description: `گزارش ${filteredOrders.length} فاکتور دانلود شد`,
+      });
+    } catch (error) {
+      console.error('خطا در دانلود گزارش:', error);
+      toast({
+        title: '❌ خطا در دانلود گزارش',
+        description: 'امکان دانلود گزارش وجود ندارد',
+        variant: 'destructive'
+      });
+    }
+  };
+
   if (ordersLoading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -416,6 +492,16 @@ export default function ShopInvoiceManagement() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">مدیریت فاکتور فروش</h2>
           <p className="text-sm text-gray-600 mt-1">فاکتورهای سفارشات تسویه شده</p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            onClick={handleDownloadAllInvoices}
+            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+            disabled={filteredOrders.length === 0}
+          >
+            <Download className="w-4 h-4" />
+            دانلود گزارش CSV ({filteredOrders.length})
+          </Button>
         </div>
       </div>
 
@@ -548,13 +634,23 @@ export default function ShopInvoiceManagement() {
                           variant="outline"
                           onClick={() => handlePreviewInvoice(order)}
                           className="text-blue-600 hover:text-blue-800"
+                          title="پیش‌نمایش فاکتور"
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button
                           size="sm" 
+                          onClick={() => handlePrintInvoice(order)}
+                          className="bg-purple-600 hover:bg-purple-700 text-white"
+                          title="چاپ فاکتور"
+                        >
+                          <Printer className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm" 
                           onClick={() => handleDownloadInvoice(order)}
-                          className="bg-green-600 hover:bg-green-700"
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          title="دانلود فاکتور"
                         >
                           <Download className="w-4 h-4" />
                         </Button>
