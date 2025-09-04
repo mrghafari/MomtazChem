@@ -21,6 +21,7 @@ const customerRegistrationSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   company: z.string().optional(),
   phone: z.string().min(1, "Phone number is required"),
+  whatsappNumber: z.string().optional(),
   country: z.string().min(1, "Country is required"),
   province: z.string().min(1, "Province is required"),
   cityRegion: z.string().min(1, "City/Region is required"),
@@ -69,6 +70,7 @@ const CustomerRegister = () => {
       lastName: "",
       company: "",
       phone: "",
+      whatsappNumber: "",
       country: "",
       province: "",
       cityRegion: "",
@@ -85,12 +87,15 @@ const CustomerRegister = () => {
   const registerMutation = useMutation({
     mutationFn: async (data: CustomerRegistrationData) => {
       const { confirmPassword, ...registerData } = data;
-      return await apiRequest("/api/customers/register", "POST", {
-        ...registerData,
-        city: registerData.cityRegion, // Map cityRegion to city for backend compatibility
-        passwordHash: registerData.password,
-        customerSource: "website",
-        customerType: "retail",
+      return await apiRequest("/api/customers/register", {
+        method: "POST",
+        body: {
+          ...registerData,
+          passwordHash: registerData.password,
+          customerSource: "website",
+          customerType: "retail",
+          whatsappNumber: registerData.whatsappNumber || registerData.phone, // Use phone if WhatsApp number is empty
+        }
       });
     },
     onSuccess: () => {
@@ -214,6 +219,23 @@ const CustomerRegister = () => {
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="whatsappNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>WhatsApp Number (if different from phone)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="+964 XXX XXX XXXX" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                      <p className="text-sm text-gray-500">
+                        Leave empty if same as phone number
+                      </p>
+                    </FormItem>
+                  )}
+                />
+
                 {/* Iraqi Geographical Format Section */}
                 <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
                   <h3 className="text-lg font-medium text-blue-900 mb-4 flex items-center gap-2">
@@ -269,7 +291,7 @@ const CustomerRegister = () => {
                             onValueChange={(value) => {
                               field.onChange(value);
                               setSelectedProvince(value);
-                              form.setValue("city", ""); // Reset city when province changes
+                              form.setValue("cityRegion", ""); // Reset city when province changes
                             }} 
                             defaultValue={field.value}
                           >

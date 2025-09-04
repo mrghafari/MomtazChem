@@ -16,6 +16,7 @@ export const customers = pgTable("customers", {
   lastName: text("last_name").notNull(),
   company: text("company"),
   phone: text("phone").notNull(), // Mandatory mobile phone
+  whatsappNumber: text("whatsapp_number"), // WhatsApp number (optional, if different from phone)
   country: text("country").notNull(), // Mandatory country
   province: text("province").notNull(), // Mandatory province/state
   cityRegion: text("city_region").notNull(), // Mandatory city/region (شهر/منطقه)
