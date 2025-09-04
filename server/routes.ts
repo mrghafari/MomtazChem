@@ -21198,8 +21198,15 @@ Momtaz Chemical Technical Team`,
         paidOrders.map(async (order) => {
           const items = await customerStorage.getOrderItems(order.id);
           let customer = null;
+          
+          // Safely get customer info with error handling
           if (order.customerId) {
-            customer = await customerStorage.getCustomerById(order.customerId);
+            try {
+              customer = await customerStorage.getCustomerById(order.customerId);
+            } catch (error) {
+              console.error(`Error fetching customer ${order.customerId} for order ${order.orderNumber}:`, error);
+              // Continue without customer info if there's a database error
+            }
           }
 
           return {
