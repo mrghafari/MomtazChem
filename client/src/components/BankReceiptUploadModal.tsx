@@ -176,76 +176,64 @@ export function BankReceiptUploadModal({
     return 'unknown';
   };
 
-  // Helper function to render existing receipt
-  const renderExistingReceipt = (receiptPath: string) => {
+  // Simple receipt viewer - just show the receipt
+  const renderReceiptViewer = (receiptPath: string) => {
     const fileType = getFileType(receiptPath);
     const fullPath = receiptPath.startsWith('http') ? receiptPath : `/${receiptPath}`;
     
     return (
-      <div className="border rounded-lg p-4 bg-green-50 dark:bg-green-900/20">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="font-medium text-green-800 dark:text-green-200 flex items-center gap-2">
+      <div className="space-y-4">
+        {/* Simple header */}
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-green-700 flex items-center justify-center gap-2">
             <CheckCircle className="w-5 h-5" />
-            فیش بانکی آپلود شده
-          </h4>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.open(fullPath, '_blank')}
-            className="text-green-700 border-green-300 hover:bg-green-100"
-          >
-            <Eye className="w-4 h-4 ml-2" />
-            مشاهده در صفحه جدید
-          </Button>
+            مشاهده فیش بانکی
+          </h3>
+          <p className="text-sm text-gray-600 mt-1">فیش واریزی سفارش شما</p>
         </div>
 
-        {fileType === 'pdf' ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg border">
-            <div className="p-4 border-b flex items-center justify-center gap-2 text-blue-700">
-              <FileText className="w-6 h-6" />
-              <span className="font-medium">فایل PDF</span>
-            </div>
-            <div className="aspect-video bg-gray-100 dark:bg-gray-700 rounded-b-lg overflow-hidden">
+        {/* Full screen receipt display */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border shadow-lg">
+          {fileType === 'pdf' ? (
+            <div className="w-full" style={{ height: '70vh' }}>
               <iframe
                 src={fullPath}
-                className="w-full h-full"
+                className="w-full h-full rounded-lg"
                 title="فیش بانکی PDF"
+                style={{ border: 'none' }}
               />
             </div>
-          </div>
-        ) : fileType === 'image' ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg border overflow-hidden">
-            <div className="p-3 border-b flex items-center justify-center gap-2 text-green-700">
-              <Image className="w-5 h-5" />
-              <span className="font-medium">تصویر فیش بانکی</span>
-            </div>
-            <div className="p-2">
+          ) : fileType === 'image' ? (
+            <div className="flex items-center justify-center p-4">
               <img
                 src={fullPath}
                 alt="فیش بانکی"
-                className="w-full h-auto max-h-96 object-contain rounded-lg"
+                className="max-w-full max-h-[70vh] object-contain rounded-lg"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
-                  const errorDiv = document.createElement('div');
-                  errorDiv.className = 'p-8 text-center text-gray-500';
-                  errorDiv.innerHTML = '⚠️ خطا در نمایش تصویر';
-                  target.parentNode?.appendChild(errorDiv);
+                  const parent = target.parentNode as HTMLElement;
+                  parent.innerHTML = '<div class="p-8 text-center text-gray-500"><div class="text-4xl mb-2">⚠️</div>خطا در نمایش تصویر</div>';
                 }}
               />
             </div>
-          </div>
-        ) : (
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-center">
-            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              فیش بانکی آپلود شده - نوع فایل: {receiptPath.split('.').pop()?.toUpperCase()}
-            </p>
-          </div>
-        )}
-
-        <div className="mt-3 text-xs text-green-700 dark:text-green-300">
-          ✅ این سفارش قبلاً فیش بانکی دارد و در انتظار تایید مالی است
+          ) : (
+            <div className="p-8 text-center">
+              <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-lg font-medium text-gray-700">فیش بانکی</p>
+              <p className="text-sm text-gray-500">
+                نوع فایل: {receiptPath.split('.').pop()?.toUpperCase()}
+              </p>
+              <Button
+                onClick={() => window.open(fullPath, '_blank')}
+                className="mt-4"
+                variant="outline"
+              >
+                <Eye className="w-4 h-4 ml-2" />
+                مشاهده در صفحه جدید
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -328,7 +316,7 @@ export function BankReceiptUploadModal({
           {/* Display Existing Receipt (if available) */}
           {order?.receiptPath && (
             <div>
-              {renderExistingReceipt(order.receiptPath)}
+              {renderReceiptViewer(order.receiptPath)}
             </div>
           )}
 
