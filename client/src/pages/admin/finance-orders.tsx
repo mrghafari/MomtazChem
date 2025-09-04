@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AlertTriangle, CheckCircle, Clock, CreditCard, DollarSign, RefreshCw, Timer, ChevronRight, XCircle, FileText, Eye, Download, Truck, MapPin, ZoomIn, ZoomOut, RotateCw, Move, X } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { OrderManagement } from "@/shared/order-management-schema";
+import { SimpleReceiptViewer } from "@/components/SimpleReceiptViewer";
 
 // Helper function for safe date formatting - OUTSIDE component
 const formatDateSafe = (dateString: string | undefined, locale: string = 'en-US') => {
