@@ -21183,15 +21183,26 @@ Momtaz Chemical Technical Team`,
   // Get paid orders only for invoice management
   app.get("/api/shop/orders/paid", requireAuth, async (req, res) => {
     try {
+      console.log('🔍 [INVOICE DEBUG] Fetching paid orders...');
+      
       // Get all customer orders that are paid/settled
       const allOrders = await customerStorage.getAllOrders();
+      console.log(`🔍 [INVOICE DEBUG] Total orders found: ${allOrders.length}`);
       
       // Filter for orders with completed payments (settled orders)
-      const paidOrders = allOrders.filter(order => 
-        order.status === 'completed' || 
-        order.status === 'delivered' ||
-        (order.paymentMethod && ['wallet_full', 'wallet_partial', 'bank_transfer'].includes(order.paymentMethod))
-      );
+      const paidOrders = allOrders.filter(order => {
+        const isPaid = order.status === 'completed' || 
+                      order.status === 'delivered' ||
+                      order.status === 'financial_approved' ||
+                      (order.paymentMethod && ['wallet_full', 'wallet_partial', 'bank_transfer'].includes(order.paymentMethod));
+        
+        if (isPaid) {
+          console.log(`✅ [INVOICE DEBUG] Paid order found: ${order.orderNumber} - Status: ${order.status}, Payment: ${order.paymentMethod}`);
+        }
+        return isPaid;
+      });
+      
+      console.log(`🔍 [INVOICE DEBUG] Paid orders filtered: ${paidOrders.length}`);
       
       // Get detailed information for each paid order including items
       const detailedPaidOrders = await Promise.all(
@@ -21232,10 +21243,11 @@ Momtaz Chemical Technical Team`,
         })
       );
 
-      res.json({ success: true, data: detailedPaidOrders });
+      console.log(`✅ [INVOICE DEBUG] Returning ${detailedPaidOrders.length} detailed paid orders`);
+      res.json(detailedPaidOrders);
     } catch (error) {
-      console.error("Error fetching paid orders:", error);
-      res.status(500).json({ success: false, message: "Failed to fetch paid orders" });
+      console.error("❌ [INVOICE DEBUG] Error fetching paid orders:", error);
+      res.status(400).json({ success: false, message: `Invalid or failed to fetch paid orders: ${error.message}` });
     }
   });
 
