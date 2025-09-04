@@ -13,8 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { AlertTriangle, CheckCircle, Clock, CreditCard, DollarSign, RefreshCw, Timer, ChevronRight, XCircle, FileText, Eye, Download, Truck, MapPin, ZoomIn, ZoomOut, RotateCw, Move, X } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { OrderManagement } from "@/shared/order-management-schema";
-import { SimpleReceiptViewer } from "@/components/SimpleReceiptViewer";
-
+// Temporarily remove SimpleReceiptViewer import - needs to be created
+// 
 // Helper function for safe date formatting - OUTSIDE component
 const formatDateSafe = (dateString: string | undefined, locale: string = 'en-US') => {
   if (!dateString) return 'نامشخص';
@@ -631,7 +631,7 @@ function FinanceOrders() {
               شما با حساب مشتری وارد شده‌اید. لطفاً از حساب مدیریت استفاده کنید.
             </p>
             <Button 
-              onClick={() => window.location.href = '/admin-login'} 
+              onClick={() => window.location.href = '/admin/login'} 
               className="w-full"
             >
               ورود به حساب مدیریت
