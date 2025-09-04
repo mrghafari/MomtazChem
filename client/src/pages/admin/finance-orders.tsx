@@ -442,16 +442,24 @@ function FinanceOrders() {
         
         // Now get wallet balance using customer ID
         if (customerId) {
+          console.log('🔍 [WALLET DEBUG] Fetching wallet balance for customer ID:', customerId);
           const walletResponse = await fetch(`/api/wallet/balance/${customerId}`, {
             credentials: 'include'
           });
+          console.log('🔍 [WALLET DEBUG] Wallet response status:', walletResponse.status);
           if (walletResponse.ok) {
             const walletResult = await walletResponse.json();
-            setWalletBalance(walletResult.data?.balance || 0);
+            console.log('🔍 [WALLET DEBUG] Wallet result:', walletResult);
+            const balance = walletResult.data?.balance || 0;
+            console.log('🔍 [WALLET DEBUG] Final balance:', balance);
+            setWalletBalance(balance);
           } else {
+            const errorText = await walletResponse.text();
+            console.error('🔍 [WALLET DEBUG] Wallet API failed:', walletResponse.status, errorText);
             setWalletBalance(0);
           }
         } else {
+          console.error('🔍 [WALLET DEBUG] Customer ID not found');
           setWalletBalance(0);
         }
       } catch (error) {
