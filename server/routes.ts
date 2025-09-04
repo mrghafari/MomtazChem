@@ -9730,8 +9730,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       documentsResult = [...documentsResult, ...paymentReceiptsResult];
 
       console.log(`✅ [ADMIN] Order details retrieved: ${order.order_number} with ${itemsResult.length} items and ${documentsResult.length} documents`);
+      console.log(`🔍 [WALLET DEBUG BACKEND] customer_id from DB: ${order.customer_id}`);
 
-      res.json({ 
+      const responseData = { 
         success: true, 
         order: {
           id: order.id,
@@ -9751,7 +9752,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           items: itemsResult
         },
         documents: documentsResult
-      });
+      };
+
+      console.log(`🔍 [WALLET DEBUG BACKEND] Response customerId: ${responseData.order.customerId}`);
+      res.json(responseData);
     } catch (error) {
       console.error("Error fetching order details:", error);
       res.status(500).json({ 
