@@ -49,6 +49,18 @@ export default function ShopInvoiceManagement() {
   // Fetch paid orders only (completed payments)
   const { data: ordersResponse, isLoading: ordersLoading } = useQuery({
     queryKey: ['/api/shop/orders/paid'],
+    queryFn: async () => {
+      const response = await fetch('/api/shop/orders/paid', {
+        credentials: 'include', // Include cookies for authentication
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    },
     staleTime: 30000, // Cache for 30 seconds
   });
 
