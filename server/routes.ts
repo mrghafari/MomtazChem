@@ -4624,6 +4624,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               updatedAt: new Date().toISOString()
             };
             
+            console.log(`📦 [BATCH-DATA] Preparing batch data:`, JSON.stringify(batchData, null, 2));
             await shopStorage.addBatch(batchData);
             console.log(`✅ [BATCH-CREATION] Successfully created batch in کاردکس: ${productData.newBatchNumber}`);
           } catch (batchError) {

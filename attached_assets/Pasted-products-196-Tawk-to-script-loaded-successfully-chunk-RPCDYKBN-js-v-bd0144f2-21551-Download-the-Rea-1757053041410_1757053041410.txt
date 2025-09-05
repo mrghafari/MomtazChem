@@ -1,0 +1,165 @@
+products:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=bd0144f2:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+products.tsx:1033 Barcode effect triggered:  Canvas ref: null
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=bd0144f2:840
+run @ @tanstack_react-query.js?v=bd0144f2:494
+start @ @tanstack_react-query.js?v=bd0144f2:536
+fetch @ @tanstack_react-query.js?v=bd0144f2:926
+executeFetch_fn @ @tanstack_react-query.js?v=bd0144f2:2211
+onSubscribe @ @tanstack_react-query.js?v=bd0144f2:1898
+subscribe @ @tanstack_react-query.js?v=bd0144f2:24
+(anonymous) @ @tanstack_react-query.js?v=bd0144f2:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=bd0144f2:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=bd0144f2:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=bd0144f2:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=bd0144f2:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=bd0144f2:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=bd0144f2:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=bd0144f2:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=bd0144f2:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=bd0144f2:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=bd0144f2:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=bd0144f2:19432
+commitRoot @ chunk-RPCDYKBN.js?v=bd0144f2:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=bd0144f2:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=bd0144f2:18718
+workLoop @ chunk-RPCDYKBN.js?v=bd0144f2:197
+flushWork @ chunk-RPCDYKBN.js?v=bd0144f2:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=bd0144f2:384
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+via.placeholder.com/128x128?text=WeChat+QR:1  GET https://via.placeholder.com/128x128?text=WeChat+QR net::ERR_NAME_NOT_RESOLVED
+Image
+commitMount @ chunk-RPCDYKBN.js?v=bd0144f2:8412
+commitLayoutEffectOnFiber @ chunk-RPCDYKBN.js?v=bd0144f2:17102
+commitLayoutMountEffects_complete @ chunk-RPCDYKBN.js?v=bd0144f2:17980
+commitLayoutEffects_begin @ chunk-RPCDYKBN.js?v=bd0144f2:17969
+commitLayoutEffects @ chunk-RPCDYKBN.js?v=bd0144f2:17920
+commitRootImpl @ chunk-RPCDYKBN.js?v=bd0144f2:19353
+commitRoot @ chunk-RPCDYKBN.js?v=bd0144f2:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=bd0144f2:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=bd0144f2:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=bd0144f2:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=bd0144f2:555
+flush @ @tanstack_react-query.js?v=bd0144f2:569
+batch @ @tanstack_react-query.js?v=bd0144f2:587
+dispatch_fn @ @tanstack_react-query.js?v=bd0144f2:996
+setData @ @tanstack_react-query.js?v=bd0144f2:696
+onSuccess @ @tanstack_react-query.js?v=bd0144f2:897
+resolve @ @tanstack_react-query.js?v=bd0144f2:456
+Promise.then
+run @ @tanstack_react-query.js?v=bd0144f2:498
+start @ @tanstack_react-query.js?v=bd0144f2:536
+fetch @ @tanstack_react-query.js?v=bd0144f2:926
+executeFetch_fn @ @tanstack_react-query.js?v=bd0144f2:2211
+onSubscribe @ @tanstack_react-query.js?v=bd0144f2:1898
+subscribe @ @tanstack_react-query.js?v=bd0144f2:24
+(anonymous) @ @tanstack_react-query.js?v=bd0144f2:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=bd0144f2:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=bd0144f2:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=bd0144f2:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=bd0144f2:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=bd0144f2:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=bd0144f2:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=bd0144f2:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=bd0144f2:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=bd0144f2:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=bd0144f2:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=bd0144f2:19432
+commitRoot @ chunk-RPCDYKBN.js?v=bd0144f2:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=bd0144f2:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=bd0144f2:18718
+workLoop @ chunk-RPCDYKBN.js?v=bd0144f2:197
+flushWork @ chunk-RPCDYKBN.js?v=bd0144f2:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=bd0144f2:384
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:118283)
+    at t.value (twk-chunk-common.js:2:151367)
+    at p.updateUUID (twk-chunk-common.js:2:203019)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:125298)
+    at twk-chunk-common.js:2:124609
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-chunk-common.js:2
+products:168 Tawk.to Live Chat loaded successfully
+products.tsx:929 Setting primary image index to: 1 for product: Solvant 402
+products.tsx:1033 Barcode effect triggered: 8649677177800 Canvas ref: null
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+products.tsx:613 🔍 [DEBUG] Form submission - Raw form data: {name: 'Solvant 402', technicalName: undefined, category: 'Paint & Solvents', description: 'Professional solvent for industrial use', shortDescription: '', …}
+products.tsx:614 🔍 [DEBUG] Tags in form data: شیمیایی Type: string
+products.tsx:615 🔍 [DEBUG] Description in form data: Professional solvent for industrial use
+products.tsx:616 🔍 [DEBUG] editingProduct state: 28
+products.tsx:670 🚀 [DEBUG] Final processed data being sent to API: {
+  "name": "Solvant 402",
+  "category": "Paint & Solvents",
+  "description": "Professional solvent for industrial use",
+  "shortDescription": "",
+  "priceRange": "",
+  "imageUrl": "/uploads/images/product-1754493291141-65569729.jpeg",
+  "imageUrls": [
+    "/uploads/images/product-1754493281352-973580872.jpeg",
+    "/uploads/images/product-1754493291141-65569729.jpeg",
+    "/uploads/images/product-1757050517634-380213928.png"
+  ],
+  "pdfCatalogUrl": "/uploads/catalogs/catalog-1754506571787-747224809.pdf",
+  "specifications": {},
+  "features": [
+    "[object Object]"
+  ],
+  "applications": [
+    "[object Object]"
+  ],
+  "showCatalogToCustomers": true,
+  "msdsUrl": "/uploads/msds/msds-1754506526237-359597389.pdf",
+  "showMsdsToCustomers": true,
+  "msdsFileName": "402A.pdf",
+  "stockQuantity": 9422,
+  "minStockLevel": 5,
+  "maxStockLevel": 1000,
+  "unitPrice": "250",
+  "currency": "IQD",
+  "batchNumber": "8888",
+  "netWeight": "5",
+  "grossWeight": "5.5",
+  "weightUnit": "kg",
+  "weight": "11",
+  "barcode": "8649677177800",
+  "sku": "SKU-1752680044975-k1rq8-2255555-WT2024003",
+  "tags": [
+    "شیمیایی"
+  ],
+  "isActive": true,
+  "syncWithShop": true,
+  "showWhenOutOfStock": false,
+  "isNonChemical": false,
+  "isFlammable": true,
+  "isVariant": false,
+  "inventoryAddition": 1000,
+  "newBatchNumber": "9999",
+  "catalogFileName": ""
+}
+products.tsx:673 📝 [DEBUG] Calling updateProduct with ID: 28
+products.tsx:674 📝 [DEBUG] updateProduct function exists: function
+products.tsx:363 ✅ [DEBUG] Update mutation successful, result: {success: true, message: 'محصول با موفقیت به‌روزرسانی شد', product: {…}}
+products.tsx:315 🔄 [INSTANT-SYNC] Triggering immediate kardex synchronization...
+products.tsx:1033 Barcode effect triggered: 8649677177800 Canvas ref: null
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
