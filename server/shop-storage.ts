@@ -1615,17 +1615,34 @@ export class ShopStorage implements IShopStorage {
     try {
       console.log(`🗑️ [DELETE-BATCH] Attempting to delete batch with ID: ${batchId}`);
       
-      // Delete the batch/product with the given ID
-      const result = await shopDb
-        .delete(shopProducts)
-        .where(eq(shopProducts.id, batchId))
-        .returning();
+      // Use raw SQL to delete from showcase_products where batch information is stored
+      const { pool } = await import('./db');
       
-      if (result.length > 0) {
-        console.log(`✅ [DELETE-BATCH] Successfully deleted batch ${result[0].batchNumber} (ID: ${batchId})`);
+      // First check if batch exists
+      const checkResult = await pool.query(`
+        SELECT id, name, batch_number FROM showcase_products 
+        WHERE id = $1
+      `, [batchId]);
+      
+      if (checkResult.rows.length === 0) {
+        console.log(`⚠️ [DELETE-BATCH] No batch found with ID: ${batchId}`);
+        return false;
+      }
+      
+      const batch = checkResult.rows[0];
+      console.log(`🗑️ [DELETE-BATCH] Found batch: ${batch.name} - ${batch.batch_number}`);
+      
+      // Delete the batch from showcase_products
+      const deleteResult = await pool.query(`
+        DELETE FROM showcase_products 
+        WHERE id = $1
+      `, [batchId]);
+      
+      if (deleteResult.rowCount > 0) {
+        console.log(`✅ [DELETE-BATCH] Successfully deleted batch ${batch.batch_number} (ID: ${batchId})`);
         return true;
       } else {
-        console.log(`⚠️ [DELETE-BATCH] No batch found with ID: ${batchId}`);
+        console.log(`⚠️ [DELETE-BATCH] Failed to delete batch with ID: ${batchId}`);
         return false;
       }
     } catch (error) {
