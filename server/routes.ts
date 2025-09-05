@@ -4621,11 +4621,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update product (PUT method - for compatibility)
   app.put("/api/products/:id", requireAuth, async (req, res) => {
     try {
-      console.log(`🔧 [DEBUG] PUT /api/products/${req.params.id} - Body:`, JSON.stringify(req.body, null, 2));
-      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
-        console.log(`❌ [DEBUG] Invalid product ID: ${req.params.id}`);
         return res.status(400).json({ 
           success: false, 
           message: "Invalid product ID" 
@@ -4633,7 +4630,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const productData = req.body;
-      console.log(`📋 [DEBUG] Product data keys:`, Object.keys(productData));
       
       // Handle sync toggle requests (skip all validations)
       const isSyncToggle = Object.keys(productData).length === 1 && 'syncWithShop' in productData;
@@ -4641,27 +4637,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Handle batch addition requests (skip all validations except batch-specific ones)
       const isBatchAddition = productData.inventoryAddition && productData.newBatchNumber;
       
-      console.log(`🔍 [DEBUG] Checking conditions - isSyncToggle: ${isSyncToggle}, isBatchAddition: ${isBatchAddition}`);
-      console.log(`🔍 [DEBUG] productData.inventoryAddition:`, productData.inventoryAddition);
-      console.log(`🔍 [DEBUG] productData.newBatchNumber:`, productData.newBatchNumber);
-      
       if (isSyncToggle) {
-        console.log(`🔄 [DEBUG] Quick sync toggle request for product ${id}:`, productData.syncWithShop);
         // Skip all validations for sync toggles - just update the field
       } else if (isBatchAddition) {
-        console.log(`📦 [DEBUG] Batch addition request for product ${id}: ${productData.inventoryAddition} units, batch: ${productData.newBatchNumber}`);
-        // Skip name validation for batch additions - only validate batch-specific fields
-        if (productData.inventoryAddition <= 0) {
-          return res.status(400).json({ 
-            success: false, 
-            message: "مقدار افزایش موجودی باید عدد مثبت باشد" 
-          });
-        }
-        if (!productData.newBatchNumber.trim()) {
-          return res.status(400).json({ 
-            success: false, 
-            message: "شماره batch اجباری است" 
-          });
+        // Handle batch creation immediately and return - don't continue with regular update
+        const oldProduct = await storage.getProductById(id);
+        
+        if (oldProduct?.barcode && productData.newBatchNumber.trim()) {
+          try {
+            const batchData = {
+              barcode: oldProduct.barcode,
+              batchNumber: productData.newBatchNumber.trim(),
+              stockQuantity: productData.inventoryAddition,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+            
+            await shopStorage.addBatch(batchData);
+            
+            // Return immediately after batch creation
+            return res.json({
+              success: true,
+              message: "بچ جدید با موفقیت ایجاد شد",
+              batchNumber: batchData.batchNumber,
+              stockQuantity: batchData.stockQuantity
+            });
+            
+          } catch (batchError) {
+            console.error(`❌ [PUT-BATCH-CREATION] Failed to create batch:`, batchError);
+            return res.status(500).json({
+              success: false,
+              message: "امکان ایجاد batch وجود ندارد",
+              error: batchError instanceof Error ? batchError.message : 'خطای نامشخص'
+            });
+          }
         }
       } else {
         // Full validation for regular updates
@@ -4688,8 +4697,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      console.log(`📝 [DEBUG] Updating showcase product ${id} with validated data`);
-      console.log(`📝 [DEBUG] Tags field:`, productData.tags, 'Type:', typeof productData.tags);
+      // Update showcase product with validated data
       
       // Check if stock quantity is being updated for warehouse sync
       const oldProduct = await storage.getProductById(id);
