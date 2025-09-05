@@ -619,20 +619,25 @@ export default function ProductsPage() {
     if (data.minStockLevel === undefined || data.minStockLevel === null || Number(data.minStockLevel) < 0) errors.minStockLevel = "حداقل موجودی اجباری است";
     if (data.maxStockLevel === undefined || data.maxStockLevel === null || Number(data.maxStockLevel) < 0) errors.maxStockLevel = "حداکثر موجودی اجباری است";
     
-    // Validate Weights & Batch section - skip for non-chemical products
-    if (!data.isNonChemical) {
+    // Check if this is a batch addition
+    const isBatchAddition = data.inventoryAddition && Number(data.inventoryAddition) > 0 && data.newBatchNumber?.trim();
+    
+    // Validate Weights & Batch section - skip for non-chemical products and batch additions
+    if (!data.isNonChemical && !isBatchAddition) {
       if (!data.netWeight || Number(data.netWeight) <= 0) errors.netWeight = "وزن خالص اجباری است";
-      
-      // For chemical products, if there's inventory addition, batch number is required
-      if (data.inventoryAddition && Number(data.inventoryAddition) > 0) {
-        if (!data.newBatchNumber?.trim()) {
-          errors.newBatchNumber = "برای محصولات شیمیایی با افزایش موجودی، شماره بچ اجباری است";
-        }
+    }
+    
+    // For chemical products, if there's inventory addition, batch number is required
+    if (!data.isNonChemical && data.inventoryAddition && Number(data.inventoryAddition) > 0) {
+      if (!data.newBatchNumber?.trim()) {
+        errors.newBatchNumber = "برای محصولات شیمیایی با افزایش موجودی، شماره بچ اجباری است";
       }
     }
     
-    // Gross weight is required for all products
-    if (!data.grossWeight || Number(data.grossWeight) <= 0) errors.grossWeight = "وزن ناخالص اجباری است";
+    // Gross weight is required for all products except batch additions
+    if (!isBatchAddition && (!data.grossWeight || Number(data.grossWeight) <= 0)) {
+      errors.grossWeight = "وزن ناخالص اجباری است";
+    }
     
     // Logical consistency validation (only if both weights exist)
     if (data.grossWeight && data.netWeight && Number(data.grossWeight) < Number(data.netWeight)) {
@@ -651,6 +656,9 @@ export default function ProductsPage() {
     console.log('🔍 [DEBUG] Tags in form data:', data.tags, 'Type:', typeof data.tags);
     console.log('🔍 [DEBUG] Description in form data:', data.description);
     console.log('🔍 [DEBUG] editingProduct state:', editingProduct?.id);
+
+    // Check if this is a batch addition for processing
+    const isBatchAddition = data.inventoryAddition && Number(data.inventoryAddition) > 0 && data.newBatchNumber?.trim();
 
     // Complete validation for both create and update operations
     const errors = validateRequiredFields(data);
@@ -672,9 +680,9 @@ export default function ProductsPage() {
       stockQuantity: Number(data.stockQuantity) || 0,
       minStockLevel: Number(data.minStockLevel) || 0,
       maxStockLevel: Number(data.maxStockLevel) || 0,
-      // Process weight fields - use gross weight for calculations
-      netWeight: data.netWeight ? data.netWeight.toString() : null,
-      grossWeight: data.grossWeight ? data.grossWeight.toString() : null,
+      // For batch additions, don't include weight fields - they'll be inherited from original product
+      netWeight: isBatchAddition ? null : (data.netWeight ? data.netWeight.toString() : null),
+      grossWeight: isBatchAddition ? null : (data.grossWeight ? data.grossWeight.toString() : null),
       batchNumber: data.newBatchNumber?.trim() || null,
       // New inventory addition fields
       inventoryAddition: Number(data.inventoryAddition) || 0,
@@ -2343,16 +2351,22 @@ export default function ProductsPage() {
                     <FormField
                       control={form.control}
                       name="netWeight"
-                      render={({ field }) => (
+                      render={({ field }) => {
+                        const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
+                        const isDisabled = form.watch('isNonChemical') || isBatchAddition;
+                        return (
                         <FormItem>
-                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.netWeight ? 'text-red-600' : ''} ${form.watch('isNonChemical') ? 'text-gray-400' : ''}`}>
+                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.netWeight ? 'text-red-600' : ''} ${isDisabled ? 'text-gray-400' : ''}`}>
 {t.netWeight}
+                            {isBatchAddition && (
+                              <Badge variant="secondary" className="text-xs">از محصول اصلی</Badge>
+                            )}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>وزن خالص محصول بدون بسته‌بندی</p>
+                                <p>{isBatchAddition ? 'وزن از محصول اصلی کپی می‌شود' : 'وزن خالص محصول بدون بسته‌بندی'}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
@@ -2360,35 +2374,41 @@ export default function ProductsPage() {
                             <Input 
                               type="number" 
                               step="0.01"
-                              placeholder="0.00" 
-                              className={`h-9 ${validationErrors.netWeight ? "border-red-500 focus:border-red-500" : ""} ${form.watch('isNonChemical') ? 'bg-gray-100 text-gray-400' : ''}`}
+                              placeholder={isBatchAddition ? "از محصول اصلی" : "0.00"} 
+                              className={`h-9 ${validationErrors.netWeight ? "border-red-500 focus:border-red-500" : ""} ${isDisabled ? 'bg-gray-100 text-gray-400' : ''}`}
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : '')}
-                              disabled={form.watch('isNonChemical')}
+                              disabled={isDisabled}
                             />
                           </FormControl>
                           <FormMessage />
-                          {validationErrors.netWeight && !form.watch('isNonChemical') && (
+                          {validationErrors.netWeight && !isDisabled && (
                             <p className="text-sm text-red-600 mt-1">{validationErrors.netWeight}</p>
                           )}
                         </FormItem>
-                      )}
+                        );
+                      }}
                     />
 
                     <FormField
                       control={form.control}
                       name="grossWeight"
-                      render={({ field }) => (
+                      render={({ field }) => {
+                        const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
+                        return (
                         <FormItem>
-                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.grossWeight ? 'text-red-600' : ''}`}>
+                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.grossWeight ? 'text-red-600' : ''} ${isBatchAddition ? 'text-gray-400' : ''}`}>
 {t.grossWeight}
+                            {isBatchAddition && (
+                              <Badge variant="secondary" className="text-xs">از محصول اصلی</Badge>
+                            )}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>وزن کل محصول همراه با بسته‌بندی (برای حمل و نقل)</p>
+                                <p>{isBatchAddition ? 'وزن از محصول اصلی کپی می‌شود' : 'وزن کل محصول همراه با بسته‌بندی (برای حمل و نقل)'}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
@@ -2396,19 +2416,21 @@ export default function ProductsPage() {
                             <Input 
                               type="number" 
                               step="0.01"
-                              placeholder="0.00" 
-                              className={`h-9 ${validationErrors.grossWeight ? "border-red-500 focus:border-red-500" : ""}`}
+                              placeholder={isBatchAddition ? "از محصول اصلی" : "0.00"} 
+                              className={`h-9 ${validationErrors.grossWeight ? "border-red-500 focus:border-red-500" : ""} ${isBatchAddition ? 'bg-gray-100 text-gray-400' : ''}`}
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : '')}
+                              disabled={isBatchAddition}
                             />
                           </FormControl>
                           <FormMessage />
-                          {validationErrors.grossWeight && (
+                          {validationErrors.grossWeight && !isBatchAddition && (
                             <p className="text-sm text-red-600 mt-1">{validationErrors.grossWeight}</p>
                           )}
                         </FormItem>
-                      )}
+                        );
+                      }}
                     />
 
                     <FormField
