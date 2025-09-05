@@ -2190,23 +2190,29 @@ export default function ProductsPage() {
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
                             افزودن موجودی
+                            {editingProduct && (
+                              <Badge variant="secondary" className="text-xs">
+                                فقط برای ویرایش
+                              </Badge>
+                            )}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>مقدار موجودی که می‌خواهید به انبار اضافه کنید</p>
+                                <p>مقدار موجودی که می‌خواهید به انبار اضافه کنید (فقط در ویرایش محصول موجود)</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
-                              placeholder="0" 
-                              className="h-9"
+                              placeholder={editingProduct ? "0" : "فقط در ویرایش محصول موجود"}
+                              className={`h-9 ${!editingProduct ? "bg-gray-100 text-gray-400" : ""}`}
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : 0)}
+                              disabled={!editingProduct}
                             />
                           </FormControl>
                           <FormMessage />
@@ -2221,21 +2227,27 @@ export default function ProductsPage() {
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
                             شماره دسته جدید
+                            {editingProduct && (
+                              <Badge variant="secondary" className="text-xs">
+                                فقط برای ویرایش
+                              </Badge>
+                            )}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>شماره دسته جدید فقط برای کاردکس - فروشگاه فقط موجودی نهایی را دریافت می‌کند</p>
+                                <p>شماره دسته جدید فقط برای کاردکس - فقط در ویرایش محصول موجود قابل استفاده است</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
                           <FormControl>
                             <Input 
-                              placeholder="BATCH-2025-NEW" 
-                              className="h-9"
+                              placeholder={editingProduct ? "BATCH-2025-NEW" : "فقط در ویرایش محصول موجود"}
+                              className={`h-9 ${!editingProduct ? "bg-gray-100 text-gray-400" : ""}`}
                               {...field}
                               value={field.value || ''}
+                              disabled={!editingProduct}
                             />
                           </FormControl>
                           <FormMessage />
