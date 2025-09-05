@@ -616,6 +616,38 @@ export default function ProductsPage() {
     },
   });
 
+  // Auto-load original product images when adding new batch
+  useEffect(() => {
+    const inventoryAddition = form.watch('inventoryAddition');
+    const newBatchNumber = form.watch('newBatchNumber');
+    
+    if (editingProduct && inventoryAddition && inventoryAddition > 0 && newBatchNumber?.trim()) {
+      // This is a batch addition - load original product images
+      const existingImageUrls = Array.isArray(editingProduct.imageUrls) ? 
+        editingProduct.imageUrls : 
+        (editingProduct.imageUrl ? [editingProduct.imageUrl] : []);
+      
+      const newPreviews: (string | null)[] = [null, null, null];
+      existingImageUrls.forEach((url: string, index: number) => {
+        if (index < 3) newPreviews[index] = url;
+      });
+      
+      setImagePreviews(newPreviews);
+      
+      // Update form imageUrls with original product images
+      form.setValue('imageUrls', existingImageUrls.slice(0, 3));
+      
+      // Set primary image
+      let primaryIndex = 0;
+      if (editingProduct.imageUrl && existingImageUrls.includes(editingProduct.imageUrl)) {
+        primaryIndex = existingImageUrls.indexOf(editingProduct.imageUrl);
+      }
+      setPrimaryImageIndex(primaryIndex);
+      form.setValue('imageUrl', editingProduct.imageUrl || '');
+      setImagePreview(editingProduct.imageUrl || null);
+    }
+  }, [form.watch('inventoryAddition'), form.watch('newBatchNumber'), editingProduct]);
+
   // Function to validate fields and set errors
   const validateRequiredFields = (data: z.infer<typeof formSchema>) => {
     const errors: Record<string, string> = {};
@@ -692,11 +724,11 @@ export default function ProductsPage() {
       stockQuantity: Number(data.stockQuantity) || 0,
       minStockLevel: Number(data.minStockLevel) || 0,
       maxStockLevel: Number(data.maxStockLevel) || 0,
-      // For batch additions, don't include weight and image fields - they'll be inherited from original product
+      // For batch additions, keep weight fields but preserve image fields
       netWeight: isBatchAddition ? null : (data.netWeight ? data.netWeight.toString() : null),
       grossWeight: isBatchAddition ? null : (data.grossWeight ? data.grossWeight.toString() : null),
-      imageUrl: isBatchAddition ? null : data.imageUrl,
-      imageUrls: isBatchAddition ? null : data.imageUrls,
+      imageUrl: data.imageUrl, // Always include images (whether batch addition or not)
+      imageUrls: data.imageUrls, // Always include images (whether batch addition or not)
       batchNumber: data.newBatchNumber?.trim() || null,
       // New inventory addition fields
       inventoryAddition: Number(data.inventoryAddition) || 0,
@@ -2404,6 +2436,7 @@ export default function ProductsPage() {
                               className={`h-9 ${validationErrors.netWeight ? "border-red-500 focus:border-red-500" : ""} ${isDisabled ? 'bg-gray-100 text-gray-400' : ''}`}
                               {...field}
                               value={isBatchAddition ? originalNetWeight : (field.value || '')}
+                              readOnly={isDisabled}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : '')}
                               disabled={isDisabled}
                             />
@@ -2451,6 +2484,7 @@ export default function ProductsPage() {
                               className={`h-9 ${validationErrors.grossWeight ? "border-red-500 focus:border-red-500" : ""} ${isDisabled ? 'bg-gray-100 text-gray-400' : ''}`}
                               {...field}
                               value={isBatchAddition ? originalGrossWeight : (field.value || '')}
+                              readOnly={isDisabled}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : '')}
                               disabled={isDisabled}
                             />
