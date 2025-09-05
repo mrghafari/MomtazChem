@@ -292,12 +292,12 @@ export default function ProductsPage() {
       group.totalStock += (product.stockQuantity || 0);
     }
 
-    // Determine active batch for each group (LIFO - newest with stock > 0)
+    // Determine active batch for each group (FIFO - oldest with stock > 0)
     for (const [barcode, group] of Array.from(barcodeMap.entries())) {
-      // Sort batches by creation date (newest first)
-      group.batches.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      // Sort batches by creation date (oldest first - FIFO)
+      group.batches.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
       
-      // Find the first batch with stock > 0 (newest = LIFO)
+      // Find the first batch with stock > 0 (oldest = FIFO)
       const activeBatch = group.batches.find(batch => batch.stockQuantity > 0);
       
       if (activeBatch) {
