@@ -1590,9 +1590,9 @@ export class ShopStorage implements IShopStorage {
       // Use raw SQL to delete from showcase_products where batch information is stored
       const { pool } = await import('./db');
       
-      // First check if batch exists
+      // First check if batch exists and get product info
       const checkResult = await pool.query(`
-        SELECT id, name, batch_number FROM showcase_products 
+        SELECT id, name, batch_number, barcode, image_urls, image_url FROM showcase_products 
         WHERE id = $1
       `, [batchId]);
       
@@ -1604,19 +1604,46 @@ export class ShopStorage implements IShopStorage {
       const batch = checkResult.rows[0];
       console.log(`🗑️ [DELETE-BATCH] Found batch: ${batch.name} - ${batch.batch_number}`);
       
-      // Delete the batch from showcase_products
-      const deleteResult = await pool.query(`
-        DELETE FROM showcase_products 
-        WHERE id = $1
-      `, [batchId]);
+      // Check if there are other batches with the same barcode
+      const otherBatchesResult = await pool.query(`
+        SELECT id, image_urls, image_url FROM showcase_products 
+        WHERE barcode = $1 AND id != $2 AND batch_number != 'PARENT'
+      `, [batch.barcode, batchId]);
       
-      if (deleteResult.rowCount > 0) {
-        console.log(`✅ [DELETE-BATCH] Successfully deleted batch ${batch.batch_number} (ID: ${batchId})`);
-        return true;
+      console.log(`🔍 [DELETE-BATCH] Found ${otherBatchesResult.rows.length} other batches with barcode ${batch.barcode}`);
+      
+      if (otherBatchesResult.rows.length > 0) {
+        // There are other batches, safe to delete this one
+        const deleteResult = await pool.query(`
+          DELETE FROM showcase_products 
+          WHERE id = $1
+        `, [batchId]);
+        
+        if (deleteResult.rowCount > 0) {
+          console.log(`✅ [DELETE-BATCH] Successfully deleted batch ${batch.batch_number} (ID: ${batchId})`);
+          return true;
+        }
       } else {
-        console.log(`⚠️ [DELETE-BATCH] Failed to delete batch with ID: ${batchId}`);
-        return false;
+        // This is the last batch, preserve the parent product by converting it to a parent record
+        console.log(`🔄 [DELETE-BATCH] Converting last batch to parent for ${batch.name}`);
+        
+        const updateResult = await pool.query(`
+          UPDATE showcase_products 
+          SET 
+            batch_number = 'PARENT',
+            stock_quantity = 0,
+            created_at = NOW()
+          WHERE id = $1
+        `, [batchId]);
+        
+        if (updateResult.rowCount > 0) {
+          console.log(`✅ [DELETE-BATCH] Converted batch ${batch.batch_number} to parent product (ID: ${batchId})`);
+          return true;
+        }
       }
+      
+      console.log(`❌ [DELETE-BATCH] Failed to delete/convert batch ${batch.batch_number} (ID: ${batchId})`);
+      return false;
     } catch (error) {
       console.error(`❌ [DELETE-BATCH] Error deleting batch ${batchId}:`, error);
       throw new Error(`امکان حذف batch وجود ندارد: ${error instanceof Error ? error.message : 'خطای نامشخص'}`);
