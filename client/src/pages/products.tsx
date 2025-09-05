@@ -616,44 +616,7 @@ export default function ProductsPage() {
     },
   });
 
-  // Auto-load original product images when adding new batch - but only when BOTH fields are filled
-  useEffect(() => {
-    const inventoryAddition = form.watch('inventoryAddition');
-    const newBatchNumber = form.watch('newBatchNumber');
-    
-    // Only act when this is definitively a batch addition (both fields completed)
-    // Don't interfere with images when user is still typing
-    if (editingProduct && inventoryAddition && inventoryAddition > 0 && newBatchNumber?.trim()) {
-      // Check if images are already loaded to avoid unnecessary updates
-      const currentImageUrls = form.getValues('imageUrls') || [];
-      const existingImageUrls = Array.isArray(editingProduct.imageUrls) ? 
-        editingProduct.imageUrls : 
-        (editingProduct.imageUrl ? [editingProduct.imageUrl] : []);
-      
-      // Only update if images are not already set or are different
-      const imagesNeedUpdate = currentImageUrls.length === 0 || 
-        JSON.stringify(currentImageUrls.slice(0, 3)) !== JSON.stringify(existingImageUrls.slice(0, 3));
-      
-      if (imagesNeedUpdate && existingImageUrls.length > 0) {
-        const newPreviews: (string | null)[] = [null, null, null];
-        existingImageUrls.forEach((url: string, index: number) => {
-          if (index < 3) newPreviews[index] = url;
-        });
-        
-        setImagePreviews(newPreviews);
-        form.setValue('imageUrls', existingImageUrls.slice(0, 3));
-        
-        // Set primary image
-        let primaryIndex = 0;
-        if (editingProduct.imageUrl && existingImageUrls.includes(editingProduct.imageUrl)) {
-          primaryIndex = existingImageUrls.indexOf(editingProduct.imageUrl);
-        }
-        setPrimaryImageIndex(primaryIndex);
-        form.setValue('imageUrl', editingProduct.imageUrl || '');
-        setImagePreview(editingProduct.imageUrl || null);
-      }
-    }
-  }, [form.watch('inventoryAddition'), form.watch('newBatchNumber'), editingProduct]);
+  // Image previews are now handled properly in openEditDialog after form.reset
 
   // Function to validate fields and set errors
   const validateRequiredFields = (data: z.infer<typeof formSchema>) => {
@@ -1011,21 +974,6 @@ export default function ProductsPage() {
     setEditingProduct(product);
     setValidationErrors({}); // Clear validation errors
     setManualBarcodeEntered(false); // Reset manual barcode flag
-    setImagePreview(product.imageUrl || null);
-    // Set multiple image previews from existing imageUrls
-    const existingImageUrls = Array.isArray(product.imageUrls) ? product.imageUrls : (product.imageUrl ? [product.imageUrl] : []);
-    const newPreviews: (string | null)[] = [null, null, null];
-    existingImageUrls.forEach((url: string, index: number) => {
-      if (index < 3) newPreviews[index] = url;
-    });
-    setImagePreviews(newPreviews);
-    // Set primary image index based on legacy imageUrl or default to 0
-    let primaryIndex = 0;
-    if (product.imageUrl && existingImageUrls.includes(product.imageUrl)) {
-      primaryIndex = existingImageUrls.indexOf(product.imageUrl);
-    }
-    console.log('Setting primary image index to:', primaryIndex, 'for product:', product.name);
-    setPrimaryImageIndex(primaryIndex);
     setCatalogPreview(product.pdfCatalogUrl || null);
     setMsdsPreview(product.msdsUrl || null);
     
@@ -1035,6 +983,9 @@ export default function ProductsPage() {
           .filter(p => p.barcode === product.barcode)
           .reduce((total, p) => total + (Number(p.stockQuantity) || 0), 0)
       : Number(product.stockQuantity) || 0;
+    
+    // Prepare image data BEFORE form reset
+    const existingImageUrls = Array.isArray(product.imageUrls) ? product.imageUrls : (product.imageUrl ? [product.imageUrl] : []);
     
     form.reset({
       name: product.name,
@@ -1072,6 +1023,23 @@ export default function ProductsPage() {
       isFlammable: product.isFlammable ?? false,
       isActive: product.isActive !== false,
     });
+    
+    // Set image previews AFTER form reset to ensure they persist
+    setImagePreview(product.imageUrl || null);
+    const newPreviews: (string | null)[] = [null, null, null];
+    existingImageUrls.forEach((url: string, index: number) => {
+      if (index < 3) newPreviews[index] = url;
+    });
+    setImagePreviews(newPreviews);
+    
+    // Set primary image index based on legacy imageUrl or default to 0
+    let primaryIndex = 0;
+    if (product.imageUrl && existingImageUrls.includes(product.imageUrl)) {
+      primaryIndex = existingImageUrls.indexOf(product.imageUrl);
+    }
+    console.log('Setting primary image index to:', primaryIndex, 'for product:', product.name);
+    setPrimaryImageIndex(primaryIndex);
+    
     setDialogOpen(true);
   };
 
