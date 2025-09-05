@@ -977,6 +977,14 @@ export default function ProductsPage() {
     setPrimaryImageIndex(primaryIndex);
     setCatalogPreview(product.pdfCatalogUrl || null);
     setMsdsPreview(product.msdsUrl || null);
+    
+    // Calculate total stock quantity across all batches for this product
+    const totalStockQuantity = products && product.barcode 
+      ? products
+          .filter(p => p.barcode === product.barcode)
+          .reduce((total, p) => total + (Number(p.stockQuantity) || 0), 0)
+      : Number(product.stockQuantity) || 0;
+    
     form.reset({
       name: product.name,
       description: product.description || "",
@@ -988,7 +996,7 @@ export default function ProductsPage() {
       tags: Array.isArray(product.tags) ? product.tags.join(', ') : String(product.tags || ""),
       barcode: product.barcode || "",
       sku: product.sku || "",
-      stockQuantity: Number(product.stockQuantity) ?? 0,
+      stockQuantity: totalStockQuantity,
       minStockLevel: Number(product.minStockLevel) ?? 0,
       maxStockLevel: Number(product.maxStockLevel) ?? 0,
       unitPrice: Number(product.unitPrice || 0),
