@@ -631,8 +631,11 @@ export default function ProductsPage() {
     // Check if this is a batch addition
     const isBatchAddition = data.inventoryAddition && Number(data.inventoryAddition) > 0 && data.newBatchNumber?.trim();
     
-    // Validate Weights & Batch section - skip for non-chemical products and batch additions
-    if (!data.isNonChemical && !isBatchAddition) {
+    // Check if this is editing an existing product (read-only weights)
+    const isEditingExistingProduct = !!editingProduct;
+    
+    // Validate Weights & Batch section - only for NEW products, skip for non-chemical products, batch additions, and existing product edits
+    if (!data.isNonChemical && !isBatchAddition && !isEditingExistingProduct) {
       if (!data.netWeight || Number(data.netWeight) <= 0) errors.netWeight = "وزن خالص اجباری است";
     }
     
@@ -643,8 +646,8 @@ export default function ProductsPage() {
       }
     }
     
-    // Gross weight is required for all products except batch additions
-    if (!isBatchAddition && (!data.grossWeight || Number(data.grossWeight) <= 0)) {
+    // Gross weight is required for NEW products only - skip batch additions and existing product edits
+    if (!isBatchAddition && !isEditingExistingProduct && (!data.grossWeight || Number(data.grossWeight) <= 0)) {
       errors.grossWeight = "وزن ناخالص اجباری است";
     }
     
@@ -2372,20 +2375,22 @@ export default function ProductsPage() {
                       name="netWeight"
                       render={({ field }) => {
                         const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
-                        const isDisabled = form.watch('isNonChemical') || isBatchAddition;
+                        const isDisabled = form.watch('isNonChemical') || isBatchAddition || editingProduct;
                         return (
                         <FormItem>
                           <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.netWeight ? 'text-red-600' : ''} ${isDisabled ? 'text-gray-400' : ''}`}>
 {t.netWeight}
-                            {isBatchAddition && (
-                              <Badge variant="secondary" className="text-xs">از محصول اصلی</Badge>
+                            {(isBatchAddition || editingProduct) && (
+                              <Badge variant="secondary" className="text-xs">
+                                {isBatchAddition ? 'از محصول اصلی' : 'مقدار ثابت اولیه'}
+                              </Badge>
                             )}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>{isBatchAddition ? 'وزن از محصول اصلی کپی می‌شود' : 'وزن خالص محصول بدون بسته‌بندی'}</p>
+                                <p>{isDisabled ? 'وزن فقط در ایجاد محصول جدید قابل تغییر است' : 'وزن خالص محصول بدون بسته‌بندی'}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
@@ -2393,7 +2398,7 @@ export default function ProductsPage() {
                             <Input 
                               type="number" 
                               step="0.01"
-                              placeholder={isBatchAddition ? "از محصول اصلی" : "0.00"} 
+                              placeholder={isDisabled ? (isBatchAddition ? "از محصول اصلی" : "مقدار ثابت") : "0.00"} 
                               className={`h-9 ${validationErrors.netWeight ? "border-red-500 focus:border-red-500" : ""} ${isDisabled ? 'bg-gray-100 text-gray-400' : ''}`}
                               {...field}
                               value={field.value || ''}
@@ -2415,19 +2420,22 @@ export default function ProductsPage() {
                       name="grossWeight"
                       render={({ field }) => {
                         const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
+                        const isDisabled = form.watch('isNonChemical') || isBatchAddition || editingProduct;
                         return (
                         <FormItem>
-                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.grossWeight ? 'text-red-600' : ''} ${isBatchAddition ? 'text-gray-400' : ''}`}>
+                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.grossWeight ? 'text-red-600' : ''} ${isDisabled ? 'text-gray-400' : ''}`}>
 {t.grossWeight}
-                            {isBatchAddition && (
-                              <Badge variant="secondary" className="text-xs">از محصول اصلی</Badge>
+                            {(isBatchAddition || editingProduct) && (
+                              <Badge variant="secondary" className="text-xs">
+                                {isBatchAddition ? 'از محصول اصلی' : 'مقدار ثابت اولیه'}
+                              </Badge>
                             )}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>{isBatchAddition ? 'وزن از محصول اصلی کپی می‌شود' : 'وزن کل محصول همراه با بسته‌بندی (برای حمل و نقل)'}</p>
+                                <p>{isDisabled ? 'وزن فقط در ایجاد محصول جدید قابل تغییر است' : 'وزن کل محصول همراه با بسته‌بندی (برای حمل و نقل)'}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
@@ -2435,12 +2443,12 @@ export default function ProductsPage() {
                             <Input 
                               type="number" 
                               step="0.01"
-                              placeholder={isBatchAddition ? "از محصول اصلی" : "0.00"} 
-                              className={`h-9 ${validationErrors.grossWeight ? "border-red-500 focus:border-red-500" : ""} ${isBatchAddition ? 'bg-gray-100 text-gray-400' : ''}`}
+                              placeholder={isDisabled ? (isBatchAddition ? "از محصول اصلی" : "مقدار ثابت") : "0.00"} 
+                              className={`h-9 ${validationErrors.grossWeight ? "border-red-500 focus:border-red-500" : ""} ${isDisabled ? 'bg-gray-100 text-gray-400' : ''}`}
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : '')}
-                              disabled={isBatchAddition}
+                              disabled={isDisabled}
                             />
                           </FormControl>
                           <FormMessage />
