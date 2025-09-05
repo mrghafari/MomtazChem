@@ -2376,13 +2376,15 @@ export default function ProductsPage() {
                       render={({ field }) => {
                         const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
                         const isDisabled = form.watch('isNonChemical') || isBatchAddition || editingProduct;
+                        const originalNetWeight = editingProduct?.netWeight || 0;
+                        const weightUnit = editingProduct?.weightUnit || 'kg';
                         return (
                         <FormItem>
                           <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.netWeight ? 'text-red-600' : ''} ${isDisabled ? 'text-gray-400' : ''}`}>
 {t.netWeight}
                             {(isBatchAddition || editingProduct) && (
                               <Badge variant="secondary" className="text-xs">
-                                {isBatchAddition ? 'از محصول اصلی' : 'مقدار ثابت اولیه'}
+                                {isBatchAddition ? `${originalNetWeight} ${weightUnit}` : 'مقدار ثابت اولیه'}
                               </Badge>
                             )}
                             <Tooltip>
@@ -2398,10 +2400,10 @@ export default function ProductsPage() {
                             <Input 
                               type="number" 
                               step="0.01"
-                              placeholder={isDisabled ? (isBatchAddition ? "از محصول اصلی" : "مقدار ثابت") : "0.00"} 
+                              placeholder={isDisabled ? (isBatchAddition ? `${originalNetWeight} ${weightUnit}` : "مقدار ثابت") : "0.00"} 
                               className={`h-9 ${validationErrors.netWeight ? "border-red-500 focus:border-red-500" : ""} ${isDisabled ? 'bg-gray-100 text-gray-400' : ''}`}
                               {...field}
-                              value={field.value || ''}
+                              value={isBatchAddition ? originalNetWeight : (field.value || '')}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : '')}
                               disabled={isDisabled}
                             />
@@ -2421,13 +2423,15 @@ export default function ProductsPage() {
                       render={({ field }) => {
                         const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
                         const isDisabled = form.watch('isNonChemical') || isBatchAddition || editingProduct;
+                        const originalGrossWeight = editingProduct?.grossWeight || 0;
+                        const weightUnit = editingProduct?.weightUnit || 'kg';
                         return (
                         <FormItem>
                           <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.grossWeight ? 'text-red-600' : ''} ${isDisabled ? 'text-gray-400' : ''}`}>
 {t.grossWeight}
                             {(isBatchAddition || editingProduct) && (
                               <Badge variant="secondary" className="text-xs">
-                                {isBatchAddition ? 'از محصول اصلی' : 'مقدار ثابت اولیه'}
+                                {isBatchAddition ? `${originalGrossWeight} ${weightUnit}` : 'مقدار ثابت اولیه'}
                               </Badge>
                             )}
                             <Tooltip>
@@ -2443,10 +2447,10 @@ export default function ProductsPage() {
                             <Input 
                               type="number" 
                               step="0.01"
-                              placeholder={isDisabled ? (isBatchAddition ? "از محصول اصلی" : "مقدار ثابت") : "0.00"} 
+                              placeholder={isDisabled ? (isBatchAddition ? `${originalGrossWeight} ${weightUnit}` : "مقدار ثابت") : "0.00"} 
                               className={`h-9 ${validationErrors.grossWeight ? "border-red-500 focus:border-red-500" : ""} ${isDisabled ? 'bg-gray-100 text-gray-400' : ''}`}
                               {...field}
-                              value={field.value || ''}
+                              value={isBatchAddition ? originalGrossWeight : (field.value || '')}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : '')}
                               disabled={isDisabled}
                             />
