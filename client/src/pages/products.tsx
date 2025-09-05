@@ -616,25 +616,30 @@ export default function ProductsPage() {
     },
   });
 
-  // Debug effect to track image changes
-  useEffect(() => {
-    console.log('🖼️ [IMAGE DEBUG] imagePreviews changed:', imagePreviews);
-    console.log('🖼️ [IMAGE DEBUG] imagePreview changed:', imagePreview);
-    console.log('🖼️ [IMAGE DEBUG] primaryImageIndex changed:', primaryImageIndex);
-  }, [imagePreviews, imagePreview, primaryImageIndex]);
+  // Always show original product images - even when adding new batch
+  const displayImageUrls = useMemo(() => {
+    if (editingProduct) {
+      return Array.isArray(editingProduct.imageUrls) ? 
+        editingProduct.imageUrls : 
+        (editingProduct.imageUrl ? [editingProduct.imageUrl] : []);
+    }
+    return [];
+  }, [editingProduct]);
 
-  // Debug effect to track form fields that might affect images
-  useEffect(() => {
-    const inventoryAddition = form.watch('inventoryAddition');
-    const newBatchNumber = form.watch('newBatchNumber');
-    const imageUrls = form.watch('imageUrls');
-    const imageUrl = form.watch('imageUrl');
-    
-    console.log('📝 [FORM DEBUG] inventoryAddition:', inventoryAddition);
-    console.log('📝 [FORM DEBUG] newBatchNumber:', newBatchNumber);
-    console.log('📝 [FORM DEBUG] imageUrls:', imageUrls);
-    console.log('📝 [FORM DEBUG] imageUrl:', imageUrl);
-  }, [form.watch('inventoryAddition'), form.watch('newBatchNumber'), form.watch('imageUrls'), form.watch('imageUrl')]);
+  const displayImagePreviews = useMemo(() => {
+    const previews: (string | null)[] = [null, null, null];
+    displayImageUrls.forEach((url: string, index: number) => {
+      if (index < 3) previews[index] = url;
+    });
+    return previews;
+  }, [displayImageUrls]);
+
+  const displayPrimaryImageIndex = useMemo(() => {
+    if (editingProduct?.imageUrl && displayImageUrls.includes(editingProduct.imageUrl)) {
+      return displayImageUrls.indexOf(editingProduct.imageUrl);
+    }
+    return 0;
+  }, [editingProduct?.imageUrl, displayImageUrls]);
 
   // Function to validate fields and set errors
   const validateRequiredFields = (data: z.infer<typeof formSchema>) => {
@@ -1042,27 +1047,23 @@ export default function ProductsPage() {
       isActive: product.isActive !== false,
     });
     
-    // Set image previews AFTER form reset to ensure they persist
-    console.log('🔧 [EDIT DIALOG] Setting images for product:', product.name);
-    console.log('🔧 [EDIT DIALOG] existingImageUrls:', existingImageUrls);
-    
-    setImagePreview(product.imageUrl || null);
-    const newPreviews: (string | null)[] = [null, null, null];
-    existingImageUrls.forEach((url: string, index: number) => {
-      if (index < 3) newPreviews[index] = url;
-    });
-    setImagePreviews(newPreviews);
-    
-    // Set primary image index based on legacy imageUrl or default to 0
-    let primaryIndex = 0;
-    if (product.imageUrl && existingImageUrls.includes(product.imageUrl)) {
-      primaryIndex = existingImageUrls.indexOf(product.imageUrl);
+    // Set image previews AFTER form reset - for new products only
+    // For existing products, images are handled by displayImagePreviews
+    if (!editingProduct) {
+      setImagePreview(product.imageUrl || null);
+      const newPreviews: (string | null)[] = [null, null, null];
+      existingImageUrls.forEach((url: string, index: number) => {
+        if (index < 3) newPreviews[index] = url;
+      });
+      setImagePreviews(newPreviews);
+      
+      // Set primary image index based on legacy imageUrl or default to 0
+      let primaryIndex = 0;
+      if (product.imageUrl && existingImageUrls.includes(product.imageUrl)) {
+        primaryIndex = existingImageUrls.indexOf(product.imageUrl);
+      }
+      setPrimaryImageIndex(primaryIndex);
     }
-    console.log('🔧 [EDIT DIALOG] Setting primary image index to:', primaryIndex, 'for product:', product.name);
-    setPrimaryImageIndex(primaryIndex);
-    
-    console.log('🔧 [EDIT DIALOG] Final state - imagePreviews:', newPreviews);
-    console.log('🔧 [EDIT DIALOG] Final state - imagePreview:', product.imageUrl || null);
     
     setDialogOpen(true);
   };
@@ -2672,17 +2673,17 @@ export default function ProductsPage() {
                             <div key={index} className="space-y-2">
                               <div className="text-xs text-gray-500 text-center font-medium">تصویر {index + 1}</div>
                               <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-3 text-center min-h-[140px] flex flex-col justify-center">
-                                {imagePreviews[index] ? (
+                                {(editingProduct ? displayImagePreviews[index] : imagePreviews[index]) ? (
                                   <div className="relative">
                                     <img 
-                                      src={imagePreviews[index]} 
+                                      src={editingProduct ? displayImagePreviews[index] : imagePreviews[index]} 
                                       alt={`پیش‌نمای تصویر ${index + 1}`} 
                                       className={`w-full h-20 object-cover rounded-lg transition-all ${
-                                        primaryImageIndex === index ? 'ring-2 ring-blue-500 ring-offset-2' : ''
+                                        (editingProduct ? displayPrimaryImageIndex : primaryImageIndex) === index ? 'ring-2 ring-blue-500 ring-offset-2' : ''
                                       }`}
                                     />
                                     {/* Primary image indicator */}
-                                    {primaryImageIndex === index && (
+                                    {(editingProduct ? displayPrimaryImageIndex : primaryImageIndex) === index && (
                                       <div className="absolute -top-1 -left-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded-full text-[10px] font-bold">
                                         اصلی
                                       </div>
