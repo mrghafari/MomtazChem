@@ -4441,7 +4441,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const result = await storage.deleteBatch(batchId);
+      const result = await shopStorage.deleteBatch(batchId);
       
       if (result) {
         res.json({
