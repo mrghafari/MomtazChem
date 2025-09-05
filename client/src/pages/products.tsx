@@ -39,7 +39,7 @@ const formSchema = insertShowcaseProductSchema.extend({
   weightUnit: z.string().default("kg"),
   // Legacy weight field for backward compatibility
   weight: z.string().optional(),
-  // Batch tracking
+  // Batch tracking (moved to newBatchNumber)
   batchNumber: z.string().optional(),
   // New inventory addition fields
   inventoryAddition: z.number().optional(),
@@ -591,7 +591,6 @@ export default function ProductsPage() {
     // Validate Weights & Batch section - skip for non-chemical products
     if (!data.isNonChemical) {
       if (!data.netWeight || Number(data.netWeight) <= 0) errors.netWeight = "وزن خالص اجباری است";
-      if (!data.batchNumber?.trim()) errors.batchNumber = "شماره دسته اجباری است";
     }
     
     // Gross weight is required for all products
@@ -638,7 +637,7 @@ export default function ProductsPage() {
       // Process weight fields - use gross weight for calculations
       netWeight: data.netWeight ? data.netWeight.toString() : null,
       grossWeight: data.grossWeight ? data.grossWeight.toString() : null,
-      batchNumber: data.batchNumber?.trim() || null,
+      batchNumber: data.newBatchNumber?.trim() || null,
       // New inventory addition fields
       inventoryAddition: Number(data.inventoryAddition) || 0,
       newBatchNumber: data.newBatchNumber?.trim() || null,
@@ -2043,38 +2042,6 @@ export default function ProductsPage() {
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="batchNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.batchNumber ? 'text-red-600' : ''} ${form.watch('isNonChemical') ? 'text-gray-400' : ''}`}>
-{t.batchNumber}
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <HelpCircle className="h-3 w-3 text-gray-400" />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>شماره دسته تولید برای ردیابی محصولات</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </FormLabel>
-                          <FormControl>
-                            <Input 
-                              placeholder="BATCH-2025-001" 
-                              className={`h-9 ${validationErrors.batchNumber ? "border-red-500 focus:border-red-500" : ""} ${form.watch('isNonChemical') ? 'bg-gray-100 text-gray-400' : ''}`}
-                              {...field}
-                              value={field.value || ''}
-                              disabled={form.watch('isNonChemical')}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                          {validationErrors.batchNumber && !form.watch('isNonChemical') && (
-                            <p className="text-sm text-red-600 mt-1">{validationErrors.batchNumber}</p>
-                          )}
-                        </FormItem>
-                      )}
-                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 mt-3">
@@ -2227,27 +2194,21 @@ export default function ProductsPage() {
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
                             شماره دسته جدید
-                            {editingProduct && (
-                              <Badge variant="secondary" className="text-xs">
-                                فقط برای ویرایش
-                              </Badge>
-                            )}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>شماره دسته جدید فقط برای کاردکس - فقط در ویرایش محصول موجود قابل استفاده است</p>
+                                <p>شماره دسته برای کاردکس - برای محصولات جدید و موجود</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
                           <FormControl>
                             <Input 
-                              placeholder={editingProduct ? "BATCH-2025-NEW" : "فقط در ویرایش محصول موجود"}
-                              className={`h-9 ${!editingProduct ? "bg-gray-100 text-gray-400" : ""}`}
+                              placeholder="BATCH-2025-NEW"
+                              className="h-9"
                               {...field}
                               value={field.value || ''}
-                              disabled={!editingProduct}
                             />
                           </FormControl>
                           <FormMessage />
