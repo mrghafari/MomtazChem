@@ -616,35 +616,42 @@ export default function ProductsPage() {
     },
   });
 
-  // Auto-load original product images when adding new batch
+  // Auto-load original product images when adding new batch - but only when BOTH fields are filled
   useEffect(() => {
     const inventoryAddition = form.watch('inventoryAddition');
     const newBatchNumber = form.watch('newBatchNumber');
     
+    // Only act when this is definitively a batch addition (both fields completed)
+    // Don't interfere with images when user is still typing
     if (editingProduct && inventoryAddition && inventoryAddition > 0 && newBatchNumber?.trim()) {
-      // This is a batch addition - load original product images
+      // Check if images are already loaded to avoid unnecessary updates
+      const currentImageUrls = form.getValues('imageUrls') || [];
       const existingImageUrls = Array.isArray(editingProduct.imageUrls) ? 
         editingProduct.imageUrls : 
         (editingProduct.imageUrl ? [editingProduct.imageUrl] : []);
       
-      const newPreviews: (string | null)[] = [null, null, null];
-      existingImageUrls.forEach((url: string, index: number) => {
-        if (index < 3) newPreviews[index] = url;
-      });
+      // Only update if images are not already set or are different
+      const imagesNeedUpdate = currentImageUrls.length === 0 || 
+        JSON.stringify(currentImageUrls.slice(0, 3)) !== JSON.stringify(existingImageUrls.slice(0, 3));
       
-      setImagePreviews(newPreviews);
-      
-      // Update form imageUrls with original product images
-      form.setValue('imageUrls', existingImageUrls.slice(0, 3));
-      
-      // Set primary image
-      let primaryIndex = 0;
-      if (editingProduct.imageUrl && existingImageUrls.includes(editingProduct.imageUrl)) {
-        primaryIndex = existingImageUrls.indexOf(editingProduct.imageUrl);
+      if (imagesNeedUpdate && existingImageUrls.length > 0) {
+        const newPreviews: (string | null)[] = [null, null, null];
+        existingImageUrls.forEach((url: string, index: number) => {
+          if (index < 3) newPreviews[index] = url;
+        });
+        
+        setImagePreviews(newPreviews);
+        form.setValue('imageUrls', existingImageUrls.slice(0, 3));
+        
+        // Set primary image
+        let primaryIndex = 0;
+        if (editingProduct.imageUrl && existingImageUrls.includes(editingProduct.imageUrl)) {
+          primaryIndex = existingImageUrls.indexOf(editingProduct.imageUrl);
+        }
+        setPrimaryImageIndex(primaryIndex);
+        form.setValue('imageUrl', editingProduct.imageUrl || '');
+        setImagePreview(editingProduct.imageUrl || null);
       }
-      setPrimaryImageIndex(primaryIndex);
-      form.setValue('imageUrl', editingProduct.imageUrl || '');
-      setImagePreview(editingProduct.imageUrl || null);
     }
   }, [form.watch('inventoryAddition'), form.watch('newBatchNumber'), editingProduct]);
 
