@@ -680,9 +680,11 @@ export default function ProductsPage() {
       stockQuantity: Number(data.stockQuantity) || 0,
       minStockLevel: Number(data.minStockLevel) || 0,
       maxStockLevel: Number(data.maxStockLevel) || 0,
-      // For batch additions, don't include weight fields - they'll be inherited from original product
+      // For batch additions, don't include weight and image fields - they'll be inherited from original product
       netWeight: isBatchAddition ? null : (data.netWeight ? data.netWeight.toString() : null),
       grossWeight: isBatchAddition ? null : (data.grossWeight ? data.grossWeight.toString() : null),
+      imageUrl: isBatchAddition ? null : data.imageUrl,
+      imageUrls: isBatchAddition ? null : data.imageUrls,
       batchNumber: data.newBatchNumber?.trim() || null,
       // New inventory addition fields
       inventoryAddition: Number(data.inventoryAddition) || 0,
