@@ -616,7 +616,25 @@ export default function ProductsPage() {
     },
   });
 
-  // Image previews are now handled properly in openEditDialog after form.reset
+  // Debug effect to track image changes
+  useEffect(() => {
+    console.log('🖼️ [IMAGE DEBUG] imagePreviews changed:', imagePreviews);
+    console.log('🖼️ [IMAGE DEBUG] imagePreview changed:', imagePreview);
+    console.log('🖼️ [IMAGE DEBUG] primaryImageIndex changed:', primaryImageIndex);
+  }, [imagePreviews, imagePreview, primaryImageIndex]);
+
+  // Debug effect to track form fields that might affect images
+  useEffect(() => {
+    const inventoryAddition = form.watch('inventoryAddition');
+    const newBatchNumber = form.watch('newBatchNumber');
+    const imageUrls = form.watch('imageUrls');
+    const imageUrl = form.watch('imageUrl');
+    
+    console.log('📝 [FORM DEBUG] inventoryAddition:', inventoryAddition);
+    console.log('📝 [FORM DEBUG] newBatchNumber:', newBatchNumber);
+    console.log('📝 [FORM DEBUG] imageUrls:', imageUrls);
+    console.log('📝 [FORM DEBUG] imageUrl:', imageUrl);
+  }, [form.watch('inventoryAddition'), form.watch('newBatchNumber'), form.watch('imageUrls'), form.watch('imageUrl')]);
 
   // Function to validate fields and set errors
   const validateRequiredFields = (data: z.infer<typeof formSchema>) => {
@@ -1025,6 +1043,9 @@ export default function ProductsPage() {
     });
     
     // Set image previews AFTER form reset to ensure they persist
+    console.log('🔧 [EDIT DIALOG] Setting images for product:', product.name);
+    console.log('🔧 [EDIT DIALOG] existingImageUrls:', existingImageUrls);
+    
     setImagePreview(product.imageUrl || null);
     const newPreviews: (string | null)[] = [null, null, null];
     existingImageUrls.forEach((url: string, index: number) => {
@@ -1037,8 +1058,11 @@ export default function ProductsPage() {
     if (product.imageUrl && existingImageUrls.includes(product.imageUrl)) {
       primaryIndex = existingImageUrls.indexOf(product.imageUrl);
     }
-    console.log('Setting primary image index to:', primaryIndex, 'for product:', product.name);
+    console.log('🔧 [EDIT DIALOG] Setting primary image index to:', primaryIndex, 'for product:', product.name);
     setPrimaryImageIndex(primaryIndex);
+    
+    console.log('🔧 [EDIT DIALOG] Final state - imagePreviews:', newPreviews);
+    console.log('🔧 [EDIT DIALOG] Final state - imagePreview:', product.imageUrl || null);
     
     setDialogOpen(true);
   };
