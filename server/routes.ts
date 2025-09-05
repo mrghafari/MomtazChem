@@ -4634,15 +4634,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (productData.inventoryAddition && productData.inventoryAddition > 0) {
         console.log(`📦 [INVENTORY-ADDITION] Adding ${productData.inventoryAddition} units to product ${id}`);
         
-        // Calculate new stock quantity by adding to existing stock
-        const currentStock = oldProduct ? oldProduct.stockQuantity || 0 : 0;
-        const newStock = currentStock + productData.inventoryAddition;
-        
-        console.log(`📦 [INVENTORY-ADDITION] Stock calculation: ${currentStock} + ${productData.inventoryAddition} = ${newStock}`);
-        
-        // Update product data with new stock quantity
-        productData.stockQuantity = newStock;
-        
         // If new batch number is provided, create a new batch entry in کاردکس only
         if (productData.newBatchNumber && productData.newBatchNumber.trim()) {
           console.log(`📦 [BATCH-CREATION] Creating new batch in کاردکس: ${productData.newBatchNumber}`);
@@ -4660,17 +4651,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`📦 [BATCH-DATA] Preparing batch data:`, JSON.stringify(batchData, null, 2));
             await shopStorage.addBatch(batchData);
             console.log(`✅ [BATCH-CREATION] Successfully created batch in کاردکس: ${productData.newBatchNumber}`);
+            
+            // Don't update the original product stock - new batch is separate entry
+            console.log(`📦 [BATCH-LOGIC] New batch created as separate entry - original product stock unchanged`);
           } catch (batchError) {
             console.error(`❌ [BATCH-CREATION] Failed to create batch:`, batchError);
             // Don't fail the main operation if batch creation fails
           }
+        } else {
+          // No new batch number provided - add to existing stock
+          const currentStock = oldProduct ? oldProduct.stockQuantity || 0 : 0;
+          const newStock = currentStock + productData.inventoryAddition;
+          
+          console.log(`📦 [INVENTORY-ADDITION] No batch number - adding to existing stock: ${currentStock} + ${productData.inventoryAddition} = ${newStock}`);
+          productData.stockQuantity = newStock;
         }
         
         // Clean up the addition fields from productData so they don't get saved
         delete productData.inventoryAddition;
         delete productData.newBatchNumber;
         
-        console.log(`✅ [INVENTORY-ADDITION] Final stock quantity: ${newStock}`);
+        console.log(`✅ [INVENTORY-ADDITION] Inventory addition completed`);
       }
       
       const isStockUpdate = productData.stockQuantity !== undefined && 
