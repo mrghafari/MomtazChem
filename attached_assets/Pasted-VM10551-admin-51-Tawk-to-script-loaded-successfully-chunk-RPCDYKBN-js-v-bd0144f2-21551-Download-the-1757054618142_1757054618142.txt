@@ -1,0 +1,104 @@
+VM10551 admin:51 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=bd0144f2:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:118283)
+    at t.value (twk-chunk-common.js:2:151367)
+    at p.updateUUID (twk-chunk-common.js:2:203019)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:125298)
+    at twk-chunk-common.js:2:124609
+value @ twk-chunk-common.js:2
+VM10551 admin:23 Tawk.to Live Chat loaded successfully
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+site-management-fixed.tsx:74 🔍 [DEBUG] userPermissions modules: Array(35)
+site-management-fixed.tsx:429 🔍 [DEBUG] Full userPermissions response: Object
+site-management-fixed.tsx:430 🔍 [DEBUG] userPermissions.modules: Array(35)
+site-management-fixed.tsx:431 🔍 [DEBUG] userPermissions.permissions: Array(35)
+site-management-fixed.tsx:436 🔍 [DEBUG] Total allButtons count: 35
+site-management-fixed.tsx:437 🔍 [DEBUG] AI Settings exists in allButtons: false
+site-management-fixed.tsx:438 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:440 🔍 [DEBUG] allowedModules: Array(35)
+site-management-fixed.tsx:441 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:442 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:443 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:444 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:445 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:446 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:452 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:456 🔍 [MISSING] order-tracking-view Order Management & Tracking - View Only moduleId: order_tracking
+site-management-fixed.tsx:460 🔍 [CRITICAL] Missing buttons count: 1
+site-management-fixed.tsx:462 🔍 [DEBUG] finance button found in allButtons? Object
+site-management-fixed.tsx:463 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+site-management-fixed.tsx:464 🔍 [DEBUG] ai_settings button found in allButtons? undefined
+site-management-fixed.tsx:465 🔍 [DEBUG] content_management button found in allButtons? Object
+site-management-fixed.tsx:466 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:467 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:468 🔍 [DEBUG] ai_settings button in filtered? undefined
+site-management-fixed.tsx:469 🔍 [DEBUG] content_management button in filtered? Object
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 34
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: undefined
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+products.tsx:1063 Barcode effect triggered:  Canvas ref: null
+useAuth.ts:43 Auth check result: Object
+products.tsx:330 🗑️ [DELETE-BATCH] Deleting batch 333 (ID: 28)
+/api/batches/28:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+products.tsx:345 ❌ [DELETE-BATCH] Error deleting batch: Error: 404: {"success":false,"message":"API endpoint not found","path":"/api/batches/28","method":"DELETE"}
+    at throwIfResNotOk (queryClient.ts:24:15)
+    at async apiRequest (queryClient.ts:63:5)
+    at async handleDeleteBatch (products.tsx:332:7)
+handleDeleteBatch @ products.tsx:345
+products.tsx:330 🗑️ [DELETE-BATCH] Deleting batch 333 (ID: 28)
+queryClient.ts:54  DELETE https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/batches/28 404 (Not Found)
+apiRequest @ queryClient.ts:54
+handleDeleteBatch @ products.tsx:332
+onClick @ products.tsx:1545
+callCallback2 @ chunk-RPCDYKBN.js?v=bd0144f2:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=bd0144f2:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=bd0144f2:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=bd0144f2:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=bd0144f2:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=bd0144f2:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=bd0144f2:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=bd0144f2:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=bd0144f2:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=bd0144f2:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=bd0144f2:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=bd0144f2:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=bd0144f2:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=bd0144f2:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=bd0144f2:5449
+products.tsx:345 ❌ [DELETE-BATCH] Error deleting batch: Error: 404: {"success":false,"message":"API endpoint not found","path":"/api/batches/28","method":"DELETE"}
+    at throwIfResNotOk (queryClient.ts:24:15)
+    at async apiRequest (queryClient.ts:63:5)
+    at async handleDeleteBatch (products.tsx:332:7)
+handleDeleteBatch @ products.tsx:345
+await in handleDeleteBatch
+onClick @ products.tsx:1545
+callCallback2 @ chunk-RPCDYKBN.js?v=bd0144f2:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=bd0144f2:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=bd0144f2:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=bd0144f2:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=bd0144f2:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=bd0144f2:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=bd0144f2:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=bd0144f2:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=bd0144f2:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=bd0144f2:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=bd0144f2:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=bd0144f2:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=bd0144f2:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=bd0144f2:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=bd0144f2:5449

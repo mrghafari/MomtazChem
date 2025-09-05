@@ -622,6 +622,13 @@ export default function ProductsPage() {
     // Validate Weights & Batch section - skip for non-chemical products
     if (!data.isNonChemical) {
       if (!data.netWeight || Number(data.netWeight) <= 0) errors.netWeight = "وزن خالص اجباری است";
+      
+      // For chemical products, if there's inventory addition, batch number is required
+      if (data.inventoryAddition && Number(data.inventoryAddition) > 0) {
+        if (!data.newBatchNumber?.trim()) {
+          errors.newBatchNumber = "برای محصولات شیمیایی با افزایش موجودی، شماره بچ اجباری است";
+        }
+      }
     }
     
     // Gross weight is required for all products
@@ -1496,8 +1503,8 @@ export default function ProductsPage() {
                         </Badge>
                       </div>
 
-                      {/* Current Selling Batch (FIFO) - Show for all products with batches */}
-                      {productGroup.currentSellingBatch && (
+                      {/* Current Selling Batch (FIFO) - Show only for chemical products with batches */}
+                      {!productGroup.mainProduct.isNonChemical && productGroup.currentSellingBatch && (
                         <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                           <div className="flex justify-between items-center">
                             <span className="text-sm font-medium text-green-700">بچ فعال (در حال فروش):</span>
@@ -1511,8 +1518,8 @@ export default function ProductsPage() {
                         </div>
                       )}
 
-                      {/* Batch Summary */}
-                      {productGroup.batches.length >= 1 && (
+                      {/* Batch Summary - Show only for chemical products */}
+                      {!productGroup.mainProduct.isNonChemical && productGroup.batches.length >= 1 && (
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
                             <span className="text-sm font-medium">همه بچ‌ها ({productGroup.batches.length}):</span>
@@ -2227,6 +2234,8 @@ export default function ProductsPage() {
                       )}
                     />
 
+                    {/* فیلد شماره بچ جدید - فقط برای محصولات شیمیایی */}
+                    {!form.watch('isNonChemical') && (
                     <FormField
                       control={form.control}
                       name="newBatchNumber"
@@ -2246,15 +2255,19 @@ export default function ProductsPage() {
                           <FormControl>
                             <Input 
                               placeholder="BATCH-2025-NEW"
-                              className="h-9"
+                              className={`h-9 ${validationErrors.newBatchNumber ? "border-red-500 focus:border-red-500" : ""}`}
                               {...field}
                               value={field.value || ''}
                             />
                           </FormControl>
                           <FormMessage />
+                          {validationErrors.newBatchNumber && (
+                            <p className="text-sm text-red-600 mt-1">{validationErrors.newBatchNumber}</p>
+                          )}
                         </FormItem>
                       )}
                     />
+                    )}
 
                     <FormField
                       control={form.control}

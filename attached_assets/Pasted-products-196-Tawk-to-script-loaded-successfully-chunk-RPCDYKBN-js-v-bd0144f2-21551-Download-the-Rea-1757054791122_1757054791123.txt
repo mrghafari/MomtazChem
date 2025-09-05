@@ -1,0 +1,250 @@
+products:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=bd0144f2:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+products.tsx:1063 Barcode effect triggered:  Canvas ref: null
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=bd0144f2:840
+run @ @tanstack_react-query.js?v=bd0144f2:494
+start @ @tanstack_react-query.js?v=bd0144f2:536
+fetch @ @tanstack_react-query.js?v=bd0144f2:926
+executeFetch_fn @ @tanstack_react-query.js?v=bd0144f2:2211
+onSubscribe @ @tanstack_react-query.js?v=bd0144f2:1898
+subscribe @ @tanstack_react-query.js?v=bd0144f2:24
+(anonymous) @ @tanstack_react-query.js?v=bd0144f2:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=bd0144f2:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=bd0144f2:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=bd0144f2:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=bd0144f2:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=bd0144f2:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=bd0144f2:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=bd0144f2:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=bd0144f2:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=bd0144f2:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=bd0144f2:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=bd0144f2:19432
+commitRoot @ chunk-RPCDYKBN.js?v=bd0144f2:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=bd0144f2:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=bd0144f2:18718
+workLoop @ chunk-RPCDYKBN.js?v=bd0144f2:197
+flushWork @ chunk-RPCDYKBN.js?v=bd0144f2:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=bd0144f2:384
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+via.placeholder.com/128x128?text=WeChat+QR:1  GET https://via.placeholder.com/128x128?text=WeChat+QR net::ERR_NAME_NOT_RESOLVED
+Image
+commitMount @ chunk-RPCDYKBN.js?v=bd0144f2:8412
+commitLayoutEffectOnFiber @ chunk-RPCDYKBN.js?v=bd0144f2:17102
+commitLayoutMountEffects_complete @ chunk-RPCDYKBN.js?v=bd0144f2:17980
+commitLayoutEffects_begin @ chunk-RPCDYKBN.js?v=bd0144f2:17969
+commitLayoutEffects @ chunk-RPCDYKBN.js?v=bd0144f2:17920
+commitRootImpl @ chunk-RPCDYKBN.js?v=bd0144f2:19353
+commitRoot @ chunk-RPCDYKBN.js?v=bd0144f2:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=bd0144f2:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=bd0144f2:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=bd0144f2:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=bd0144f2:555
+flush @ @tanstack_react-query.js?v=bd0144f2:569
+batch @ @tanstack_react-query.js?v=bd0144f2:587
+dispatch_fn @ @tanstack_react-query.js?v=bd0144f2:996
+setData @ @tanstack_react-query.js?v=bd0144f2:696
+onSuccess @ @tanstack_react-query.js?v=bd0144f2:897
+resolve @ @tanstack_react-query.js?v=bd0144f2:456
+Promise.then
+run @ @tanstack_react-query.js?v=bd0144f2:498
+start @ @tanstack_react-query.js?v=bd0144f2:536
+fetch @ @tanstack_react-query.js?v=bd0144f2:926
+executeFetch_fn @ @tanstack_react-query.js?v=bd0144f2:2211
+onSubscribe @ @tanstack_react-query.js?v=bd0144f2:1898
+subscribe @ @tanstack_react-query.js?v=bd0144f2:24
+(anonymous) @ @tanstack_react-query.js?v=bd0144f2:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=bd0144f2:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=bd0144f2:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=bd0144f2:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=bd0144f2:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=bd0144f2:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=bd0144f2:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=bd0144f2:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=bd0144f2:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=bd0144f2:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=bd0144f2:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=bd0144f2:19432
+commitRoot @ chunk-RPCDYKBN.js?v=bd0144f2:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=bd0144f2:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=bd0144f2:18718
+workLoop @ chunk-RPCDYKBN.js?v=bd0144f2:197
+flushWork @ chunk-RPCDYKBN.js?v=bd0144f2:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=bd0144f2:384
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:118283)
+    at t.value (twk-chunk-common.js:2:151367)
+    at p.updateUUID (twk-chunk-common.js:2:203019)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:125298)
+    at twk-chunk-common.js:2:124609
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-chunk-common.js:2
+products:168 Tawk.to Live Chat loaded successfully
+products.tsx:330 🗑️ [DELETE-BATCH] Deleting batch 333 (ID: 28)
+queryClient.ts:54  DELETE https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/batches/28 404 (Not Found)
+apiRequest @ queryClient.ts:54
+handleDeleteBatch @ products.tsx:332
+onClick @ products.tsx:1545
+callCallback2 @ chunk-RPCDYKBN.js?v=bd0144f2:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=bd0144f2:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=bd0144f2:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=bd0144f2:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=bd0144f2:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=bd0144f2:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=bd0144f2:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=bd0144f2:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=bd0144f2:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=bd0144f2:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=bd0144f2:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=bd0144f2:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=bd0144f2:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=bd0144f2:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=bd0144f2:5449
+products.tsx:345 ❌ [DELETE-BATCH] Error deleting batch: Error: 404: {"success":false,"message":"API endpoint not found","path":"/api/batches/28","method":"DELETE"}
+    at throwIfResNotOk (queryClient.ts:24:15)
+    at async apiRequest (queryClient.ts:63:5)
+    at async handleDeleteBatch (products.tsx:332:7)
+handleDeleteBatch @ products.tsx:345
+await in handleDeleteBatch
+onClick @ products.tsx:1545
+callCallback2 @ chunk-RPCDYKBN.js?v=bd0144f2:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=bd0144f2:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=bd0144f2:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=bd0144f2:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=bd0144f2:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=bd0144f2:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=bd0144f2:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=bd0144f2:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=bd0144f2:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=bd0144f2:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=bd0144f2:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=bd0144f2:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=bd0144f2:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=bd0144f2:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=bd0144f2:5449
+products.tsx:330 🗑️ [DELETE-BATCH] Deleting batch 2255555 (ID: 27)
+queryClient.ts:54  DELETE https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/batches/27 404 (Not Found)
+apiRequest @ queryClient.ts:54
+handleDeleteBatch @ products.tsx:332
+onClick @ products.tsx:1545
+callCallback2 @ chunk-RPCDYKBN.js?v=bd0144f2:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=bd0144f2:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=bd0144f2:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=bd0144f2:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=bd0144f2:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=bd0144f2:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=bd0144f2:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=bd0144f2:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=bd0144f2:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=bd0144f2:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=bd0144f2:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=bd0144f2:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=bd0144f2:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=bd0144f2:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=bd0144f2:5449
+products.tsx:345 ❌ [DELETE-BATCH] Error deleting batch: Error: 404: {"success":false,"message":"API endpoint not found","path":"/api/batches/27","method":"DELETE"}
+    at throwIfResNotOk (queryClient.ts:24:15)
+    at async apiRequest (queryClient.ts:63:5)
+    at async handleDeleteBatch (products.tsx:332:7)
+handleDeleteBatch @ products.tsx:345
+await in handleDeleteBatch
+onClick @ products.tsx:1545
+callCallback2 @ chunk-RPCDYKBN.js?v=bd0144f2:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=bd0144f2:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=bd0144f2:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=bd0144f2:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=bd0144f2:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=bd0144f2:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=bd0144f2:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=bd0144f2:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=bd0144f2:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=bd0144f2:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=bd0144f2:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=bd0144f2:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=bd0144f2:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=bd0144f2:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=bd0144f2:5449
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=bd0144f2:840
+run @ @tanstack_react-query.js?v=bd0144f2:494
+start @ @tanstack_react-query.js?v=bd0144f2:536
+fetch @ @tanstack_react-query.js?v=bd0144f2:926
+executeFetch_fn @ @tanstack_react-query.js?v=bd0144f2:2211
+fetch @ @tanstack_react-query.js?v=bd0144f2:2011
+refetch @ @tanstack_react-query.js?v=bd0144f2:2001
+onFocus @ @tanstack_react-query.js?v=bd0144f2:749
+(anonymous) @ @tanstack_react-query.js?v=bd0144f2:1112
+(anonymous) @ @tanstack_react-query.js?v=bd0144f2:1111
+batch @ @tanstack_react-query.js?v=bd0144f2:583
+onFocus @ @tanstack_react-query.js?v=bd0144f2:1110
+(anonymous) @ @tanstack_react-query.js?v=bd0144f2:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=bd0144f2:313
+onFocus @ @tanstack_react-query.js?v=bd0144f2:312
+(anonymous) @ @tanstack_react-query.js?v=bd0144f2:299
+listener @ @tanstack_react-query.js?v=bd0144f2:270
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+products.tsx:330 🗑️ [DELETE-BATCH] Deleting batch 333 (ID: 28)
+queryClient.ts:54  DELETE https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/batches/28 404 (Not Found)
+apiRequest @ queryClient.ts:54
+handleDeleteBatch @ products.tsx:332
+onClick @ products.tsx:1545
+callCallback2 @ chunk-RPCDYKBN.js?v=bd0144f2:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=bd0144f2:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=bd0144f2:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=bd0144f2:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=bd0144f2:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=bd0144f2:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=bd0144f2:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=bd0144f2:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=bd0144f2:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=bd0144f2:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=bd0144f2:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=bd0144f2:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=bd0144f2:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=bd0144f2:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=bd0144f2:5449
+products.tsx:345 ❌ [DELETE-BATCH] Error deleting batch: Error: 404: {"success":false,"message":"API endpoint not found","path":"/api/batches/28","method":"DELETE"}
+    at throwIfResNotOk (queryClient.ts:24:15)
+    at async apiRequest (queryClient.ts:63:5)
+    at async handleDeleteBatch (products.tsx:332:7)
+handleDeleteBatch @ products.tsx:345
+await in handleDeleteBatch
+onClick @ products.tsx:1545
+callCallback2 @ chunk-RPCDYKBN.js?v=bd0144f2:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=bd0144f2:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=bd0144f2:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=bd0144f2:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=bd0144f2:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=bd0144f2:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=bd0144f2:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=bd0144f2:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=bd0144f2:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=bd0144f2:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=bd0144f2:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=bd0144f2:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=bd0144f2:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=bd0144f2:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=bd0144f2:5449
