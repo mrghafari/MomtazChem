@@ -394,10 +394,19 @@ export default function ProductsPage() {
       console.log('✅ [DEBUG] Update mutation successful, result:', result);
       setIsSubmitting(false);
       
-      // Close dialog and reset form
-      setDialogOpen(false);
-      setEditingProduct(null);
-      form.reset();
+      // Only refresh data, keep dialog open if it was a batch addition
+      if (!result?.batchNumber) {
+        // Regular update - close dialog and reset
+        setDialogOpen(false);
+        setEditingProduct(null);
+        setImagePreview(null);
+        setImagePreviews([null, null, null]);
+        form.reset();
+      } else {
+        // Batch addition - reset only batch fields but keep images and core data
+        form.setValue('inventoryAddition', 0);
+        form.setValue('newBatchNumber', '');
+      }
       
       // Refresh products list to ensure UI is in sync
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
