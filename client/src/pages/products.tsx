@@ -1938,26 +1938,26 @@ export default function ProductsPage() {
                         <FormItem>
                           <FormLabel className={`flex items-center gap-2 text-sm font-medium ${validationErrors.sku ? 'text-red-600' : ''}`}>
 {t.productSku}
-                            {(editingProduct || field.value) && <Lock className="h-3 w-3 text-gray-400" />}
+                            {editingProduct && <Lock className="h-3 w-3 text-gray-400" />}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>کد یکتای محصول برای شناسایی در سیستم. بعد از ایجاد قابل تغییر نیست</p>
+                                <p>{editingProduct ? 'کد یکتای محصول قابل تغییر نیست' : 'کد یکتای محصول برای شناسایی در سیستم'}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
                           <FormControl>
                             <div className="flex gap-2">
                               <Input 
-                                placeholder="کد محصول" 
-                                className={`h-9 ${(editingProduct || field.value) ? "bg-gray-50 text-gray-500" : ""} ${validationErrors.sku ? "border-red-500 focus:border-red-500" : ""}`}
+                                placeholder={editingProduct ? "کد محصول (فقط نمایش)" : "کد محصول یا از AI استفاده کنید"} 
+                                className={`h-9 ${editingProduct ? "bg-gray-50 text-gray-500" : ""} ${validationErrors.sku ? "border-red-500 focus:border-red-500" : ""}`}
                                 {...field}
                                 value={field.value || ""}
-                                readOnly={!!(editingProduct || field.value)}
+                                readOnly={!!editingProduct}
                               />
-                              {!editingProduct && !field.value && (
+                              {!editingProduct && (
                                 <Button
                                   type="button"
                                   size="sm"
