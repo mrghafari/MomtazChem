@@ -1006,11 +1006,11 @@ export class ShopStorage implements IShopStorage {
       
       console.log(`📦 [ADD-BATCH] Adding new batch: ${batchData.batchNumber} for barcode: ${batchData.barcode}`);
       
-      // First, get the original product data to clone it for the new batch
+      // First, get the original product data (the one with the base SKU without batch suffix)
       const originalResult = await pool.query(`
         SELECT * FROM showcase_products 
         WHERE barcode = $1 
-        ORDER BY created_at DESC
+        ORDER BY created_at ASC
         LIMIT 1
       `, [batchData.barcode]);
       
@@ -1020,7 +1020,7 @@ export class ShopStorage implements IShopStorage {
       
       const originalProduct = originalResult.rows[0];
       
-      // Debug logs removed - batch creation working correctly
+      // Extract base SKU (first 3 parts) to prevent accumulation of batch numbers
       
       // Create new batch entry with required fields
       const insertResult = await pool.query(`
@@ -1037,7 +1037,7 @@ export class ShopStorage implements IShopStorage {
         originalProduct.description,          // $3
         originalProduct.short_description,    // $4
         batchData.barcode,                    // $5
-        originalProduct.sku + '-' + batchData.batchNumber, // $6 - unique SKU
+        originalProduct.sku.split('-').slice(0, 3).join('-') + '-' + batchData.batchNumber, // $6 - unique SKU with base only
         batchData.stockQuantity,              // $7
         originalProduct.unit_price,           // $8
         originalProduct.currency,             // $9
