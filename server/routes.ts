@@ -3569,6 +3569,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint to serve product images from object storage
+  app.get("/objects/images/:fileName", async (req, res) => {
+    try {
+      const { fileName } = req.params;
+      console.log('🖼️ [IMAGE SERVE] Serving image:', fileName);
+      
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = `/objects/images/${fileName}`;
+      
+      // Get the file from object storage
+      const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
+      
+      // Set appropriate headers and stream the file
+      await objectStorageService.downloadObject(objectFile, res);
+      
+    } catch (error) {
+      console.error('❌ [IMAGE SERVE] Error serving image:', error);
+      if (error.message.includes('not found') || error.name === 'ObjectNotFoundError') {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Image not found' 
+        });
+      }
+      res.status(500).json({ 
+        success: false, 
+        message: 'Error serving image' 
+      });
+    }
+  });
+
   // Secure Object Storage upload endpoint for general file uploads
   app.post("/api/objects/upload", requireCustomerAuth, async (req, res) => {
     try {
@@ -51899,6 +51929,126 @@ momtazchem.com
       },
       message: 'سیستم آپلود امن فعال است'
     });
+  });
+
+  // =============================================================================
+  // FILE MIGRATION TO OBJECT STORAGE ENDPOINTS
+  // =============================================================================
+
+  // Migrate files from filesystem to Object Storage
+  app.post('/api/migrate-to-object-storage', requireAuth, async (req, res) => {
+    try {
+      console.log('🚀 [MIGRATION] Starting file migration to Object Storage...');
+      
+      const { FileToObjectStorageMigrator } = require('./migrate-to-object-storage');
+      const migrator = new FileToObjectStorageMigrator();
+      
+      // Migrate product images
+      const imagesMigrationMap = await migrator.migrateProductImages();
+      
+      // Migrate documents
+      const documentsMigrationMap = await migrator.migrateDocuments();
+      
+      const results = migrator.getResults();
+      
+      console.log('📊 [MIGRATION] Migration completed:', results);
+      
+      // Update database URLs for product images
+      if (imagesMigrationMap.length > 0) {
+        console.log('🔄 [MIGRATION] Updating product image URLs in database...');
+        
+        for (const mapping of imagesMigrationMap) {
+          try {
+            // Update showcase_products table
+            await db.execute(sql`
+              UPDATE showcase_products 
+              SET image_urls = REPLACE(
+                COALESCE(image_urls::text, '[]'), 
+                ${mapping.oldUrl}, 
+                ${mapping.newUrl}
+              )::json
+              WHERE image_urls::text LIKE ${'%' + mapping.oldUrl + '%'}
+            `);
+            
+            // Update legacy imageUrl field if exists
+            await db.execute(sql`
+              UPDATE showcase_products 
+              SET image_url = ${mapping.newUrl}
+              WHERE image_url = ${mapping.oldUrl}
+            `);
+            
+            console.log(`✅ [DB UPDATE] Updated URLs for ${mapping.oldUrl} -> ${mapping.newUrl}`);
+          } catch (dbError) {
+            console.error('❌ [DB UPDATE] Failed to update URL:', mapping.oldUrl, dbError);
+          }
+        }
+      }
+      
+      res.json({
+        success: true,
+        message: 'فایل‌ها با موفقیت به Object Storage منتقل شدند',
+        results: {
+          ...results,
+          imagesMigrated: imagesMigrationMap.length,
+          documentsMigrated: documentsMigrationMap.length,
+          imagesMigrationMap,
+          documentsMigrationMap
+        }
+      });
+
+    } catch (error) {
+      console.error('❌ [MIGRATION] Migration failed:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در انتقال فایل‌ها',
+        error: error.message
+      });
+    }
+  });
+
+  // Check migration status
+  app.get('/api/migration-status', requireAuth, async (req, res) => {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      
+      const uploadsDir = path.join(process.cwd(), 'uploads');
+      let localFiles = 0;
+      
+      if (fs.existsSync(uploadsDir)) {
+        const countFiles = (dir) => {
+          let count = 0;
+          const items = fs.readdirSync(dir);
+          for (const item of items) {
+            const fullPath = path.join(dir, item);
+            if (fs.statSync(fullPath).isDirectory()) {
+              count += countFiles(fullPath);
+            } else {
+              count++;
+            }
+          }
+          return count;
+        };
+        localFiles = countFiles(uploadsDir);
+      }
+      
+      res.json({
+        success: true,
+        status: {
+          localFilesRemaining: localFiles,
+          objectStorageConfigured: !!process.env.PRIVATE_OBJECT_DIR,
+          privateObjectDir: process.env.PRIVATE_OBJECT_DIR,
+          publicObjectPaths: process.env.PUBLIC_OBJECT_SEARCH_PATHS
+        }
+      });
+      
+    } catch (error) {
+      console.error('❌ [MIGRATION STATUS] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در بررسی وضعیت migration'
+      });
+    }
   });
 
   // Catch-all for unmatched API routes - return JSON 404 (must be last)
