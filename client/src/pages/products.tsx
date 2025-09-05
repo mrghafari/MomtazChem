@@ -1465,8 +1465,8 @@ export default function ProductsPage() {
                         </Badge>
                       </div>
 
-                      {/* Current Selling Batch (LIFO) - Only show if product has multiple batches */}
-                      {productGroup.batches.length > 1 && productGroup.currentSellingBatch && (
+                      {/* Current Selling Batch (FIFO) - Show for all products with batches */}
+                      {productGroup.currentSellingBatch && (
                         <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                           <div className="flex justify-between items-center">
                             <span className="text-sm font-medium text-green-700">بچ فعال (در حال فروش):</span>
@@ -1481,7 +1481,7 @@ export default function ProductsPage() {
                       )}
 
                       {/* Batch Summary */}
-                      {productGroup.batches.length > 1 && (
+                      {productGroup.batches.length >= 1 && (
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
                             <span className="text-sm font-medium">همه بچ‌ها ({productGroup.batches.length}):</span>
