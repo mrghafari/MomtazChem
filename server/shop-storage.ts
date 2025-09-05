@@ -165,6 +165,9 @@ export interface IShopStorage {
   
   // Process order refund/return
   processOrderRefund(orderId: number, amount: number, reason: string, type: 'refund' | 'return'): Promise<void>;
+  
+  // Batch Management
+  deleteBatch(batchId: number): Promise<boolean>;
 }
 
 export class ShopStorage implements IShopStorage {
@@ -1604,6 +1607,30 @@ export class ShopStorage implements IShopStorage {
         approvedReturns: 0,
         rejectedReturns: 0,
       };
+    }
+  }
+
+  // Batch Management - Delete a batch by ID
+  async deleteBatch(batchId: number): Promise<boolean> {
+    try {
+      console.log(`🗑️ [DELETE-BATCH] Attempting to delete batch with ID: ${batchId}`);
+      
+      // Delete the batch/product with the given ID
+      const result = await shopDb
+        .delete(shopProducts)
+        .where(eq(shopProducts.id, batchId))
+        .returning();
+      
+      if (result.length > 0) {
+        console.log(`✅ [DELETE-BATCH] Successfully deleted batch ${result[0].batchNumber} (ID: ${batchId})`);
+        return true;
+      } else {
+        console.log(`⚠️ [DELETE-BATCH] No batch found with ID: ${batchId}`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`❌ [DELETE-BATCH] Error deleting batch ${batchId}:`, error);
+      throw new Error(`امکان حذف batch وجود ندارد: ${error instanceof Error ? error.message : 'خطای نامشخص'}`);
     }
   }
 }

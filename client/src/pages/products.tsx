@@ -320,6 +320,37 @@ export default function ProductsPage() {
     }
   };
 
+  // Delete batch function
+  const handleDeleteBatch = async (batchId: number, batchNumber: string) => {
+    if (!confirm(`آیا مطمئن هستید که می‌خواهید batch "${batchNumber}" را حذف کنید؟`)) {
+      return;
+    }
+
+    try {
+      console.log(`🗑️ [DELETE-BATCH] Deleting batch ${batchNumber} (ID: ${batchId})`);
+      
+      await apiRequest(`/api/batches/${batchId}`, { 
+        method: "DELETE" 
+      });
+      
+      toast({
+        title: "✅ batch حذف شد",
+        description: `batch "${batchNumber}" با موفقیت حذف شد`,
+      });
+
+      // Refresh products list
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      
+    } catch (error: any) {
+      console.error("❌ [DELETE-BATCH] Error deleting batch:", error);
+      toast({
+        title: "❌ خطا در حذف batch",
+        description: error?.message || "امکان حذف batch وجود ندارد",
+        variant: "destructive",
+      });
+    }
+  };
+
   const { mutate: createProduct } = useMutation({
     mutationFn: (data: any) => {
       setIsSubmitting(true);
@@ -1507,6 +1538,15 @@ export default function ProductsPage() {
                                       در نوبت
                                     </Badge>
                                   )}
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    className="h-6 w-6 p-0 text-xs"
+                                    onClick={() => handleDeleteBatch(batch.id, batch.batchNumber)}
+                                    title="حذف batch"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
                                 </div>
                               </div>
                             ))}

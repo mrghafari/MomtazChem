@@ -4430,6 +4430,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete batch endpoint
+  app.delete("/api/batches/:id", requireAuth, async (req, res) => {
+    try {
+      const batchId = parseInt(req.params.id);
+      if (isNaN(batchId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid batch ID" 
+        });
+      }
+
+      const result = await storage.deleteBatch(batchId);
+      
+      if (result) {
+        res.json({
+          success: true,
+          message: "Batch deleted successfully"
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: "Batch not found"
+        });
+      }
+    } catch (error: any) {
+      console.error("Error deleting batch:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: error.message || "Error deleting batch" 
+      });
+    }
+  });
+
   // =============================================================================
   // IRAQI GEOGRAPHIC DATA API ENDPOINTS
   // =============================================================================
