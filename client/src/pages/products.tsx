@@ -2584,13 +2584,29 @@ export default function ProductsPage() {
                     <div className="space-y-3">
                       <FormLabel className="text-sm font-medium flex items-center gap-2">
                         <Image className="h-4 w-4" />
-                        تصاویر محصول (حداکثر 3 تصویر)
+                        {(() => {
+                          const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
+                          return isBatchAddition ? 'تصاویر محصول (از محصول اصلی)' : 'تصاویر محصول (حداکثر 3 تصویر)';
+                        })()}
+                        {(() => {
+                          const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
+                          return isBatchAddition && (
+                            <Badge variant="secondary" className="text-xs">
+                              قابل تغییر در صورت نیاز
+                            </Badge>
+                          );
+                        })()}
                         <Tooltip>
                           <TooltipTrigger>
                             <HelpCircle className="h-3 w-3 text-gray-400" />
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>حداکثر 3 تصویر از محصول برای نمایش در کاردکس و فروشگاه. پشتیبانی از JPG, PNG, GIF - حداکثر 2MB</p>
+                            <p>{(() => {
+                              const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
+                              return isBatchAddition 
+                                ? 'تصاویر از محصول اصلی فراخوانی شده‌اند. در صورت نیاز می‌توانید تغییر دهید.'
+                                : 'حداکثر 3 تصویر از محصول برای نمایش در کاردکس و فروشگاه. پشتیبانی از JPG, PNG, GIF - حداکثر 2MB';
+                            })()}</p>
                           </TooltipContent>
                         </Tooltip>
                       </FormLabel>
@@ -2602,8 +2618,20 @@ export default function ProductsPage() {
                             <div className="w-4 h-4 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
                               <div className="w-2 h-2 bg-white rounded-full"></div>
                             </div>
-                            <span className="font-medium">انتخاب تصویر اصلی:</span>
-                            <span>روی دکمه دایره‌ای گوشه پایین چپ هر تصویر کلیک کنید (تصویر انتخاب شده: {primaryImageIndex + 1})</span>
+                            <span className="font-medium">
+                              {(() => {
+                                const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
+                                return isBatchAddition ? 'تصاویر محصول اصلی:' : 'انتخاب تصویر اصلی:';
+                              })()}
+                            </span>
+                            <span>
+                              {(() => {
+                                const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
+                                return isBatchAddition 
+                                  ? 'تصاویر از دیتابیس فراخوانی شده‌اند و قابل تغییر هستند (تصویر اصلی: ' + (primaryImageIndex + 1) + ')'
+                                  : 'روی دکمه دایره‌ای گوشه پایین چپ هر تصویر کلیک کنید (تصویر انتخاب شده: ' + (primaryImageIndex + 1) + ')';
+                              })()}
+                            </span>
                           </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
