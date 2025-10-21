@@ -170,7 +170,7 @@ const Home = () => {
                           <div className="mb-6">
                             <h4 className="text-sm font-semibold text-gray-900 mb-3">Available Products:</h4>
                             <div className="space-y-2 max-h-32 overflow-y-auto">
-                              {categoryProducts.slice(0, 3).map((product) => (
+                              {categoryProducts.slice(0, 3).map((product: ShopProduct) => (
                                 <div key={product.id} className="flex items-center justify-between text-sm">
                                   <span className="text-gray-700 truncate flex-1">{product.name}</span>
                                   <div className="flex items-center gap-1 ml-2">
