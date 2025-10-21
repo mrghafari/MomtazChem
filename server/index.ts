@@ -169,18 +169,31 @@ app.use((req, res, next) => {
     app.use('/api', paymentRoutes);
     
     // Start auto-approval service
-    const { autoApprovalService } = await import('./auto-approval-service');
-    autoApprovalService.start();
+    try {
+      const { autoApprovalService } = await import('./auto-approval-service');
+      autoApprovalService.start();
+    } catch (error: any) {
+      console.error('⚠️ [AUTO APPROVAL] Service failed to start:', error.message);
+    }
     
     // 🔥 INSTALL REALTIME DATABASE TRIGGERS - ZERO TOLERANCE FOR INCONSISTENCY
-    const { RealtimeSyncTriggers } = await import('./realtime-sync-triggers');
-    await RealtimeSyncTriggers.installTriggers();
+    try {
+      const { RealtimeSyncTriggers } = await import('./realtime-sync-triggers');
+      await RealtimeSyncTriggers.installTriggers();
+    } catch (error: any) {
+      console.error('⚠️ [REALTIME SYNC] Failed to install triggers (database may be unavailable):', error.message);
+      console.log('⚠️ [REALTIME SYNC] Server will continue running without realtime triggers');
+    }
     
     // Start backup sync service as secondary safety net
-    const { SyncService } = await import('./sync-service');
-    const syncService = new SyncService();
-    syncService.startAutoSync(5); // هر 5 دقیقه به عنوان backup چک
-    console.log('🔄 [SYSTEM] Backup sync service started - orders will be checked every 5 minutes as secondary safety');
+    try {
+      const { SyncService } = await import('./sync-service');
+      const syncService = new SyncService();
+      syncService.startAutoSync(5); // هر 5 دقیقه به عنوان backup چک
+      console.log('🔄 [SYSTEM] Backup sync service started - orders will be checked every 5 minutes as secondary safety');
+    } catch (error: any) {
+      console.error('⚠️ [SYNC SERVICE] Failed to start:', error.message);
+    }
     
     // Add WebRTC routes directly before registering other routes
     const { webrtcRooms, roomParticipants, chatMessages } = await import("@shared/webrtc-schema");
