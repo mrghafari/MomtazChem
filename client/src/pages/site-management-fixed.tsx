@@ -404,14 +404,6 @@ export default function SiteManagement() {
       moduleId: "marketing_module"
     },
     {
-      id: "order-tracking-view",
-      label: "Order Management & Tracking - View Only",
-      icon: Monitor,
-      onClick: () => trackButtonClick("order-tracking-view", () => setLocation("/admin/order-tracking-view")),
-      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-800",
-      moduleId: "order_tracking"
-    },
-    {
       id: "super-admin-order-management",
       label: "Super Admin Order Management",
       icon: Shield,
