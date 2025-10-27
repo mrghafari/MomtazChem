@@ -849,20 +849,20 @@ const Shop = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between relative">
-            <div className="flex items-center gap-4">
-              <h1 className="text-3xl font-bold text-gray-900">{t.shop.title}</h1>
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-3 sm:py-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 relative">
+            <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{t.shop.title}</h1>
               
               {/* Admin status removed - shop is customer-only */}
               
             </div>
             
             {/* User & Cart Section */}
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
               {/* User Account */}
               {!isLoadingCustomer && !customer && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2">
                   <Button 
                     variant="ghost" 
                     size="sm"
@@ -870,12 +870,12 @@ const Shop = () => {
                       setAuthMode('login');
                       setShowAuth(true);
                     }}
-                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    className="flex items-center gap-1 sm:gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-2 sm:px-3 py-1 sm:py-2"
                   >
-                    <User className="w-4 h-4" />
-                    <span className="text-sm">Login</span>
+                    <User className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="text-xs sm:text-sm">Login</span>
                   </Button>
-                  <span className="text-gray-400 text-sm">/</span>
+                  <span className="text-gray-400 text-xs sm:text-sm">/</span>
                   <Button 
                     variant="ghost" 
                     size="sm"
@@ -883,81 +883,81 @@ const Shop = () => {
                       setAuthMode('register');
                       setShowAuth(true);
                     }}
-                    className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50"
+                    className="flex items-center gap-1 sm:gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 px-2 sm:px-3 py-1 sm:py-2"
                   >
-                    <span className="text-sm">Register</span>
+                    <span className="text-xs sm:text-sm">Register</span>
                   </Button>
                 </div>
               )}
 
               {/* Logged in Customer */}
               {!isLoadingCustomer && customer && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                   {/* Profile Button */}
                   <Button 
                     variant="ghost" 
                     size="sm"
                     onClick={() => navigate('/customer/profile')}
-                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    className="flex items-center gap-1 sm:gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-2 sm:px-3 py-1 sm:py-2"
                   >
-                    <User className="w-4 h-4" />
-                    <span className="text-sm font-medium">
+                    <User className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="text-xs sm:text-sm font-medium hidden sm:inline">
                       {customer.firstName} {customer.lastName}
                     </span>
                   </Button>
                   
                   {/* Wallet Button */}
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5 sm:gap-1">
                     <Button 
                       variant="ghost" 
                       size="sm"
                       onClick={() => navigate('/customer/wallet')}
-                      className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50"
+                      className="flex items-center gap-1 sm:gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 px-2 sm:px-3 py-1 sm:py-2"
                     >
-                      <Wallet className="w-4 h-4" />
-                      <span className="text-sm">
-                        {showWalletBalance ? walletBalance.toLocaleString() : '••••••'} IQD
+                      <Wallet className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="text-xs sm:text-sm">
+                        {showWalletBalance ? walletBalance.toLocaleString() : '••••••'}
                       </span>
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setShowWalletBalance(!showWalletBalance)}
-                      className="p-1 h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+                      className="p-1 h-7 w-7 sm:h-8 sm:w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
                       title={showWalletBalance ? t.shop.hideWalletBalance : t.shop.showWalletBalance}
                     >
-                      {showWalletBalance ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                      {showWalletBalance ? <EyeOff className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> : <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3" />}
                     </Button>
                   </div>
                   <Button 
                     variant="ghost" 
                     size="sm"
                     onClick={handleLogout}
-                    className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50 p-1 sm:p-2"
                   >
-                    <LogOut className="w-4 h-4" />
+                    <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
                 </div>
               )}
 
               {/* Cart Summary */}
-              <div className="relative">
+              <div className="relative w-full sm:w-auto">
                 <Button 
                   variant="outline" 
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto justify-center px-2 sm:px-4 py-2 text-xs sm:text-sm"
                   onClick={handleCartClick}
                   disabled={getTotalItems() === 0}
                 >
-                  <ShoppingCart className="w-5 h-5" />
-                  Cart ({getTotalItems()})
+                  <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Cart</span> ({getTotalItems()})
                   {getTotalItems() > 0 && (
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary">
-                        {getTotalPrice().toFixed(2)}
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <Badge variant="secondary" className="text-xs px-1 sm:px-2">
+                        {getTotalPrice().toFixed(0)}
                       </Badge>
                       {getTotalSavings() > 0 && (
-                        <Badge variant="default" className="bg-green-600">
-                          Save {getTotalSavings().toFixed(2)}
+                        <Badge variant="default" className="bg-green-600 text-xs px-1 sm:px-2">
+                          <span className="hidden sm:inline">Save</span> {getTotalSavings().toFixed(0)}
                         </Badge>
                       )}
                     </div>
