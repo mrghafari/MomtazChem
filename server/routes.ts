@@ -31385,50 +31385,9 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             ? customUser.permissions 
             : JSON.parse(customUser.permissions || '[]');
 
-          // Map Persian display names to technical module IDs
-          const persianToTechnicalMap = {
-            'شاخص‌های عملکرد (KPI)': 'kpi_dashboard',
-            'داشبورد مدیریتی': 'management_dashboard',
-            'تنظیمات ایمیل': 'email_settings',
-            'پشتیبان‌گیری پایگاه داده': 'database_backup',
-            'مدیریت SEO': 'seo',
-            'مدیریت پیامک': 'sms',
-            'مدیریت واتساپ CRM': 'whatsapp_crm',
-            'تنظیمات هوش مصنوعی': 'ai_settings',
-            'کنترل تازه‌سازی': 'refresh_control',
-            'سیستم تیکتینگ': 'ticketing_system',
-            'مدیریت محتوا': 'content_management',
-            'مدیریت بارکد': 'barcode',
-            'همگام‌سازی فروشگاه': 'syncing_shop',
-            'مدیریت فروشگاه': 'shop_management',
-            'مدیریت محصولات': 'product_management',
-            'مدیریت سفارشات': 'order_management',
-            'مدیریت انبار': 'warehouse_management',
-            'مدیریت لجستیک': 'logistics_management',
-            'مدیریت استعلامات': 'inquiries',
-            'مدیریت CRM': 'crm',
-            'مدیریت کارخانه': 'factory',
-            'مدیریت کاربران': 'user_management',
-            'مدیریت روش‌ها': 'procedures',
-            'مدیریت پرداخت': 'payment_management',
-            'مدیریت مالی': 'finance',
-            'مدیریت کیف پول': 'wallet_management',
-            'آمار جغرافیایی': 'geography_analytics',
-            'مدیریت دسته‌بندی‌ها': 'categories',
-            'دستیار SEO هوشمند': 'seo_management',
-            'تنظیمات سرور': 'server_config',
-            'تنظیمات AWS S3': 'aws_s3_settings',
-            'اطلاعات شرکت': 'company_information',
-            'User Guide': 'user_guide',
-            'مدیریت سایت': 'site_management',
-            'ماژول مارکتینگ': 'marketing_module',
-            'مدیریت و پیگیری سفارشات': 'order_management'
-          };
+          console.log(`✓ [PERMISSIONS] Custom user ${customUser.email} has modules:`, permissions);
 
-          // Convert Persian names to technical IDs
-          const technicalModules = permissions.map(perm => 
-            persianToTechnicalMap[perm] || perm
-          ).filter(Boolean);
+          return res.json({
 
           console.log(`✓ [PERMISSIONS] Custom user ${customUser.email} has modules:`, permissions);
           console.log(`✓ [PERMISSIONS] Converted to technical IDs:`, technicalModules);
@@ -31485,54 +31444,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           // Parse permissions from JSON array
           const permissions = Array.isArray(userRole[0].permissions) 
             ? userRole[0].permissions 
-            : JSON.parse(userRole[0].permissions || '[]');
-
-          // Map Persian display names to technical module IDs
-          const persianToTechnicalMap = {
-            'شاخص‌های عملکرد (KPI)': 'kpi_dashboard',
-            'داشبورد مدیریتی': 'management_dashboard',
-            'تنظیمات ایمیل': 'email_settings',
-            'پشتیبان‌گیری پایگاه داده': 'database_backup',
-            'مدیریت SEO': 'seo',
-            'مدیریت پیامک': 'sms',
-            'مدیریت واتساپ CRM': 'whatsapp_crm',
-            'تنظیمات هوش مصنوعی': 'ai_settings',
-            'کنترل تازه‌سازی': 'refresh_control',
-            'سیستم تیکتینگ': 'ticketing_system',
-            'مدیریت محتوا': 'content_management',
-            'مدیریت بارکد': 'barcode',
-            'همگام‌سازی فروشگاه': 'syncing_shop',
-            'مدیریت فروشگاه': 'shop_management',
-            'مدیریت محصولات': 'product_management',
-            'مدیریت سفارشات': 'order_management',
-            'مدیریت انبار': 'warehouse_management',
-            'مدیریت لجستیک': 'logistics_management',
-            'مدیریت استعلامات': 'inquiries',
-            'مدیریت CRM': 'crm',
-            'مدیریت کارخانه': 'factory',
-            'مدیریت کاربران': 'user_management',
-            'مدیریت روش‌ها': 'procedures',
-            'مدیریت پرداخت': 'payment_management',
-            'مدیریت حسابداری': 'accounting_management',
-            'مدیریت مالی': 'finance',
-            'مدیریت کیف پول': 'wallet_management',
-            'آمار جغرافیایی': 'geography_analytics',
-            'مدیریت دسته‌بندی‌ها': 'categories',
-            'دستیار SEO هوشمند': 'seo_management',
-            'تنظیمات سرور': 'server_config',
-            'تنظیمات AWS S3': 'aws_s3_settings',
-            'اطلاعات شرکت': 'company_information',
-            'User Guide': 'user_guide',
-            'مدیریت سایت': 'site_management',
-            'ماژول مارکتینگ': 'marketing_module',
-            'مدیریت و پیگیری سفارشات': 'order_management'
-          };
-
-          // Convert Persian names to technical IDs
-          const technicalModules = permissions.map(perm => 
-            persianToTechnicalMap[perm] || perm
-          ).filter(Boolean);
-
+console.log(`✓ [PERMISSIONS] User ${customUser[0].email} has modules:`, permissions);          return res.json({
           console.log(`✓ [PERMISSIONS] User ${customUser[0].email} has modules:`, permissions);
           console.log(`✓ [PERMISSIONS] Converted to technical IDs:`, technicalModules);
 
