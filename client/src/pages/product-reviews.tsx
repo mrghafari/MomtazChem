@@ -64,7 +64,7 @@ export default function ProductReviews() {
       const payload = {
         rating: reviewData.rating,
         comment: reviewData.comment.trim(),
-        title: `نظر مشتری در مورد ${product?.name || 'محصول'}`, // Generate meaningful title
+        title: `${t.customerReviewTitle} ${product?.name || t.product}`, // Generate meaningful title
       };
       console.log('🔥 [REVIEW SUBMIT] Sending payload:', payload);
       const response = await fetch(`/api/products/${id}/reviews`, {
@@ -79,16 +79,16 @@ export default function ProductReviews() {
       // Invalidate and refetch product reviews (which includes stats)
       queryClient.invalidateQueries({ queryKey: [`/api/products/${id}/reviews`] });
       toast({
-        title: "نظر ثبت شد",
-        description: "نظر شما با موفقیت ثبت شد",
+        title: 'reviewSubmitted',
+        description: 'reviewSubmittedDesc',
       });
     },
     onError: (error: any) => {
       console.error('🔥 [REVIEW SUBMIT ERROR]', error);
-      const errorMessage = error?.message || error?.toString() || "خطای نامشخص";
+      const errorMessage = error?.message || error?.toString() || "Unknown error";
       toast({
-        title: "خطا در ثبت نظر",
-        description: `خطا: ${errorMessage}`,
+        title: 'reviewError',
+        description: `${t.reviewErrorDesc}: ${errorMessage}`,
         variant: 'destructive',
       });
     },
@@ -115,9 +115,9 @@ export default function ProductReviews() {
   // Show loading message if still waiting for valid data
   if (!hasValidData && !isLoadingReviews) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8" dir={direction}>
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-gray-600">در حال بارگذاری نظرات...</p>
+          <p className="text-gray-600">{t.loadingReviews}</p>
         </div>
       </div>
     );

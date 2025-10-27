@@ -415,6 +415,15 @@ export interface Translation {
   weightsAndBatch: string;
   productDetails: string;
   
+  // Product Reviews
+  reviewSubmitted: string;
+  reviewSubmittedDesc: string;
+  reviewError: string;
+  reviewErrorDesc: string;
+  loadingReviews: string;
+  customerReviewTitle: string;
+  product: string;
+  
   // Services Page
   servicesPage: {
     title: string;
@@ -960,6 +969,15 @@ export const translations: Record<Language, Translation> = {
     weightsAndBatch: 'Weights & Batch',
     productDetails: 'Product Details',
     
+    // Product Reviews
+    reviewSubmitted: 'Review Submitted',
+    reviewSubmittedDesc: 'Your review has been submitted successfully',
+    reviewError: 'Error Submitting Review',
+    reviewErrorDesc: 'Error',
+    loadingReviews: 'Loading reviews...',
+    customerReviewTitle: 'Customer Review about',
+    product: 'Product',
+    
     // Services Page
     servicesPage: {
       title: 'Our Services & Capabilities',
@@ -1477,6 +1495,15 @@ export const translations: Record<Language, Translation> = {
     shopSettings: 'إعدادات المتجر',
     weightsAndBatch: 'الأوزان والدفعة',
     productDetails: 'تفاصيل المنتج',
+    
+    // Product Reviews
+    reviewSubmitted: 'تم تقديم المراجعة',
+    reviewSubmittedDesc: 'تم تقديم مراجعتك بنجاح',
+    reviewError: 'خطأ في تقديم المراجعة',
+    reviewErrorDesc: 'خطأ',
+    loadingReviews: 'جاري تحميل المراجعات...',
+    customerReviewTitle: 'رأي العميل حول',
+    product: 'المنتج',
     
     // Services Page
     servicesPage: {
