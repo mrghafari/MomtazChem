@@ -3,14 +3,24 @@ import { Upload } from '@aws-sdk/lib-storage';
 import crypto from 'crypto';
 import type { AwsS3Settings } from '../shared/schema';
 
-// Encryption key from environment or generate one
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'default-key-change-in-production-32b';
+// Encryption key MUST be set in environment variables for security
+const ENCRYPTION_KEY = process.env.AWS_CREDENTIALS_ENCRYPTION_KEY;
 const ALGORITHM = 'aes-256-cbc';
+
+// Validate encryption key exists
+if (!ENCRYPTION_KEY) {
+  console.error('❌ AWS_CREDENTIALS_ENCRYPTION_KEY environment variable is not set!');
+  console.error('⚠️  AWS S3 integration will not work without a secure encryption key.');
+}
 
 /**
  * Encrypt sensitive data
  */
 export function encrypt(text: string): string {
+  if (!ENCRYPTION_KEY) {
+    throw new Error('AWS_CREDENTIALS_ENCRYPTION_KEY environment variable is not set. Cannot encrypt credentials.');
+  }
+  
   const iv = crypto.randomBytes(16);
   const key = crypto.scryptSync(ENCRYPTION_KEY, 'salt', 32);
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
@@ -25,6 +35,10 @@ export function encrypt(text: string): string {
  * Decrypt sensitive data
  */
 export function decrypt(encryptedText: string): string {
+  if (!ENCRYPTION_KEY) {
+    throw new Error('AWS_CREDENTIALS_ENCRYPTION_KEY environment variable is not set. Cannot decrypt credentials.');
+  }
+  
   try {
     const parts = encryptedText.split(':');
     const iv = Buffer.from(parts[0], 'hex');
