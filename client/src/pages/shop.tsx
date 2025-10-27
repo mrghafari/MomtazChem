@@ -969,10 +969,10 @@ const Shop = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
         {/* Global Volume Discount Incentive Banner - Controlled by Content Management */}
         {discountBannerEnabled && (
-          <div className="mb-6 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 rounded-2xl p-4 shadow-2xl border border-purple-300 overflow-hidden relative">
+          <div className="mb-4 sm:mb-6 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-2xl border border-purple-300 overflow-hidden relative">
             {/* Animated Background Elements */}
             <div className="absolute inset-0">
               <div className="absolute -top-8 -right-8 w-24 h-24 bg-yellow-400/20 rounded-full animate-bounce"></div>
@@ -983,26 +983,26 @@ const Shop = () => {
             {/* Glassmorphism Overlay */}
             <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
             
-            <div className="relative z-10 flex items-center justify-between text-white">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-3">
-                  <Sparkles className="w-8 h-8 animate-spin text-yellow-300" />
+            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-white">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-yellow-300" />
                   <div>
-                    <h3 className="text-2xl font-bold mb-1">💰 {t.shop?.maximizeSavings || 'MAXIMIZE YOUR SAVINGS!'}</h3>
-                    <p className="text-purple-100 text-sm">
+                    <h3 className="text-base sm:text-xl md:text-2xl font-bold mb-0.5 sm:mb-1">💰 {t.shop?.maximizeSavings || 'MAXIMIZE YOUR SAVINGS!'}</h3>
+                    <p className="text-purple-100 text-xs sm:text-sm">
                       {discountBannerText || t.shop?.bulkDiscountMessage || `Buy more, save more! Up to ${highestDiscountPercentage}% OFF on bulk orders`}
                     </p>
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center gap-3">
-                <div className="bg-yellow-400 text-purple-900 px-4 py-2 rounded-full font-bold text-sm animate-pulse shadow-lg">
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <div className="bg-yellow-400 text-purple-900 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full font-bold text-xs sm:text-sm animate-pulse shadow-lg whitespace-nowrap">
                   🔥 {t.shop?.volumeDiscountsActive || 'VOLUME DISCOUNTS ACTIVE'}
                 </div>
-                <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/30">
-                  <div className="flex items-center gap-2 text-sm">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <div className="bg-white/20 backdrop-blur-sm rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 border border-white/30">
+                  <div className="flex items-center gap-2 text-xs sm:text-sm">
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse"></div>
                     <span className="font-semibold">{t.shop?.checkProductCards || 'Check product cards below!'}</span>
                   </div>
                 </div>
@@ -1011,14 +1011,14 @@ const Shop = () => {
           </div>
         )}
 
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           {/* Sidebar Filters */}
-          <div className="w-64 flex-shrink-0">
+          <div className="w-full lg:w-64 flex-shrink-0">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Filters</CardTitle>
+              <CardHeader className="p-3 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Filters</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 sm:space-y-6 p-3 sm:p-6">
                 {/* Advanced Search */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">Search Products</label>
@@ -1163,8 +1163,8 @@ const Shop = () => {
           {/* Products Grid */}
           <div className="flex-1">
             {/* View Toggle */}
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-gray-600">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+              <p className="text-sm sm:text-base text-gray-600">
                 Showing {totalResults} product{totalResults !== 1 ? 's' : ''} {currentPage > 0 ? `(page ${currentPage + 1} of ${totalPages})` : ''}
               </p>
               <div className="flex items-center gap-2">
@@ -1173,14 +1173,14 @@ const Shop = () => {
                   size="sm"
                   onClick={() => setViewMode("grid")}
                 >
-                  <Grid className="w-4 h-4" />
+                  <Grid className="w-3 h-3 sm:w-4 sm:h-4" />
                 </Button>
                 <Button
                   variant={viewMode === "list" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setViewMode("list")}
                 >
-                  <List className="w-4 h-4" />
+                  <List className="w-3 h-3 sm:w-4 sm:h-4" />
                 </Button>
               </div>
             </div>
@@ -1188,8 +1188,8 @@ const Shop = () => {
             {/* Products Grid */}
             <div className={`${
               viewMode === "grid" 
-                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
-                : "flex flex-col gap-4"
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6" 
+                : "flex flex-col gap-3 sm:gap-4"
             }`}>
               {productsLoading ? (
                 Array.from({ length: 6 }).map((_, index) => (
@@ -1398,18 +1398,18 @@ const Shop = () => {
                             </TooltipProvider>
                           </div>
                         </div>
-                        <CardContent className="p-4">
-                          <div className="mb-2">
-                            <h3 className="font-semibold text-lg">{product.name}</h3>
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="mb-1.5 sm:mb-2">
+                            <h3 className="font-semibold text-base sm:text-lg">{product.name}</h3>
                           </div>
                           
-                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                          <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2">
                             {product.shortDescription || product.description}
                           </p>
                           
-                          <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center justify-between mb-2 sm:mb-3">
                             <div>
-                              <span className="text-2xl font-bold text-green-600">
+                              <span className="text-xl sm:text-2xl font-bold text-green-600">
                                 {product.price && !isNaN(parseFloat(product.price)) ? formatIQDAmount(parseFloat(product.price)) : '0 IQD'}
                               </span>
                               <span className="text-sm text-gray-500 ml-1">
@@ -1444,9 +1444,9 @@ const Shop = () => {
 
 
                           {/* Modern Discount Card */}
-                          <div className="mb-3 h-24 overflow-hidden">
+                          <div className="mb-3 min-h-[80px] sm:min-h-[96px] overflow-hidden">
                             {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 ? (
-                              <div className="relative h-full bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 rounded-2xl overflow-hidden shadow-md border border-purple-200">
+                              <div className="relative w-full h-full bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 rounded-2xl overflow-hidden shadow-md border border-purple-200">
                                 {/* Animated Background */}
                                 <div className="absolute inset-0">
                                   <div className="absolute -top-4 -right-4 w-16 h-16 bg-purple-100/30 rounded-full animate-pulse"></div>
@@ -1457,11 +1457,11 @@ const Shop = () => {
                                 {/* Glassmorphism Overlay */}
                                 <div className="absolute inset-0 bg-white/50 backdrop-blur-sm"></div>
                                 
-                                <div className="relative z-20 p-3 h-full flex flex-col justify-between text-gray-700">
-                                  <div className="flex items-center">
-                                    <div className="flex items-center gap-2">
-                                      <div className="w-3 h-3 bg-yellow-400 rounded-full shadow-lg animate-pulse"></div>
-                                      <span className="text-xs font-semibold uppercase tracking-wider">{t.shop.volumeDeals}</span>
+                                <div className="relative z-20 p-2 sm:p-3 h-full flex flex-col justify-between text-gray-700">
+                                  <div className="flex items-center mb-1">
+                                    <div className="flex items-center gap-1 sm:gap-2">
+                                      <div className="w-2 h-2 sm:w-3 sm:h-3 bg-yellow-400 rounded-full shadow-lg animate-pulse"></div>
+                                      <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider">{t.shop.volumeDeals}</span>
                                     </div>
                                   </div>
                                   
@@ -1500,9 +1500,9 @@ const Shop = () => {
                                           if (!currentDiscount && nextDiscount) {
                                             return (
                                               <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg p-1.5 border border-red-400 shadow-lg animate-pulse">
-                                                <div className="flex items-center justify-between text-xs">
+                                                <div className="flex flex-col sm:flex-row items-center justify-between gap-1 text-[10px] sm:text-xs">
                                                   <div className="flex items-center gap-1">
-                                                    <Sparkles className="w-2.5 h-2.5 animate-spin" />
+                                                    <Sparkles className="w-2 h-2 sm:w-2.5 sm:h-2.5 animate-spin" />
                                                     <span className="font-bold">🔥 {t.shop.max} {(highestDiscount.discount * 100).toFixed(0)}% {t.shop.off}!</span>
                                                   </div>
                                                   <span className="font-bold text-yellow-200">
@@ -1515,30 +1515,30 @@ const Shop = () => {
                                           
                                           // Regular status display
                                           return currentDiscount ? (
-                                            <div className="bg-green-50 backdrop-blur-sm rounded-lg p-2 border border-green-100">
-                                              <div className="flex items-center justify-between text-xs">
+                                            <div className="bg-green-50 backdrop-blur-sm rounded-lg p-1.5 sm:p-2 border border-green-100">
+                                              <div className="flex flex-col sm:flex-row items-center justify-between gap-1 text-[10px] sm:text-xs">
                                                 <div className="flex items-center gap-1">
-                                                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse"></div>
                                                   <span className="font-semibold text-green-700">{(currentDiscount.discount * 100).toFixed(0)}% {t.shop.active}</span>
                                                 </div>
-                                                <span className="font-semibold text-green-700">
+                                                <span className="font-semibold text-green-700 text-center">
                                                   {Math.floor(parseFloat(product.price || "0") * currentDiscount.discount * currentQty)} IQD {t.shop.off}
                                                 </span>
                                               </div>
                                             </div>
                                           ) : nextDiscount ? (
-                                            <div className="bg-orange-50 backdrop-blur-sm rounded-lg p-2 border border-orange-100">
-                                              <div className="flex items-center gap-1 text-xs">
-                                                <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
+                                            <div className="bg-orange-50 backdrop-blur-sm rounded-lg p-1.5 sm:p-2 border border-orange-100">
+                                              <div className="flex items-center justify-center gap-1 text-[10px] sm:text-xs text-center">
+                                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-orange-400 rounded-full animate-bounce"></div>
                                                 <span className="font-semibold text-orange-700">
                                                   +{nextDiscount.remaining} {t.shop.more} → {(nextDiscount.discount * 100).toFixed(0)}% {t.shop.off}
                                                 </span>
                                               </div>
                                             </div>
                                           ) : (
-                                            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2 border border-white/30">
-                                              <div className="flex items-center gap-1 text-xs">
-                                                <div className="w-2 h-2 bg-white/70 rounded-full"></div>
+                                            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-1.5 sm:p-2 border border-white/30">
+                                              <div className="flex items-center justify-center gap-1 text-[10px] sm:text-xs text-center">
+                                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white/70 rounded-full"></div>
                                                 <span className="font-bold text-white/90">
                                                   {product.quantityDiscounts[0].minQty}+ {t.shop.items}: {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% {t.shop.off}
                                                 </span>
