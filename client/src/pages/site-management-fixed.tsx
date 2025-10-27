@@ -140,7 +140,7 @@ export default function SiteManagement() {
       label: "KPI Dashboard", 
       icon: BarChart3,
       onClick: () => trackButtonClick("kpi-dashboard", () => setLocation("/admin/kpi-dashboard")),
-      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50 hover:text-blue-800",
       moduleId: "kpi_dashboard"
     },
     {
@@ -148,7 +148,7 @@ export default function SiteManagement() {
       label: "Management Dashboard",
       icon: Monitor,
       onClick: () => trackButtonClick("management-dashboard", () => setLocation("/admin/management-dashboard")),
-      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50",
+      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-800",
       moduleId: "management_dashboard"
     },
     {
@@ -156,7 +156,7 @@ export default function SiteManagement() {
       label: "Syncing Shop",
       icon: Database,
       onClick: () => trackButtonClick("kardex-sync", () => setShowKardexSync(true)),
-      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50 hover:text-blue-800",
       moduleId: "syncing_shop"
     },
     {
@@ -164,7 +164,7 @@ export default function SiteManagement() {
       label: "Shop",
       icon: DollarSign,
       onClick: () => trackButtonClick("shop", () => setLocation("/admin/shop")),
-      className: "border-green-300 text-green-600 hover:bg-green-50",
+      className: "border-green-300 text-green-600 hover:bg-green-50 hover:text-green-800",
       moduleId: "shop_management"
     },
     {
@@ -172,7 +172,7 @@ export default function SiteManagement() {
       label: "Products",
       icon: Package,
       onClick: () => trackButtonClick("products", () => setLocation("/admin/products")),
-      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50 hover:text-purple-800",
       moduleId: "product_management"
     },
     {
@@ -180,7 +180,7 @@ export default function SiteManagement() {
       label: "Order Management",
       icon: ShoppingCart,
       onClick: () => trackButtonClick("order-management", () => setLocation("/admin/order-management")),
-      className: "border-orange-300 text-orange-600 hover:bg-orange-50",
+      className: "border-orange-300 text-orange-600 hover:bg-orange-50 hover:text-orange-800",
       moduleId: "order_management"
     },
     {
@@ -188,7 +188,7 @@ export default function SiteManagement() {
       label: "Warehouse Management",
       icon: Warehouse,
       onClick: () => trackButtonClick("warehouse-management", () => setLocation("/admin/warehouse-management")),
-      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50",
+      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-800",
       moduleId: "warehouse_management"
     },
 
@@ -198,7 +198,7 @@ export default function SiteManagement() {
       label: "CRM",
       icon: Users,
       onClick: () => trackButtonClick("crm", () => setLocation("/crm")),
-      className: "border-pink-300 text-pink-600 hover:bg-pink-50",
+      className: "border-pink-300 text-pink-600 hover:bg-pink-50 hover:text-pink-800",
       moduleId: "crm"
     },
     {
@@ -206,7 +206,7 @@ export default function SiteManagement() {
       label: "Wallet Management",
       icon: Wallet,
       onClick: () => trackButtonClick("wallet-management", () => setLocation("/admin/wallet-management")),
-      className: "border-yellow-300 text-yellow-600 hover:bg-yellow-50",
+      className: "border-yellow-300 text-yellow-600 hover:bg-yellow-50 hover:text-yellow-800",
       moduleId: "wallet_management"
     },
 
@@ -215,7 +215,7 @@ export default function SiteManagement() {
       label: "Finance",
       icon: DollarSign,
       onClick: () => trackButtonClick("finance", () => setLocation("/admin/finance-orders")),
-      className: "border-green-300 text-green-600 hover:bg-green-50",
+      className: "border-green-300 text-green-600 hover:bg-green-50 hover:text-green-800",
       moduleId: "finance"
     },
     {
@@ -223,7 +223,7 @@ export default function SiteManagement() {
       label: "Accounting Management",
       icon: Calculator,
       onClick: () => trackButtonClick("accounting-management", () => setLocation("/admin/accounting-management")),
-      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
+      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-800",
       moduleId: "accounting_management"
     },
     {
@@ -231,7 +231,7 @@ export default function SiteManagement() {
       label: "Payment Settings",
       icon: CreditCard,
       onClick: () => trackButtonClick("payment-settings", () => setLocation("/admin/payment-settings")),
-      className: "border-red-300 text-red-600 hover:bg-red-50",
+      className: "border-red-300 text-red-600 hover:bg-red-50 hover:text-red-800",
       moduleId: "payment_management"
     },
     {
@@ -239,7 +239,7 @@ export default function SiteManagement() {
       label: "Geography Analytics",
       icon: MapPin,
       onClick: () => trackButtonClick("geography-analytics", () => setLocation("/admin/geographic-analytics")),
-      className: "border-teal-300 text-teal-600 hover:bg-teal-50",
+      className: "border-teal-300 text-teal-600 hover:bg-teal-50 hover:text-teal-800",
       moduleId: "geography_analytics"
     },
     {
@@ -247,7 +247,7 @@ export default function SiteManagement() {
       label: "Inquiries",
       icon: MessageSquare,
       onClick: () => trackButtonClick("inquiries", () => setLocation("/admin/inquiries")),
-      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50 hover:text-blue-800",
       moduleId: "inquiries"
     },
     {
@@ -255,7 +255,7 @@ export default function SiteManagement() {
       label: "Email Settings",
       icon: Mail,
       onClick: () => trackButtonClick("email-settings", () => setLocation("/admin/advanced-email-settings")),
-      className: "border-cyan-300 text-cyan-600 hover:bg-cyan-50",
+      className: "border-cyan-300 text-cyan-600 hover:bg-cyan-50 hover:text-cyan-800",
       moduleId: "email_settings"
     },
     {
@@ -263,7 +263,7 @@ export default function SiteManagement() {
       label: "Content Management",
       icon: Edit3,
       onClick: () => trackButtonClick("content-management", () => setLocation("/content-management")),
-      className: "border-lime-300 text-lime-600 hover:bg-lime-50",
+      className: "border-lime-300 text-lime-600 hover:bg-lime-50 hover:text-lime-800",
       moduleId: "content_management"
     },
     {
@@ -271,7 +271,7 @@ export default function SiteManagement() {
       label: "Company Information",
       icon: FileText,
       onClick: () => trackButtonClick("company-information", () => setLocation("/admin/company-information")),
-      className: "border-slate-300 text-slate-600 hover:bg-slate-50",
+      className: "border-slate-300 text-slate-600 hover:bg-slate-50 hover:text-slate-800",
       moduleId: "company_information"
     },
     {
@@ -279,7 +279,7 @@ export default function SiteManagement() {
       label: "SEO Management",
       icon: Globe,
       onClick: () => trackButtonClick("seo", () => setLocation("/seo-management")),
-      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
+      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-800",
       moduleId: "seo"
     },
     {
@@ -287,7 +287,7 @@ export default function SiteManagement() {
       label: "Categories",
       icon: Box,
       onClick: () => trackButtonClick("categories", () => setLocation("/category-management")),
-      className: "border-violet-300 text-violet-600 hover:bg-violet-50",
+      className: "border-violet-300 text-violet-600 hover:bg-violet-50 hover:text-violet-800",
       moduleId: "categories"
     },
     {
@@ -295,7 +295,7 @@ export default function SiteManagement() {
       label: "Barcode",
       icon: QrCode,
       onClick: () => trackButtonClick("barcode", () => setLocation("/admin/barcode-inventory")),
-      className: "border-rose-300 text-rose-600 hover:bg-rose-50",
+      className: "border-rose-300 text-rose-600 hover:bg-rose-50 hover:text-rose-800",
       moduleId: "barcode"
     },
     {
@@ -303,7 +303,7 @@ export default function SiteManagement() {
       label: "Database Backup",
       icon: Database,
       onClick: () => trackButtonClick("database-backup", () => setLocation("/admin/database-management")),
-      className: "border-stone-300 text-stone-600 hover:bg-stone-50",
+      className: "border-stone-300 text-stone-600 hover:bg-stone-50 hover:text-stone-800",
       moduleId: "database_backup"
     },
     {
@@ -311,7 +311,7 @@ export default function SiteManagement() {
       label: "User Management",
       icon: UserCog,
       onClick: () => trackButtonClick("user-management", () => setLocation("/admin/user-management")),
-      className: "border-slate-300 text-slate-600 hover:bg-slate-50",
+      className: "border-slate-300 text-slate-600 hover:bg-slate-50 hover:text-slate-800",
       moduleId: "user_management"
     },
     {
@@ -319,7 +319,7 @@ export default function SiteManagement() {
       label: "SMS Management",
       icon: Smartphone,
       onClick: () => trackButtonClick("sms", () => setLocation("/admin/sms-management")),
-      className: "border-gray-300 text-gray-600 hover:bg-gray-50",
+      className: "border-gray-300 text-gray-600 hover:bg-gray-50 hover:text-gray-800",
       moduleId: "sms"
     },
     {
@@ -327,7 +327,7 @@ export default function SiteManagement() {
       label: "Factory Management",
       icon: Factory,
       onClick: () => trackButtonClick("factory", () => setLocation("/admin/factory-management")),
-      className: "border-neutral-300 text-neutral-600 hover:bg-neutral-50",
+      className: "border-neutral-300 text-neutral-600 hover:bg-neutral-50 hover:text-neutral-800",
       moduleId: "factory"
     },
     {
@@ -335,7 +335,7 @@ export default function SiteManagement() {
       label: "Procedures",
       icon: BookOpen,
       onClick: () => trackButtonClick("procedures", () => setLocation("/admin/procedures-management")),
-      className: "border-zinc-300 text-zinc-600 hover:bg-zinc-50",
+      className: "border-zinc-300 text-zinc-600 hover:bg-zinc-50 hover:text-zinc-800",
       moduleId: "procedures"
     },
     {
@@ -343,7 +343,7 @@ export default function SiteManagement() {
       label: "Refresh Control",
       icon: RefreshCw,
       onClick: () => trackButtonClick("refresh-control", () => setLocation("/admin/global-refresh-settings")),
-      className: "border-green-300 text-green-600 hover:bg-green-50",
+      className: "border-green-300 text-green-600 hover:bg-green-50 hover:text-green-800",
       moduleId: "refresh_control"
     },
     {
@@ -351,7 +351,7 @@ export default function SiteManagement() {
       label: "Logistics Management",
       icon: Truck,
       onClick: () => trackButtonClick("logistics", () => setLocation("/admin/logistics-management")),
-      className: "border-orange-300 text-orange-600 hover:bg-orange-50",
+      className: "border-orange-300 text-orange-600 hover:bg-orange-50 hover:text-orange-800",
       moduleId: "logistics_management"
     },
     {
@@ -359,7 +359,7 @@ export default function SiteManagement() {
       label: "Ticketing System",
       icon: Ticket,
       onClick: () => trackButtonClick("ticketing", () => setLocation("/admin/ticketing-system")),
-      className: "border-rose-300 text-rose-600 hover:bg-rose-50",
+      className: "border-rose-300 text-rose-600 hover:bg-rose-50 hover:text-rose-800",
       moduleId: "ticketing_system"
     },
 
@@ -368,7 +368,7 @@ export default function SiteManagement() {
       label: "Remote Desktop",
       icon: RemoteMonitor,
       onClick: () => trackButtonClick("remote-desktop", () => setLocation("/admin/remote-desktop")),
-      className: "border-cyan-300 text-cyan-600 hover:bg-cyan-50",
+      className: "border-cyan-300 text-cyan-600 hover:bg-cyan-50 hover:text-cyan-800",
       moduleId: "remote_desktop"
     },
     {
@@ -376,7 +376,7 @@ export default function SiteManagement() {
       label: "Server Config",
       icon: Server,
       onClick: () => trackButtonClick("server-config", () => setLocation("/admin/server-config")),
-      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50 hover:text-blue-800",
       moduleId: "server_config"
     },
     {
@@ -384,7 +384,7 @@ export default function SiteManagement() {
       label: "AWS S3 Settings",
       icon: Cloud,
       onClick: () => trackButtonClick("aws-s3-settings", () => setLocation("/admin/aws-s3-settings")),
-      className: "border-sky-300 text-sky-600 hover:bg-sky-50",
+      className: "border-sky-300 text-sky-600 hover:bg-sky-50 hover:text-sky-800",
       moduleId: "aws_s3_settings"
     },
     {
@@ -392,7 +392,7 @@ export default function SiteManagement() {
       label: "User Guide",
       icon: BookOpen,
       onClick: () => trackButtonClick("user-guide", () => setLocation("/user-guide")),
-      className: "border-teal-300 text-teal-600 hover:bg-teal-50",
+      className: "border-teal-300 text-teal-600 hover:bg-teal-50 hover:text-teal-800",
       moduleId: "user_guide"
     },
     {
@@ -400,7 +400,7 @@ export default function SiteManagement() {
       label: "Marketing Module",
       icon: BarChart3,
       onClick: () => trackButtonClick("marketing-module", () => setLocation("/admin/marketing-module")),
-      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50 hover:text-purple-800",
       moduleId: "marketing_module"
     },
     {
@@ -408,7 +408,7 @@ export default function SiteManagement() {
       label: "Order Management & Tracking - View Only",
       icon: Monitor,
       onClick: () => trackButtonClick("order-tracking-view", () => setLocation("/admin/order-tracking-view")),
-      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50",
+      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-800",
       moduleId: "order_tracking"
     },
     {
@@ -416,7 +416,7 @@ export default function SiteManagement() {
       label: "Super Admin Order Management",
       icon: Shield,
       onClick: () => trackButtonClick("super-admin-order-management", () => setLocation("/admin/super-admin-order-management")),
-      className: "border-red-300 text-red-600 hover:bg-red-50 font-semibold",
+      className: "border-red-300 text-red-600 hover:bg-red-50 hover:text-red-800 font-semibold",
       moduleId: "order_management"
     },
     {
@@ -424,7 +424,7 @@ export default function SiteManagement() {
       label: "WhatsApp CRM",
       icon: MessageCircle,
       onClick: () => trackButtonClick("whatsapp-crm", () => setLocation("/admin/whatsapp-crm")),
-      className: "border-green-400 text-green-600 hover:bg-green-50",
+      className: "border-green-400 text-green-600 hover:bg-green-50 hover:text-green-800",
       moduleId: "whatsapp_crm"
     }
 
