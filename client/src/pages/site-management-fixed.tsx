@@ -579,12 +579,13 @@ export default function SiteManagement() {
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            className={`relative group ${snapshot.isDragging ? 'z-50' : ''}`}
+                            {...provided.dragHandleProps}
+                            className={`relative group cursor-grab active:cursor-grabbing ${snapshot.isDragging ? 'z-50' : ''}`}
                           >
                             <Button
                               onClick={button.onClick}
                               variant="outline"
-                              className={`w-full h-20 flex flex-col items-center justify-center space-y-2 transition-all duration-200 hover:scale-105 ${button.className} ${snapshot.isDragging ? 'shadow-2xl ring-2 ring-blue-400' : ''}`}
+                              className={`w-full h-20 flex flex-col items-center justify-center space-y-2 transition-all duration-200 hover:scale-105 ${button.className} ${snapshot.isDragging ? 'shadow-2xl ring-2 ring-blue-400 opacity-80' : ''}`}
                             >
                               <button.icon className="w-6 h-6" />
                               <span className="text-xs font-medium text-center leading-tight">
@@ -592,8 +593,7 @@ export default function SiteManagement() {
                               </span>
                             </Button>
                             <div
-                              {...provided.dragHandleProps}
-                              className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+                              className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
                             >
                               <GripVertical className="w-4 h-4 text-gray-400" />
                             </div>
