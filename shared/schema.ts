@@ -41,6 +41,31 @@ export type InsertAiApiSettings = z.infer<typeof insertAiApiSettingsSchema>;
 export type AiApiSettings = typeof aiApiSettings.$inferSelect;
 
 // =============================================================================
+// AWS S3 STORAGE SETTINGS
+// =============================================================================
+
+// AWS S3 Settings table for storing S3 configuration
+export const awsS3Settings = pgTable("aws_s3_settings", {
+  id: serial("id").primaryKey(),
+  accessKeyId: text("access_key_id").notNull(), // Encrypted AWS Access Key ID
+  secretAccessKey: text("secret_access_key").notNull(), // Encrypted AWS Secret Access Key
+  region: text("region").notNull(), // AWS region (e.g., us-east-1)
+  bucketName: text("bucket_name").notNull(), // S3 bucket name
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  // Additional settings
+  endpoint: text("endpoint"), // Custom endpoint (for S3-compatible services)
+  usePathStyle: boolean("use_path_style").default(false), // Force path style URLs
+  publicUrl: text("public_url"), // Public URL for accessing files
+  description: text("description"), // Description of this configuration
+});
+
+export const insertAwsS3SettingsSchema = createInsertSchema(awsS3Settings);
+export type InsertAwsS3Settings = z.infer<typeof insertAwsS3SettingsSchema>;
+export type AwsS3Settings = typeof awsS3Settings.$inferSelect;
+
+// =============================================================================
 // ABANDONED ORDERS TRACKING SYSTEM
 // =============================================================================
 
