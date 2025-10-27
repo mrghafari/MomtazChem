@@ -46,6 +46,7 @@ import EmailRoutingStats from "@/pages/admin/email-routing-stats";
 import AutomatedEmailLogs from "@/pages/admin/automated-email-logs";
 import InquiryResponses from '@/pages/admin/inquiry-responses';
 import ServerConfig from "@/components/admin/server-config";
+import AwsS3Settings from "@/pages/admin/aws-s3-settings";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import PasswordReset from "@/pages/password-reset";
@@ -277,6 +278,7 @@ function Router() {
           <Route path="/admin/abandoned-orders" component={AdminAbandonedOrders} />
           <Route path="/admin/remote-desktop" component={RemoteDesktop} />
           <Route path="/admin/server-config" component={ServerConfig} />
+          <Route path="/admin/aws-s3-settings" component={AwsS3Settings} />
           <Route path="/admin/batch-management" component={BatchManagement} />
           <Route path="/admin/kpi-dashboard" component={KpiDashboard} />
           <Route path="/admin/kpi-report" component={KpiReport} />

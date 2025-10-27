@@ -1,4 +1,4 @@
-import { users, leads, leadActivities, passwordResets, abandonedOrders, persistentCarts, aiApiSettings, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type AbandonedOrder, type InsertAbandonedOrder, type PersistentCart, type InsertPersistentCart, type AiApiSettings, type InsertAiApiSettings } from "@shared/schema";
+import { users, leads, leadActivities, passwordResets, abandonedOrders, persistentCarts, aiApiSettings, awsS3Settings, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type AbandonedOrder, type InsertAbandonedOrder, type PersistentCart, type InsertPersistentCart, type AiApiSettings, type InsertAiApiSettings, type AwsS3Settings, type InsertAwsS3Settings } from "@shared/schema";
 import { contacts, showcaseProducts, type Contact, type InsertContact, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { db } from "./db";
 import { showcaseDb } from "./showcase-db";
@@ -77,6 +77,14 @@ export interface IStorage {
   updateAiApiSettings(id: number, settings: Partial<InsertAiApiSettings>): Promise<AiApiSettings>;
   deleteAiApiSettings(id: number): Promise<void>;
   getActiveAiApiSettings(provider: string): Promise<AiApiSettings | undefined>;
+
+  // AWS S3 Settings Management
+  createAwsS3Settings(settings: InsertAwsS3Settings): Promise<AwsS3Settings>;
+  getAwsS3Settings(): Promise<AwsS3Settings[]>;
+  getAwsS3SettingById(id: number): Promise<AwsS3Settings | undefined>;
+  updateAwsS3Settings(id: number, settings: Partial<InsertAwsS3Settings>): Promise<AwsS3Settings>;
+  deleteAwsS3Settings(id: number): Promise<void>;
+  getActiveAwsS3Settings(): Promise<AwsS3Settings | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -991,6 +999,58 @@ export class DatabaseStorage implements IStorage {
         eq(aiApiSettings.provider, provider),
         eq(aiApiSettings.isActive, true)
       ))
+      .limit(1);
+    return results[0];
+  }
+
+  // AWS S3 Settings Management Implementation
+  async createAwsS3Settings(insertSettings: InsertAwsS3Settings): Promise<AwsS3Settings> {
+    const [settings] = await db
+      .insert(awsS3Settings)
+      .values(insertSettings)
+      .returning();
+    return settings;
+  }
+
+  async getAwsS3Settings(): Promise<AwsS3Settings[]> {
+    return await db
+      .select()
+      .from(awsS3Settings)
+      .orderBy(desc(awsS3Settings.createdAt));
+  }
+
+  async getAwsS3SettingById(id: number): Promise<AwsS3Settings | undefined> {
+    const results = await db
+      .select()
+      .from(awsS3Settings)
+      .where(eq(awsS3Settings.id, id));
+    return results[0];
+  }
+
+  async updateAwsS3Settings(id: number, updateSettings: Partial<InsertAwsS3Settings>): Promise<AwsS3Settings> {
+    const [settings] = await db
+      .update(awsS3Settings)
+      .set({
+        ...updateSettings,
+        updatedAt: new Date()
+      })
+      .where(eq(awsS3Settings.id, id))
+      .returning();
+    return settings;
+  }
+
+  async deleteAwsS3Settings(id: number): Promise<void> {
+    await db
+      .delete(awsS3Settings)
+      .where(eq(awsS3Settings.id, id));
+  }
+
+  async getActiveAwsS3Settings(): Promise<AwsS3Settings | undefined> {
+    const results = await db
+      .select()
+      .from(awsS3Settings)
+      .where(eq(awsS3Settings.isActive, true))
+      .orderBy(desc(awsS3Settings.createdAt))
       .limit(1);
     return results[0];
   }
