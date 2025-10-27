@@ -93,7 +93,7 @@ export default function Header() {
     {
       title: t.fuelAdditives,
       href: "/products/fuel-additives",
-      description: "High-performance fuel additives for enhanced engine efficiency",
+      description: t.fuelAdditivesDesc,
       icon: <Beaker className="h-6 w-6" />,
       color: "blue",
       hoverBg: "hover:bg-blue-50 dark:hover:bg-blue-900/20",
@@ -103,7 +103,7 @@ export default function Header() {
     {
       title: t.waterTreatment,
       href: "/products/water-treatment", 
-      description: "Comprehensive water treatment solutions for all applications",
+      description: t.waterTreatmentDesc,
       icon: <Droplet className="h-6 w-6" />,
       color: "cyan",
       hoverBg: "hover:bg-cyan-50 dark:hover:bg-cyan-900/20",
@@ -111,9 +111,9 @@ export default function Header() {
       titleHover: "group-hover:text-cyan-600 dark:group-hover:text-cyan-400"
     },
     {
-      title: "Paint & Solvents",
+      title: t.paintSolvents,
       href: "/products/paint-solvents",
-      description: "Premium paint formulations and specialty solvents",
+      description: t.paintSolventsDesc,
       icon: <Package className="h-6 w-6" />,
       color: "orange",
       hoverBg: "hover:bg-orange-50 dark:hover:bg-orange-900/20",
@@ -124,7 +124,7 @@ export default function Header() {
     {
       title: t.agriculturalFertilizers, 
       href: "/products/agricultural-fertilizers",
-      description: "Advanced fertilizer solutions for sustainable farming",
+      description: t.agriculturalFertilizersDesc,
       icon: <Wheat className="h-6 w-6" />,
       color: "emerald",
       hoverBg: "hover:bg-emerald-50 dark:hover:bg-emerald-900/20",
@@ -132,9 +132,9 @@ export default function Header() {
       titleHover: "group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
     },
     {
-      title: "Industrial Chemicals",
+      title: t.industrialChemicals,
       href: "/products/industrial-chemicals",
-      description: "Professional industrial chemical solutions",
+      description: t.industrialChemicalsDesc,
       icon: <Package className="h-6 w-6" />,
       color: "purple",
       hoverBg: "hover:bg-purple-50 dark:hover:bg-purple-900/20",
@@ -142,9 +142,9 @@ export default function Header() {
       titleHover: "group-hover:text-purple-600 dark:group-hover:text-purple-400"
     },
     {
-      title: "Paint Thinner",
+      title: t.paintThinner,
       href: "/products/paint-thinner",
-      description: "Specialty paint thinners and related products",
+      description: t.paintThinnerDesc,
       icon: <Package className="h-6 w-6" />,
       color: "amber",
       hoverBg: "hover:bg-amber-50 dark:hover:bg-amber-900/20",
@@ -152,9 +152,9 @@ export default function Header() {
       titleHover: "group-hover:text-amber-600 dark:group-hover:text-amber-400"
     },
     {
-      title: "Technical Equipment",
+      title: t.technicalEquipment,
       href: "/products/technical-equipment",
-      description: "Professional technical equipment and tools",
+      description: t.technicalEquipmentDesc,
       icon: <Package className="h-6 w-6" />,
       color: "indigo",
       hoverBg: "hover:bg-indigo-50 dark:hover:bg-indigo-900/20",
@@ -162,9 +162,9 @@ export default function Header() {
       titleHover: "group-hover:text-indigo-600 dark:group-hover:text-indigo-400"
     },
     {
-      title: "Commercial Goods",
+      title: t.commercialGoods,
       href: "/products/commercial-goods",
-      description: "Commercial goods and business solutions",
+      description: t.commercialGoodsDesc,
       icon: <Package className="h-6 w-6" />,
       color: "slate",
       hoverBg: "hover:bg-slate-50 dark:hover:bg-slate-900/20",

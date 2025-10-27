@@ -234,6 +234,20 @@ export interface Translation {
   fuelAdditives: string;
   paintThinner: string;
   agriculturalFertilizers: string;
+  paintSolvents: string;
+  industrialChemicals: string;
+  technicalEquipment: string;
+  commercialGoods: string;
+  
+  // Product category descriptions
+  fuelAdditivesDesc: string;
+  waterTreatmentDesc: string;
+  paintSolventsDesc: string;
+  agriculturalFertilizersDesc: string;
+  industrialChemicalsDesc: string;
+  paintThinnerDesc: string;
+  technicalEquipmentDesc: string;
+  commercialGoodsDesc: string;
   
   // Product Reviews
   productReviews: string;
@@ -308,16 +322,6 @@ export interface Translation {
   support24_7: string;
   applicationTraining: string;
   documentation: string;
-  
-  // Product Categories Extended
-  fuelAdditivesTitle: string;
-  fuelAdditivesDesc: string;
-  waterTreatmentTitle: string;
-  waterTreatmentDesc: string;
-  paintThinnerTitle: string;
-  paintThinnerDesc: string;
-  agriculturalFertilizersTitle: string;
-  agriculturalFertilizersDesc: string;
   
   // About page
   aboutTitle: string;
@@ -644,8 +648,22 @@ export const translations: Record<Language, Translation> = {
     // Product categories
     waterTreatment: 'Water Treatment',
     fuelAdditives: 'Fuel Additives',
-    paintThinner: 'Paint & Thinner',
+    paintThinner: 'Paint Thinner',
     agriculturalFertilizers: 'Agricultural Fertilizers',
+    paintSolvents: 'Paint & Solvents',
+    industrialChemicals: 'Industrial Chemicals',
+    technicalEquipment: 'Technical Equipment',
+    commercialGoods: 'Commercial Goods',
+    
+    // Product category descriptions
+    fuelAdditivesDesc: 'High-performance fuel additives for enhanced engine efficiency',
+    waterTreatmentDesc: 'Comprehensive water treatment solutions for all applications',
+    paintSolventsDesc: 'Premium paint formulations and specialty solvents',
+    agriculturalFertilizersDesc: 'Advanced fertilizer solutions for sustainable farming',
+    industrialChemicalsDesc: 'Professional industrial chemical solutions',
+    paintThinnerDesc: 'Specialty paint thinners and related products',
+    technicalEquipmentDesc: 'Professional technical equipment and tools',
+    commercialGoodsDesc: 'Commercial goods and business solutions',
     
     // Product Reviews
     productReviews: 'Product Reviews',
@@ -712,16 +730,6 @@ export const translations: Record<Language, Translation> = {
     support24_7: '24/7 Support',
     applicationTraining: 'Application Training',
     documentation: 'Documentation',
-    
-    // Product Categories Extended
-    fuelAdditivesTitle: 'Fuel Additives',
-    fuelAdditivesDesc: 'High-performance fuel additives designed to enhance combustion efficiency, reduce emissions, and extend engine life across automotive and industrial applications.',
-    waterTreatmentTitle: 'Water Treatment',
-    waterTreatmentDesc: 'Comprehensive water treatment solutions for municipal, industrial, and residential applications, ensuring clean and safe water for all uses.',
-    paintThinnerTitle: 'Paint & Thinner',
-    paintThinnerDesc: 'Premium paint formulations and thinners for automotive, architectural, and industrial applications with superior durability and finish quality.',
-    agriculturalFertilizersTitle: 'Agricultural Fertilizers',
-    agriculturalFertilizersDesc: 'Advanced fertilizer solutions designed to maximize crop yields while promoting sustainable farming practices and soil health enhancement.',
     
     // About page
     aboutTitle: 'About Momtazchem',
@@ -1028,8 +1036,22 @@ export const translations: Record<Language, Translation> = {
     // Product categories
     waterTreatment: 'معالجة المياه',
     fuelAdditives: 'إضافات الوقود',
-    paintThinner: 'الدهان والمذيبات',
+    paintThinner: 'مخفف الدهان',
     agriculturalFertilizers: 'الأسمدة الزراعية',
+    paintSolvents: 'الدهان والمذيبات',
+    industrialChemicals: 'المواد الكيميائية الصناعية',
+    technicalEquipment: 'المعدات الفنية',
+    commercialGoods: 'السلع التجارية',
+    
+    // Product category descriptions
+    fuelAdditivesDesc: 'إضافات وقود عالية الأداء لتحسين كفاءة المحرك',
+    waterTreatmentDesc: 'حلول شاملة لمعالجة المياه لجميع التطبيقات',
+    paintSolventsDesc: 'تركيبات دهانات متميزة ومذيبات متخصصة',
+    agriculturalFertilizersDesc: 'حلول أسمدة متقدمة للزراعة المستدامة',
+    industrialChemicalsDesc: 'حلول كيميائية صناعية احترافية',
+    paintThinnerDesc: 'مخففات دهان متخصصة ومنتجات ذات صلة',
+    technicalEquipmentDesc: 'معدات وأدوات فنية احترافية',
+    commercialGoodsDesc: 'السلع التجارية وحلول الأعمال',
     
     // Product Reviews
     productReviews: 'مراجعات المنتج',
@@ -1096,16 +1118,6 @@ export const translations: Record<Language, Translation> = {
     support24_7: 'دعم 24/7',
     applicationTraining: 'تدريب التطبيق',
     documentation: 'التوثيق',
-    
-    // Product Categories Extended
-    fuelAdditivesTitle: 'إضافات الوقود',
-    fuelAdditivesDesc: 'إضافات وقود عالية الأداء مصممة لتعزيز كفاءة الاحتراق وتقليل الانبعاثات وإطالة عمر المحرك عبر التطبيقات السيارات والصناعية.',
-    waterTreatmentTitle: 'معالجة المياه',
-    waterTreatmentDesc: 'حلول معالجة المياه الشاملة للتطبيقات البلدية والصناعية والسكنية، مما يضمن مياه نظيفة وآمنة لجميع الاستخدامات.',
-    paintThinnerTitle: 'الدهانات والمذيبات',
-    paintThinnerDesc: 'تركيبات دهانات ومذيبات ممتازة للسيارات والعمارة والتطبيقات الصناعية مع متانة وجودة تشطيب فائقة.',
-    agriculturalFertilizersTitle: 'الأسمدة الزراعية',
-    agriculturalFertilizersDesc: 'حلول الأسمدة المتقدمة المصممة لتعظيم غلة المحاصيل مع تعزيز ممارسات الزراعة المستدامة وتحسين صحة التربة.',
     
     // About page
     aboutTitle: 'حول مجمع ممتاز الكيميائي',
