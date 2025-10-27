@@ -414,6 +414,138 @@ export interface Translation {
   shopSettings: string;
   weightsAndBatch: string;
   productDetails: string;
+  
+  // Services Page
+  servicesPage: {
+    title: string;
+    subtitle: string;
+    
+    // Service 1: R&D
+    rdTitle: string;
+    rdDesc: string;
+    rdFeature1: string;
+    rdFeature2: string;
+    rdFeature3: string;
+    rdFeature4: string;
+    rdFeature5: string;
+    rdFeature6: string;
+    
+    // Service 2: Distribution
+    distributionTitle: string;
+    distributionDesc: string;
+    distFeature1: string;
+    distFeature2: string;
+    distFeature3: string;
+    distFeature4: string;
+    distFeature5: string;
+    distFeature6: string;
+    
+    // Service 3: Technical Support
+    techSupportTitle: string;
+    techSupportDesc: string;
+    techFeature1: string;
+    techFeature2: string;
+    techFeature3: string;
+    techFeature4: string;
+    techFeature5: string;
+    techFeature6: string;
+    
+    // Service 4: Consulting
+    consultingTitle: string;
+    consultingDesc: string;
+    consultFeature1: string;
+    consultFeature2: string;
+    consultFeature3: string;
+    consultFeature4: string;
+    consultFeature5: string;
+    consultFeature6: string;
+    
+    // Service 5: Quality Assurance
+    qaTitle: string;
+    qaDesc: string;
+    qaFeature1: string;
+    qaFeature2: string;
+    qaFeature3: string;
+    qaFeature4: string;
+    qaFeature5: string;
+    qaFeature6: string;
+    
+    // Service 6: Custom Manufacturing
+    customMfgTitle: string;
+    customMfgDesc: string;
+    customFeature1: string;
+    customFeature2: string;
+    customFeature3: string;
+    customFeature4: string;
+    customFeature5: string;
+    customFeature6: string;
+    
+    // Capabilities
+    coreCapabilities: string;
+    coreCapabilitiesDesc: string;
+    advManufacturing: string;
+    advManufacturingDesc: string;
+    qualityControl: string;
+    qualityControlDesc: string;
+    globalReachCap: string;
+    globalReachCapDesc: string;
+    expertTeam: string;
+    expertTeamDesc: string;
+    
+    // Service Process
+    serviceProcess: string;
+    serviceProcessDesc: string;
+    consultation: string;
+    consultationDesc: string;
+    development: string;
+    developmentDesc: string;
+    testing: string;
+    testingDesc: string;
+    delivery: string;
+    deliveryDesc: string;
+    
+    // CTA
+    readyToStart: string;
+    contactExpertsDesc: string;
+    contactSales: string;
+    requestQuote: string;
+    
+    // Contact Form
+    contactSalesTitle: string;
+    fullName: string;
+    emailAddress: string;
+    companyName: string;
+    phoneNumber: string;
+    message: string;
+    messagePlaceholder: string;
+    cancel: string;
+    sendMessage: string;
+    sending: string;
+    
+    // Quote Form  
+    requestQuoteTitle: string;
+    productCategory: string;
+    productCategoryPlaceholder: string;
+    requiredQuantity: string;
+    quantityPlaceholder: string;
+    requiredTimeline: string;
+    timelinePlaceholder: string;
+    productSpecs: string;
+    specsPlaceholder: string;
+    additionalReqs: string;
+    additionalPlaceholder: string;
+    submitQuote: string;
+    submitting: string;
+    
+    // Toast Messages
+    messageSent: string;
+    messageSentDesc: string;
+    quoteSubmitted: string;
+    quoteSubmittedDesc: string;
+    errorTitle: string;
+    messageFailed: string;
+    quoteFailed: string;
+  };
 }
 
 export const translations: Record<Language, Translation> = {
@@ -827,6 +959,126 @@ export const translations: Record<Language, Translation> = {
     shopSettings: 'Shop Settings',
     weightsAndBatch: 'Weights & Batch',
     productDetails: 'Product Details',
+    
+    // Services Page
+    servicesPage: {
+      title: 'Our Services & Capabilities',
+      subtitle: 'Comprehensive support from research and development to delivery and technical assistance, ensuring your success every step of the way.',
+      
+      rdTitle: 'Research & Development',
+      rdDesc: 'Custom formulation development and product optimization to meet your specific requirements.',
+      rdFeature1: 'Custom Chemical Formulations',
+      rdFeature2: 'Product Performance Testing',
+      rdFeature3: 'Regulatory Compliance Support',
+      rdFeature4: 'Scale-up from Lab to Production',
+      rdFeature5: 'Quality Optimization',
+      rdFeature6: 'Application Development',
+      
+      distributionTitle: 'Global Distribution',
+      distributionDesc: 'Reliable supply chain and logistics network ensuring timely delivery worldwide.',
+      distFeature1: '40+ Countries Coverage',
+      distFeature2: 'Express Shipping Options',
+      distFeature3: 'Bulk Order Handling',
+      distFeature4: 'Cold Chain Management',
+      distFeature5: 'Real-time Tracking',
+      distFeature6: 'Local Warehousing',
+      
+      techSupportTitle: 'Technical Support',
+      techSupportDesc: 'Expert technical assistance and consultation for optimal product application.',
+      techFeature1: '24/7 Technical Helpline',
+      techFeature2: 'Application Training',
+      techFeature3: 'Troubleshooting Support',
+      techFeature4: 'Performance Optimization',
+      techFeature5: 'Safety Guidelines',
+      techFeature6: 'Documentation Support',
+      
+      consultingTitle: 'Consulting Services',
+      consultingDesc: 'Strategic consulting to help optimize your chemical processes and operations.',
+      consultFeature1: 'Process Optimization',
+      consultFeature2: 'Cost Reduction Analysis',
+      consultFeature3: 'Sustainability Assessment',
+      consultFeature4: 'Regulatory Guidance',
+      consultFeature5: 'Market Analysis',
+      consultFeature6: 'Strategic Planning',
+      
+      qaTitle: 'Quality Assurance',
+      qaDesc: 'Comprehensive quality control and assurance programs for all our products.',
+      qaFeature1: 'ISO Certified Processes',
+      qaFeature2: 'Batch Testing & Analysis',
+      qaFeature3: 'Certificate of Analysis',
+      qaFeature4: 'Quality Documentation',
+      qaFeature5: 'Regulatory Compliance',
+      qaFeature6: 'Continuous Monitoring',
+      
+      customMfgTitle: 'Custom Manufacturing',
+      customMfgDesc: 'Tailored manufacturing solutions for specialized chemical requirements.',
+      customFeature1: 'Contract Manufacturing',
+      customFeature2: 'Private Labeling',
+      customFeature3: 'Flexible Batch Sizes',
+      customFeature4: 'Specialty Formulations',
+      customFeature5: 'Packaging Solutions',
+      customFeature6: 'Supply Chain Integration',
+      
+      coreCapabilities: 'Our Core Capabilities',
+      coreCapabilitiesDesc: 'Backed by decades of experience and cutting-edge technology',
+      advManufacturing: 'Advanced Manufacturing',
+      advManufacturingDesc: 'State-of-the-art facilities with modern equipment and automation',
+      qualityControl: 'Quality Control',
+      qualityControlDesc: 'Rigorous testing and quality assurance at every stage',
+      globalReachCap: 'Global Reach',
+      globalReachCapDesc: 'Serving customers in over 40 countries worldwide',
+      expertTeam: 'Expert Team',
+      expertTeamDesc: '50+ R&D scientists and chemical engineering experts',
+      
+      serviceProcess: 'Our Service Process',
+      serviceProcessDesc: 'From initial consultation to ongoing support, we\'re with you every step of the way',
+      consultation: 'Consultation',
+      consultationDesc: 'Understanding your specific requirements and challenges',
+      development: 'Development',
+      developmentDesc: 'Custom formulation and solution development',
+      testing: 'Testing',
+      testingDesc: 'Rigorous testing and quality validation',
+      delivery: 'Delivery',
+      deliveryDesc: 'Production, delivery, and ongoing support',
+      
+      readyToStart: 'Ready to Get Started?',
+      contactExpertsDesc: 'Contact our team of experts to discuss your chemical solution needs and discover how we can help your business succeed.',
+      contactSales: 'Contact Sales Team',
+      requestQuote: 'Request Quote',
+      
+      contactSalesTitle: 'Contact Sales Team',
+      fullName: 'Full Name',
+      emailAddress: 'Email Address',
+      companyName: 'Company',
+      phoneNumber: 'Phone Number',
+      message: 'Message',
+      messagePlaceholder: 'Tell us about your requirements...',
+      cancel: 'Cancel',
+      sendMessage: 'Send Message',
+      sending: 'Sending...',
+      
+      requestQuoteTitle: 'Request Quote',
+      productCategory: 'Product Category',
+      productCategoryPlaceholder: 'e.g., Agricultural Fertilizers, Water Treatment, etc.',
+      requiredQuantity: 'Required Quantity',
+      quantityPlaceholder: 'e.g., 500 kg, 10 tons',
+      requiredTimeline: 'Required Timeline',
+      timelinePlaceholder: 'e.g., Within 2 weeks',
+      productSpecs: 'Product Specifications',
+      specsPlaceholder: 'Please provide detailed specifications, purity requirements, packaging preferences, etc.',
+      additionalReqs: 'Additional Requirements',
+      additionalPlaceholder: 'Any additional information or special requirements...',
+      submitQuote: 'Submit Quote Request',
+      submitting: 'Submitting...',
+      
+      messageSent: 'Message Sent Successfully',
+      messageSentDesc: 'Our sales team will contact you within 24 hours.',
+      quoteSubmitted: 'Quote Request Submitted',
+      quoteSubmittedDesc: 'Our team will prepare your quote and respond within 24 hours.',
+      errorTitle: 'Error',
+      messageFailed: 'Failed to send message. Please try again.',
+      quoteFailed: 'Failed to submit quote request. Please try again.',
+    },
   },
   
   ar: {
@@ -1225,6 +1477,126 @@ export const translations: Record<Language, Translation> = {
     shopSettings: 'إعدادات المتجر',
     weightsAndBatch: 'الأوزان والدفعة',
     productDetails: 'تفاصيل المنتج',
+    
+    // Services Page
+    servicesPage: {
+      title: 'خدماتنا وقدراتنا',
+      subtitle: 'دعم شامل من البحث والتطوير إلى التسليم والمساعدة الفنية، لضمان نجاحك في كل خطوة على الطريق.',
+      
+      rdTitle: 'البحث والتطوير',
+      rdDesc: 'تطوير تركيبات مخصصة وتحسين المنتجات لتلبية متطلباتك المحددة.',
+      rdFeature1: 'تركيبات كيميائية مخصصة',
+      rdFeature2: 'اختبار أداء المنتج',
+      rdFeature3: 'دعم الامتثال التنظيمي',
+      rdFeature4: 'التوسع من المختبر إلى الإنتاج',
+      rdFeature5: 'تحسين الجودة',
+      rdFeature6: 'تطوير التطبيقات',
+      
+      distributionTitle: 'التوزيع العالمي',
+      distributionDesc: 'سلسلة توريد وشبكة لوجستية موثوقة تضمن التسليم في الوقت المحدد في جميع أنحاء العالم.',
+      distFeature1: 'تغطية أكثر من 40 دولة',
+      distFeature2: 'خيارات الشحن السريع',
+      distFeature3: 'معالجة الطلبات بالجملة',
+      distFeature4: 'إدارة السلسلة الباردة',
+      distFeature5: 'التتبع الفوري',
+      distFeature6: 'التخزين المحلي',
+      
+      techSupportTitle: 'الدعم الفني',
+      techSupportDesc: 'مساعدة فنية واستشارات من الخبراء للتطبيق الأمثل للمنتج.',
+      techFeature1: 'خط مساعدة فني على مدار الساعة',
+      techFeature2: 'تدريب على التطبيقات',
+      techFeature3: 'دعم استكشاف الأخطاء وإصلاحها',
+      techFeature4: 'تحسين الأداء',
+      techFeature5: 'إرشادات السلامة',
+      techFeature6: 'دعم التوثيق',
+      
+      consultingTitle: 'خدمات الاستشارات',
+      consultingDesc: 'استشارات استراتيجية للمساعدة في تحسين عملياتك ومنتجاتك الكيميائية.',
+      consultFeature1: 'تحسين العمليات',
+      consultFeature2: 'تحليل خفض التكاليف',
+      consultFeature3: 'تقييم الاستدامة',
+      consultFeature4: 'إرشادات تنظيمية',
+      consultFeature5: 'تحليل السوق',
+      consultFeature6: 'التخطيط الاستراتيجي',
+      
+      qaTitle: 'ضمان الجودة',
+      qaDesc: 'برامج شاملة لمراقبة الجودة وضمانها لجميع منتجاتنا.',
+      qaFeature1: 'عمليات معتمدة من ISO',
+      qaFeature2: 'اختبار وتحليل الدفعات',
+      qaFeature3: 'شهادة التحليل',
+      qaFeature4: 'توثيق الجودة',
+      qaFeature5: 'الامتثال التنظيمي',
+      qaFeature6: 'المراقبة المستمرة',
+      
+      customMfgTitle: 'التصنيع المخصص',
+      customMfgDesc: 'حلول تصنيع مخصصة للمتطلبات الكيميائية المتخصصة.',
+      customFeature1: 'التصنيع بموجب العقد',
+      customFeature2: 'العلامات التجارية الخاصة',
+      customFeature3: 'أحجام دفعات مرنة',
+      customFeature4: 'تركيبات متخصصة',
+      customFeature5: 'حلول التعبئة والتغليف',
+      customFeature6: 'تكامل سلسلة التوريد',
+      
+      coreCapabilities: 'قدراتنا الأساسية',
+      coreCapabilitiesDesc: 'مدعومة بعقود من الخبرة والتكنولوجيا المتطورة',
+      advManufacturing: 'التصنيع المتقدم',
+      advManufacturingDesc: 'منشآت حديثة مع معدات وأتمتة عصرية',
+      qualityControl: 'مراقبة الجودة',
+      qualityControlDesc: 'اختبارات صارمة وضمان الجودة في كل مرحلة',
+      globalReachCap: 'الوصول العالمي',
+      globalReachCapDesc: 'خدمة العملاء في أكثر من 40 دولة حول العالم',
+      expertTeam: 'فريق الخبراء',
+      expertTeamDesc: 'أكثر من 50 عالم بحث وتطوير وخبير هندسة كيميائية',
+      
+      serviceProcess: 'عملية الخدمة لدينا',
+      serviceProcessDesc: 'من الاستشارة الأولية إلى الدعم المستمر، نحن معك في كل خطوة',
+      consultation: 'الاستشارة',
+      consultationDesc: 'فهم متطلباتك وتحدياتك المحددة',
+      development: 'التطوير',
+      developmentDesc: 'تطوير التركيبات والحلول المخصصة',
+      testing: 'الاختبار',
+      testingDesc: 'اختبار صارم والتحقق من الجودة',
+      delivery: 'التسليم',
+      deliveryDesc: 'الإنتاج والتسليم والدعم المستمر',
+      
+      readyToStart: 'هل أنت مستعد للبدء؟',
+      contactExpertsDesc: 'اتصل بفريق الخبراء لدينا لمناقشة احتياجاتك من الحلول الكيميائية واكتشف كيف يمكننا مساعدة عملك على النجاح.',
+      contactSales: 'اتصل بفريق المبيعات',
+      requestQuote: 'طلب عرض أسعار',
+      
+      contactSalesTitle: 'اتصل بفريق المبيعات',
+      fullName: 'الاسم الكامل',
+      emailAddress: 'عنوان البريد الإلكتروني',
+      companyName: 'الشركة',
+      phoneNumber: 'رقم الهاتف',
+      message: 'الرسالة',
+      messagePlaceholder: 'أخبرنا عن متطلباتك...',
+      cancel: 'إلغاء',
+      sendMessage: 'إرسال الرسالة',
+      sending: 'جاري الإرسال...',
+      
+      requestQuoteTitle: 'طلب عرض أسعار',
+      productCategory: 'فئة المنتج',
+      productCategoryPlaceholder: 'مثل: الأسمدة الزراعية، معالجة المياه، إلخ.',
+      requiredQuantity: 'الكمية المطلوبة',
+      quantityPlaceholder: 'مثل: 500 كجم، 10 أطنان',
+      requiredTimeline: 'الجدول الزمني المطلوب',
+      timelinePlaceholder: 'مثل: في غضون أسبوعين',
+      productSpecs: 'مواصفات المنتج',
+      specsPlaceholder: 'يرجى تقديم مواصفات مفصلة، متطلبات النقاء، تفضيلات التعبئة، إلخ.',
+      additionalReqs: 'المتطلبات الإضافية',
+      additionalPlaceholder: 'أي معلومات إضافية أو متطلبات خاصة...',
+      submitQuote: 'تقديم طلب عرض الأسعار',
+      submitting: 'جاري التقديم...',
+      
+      messageSent: 'تم إرسال الرسالة بنجاح',
+      messageSentDesc: 'سيتصل بك فريق المبيعات لدينا خلال 24 ساعة.',
+      quoteSubmitted: 'تم تقديم طلب عرض الأسعار',
+      quoteSubmittedDesc: 'سيقوم فريقنا بإعداد عرض الأسعار والرد خلال 24 ساعة.',
+      errorTitle: 'خطأ',
+      messageFailed: 'فشل إرسال الرسالة. يرجى المحاولة مرة أخرى.',
+      quoteFailed: 'فشل تقديم طلب عرض الأسعار. يرجى المحاولة مرة أخرى.',
+    },
   },
 };
 
