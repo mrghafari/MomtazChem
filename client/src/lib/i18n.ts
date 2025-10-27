@@ -23,6 +23,30 @@ export interface Translation {
     max: string;
     buy: string;
     catalog: string;
+    addToCart: string;
+    addMore: string;
+    notAvailable: string;
+    insufficientStock: string;
+    maxStockInCart: string;
+    onlyXAvailable: string;
+    onlyXLeft: string;
+    productReviews: string;
+    technicalSpecs: string;
+    hideWalletBalance: string;
+    showWalletBalance: string;
+    addedToCart: string;
+    addedToCartDesc: string;
+    welcome: string;
+    registrationSuccessful: string;
+    welcomeMessage: string;
+    logoutSuccessful: string;
+    logoutMessage: string;
+    error: string;
+    logoutError: string;
+    loginSuccessful: string;
+    loginWelcome: string;
+    unit: string;
+    units: string;
   };
   
   // Common actions
@@ -243,6 +267,14 @@ export interface Translation {
   bankReceiptRequired: string;
   bankReferenceRequired: string;
   
+  // Home Page - Hero Section
+  advancedChemical: string;
+  solutions: string;
+  forIndustry: string;
+  heroDescription: string;
+  exploreProducts: string;
+  contactSales: string;
+  
   // Home Page
   ourProductPortfolio: string;
   productPortfolioDesc: string;
@@ -307,9 +339,7 @@ export interface Translation {
   visionText: string;
   teamText: string;
   
-  // Values
-  qualityExcellence: string;
-  qualityExcellenceDesc: string;
+  // Values (same as in Home Page)
   environmentalResponsibility: string;
   environmentalResponsibilityDesc: string;
   customerFocus: string;
@@ -396,7 +426,31 @@ export const translations: Record<Language, Translation> = {
       items: 'items',
       max: 'MAX',
       buy: 'Buy',
-      catalog: 'Catalog'
+      catalog: 'Catalog',
+      addToCart: 'Add to Cart',
+      addMore: 'Add More',
+      notAvailable: 'Not Available',
+      insufficientStock: 'Insufficient Stock',
+      maxStockInCart: 'Maximum stock of this product is in cart',
+      onlyXAvailable: 'Only {count} units of this product available',
+      onlyXLeft: 'Only {count} left!',
+      productReviews: 'Product Reviews & Rating',
+      technicalSpecs: 'Technical Specifications',
+      hideWalletBalance: 'Hide Wallet Balance',
+      showWalletBalance: 'Show Wallet Balance',
+      addedToCart: 'Added to Cart',
+      addedToCartDesc: '{count} units of {product} added to cart',
+      welcome: 'Welcome',
+      registrationSuccessful: 'Registration Successful',
+      welcomeMessage: 'Welcome {name}',
+      logoutSuccessful: 'Logout Successful',
+      logoutMessage: 'You have successfully logged out',
+      error: 'Error',
+      logoutError: 'Error logging out',
+      loginSuccessful: 'Login Successful',
+      loginWelcome: 'Welcome back! You can now checkout',
+      unit: 'unit',
+      units: 'units'
     },
     
     // Common actions
@@ -769,7 +823,31 @@ export const translations: Record<Language, Translation> = {
       items: 'قطع',
       max: 'أقصى',
       buy: 'اشترِ',
-      catalog: 'الكتالوج'
+      catalog: 'الكتالوج',
+      addToCart: 'إضافة للسلة',
+      addMore: 'إضافة المزيد',
+      notAvailable: 'غير متوفر',
+      insufficientStock: 'مخزون غير كافٍ',
+      maxStockInCart: 'الحد الأقصى من المخزون موجود في السلة',
+      onlyXAvailable: 'متوفر فقط {count} وحدة من هذا المنتج',
+      onlyXLeft: 'تبقى فقط {count} وحدة!',
+      productReviews: 'التقييمات والمراجعات',
+      technicalSpecs: 'المواصفات الفنية',
+      hideWalletBalance: 'إخفاء رصيد المحفظة',
+      showWalletBalance: 'عرض رصيد المحفظة',
+      addedToCart: 'تمت الإضافة للسلة',
+      addedToCartDesc: 'تمت إضافة {count} وحدة من {product} للسلة',
+      welcome: 'مرحباً',
+      registrationSuccessful: 'التسجيل ناجح',
+      welcomeMessage: 'مرحباً {name}',
+      logoutSuccessful: 'تم تسجيل الخروج',
+      logoutMessage: 'تم تسجيل الخروج بنجاح',
+      error: 'خطأ',
+      logoutError: 'خطأ في تسجيل الخروج',
+      loginSuccessful: 'تم تسجيل الدخول',
+      loginWelcome: 'مرحباً بعودتك! يمكنك الآن إتمام الطلب',
+      unit: 'وحدة',
+      units: 'وحدات'
     },
     
     // Common actions

@@ -466,7 +466,7 @@ const Shop = () => {
     }, 500);
     
     toast({
-      title: "خوش آمدید",
+      title: t.shop.welcome,
       description: `${customerData.firstName} ${customerData.lastName}`,
     });
   };
@@ -481,8 +481,8 @@ const Shop = () => {
     queryClient.invalidateQueries({ queryKey: ["/api/customer/wallet"] });
     
     toast({
-      title: "ثبت‌نام موفق",
-      description: `خوش آمدید ${customerData.firstName} ${customerData.lastName}`,
+      title: t.shop.registrationSuccessful,
+      description: t.shop.welcomeMessage.replace('{name}', `${customerData.firstName} ${customerData.lastName}`),
     });
     
     // Stay in shop after registration - no redirect needed
@@ -503,14 +503,14 @@ const Shop = () => {
       }, 500);
       
       toast({
-        title: "خروج موفق",
-        description: "با موفقیت از حساب کاربری خارج شدید",
+        title: t.shop.logoutSuccessful,
+        description: t.shop.logoutMessage,
       });
     } catch (error) {
       console.error('Logout error:', error);
       toast({
-        title: "خطا",
-        description: "خطا در خروج از حساب کاربری",
+        title: t.shop.error,
+        description: t.shop.logoutError,
         variant: "destructive",
       });
     }
@@ -552,8 +552,8 @@ const Shop = () => {
     // Check if product is in stock
     if (!product.inStock || (product.stockQuantity || 0) <= 0) {
       toast({
-        title: "موجودی ناکافی",
-        description: "این محصول در حال حاضر موجود نیست",
+        title: t.shop.insufficientStock,
+        description: t.shop.notAvailable,
         variant: "destructive",
       });
       return;
@@ -566,8 +566,8 @@ const Shop = () => {
     // Check if there's any stock available after considering cart items
     if (availableForQuantityInput <= 0) {
       toast({
-        title: "موجودی ناکافی",
-        description: "حداکثر موجودی این محصول در سبد خرید قرار دارد",
+        title: t.shop.insufficientStock,
+        description: t.shop.maxStockInCart,
         variant: "destructive",
       });
       return;
@@ -594,8 +594,8 @@ const Shop = () => {
     
     if (availableStock < targetQuantity) {
       toast({
-        title: "موجودی ناکافی",
-        description: `تنها ${availableStock} عدد از این محصول موجود است`,
+        title: t.shop.insufficientStock,
+        description: t.shop.onlyXAvailable.replace('{count}', availableStock.toString()),
         variant: "destructive",
       });
       return;
@@ -622,8 +622,8 @@ const Shop = () => {
     
     // Show success message
     toast({
-      title: "به سبد خرید اضافه شد",
-      description: `${targetQuantity} عدد ${product.name} به سبد خرید اضافه شد`,
+      title: t.shop.addedToCart,
+      description: t.shop.addedToCartDesc.replace('{count}', targetQuantity.toString()).replace('{product}', product.name),
       variant: "default",
     });
   };
@@ -811,8 +811,8 @@ const Shop = () => {
       // Profile is complete and cart has items, proceed to checkout
       setShowCheckout(true);
       toast({
-        title: direction === 'rtl' ? "ورود موفق" : "Login Successful",
-        description: direction === 'rtl' ? "خوش آمدید! حالا می‌توانید خرید کنید" : "Welcome back! You can now checkout",
+        title: t.shop.loginSuccessful,
+        description: t.shop.loginWelcome,
       });
     } else if (getTotalItems() > 0 && !isProfileComplete) {
       // Profile needs completion for checkout, show registration form with pre-filled data
@@ -826,8 +826,8 @@ const Shop = () => {
     } else {
       // Just a regular login, no checkout needed
       toast({
-        title: direction === 'rtl' ? "ورود موفق" : "Login Successful",
-        description: direction === 'rtl' ? "خوش آمدید!" : "Welcome back!",
+        title: t.shop.loginSuccessful,
+        description: t.shop.welcome,
       });
     }
   };
@@ -924,7 +924,7 @@ const Shop = () => {
                       size="sm"
                       onClick={() => setShowWalletBalance(!showWalletBalance)}
                       className="p-1 h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
-                      title={showWalletBalance ? 'مخفی کردن موجودی کیف پول' : 'نمایش موجودی کیف پول'}
+                      title={showWalletBalance ? t.shop.hideWalletBalance : t.shop.showWalletBalance}
                     >
                       {showWalletBalance ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                     </Button>
@@ -1375,7 +1375,7 @@ const Shop = () => {
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent side="left" sideOffset={5}>
-                                  <p>نظرات و امتیاز محصول</p>
+                                  <p>{t.shop.productReviews}</p>
                                 </TooltipContent>
                               </Tooltip>
                               
@@ -1392,7 +1392,7 @@ const Shop = () => {
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent side="left" sideOffset={5}>
-                                  <p>مشخصات فنی محصول</p>
+                                  <p>{t.shop.technicalSpecs}</p>
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
@@ -1624,7 +1624,7 @@ const Shop = () => {
                               disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
                             >
                               <ShoppingCart className="w-4 h-4 mr-2" />
-                              {!product.inStock || product.stockQuantity <= 0 ? 'موجود نیست' : cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
+                              {!product.inStock || product.stockQuantity <= 0 ? t.shop.notAvailable : cart[product.id] && cart[product.id] > 0 ? t.shop.addMore : t.shop.addToCart}
                             </Button>
                           </div>
                         </CardContent>
@@ -1793,7 +1793,7 @@ const Shop = () => {
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent side="left" sideOffset={5}>
-                                  <p>نظرات و امتیاز محصول</p>
+                                  <p>{t.shop.productReviews}</p>
                                 </TooltipContent>
                               </Tooltip>
                               
@@ -1810,7 +1810,7 @@ const Shop = () => {
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent side="left" sideOffset={5}>
-                                  <p>مشخصات فنی محصول</p>
+                                  <p>{t.shop.technicalSpecs}</p>
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
@@ -1968,7 +1968,7 @@ const Shop = () => {
                                   <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
                                     <span className="text-sm font-semibold text-orange-800">
-                                      تنها {displayStock[product.id] || 0} عدد باقی مانده!
+                                      {t.shop.onlyXLeft.replace('{count}', (displayStock[product.id] || 0).toString())}
                                     </span>
                                   </div>
                                 </div>
@@ -2044,7 +2044,7 @@ const Shop = () => {
                                   disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
                                 >
                                   <ShoppingCart className="w-4 h-4 mr-2" />
-                                  {!product.inStock || product.stockQuantity <= 0 ? 'موجود نیست' : cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
+                                  {!product.inStock || product.stockQuantity <= 0 ? t.shop.notAvailable : cart[product.id] && cart[product.id] > 0 ? t.shop.addMore : t.shop.addToCart}
                                 </Button>
                               </div>
                             </div>
