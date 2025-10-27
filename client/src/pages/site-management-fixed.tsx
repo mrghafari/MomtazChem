@@ -1,14 +1,13 @@
 import React, { useState, useEffect, startTransition } from "react";
 import { useLocation } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain, Monitor as RemoteMonitor, FileText, Edit, Server, MessageCircle, Cloud } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, DollarSign, BookOpen, Truck, Box, CreditCard, Wallet, MapPin, Barcode, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain, Monitor as RemoteMonitor, FileText, Server, MessageCircle, Cloud } from "lucide-react";
 import { KardexSyncPanel } from "@/components/KardexSyncPanel";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 
 // Define the structure for Quick Action buttons
@@ -77,41 +76,12 @@ export default function SiteManagement() {
         console.log('🔍 [DEBUG] First 5 filtered buttons:', filteredButtons.slice(0, 5).map(b => ({ id: b.id, label: b.label, moduleId: b.moduleId })));
         console.log('🔍 [DEBUG] AI Control button in filtered:', filteredButtons.find(b => b.id === 'ai-settings'));
         console.log('🔍 [DEBUG] Content Management button in filtered:', filteredButtons.find(b => b.id === 'content-management'));
-        const clickCounts = JSON.parse(localStorage.getItem('site-management-click-counts') || '{}');
-        const savedOrder = localStorage.getItem('site-management-button-order');
         
-        if (savedOrder) {
-          try {
-            const savedButtonIds = JSON.parse(savedOrder);
-            const orderedButtons = savedButtonIds
-              .map((id: string) => filteredButtons.find(btn => btn.id === id))
-              .filter((btn: QuickActionButton | undefined): btn is QuickActionButton => btn !== undefined);
-            
-            const savedIds = new Set(savedButtonIds);
-            const newButtons = filteredButtons.filter(btn => !savedIds.has(btn.id));
-            
-            setButtons([...orderedButtons, ...newButtons]);
-            return;
-          } catch {
-            // If parsing fails, fall back to default behavior
-          }
-        }
-        
-        if (Object.keys(clickCounts).length > 0) {
-          setButtons(sortButtonsByUsage(filteredButtons));
-        } else {
-          setButtons(filteredButtons);
-        }
+        // Always sort by usage, ignore saved order
+        setButtons(sortButtonsByUsage(filteredButtons));
       });
     }
   }, [userPermissions]);
-
-  useEffect(() => {
-    if (buttons.length > 0) {
-      const buttonIds = buttons.map(btn => btn.id);
-      localStorage.setItem('site-management-button-order', JSON.stringify(buttonIds));
-    }
-  }, [buttons]);
 
   // Helper functions
   const trackButtonClick = (buttonId: string, action: () => void) => {
@@ -119,9 +89,10 @@ export default function SiteManagement() {
     clickCounts[buttonId] = (clickCounts[buttonId] || 0) + 1;
     localStorage.setItem('site-management-click-counts', JSON.stringify(clickCounts));
     action();
+    // Immediately re-sort by usage after click
     setTimeout(() => {
-      const updatedButtons = sortButtonsByUsage(getInitialButtons());
-      setButtons(updatedButtons);
+      const filteredButtons = getFilteredButtons();
+      setButtons(sortButtonsByUsage(filteredButtons));
     }, 100);
   };
 
@@ -472,21 +443,10 @@ export default function SiteManagement() {
   };
 
   const resetButtonOrder = () => {
-    localStorage.removeItem('site-management-button-order');
     localStorage.removeItem('site-management-click-counts');
     const filteredButtons = getFilteredButtons();
     setButtons(filteredButtons);
-    toast({ title: "Success", description: "Button order has been reset to default" });
-  };
-
-  const onDragEnd = (result: any) => {
-    if (!result.destination) return;
-
-    const items = Array.from(buttons);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    setButtons(items);
+    toast({ title: "Success", description: "Usage statistics have been reset" });
   };
 
   // Show loading while authenticating
@@ -539,7 +499,7 @@ export default function SiteManagement() {
               size="sm"
               className="text-gray-600 border-gray-300 hover:bg-gray-50"
             >
-              Reset Order
+              Reset Usage Stats
             </Button>
             <div className="text-sm text-gray-500 dark:text-gray-400">
               Welcome, {user?.username}
@@ -565,47 +525,22 @@ export default function SiteManagement() {
               <p className="text-gray-600 dark:text-gray-300">Loading modules...</p>
             </div>
           ) : (
-            <DragDropContext onDragEnd={onDragEnd}>
-              <Droppable droppableId="quick-actions">
-                {(provided) => (
-                  <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4"
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+              {buttons.map((button, index) => (
+                <div key={button.id} className="relative group">
+                  <Button
+                    onClick={button.onClick}
+                    variant="outline"
+                    className={`w-full h-20 flex flex-col items-center justify-center space-y-2 transition-all duration-200 hover:scale-105 ${button.className}`}
                   >
-                    {buttons.map((button, index) => (
-                      <Draggable key={button.id} draggableId={button.id} index={index}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`relative group cursor-grab active:cursor-grabbing ${snapshot.isDragging ? 'z-50' : ''}`}
-                          >
-                            <Button
-                              onClick={button.onClick}
-                              variant="outline"
-                              className={`w-full h-20 flex flex-col items-center justify-center space-y-2 transition-all duration-200 hover:scale-105 ${button.className} ${snapshot.isDragging ? 'shadow-2xl ring-2 ring-blue-400 opacity-80' : ''}`}
-                            >
-                              <button.icon className="w-6 h-6" />
-                              <span className="text-xs font-medium text-center leading-tight">
-                                {button.label}
-                              </span>
-                            </Button>
-                            <div
-                              className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-                            >
-                              <GripVertical className="w-4 h-4 text-gray-400" />
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
+                    <button.icon className="w-6 h-6" />
+                    <span className="text-xs font-medium text-center leading-tight">
+                      {button.label}
+                    </span>
+                  </Button>
+                </div>
+              ))}
+            </div>
           )}
         </Card>
 
