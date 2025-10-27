@@ -19,7 +19,7 @@ const getSiteManagementModulesCount = () => {
     "user_management", "sms", "whatsapp_crm", "factory", "procedures", "refresh_control", 
     "logistics_management", "ticketing_system", "remote_desktop", "server_config",
     "reports_analytics", "security_management", "notification_center", "system_monitoring", 
-    "api_management", "integration_hub"
+    "api_management", "integration_hub", "aws_s3_settings"
   ];
   return modules.length;
 };
@@ -144,6 +144,7 @@ function AdminDashboardContent({ user, logout, setLocation, moduleCount, getCont
               <div>• <strong>Ticketing System</strong> - Support ticket management</div>
               <div>• <strong>Remote Desktop</strong> - RustDesk international support</div>
               <div>• <strong>Server Config</strong> - Production migration & hosting</div>
+              <div>• <strong>AWS S3 Settings</strong> - Cloud storage configuration & management</div>
               <div>• <strong>Reports Analytics</strong> - Advanced business intelligence & KPIs</div>
               <div>• <strong>Security Management</strong> - Access control & audit trails</div>
               <div>• <strong>Notification Center</strong> - System alerts & communication hub</div>

@@ -5,7 +5,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain, Monitor as RemoteMonitor, FileText, Edit, Server, MessageCircle } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain, Monitor as RemoteMonitor, FileText, Edit, Server, MessageCircle, Cloud } from "lucide-react";
 import { KardexSyncPanel } from "@/components/KardexSyncPanel";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -378,6 +378,14 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("server-config", () => setLocation("/admin/server-config")),
       className: "border-blue-300 text-blue-600 hover:bg-blue-50",
       moduleId: "server_config"
+    },
+    {
+      id: "aws-s3-settings",
+      label: "AWS S3 Settings",
+      icon: Cloud,
+      onClick: () => trackButtonClick("aws-s3-settings", () => setLocation("/admin/aws-s3-settings")),
+      className: "border-sky-300 text-sky-600 hover:bg-sky-50",
+      moduleId: "aws_s3_settings"
     },
     {
       id: "user-guide",
