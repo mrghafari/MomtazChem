@@ -174,23 +174,23 @@ const About = () => {
           <div className="grid md:grid-cols-4 gap-8">
             <div className="text-center p-6 bg-gray-50 rounded-lg">
               <i className="fas fa-certificate text-primary text-4xl mb-4"></i>
-              <h3 className="font-semibold text-gray-900 mb-2">ISO 9001:2015</h3>
-              <p className="text-gray-600 text-sm">Quality Management Systems</p>
+              <h3 className="font-semibold text-gray-900 mb-2">{t.iso9001}</h3>
+              <p className="text-gray-600 text-sm">{t.iso9001Desc}</p>
             </div>
             <div className="text-center p-6 bg-gray-50 rounded-lg">
               <i className="fas fa-shield-alt text-primary text-4xl mb-4"></i>
-              <h3 className="font-semibold text-gray-900 mb-2">ISO 14001</h3>
-              <p className="text-gray-600 text-sm">Environmental Management</p>
+              <h3 className="font-semibold text-gray-900 mb-2">{t.iso14001}</h3>
+              <p className="text-gray-600 text-sm">{t.iso14001Desc}</p>
             </div>
             <div className="text-center p-6 bg-gray-50 rounded-lg">
               <i className="fas fa-hard-hat text-primary text-4xl mb-4"></i>
-              <h3 className="font-semibold text-gray-900 mb-2">OHSAS 18001</h3>
-              <p className="text-gray-600 text-sm">Occupational Health & Safety</p>
+              <h3 className="font-semibold text-gray-900 mb-2">{t.ohsas18001}</h3>
+              <p className="text-gray-600 text-sm">{t.ohsas18001Desc}</p>
             </div>
             <div className="text-center p-6 bg-gray-50 rounded-lg">
               <i className="fas fa-check-circle text-primary text-4xl mb-4"></i>
-              <h3 className="font-semibold text-gray-900 mb-2">REACH Compliance</h3>
-              <p className="text-gray-600 text-sm">European Chemicals Regulation</p>
+              <h3 className="font-semibold text-gray-900 mb-2">{t.reachCompliance}</h3>
+              <p className="text-gray-600 text-sm">{t.reachComplianceDesc}</p>
             </div>
           </div>
         </div>

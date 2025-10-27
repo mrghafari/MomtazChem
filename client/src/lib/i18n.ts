@@ -357,6 +357,16 @@ export interface Translation {
   manufacturingSites: string;
   qualityRate: string;
   
+  // Certifications
+  iso9001: string;
+  iso9001Desc: string;
+  iso14001: string;
+  iso14001Desc: string;
+  ohsas18001: string;
+  ohsas18001Desc: string;
+  reachCompliance: string;
+  reachComplianceDesc: string;
+  
   // Product Form
   productManagement: string;
   addProduct: string;
@@ -767,6 +777,16 @@ export const translations: Record<Language, Translation> = {
     manufacturingSites: 'Manufacturing Sites',
     qualityRate: 'Quality Rate',
     
+    // Certifications
+    iso9001: 'ISO 9001:2015',
+    iso9001Desc: 'Quality Management Systems',
+    iso14001: 'ISO 14001',
+    iso14001Desc: 'Environmental Management',
+    ohsas18001: 'OHSAS 18001',
+    ohsas18001Desc: 'Occupational Health & Safety',
+    reachCompliance: 'REACH Compliance',
+    reachComplianceDesc: 'European Chemicals Regulation',
+    
     // Product Form
     productManagement: 'Product Management',
     addProduct: 'Add Product',
@@ -1154,6 +1174,16 @@ export const translations: Record<Language, Translation> = {
     rdScientists: 'علماء البحث والتطوير',
     manufacturingSites: 'مواقع التصنيع',
     qualityRate: 'معدل الجودة',
+    
+    // Certifications
+    iso9001: 'ISO 9001:2015',
+    iso9001Desc: 'أنظمة إدارة الجودة',
+    iso14001: 'ISO 14001',
+    iso14001Desc: 'الإدارة البيئية',
+    ohsas18001: 'OHSAS 18001',
+    ohsas18001Desc: 'الصحة والسلامة المهنية',
+    reachCompliance: 'الامتثال لـ REACH',
+    reachComplianceDesc: 'لائحة المواد الكيميائية الأوروبية',
     
     // Product Form
     productManagement: 'إدارة المنتجات',
