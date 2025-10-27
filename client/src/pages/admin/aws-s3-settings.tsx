@@ -88,10 +88,29 @@ export default function AwsS3Settings() {
 
     setIsLoading(true);
     try {
+      // Prepare payload - exclude masked credentials
+      const payload: any = {
+        region: settings.region,
+        bucketName: settings.bucketName,
+        isActive: settings.isActive,
+        endpoint: settings.endpoint,
+        usePathStyle: settings.usePathStyle,
+        publicUrl: settings.publicUrl,
+        description: settings.description
+      };
+
+      // Only include keys if they are not masked (i.e., user changed them)
+      if (settings.accessKeyId && settings.accessKeyId !== '••••••••') {
+        payload.accessKeyId = settings.accessKeyId;
+      }
+      if (settings.secretAccessKey && settings.secretAccessKey !== '••••••••') {
+        payload.secretAccessKey = settings.secretAccessKey;
+      }
+
       const response = await fetch('/api/admin/aws-s3/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings)
+        body: JSON.stringify(payload)
       });
 
       const data = await response.json();
