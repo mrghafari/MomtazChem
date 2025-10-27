@@ -9,8 +9,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Award, Leaf, FlaskRound, Truck, Headphones, FuelIcon as Fuel, Droplets, PaintBucket, Wheat, Download, FileText, Image } from "lucide-react";
 import type { ShopProduct } from "@shared/shop-schema";
 import waterTreatmentImg from "@assets/download_1749877891276.jpeg";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Home = () => {
+  const { t } = useLanguage();
   // Fetch all products from database
   const { data: productsResponse, isLoading } = useQuery({
     queryKey: ["/api/products"],
@@ -21,8 +23,8 @@ const Home = () => {
 
   const categoryInfo = [
     {
-      title: "Fuel Additives",
-      description: "High-performance fuel additives designed to enhance combustion efficiency, reduce emissions, and extend engine life across automotive and industrial applications.",
+      title: t.fuelAdditivesTitle,
+      description: t.fuelAdditivesDesc,
       href: "/products/fuel-additives",
       icon: <Fuel className="text-white text-xl" />,
       iconBg: "bg-primary-blue",
@@ -30,8 +32,8 @@ const Home = () => {
       imageUrl: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
     },
     {
-      title: "Water Treatment",
-      description: "Comprehensive water treatment solutions for municipal, industrial, and residential applications, ensuring clean and safe water for all uses.",
+      title: t.waterTreatmentTitle,
+      description: t.waterTreatmentDesc,
       href: "/products/water-treatment",
       icon: <Droplets className="text-white text-xl" />,
       iconBg: "bg-primary-green",
@@ -39,8 +41,8 @@ const Home = () => {
       imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
     },
     {
-      title: "Paint & Thinner",
-      description: "Premium paint formulations and thinners for automotive, architectural, and industrial applications with superior durability and finish quality.",
+      title: t.paintThinnerTitle,
+      description: t.paintThinnerDesc,
       href: "/products/paint-thinner",
       icon: <PaintBucket className="text-white text-xl" />,
       iconBg: "bg-accent-orange",
@@ -48,8 +50,8 @@ const Home = () => {
       imageUrl: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
     },
     {
-      title: "Agricultural Fertilizers",
-      description: "Advanced fertilizer solutions designed to maximize crop yields while promoting sustainable farming practices and soil health enhancement.",
+      title: t.agriculturalFertilizersTitle,
+      description: t.agriculturalFertilizersDesc,
       href: "/products/agricultural-fertilizers",
       icon: <Wheat className="text-white text-xl" />,
       iconBg: "bg-primary-green",
@@ -69,23 +71,23 @@ const Home = () => {
 
   const services = [
     {
-      title: "R&D Services",
-      description: "Custom formulation development and product optimization to meet specific industry requirements.",
-      features: ["Custom Formulations", "Product Testing", "Performance Analysis"],
+      title: t.rdServices,
+      description: t.rdServicesDesc,
+      features: [t.customFormulations, t.productTesting, t.performanceAnalysis],
       icon: <FlaskRound className="text-white text-2xl" />,
       iconBg: "bg-primary-blue",
     },
     {
-      title: "Global Distribution",
-      description: "Reliable supply chain and logistics network ensuring timely delivery worldwide.",
-      features: ["40+ Countries", "Express Shipping", "Bulk Orders"],
+      title: t.globalDistribution,
+      description: t.globalDistributionDesc,
+      features: [t.countries40Plus, t.expressShipping, t.bulkOrders],
       icon: <Truck className="text-white text-2xl" />,
       iconBg: "bg-primary-green",
     },
     {
-      title: "Technical Support",
-      description: "Expert technical assistance and consultation for optimal product application and performance.",
-      features: ["24/7 Support", "Application Training", "Documentation"],
+      title: t.technicalSupport,
+      description: t.technicalSupportDesc,
+      features: [t.support24_7, t.applicationTraining, t.documentation],
       icon: <Headphones className="text-white text-2xl" />,
       iconBg: "bg-accent-orange",
     },
@@ -103,9 +105,9 @@ const Home = () => {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Product Portfolio</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">{t.ourProductPortfolio}</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Comprehensive chemical solutions across four key industries, engineered for performance and reliability.
+              {t.productPortfolioDesc}
             </p>
           </div>
 
@@ -154,7 +156,7 @@ const Home = () => {
                           {category.icon}
                         </div>
                         <Badge className="absolute top-4 right-4 bg-white/90 text-gray-800 border-0">
-                          {productCount} Products
+                          {productCount} {t.products_plural}
                         </Badge>
                       </div>
                       
@@ -168,7 +170,7 @@ const Home = () => {
                         
                         {categoryProducts.length > 0 && (
                           <div className="mb-6">
-                            <h4 className="text-sm font-semibold text-gray-900 mb-3">Available Products:</h4>
+                            <h4 className="text-sm font-semibold text-gray-900 mb-3">{t.availableProducts}</h4>
                             <div className="space-y-2 max-h-32 overflow-y-auto">
                               {categoryProducts.slice(0, 3).map((product: ShopProduct) => (
                                 <div key={product.id} className="flex items-center justify-between text-sm">
@@ -176,7 +178,7 @@ const Home = () => {
                                   <div className="flex items-center gap-1 ml-2">
                                     {product.inventoryStatus === 'in_stock' && (
                                       <Badge variant="outline" className="text-xs border-green-200 text-green-800 bg-green-50">
-                                        In Stock
+                                        {t.inStock}
                                       </Badge>
                                     )}
                                     {product.pdfCatalogUrl && (
@@ -196,7 +198,7 @@ const Home = () => {
                               ))}
                               {categoryProducts.length > 3 && (
                                 <div className="text-xs text-gray-500 pt-1">
-                                  +{categoryProducts.length - 3} more products
+                                  +{categoryProducts.length - 3} {t.moreProducts}
                                 </div>
                               )}
                             </div>
@@ -205,7 +207,7 @@ const Home = () => {
                         
                         <Link href={category.href}>
                           <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                            View All {category.title}
+                            {t.viewAll} {category.title}
                           </Button>
                         </Link>
                       </div>
@@ -223,12 +225,12 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">About Momtazchem</h2>
+              <h2 className="text-4xl font-bold text-gray-900 mb-6">{t.aboutMomtazchem}</h2>
               <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                With over 25 years of excellence in chemical manufacturing, Momtazchem has established itself as a trusted partner for industries worldwide. Our commitment to innovation, quality, and sustainability drives everything we do.
+                {t.aboutMomtazchemDesc1}
               </p>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                From our state-of-the-art facilities, we develop and produce high-quality chemical solutions that meet the evolving needs of fuel, water treatment, paint, and agricultural industries.
+                {t.aboutMomtazchemDesc2}
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -237,8 +239,8 @@ const Home = () => {
                     <Award className="text-white h-6 w-6" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Quality Excellence</h4>
-                    <p className="text-gray-600 text-sm">ISO certified processes ensuring consistent high-quality products.</p>
+                    <h4 className="font-semibold text-gray-900 mb-2">{t.qualityExcellence}</h4>
+                    <p className="text-gray-600 text-sm">{t.qualityExcellenceDesc}</p>
                   </div>
                 </div>
                 <div className="flex items-start">
@@ -246,15 +248,15 @@ const Home = () => {
                     <Leaf className="text-white h-6 w-6" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Sustainability</h4>
-                    <p className="text-gray-600 text-sm">Environmentally responsible manufacturing and products.</p>
+                    <h4 className="font-semibold text-gray-900 mb-2">{t.environmentalResponsibility}</h4>
+                    <p className="text-gray-600 text-sm">{t.environmentalResponsibilityDesc}</p>
                   </div>
                 </div>
               </div>
 
               <Link href="/about">
                 <Button className="bg-primary-blue hover:bg-primary-blue-dark text-white">
-                  Learn More About Us
+                  {t.learnMoreAboutUs}
                 </Button>
               </Link>
             </div>
@@ -269,7 +271,7 @@ const Home = () => {
               {/* Floating stats card */}
               <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-xl p-6 border border-gray-100">
                 <div className="text-3xl font-bold primary-blue mb-2">99.8%</div>
-                <div className="text-gray-600 font-medium">Customer Satisfaction</div>
+                <div className="text-gray-600 font-medium">{t.customerSatisfaction}</div>
               </div>
             </div>
           </div>
@@ -280,9 +282,9 @@ const Home = () => {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Services & Capabilities</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">{t.ourServicesCapabilities}</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Comprehensive support from research and development to delivery and technical assistance.
+              {t.servicesCapabilitiesDesc}
             </p>
           </div>
 

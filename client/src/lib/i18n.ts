@@ -228,6 +228,55 @@ export interface Translation {
   followUs: string;
   allRightsReserved: string;
   
+  // Bank Receipt
+  uploadBankReceipt: string;
+  bankReceiptRequired: string;
+  bankReferenceRequired: string;
+  
+  // Home Page
+  ourProductPortfolio: string;
+  productPortfolioDesc: string;
+  products_plural: string;
+  availableProducts: string;
+  moreProducts: string;
+  viewAll: string;
+  aboutMomtazchem: string;
+  aboutMomtazchemDesc1: string;
+  aboutMomtazchemDesc2: string;
+  qualityExcellence: string;
+  qualityExcellenceDesc: string;
+  sustainability: string;
+  sustainabilityDesc: string;
+  learnMoreAboutUs: string;
+  customerSatisfaction: string;
+  ourServicesCapabilities: string;
+  servicesCapabilitiesDesc: string;
+  rdServices: string;
+  rdServicesDesc: string;
+  customFormulations: string;
+  productTesting: string;
+  performanceAnalysis: string;
+  globalDistribution: string;
+  globalDistributionDesc: string;
+  countries40Plus: string;
+  expressShipping: string;
+  bulkOrders: string;
+  technicalSupport: string;
+  technicalSupportDesc: string;
+  support24_7: string;
+  applicationTraining: string;
+  documentation: string;
+  
+  // Product Categories Extended
+  fuelAdditivesTitle: string;
+  fuelAdditivesDesc: string;
+  waterTreatmentTitle: string;
+  waterTreatmentDesc: string;
+  paintThinnerTitle: string;
+  paintThinnerDesc: string;
+  agriculturalFertilizersTitle: string;
+  agriculturalFertilizersDesc: string;
+  
   // About page
   aboutTitle: string;
   aboutSubtitle: string;
@@ -552,6 +601,46 @@ export const translations: Record<Language, Translation> = {
     followUs: 'Follow Us',
     allRightsReserved: 'All Rights Reserved',
     
+    // Home Page
+    ourProductPortfolio: 'Our Product Portfolio',
+    productPortfolioDesc: 'Comprehensive chemical solutions across four key industries, engineered for performance and reliability.',
+    products_plural: 'Products',
+    availableProducts: 'Available Products:',
+    moreProducts: 'more products',
+    viewAll: 'View All',
+    aboutMomtazchem: 'About Momtazchem',
+    aboutMomtazchemDesc1: 'With over 25 years of excellence in chemical manufacturing, Momtazchem has established itself as a trusted partner for industries worldwide. Our commitment to innovation, quality, and sustainability drives everything we do.',
+    aboutMomtazchemDesc2: 'From our state-of-the-art facilities, we develop and produce high-quality chemical solutions that meet the evolving needs of fuel, water treatment, paint, and agricultural industries.',
+    learnMoreAboutUs: 'Learn More About Us',
+    customerSatisfaction: 'Customer Satisfaction',
+    ourServicesCapabilities: 'Our Services & Capabilities',
+    servicesCapabilitiesDesc: 'Comprehensive support from research and development to delivery and technical assistance.',
+    rdServices: 'R&D Services',
+    rdServicesDesc: 'Custom formulation development and product optimization to meet specific industry requirements.',
+    customFormulations: 'Custom Formulations',
+    productTesting: 'Product Testing',
+    performanceAnalysis: 'Performance Analysis',
+    globalDistribution: 'Global Distribution',
+    globalDistributionDesc: 'Reliable supply chain and logistics network ensuring timely delivery worldwide.',
+    countries40Plus: '40+ Countries',
+    expressShipping: 'Express Shipping',
+    bulkOrders: 'Bulk Orders',
+    technicalSupport: 'Technical Support',
+    technicalSupportDesc: 'Expert technical assistance and consultation for optimal product application and performance.',
+    support24_7: '24/7 Support',
+    applicationTraining: 'Application Training',
+    documentation: 'Documentation',
+    
+    // Product Categories Extended
+    fuelAdditivesTitle: 'Fuel Additives',
+    fuelAdditivesDesc: 'High-performance fuel additives designed to enhance combustion efficiency, reduce emissions, and extend engine life across automotive and industrial applications.',
+    waterTreatmentTitle: 'Water Treatment',
+    waterTreatmentDesc: 'Comprehensive water treatment solutions for municipal, industrial, and residential applications, ensuring clean and safe water for all uses.',
+    paintThinnerTitle: 'Paint & Thinner',
+    paintThinnerDesc: 'Premium paint formulations and thinners for automotive, architectural, and industrial applications with superior durability and finish quality.',
+    agriculturalFertilizersTitle: 'Agricultural Fertilizers',
+    agriculturalFertilizersDesc: 'Advanced fertilizer solutions designed to maximize crop yields while promoting sustainable farming practices and soil health enhancement.',
+    
     // About page
     aboutTitle: 'About Momtazchem',
     aboutSubtitle: 'Leading the chemical industry with innovation, quality, and sustainability for over 25 years.',
@@ -853,6 +942,46 @@ export const translations: Record<Language, Translation> = {
     contactInfo: 'معلومات الاتصال',
     followUs: 'تابعونا',
     allRightsReserved: 'جميع الحقوق محفوظة',
+    
+    // Home Page
+    ourProductPortfolio: 'مجموعة منتجاتنا',
+    productPortfolioDesc: 'حلول كيميائية شاملة عبر أربعة صناعات رئيسية، مصممة للأداء والموثوقية.',
+    products_plural: 'منتجات',
+    availableProducts: 'المنتجات المتوفرة:',
+    moreProducts: 'المزيد من المنتجات',
+    viewAll: 'عرض الكل',
+    aboutMomtazchem: 'حول ممتاز كيم',
+    aboutMomtazchemDesc1: 'مع أكثر من 25 عامًا من التميز في تصنيع المواد الكيميائية، أثبتت ممتاز كيم نفسها كشريك موثوق للصناعات في جميع أنحاء العالم. التزامنا بالابتكار والجودة والاستدامة يدفع كل ما نقوم به.',
+    aboutMomtazchemDesc2: 'من منشآتنا الحديثة، نطور وننتج حلولًا كيميائية عالية الجودة تلبي الاحتياجات المتطورة للوقود ومعالجة المياه والدهانات والصناعات الزراعية.',
+    learnMoreAboutUs: 'تعرف على المزيد عنا',
+    customerSatisfaction: 'رضا العملاء',
+    ourServicesCapabilities: 'خدماتنا وقدراتنا',
+    servicesCapabilitiesDesc: 'دعم شامل من البحث والتطوير إلى التسليم والمساعدة الفنية.',
+    rdServices: 'خدمات البحث والتطوير',
+    rdServicesDesc: 'تطوير تركيبات مخصصة وتحسين المنتجات لتلبية متطلبات الصناعة المحددة.',
+    customFormulations: 'تركيبات مخصصة',
+    productTesting: 'اختبار المنتج',
+    performanceAnalysis: 'تحليل الأداء',
+    globalDistribution: 'التوزيع العالمي',
+    globalDistributionDesc: 'سلسلة توريد ولوجستيات موثوقة تضمن التسليم في الوقت المناسب في جميع أنحاء العالم.',
+    countries40Plus: '40+ دولة',
+    expressShipping: 'شحن سريع',
+    bulkOrders: 'طلبات بالجملة',
+    technicalSupport: 'الدعم الفني',
+    technicalSupportDesc: 'مساعدة فنية خبيرة واستشارات لتطبيق المنتج الأمثل والأداء.',
+    support24_7: 'دعم 24/7',
+    applicationTraining: 'تدريب التطبيق',
+    documentation: 'التوثيق',
+    
+    // Product Categories Extended
+    fuelAdditivesTitle: 'إضافات الوقود',
+    fuelAdditivesDesc: 'إضافات وقود عالية الأداء مصممة لتعزيز كفاءة الاحتراق وتقليل الانبعاثات وإطالة عمر المحرك عبر التطبيقات السيارات والصناعية.',
+    waterTreatmentTitle: 'معالجة المياه',
+    waterTreatmentDesc: 'حلول معالجة المياه الشاملة للتطبيقات البلدية والصناعية والسكنية، مما يضمن مياه نظيفة وآمنة لجميع الاستخدامات.',
+    paintThinnerTitle: 'الدهانات والمذيبات',
+    paintThinnerDesc: 'تركيبات دهانات ومذيبات ممتازة للسيارات والعمارة والتطبيقات الصناعية مع متانة وجودة تشطيب فائقة.',
+    agriculturalFertilizersTitle: 'الأسمدة الزراعية',
+    agriculturalFertilizersDesc: 'حلول الأسمدة المتقدمة المصممة لتعظيم غلة المحاصيل مع تعزيز ممارسات الزراعة المستدامة وتحسين صحة التربة.',
     
     // About page
     aboutTitle: 'حول مجمع ممتاز الكيميائي',
