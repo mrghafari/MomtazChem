@@ -31388,13 +31388,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           console.log(`✓ [PERMISSIONS] Custom user ${customUser.email} has modules:`, permissions);
 
           return res.json({
-
-          console.log(`✓ [PERMISSIONS] Custom user ${customUser.email} has modules:`, permissions);
-          console.log(`✓ [PERMISSIONS] Converted to technical IDs:`, technicalModules);
-
-          return res.json({
             success: true,
-            permissions: technicalModules.map(moduleId => ({
+            permissions: permissions.map(moduleId => ({
               moduleId,
               canView: true,
               canCreate: true,
@@ -31402,7 +31397,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
               canDelete: true,
               canApprove: true
             })),
-            modules: technicalModules,
+            modules: permissions,
             roles: [customUser.role_id],
             roleInfo: {
               name: customUser.role_name,
@@ -31444,13 +31439,13 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           // Parse permissions from JSON array
           const permissions = Array.isArray(userRole[0].permissions) 
             ? userRole[0].permissions 
-console.log(`✓ [PERMISSIONS] User ${customUser[0].email} has modules:`, permissions);          return res.json({
+            : JSON.parse(userRole[0].permissions || '[]');
+          
           console.log(`✓ [PERMISSIONS] User ${customUser[0].email} has modules:`, permissions);
-          console.log(`✓ [PERMISSIONS] Converted to technical IDs:`, technicalModules);
 
           return res.json({
             success: true,
-            permissions: technicalModules.map(moduleId => ({
+            permissions: permissions.map(moduleId => ({
               moduleId,
               canView: true,
               canCreate: true,
@@ -31458,7 +31453,7 @@ console.log(`✓ [PERMISSIONS] User ${customUser[0].email} has modules:`, permis
               canDelete: true,
               canApprove: true
             })),
-            modules: technicalModules,
+            modules: permissions,
             roles: [userRole[0].id],
             roleInfo: {
               name: userRole[0].name,

@@ -31385,56 +31385,12 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             ? customUser.permissions 
             : JSON.parse(customUser.permissions || '[]');
 
-          // Map Persian display names to technical module IDs
-          const persianToTechnicalMap = {
-            'شاخص‌های عملکرد (KPI)': 'kpi_dashboard',
-            'داشبورد مدیریتی': 'management_dashboard',
-            'تنظیمات ایمیل': 'email_settings',
-            'پشتیبان‌گیری پایگاه داده': 'database_backup',
-            'مدیریت SEO': 'seo',
-            'مدیریت پیامک': 'sms',
-            'مدیریت واتساپ CRM': 'whatsapp_crm',
-            'تنظیمات هوش مصنوعی': 'ai_settings',
-            'کنترل تازه‌سازی': 'refresh_control',
-            'سیستم تیکتینگ': 'ticketing_system',
-            'مدیریت محتوا': 'content_management',
-            'مدیریت بارکد': 'barcode',
-            'همگام‌سازی فروشگاه': 'syncing_shop',
-            'مدیریت فروشگاه': 'shop_management',
-            'مدیریت محصولات': 'product_management',
-            'مدیریت سفارشات': 'order_management',
-            'مدیریت انبار': 'warehouse_management',
-            'مدیریت لجستیک': 'logistics_management',
-            'مدیریت استعلامات': 'inquiries',
-            'مدیریت CRM': 'crm',
-            'مدیریت کارخانه': 'factory',
-            'مدیریت کاربران': 'user_management',
-            'مدیریت روش‌ها': 'procedures',
-            'مدیریت پرداخت': 'payment_management',
-            'مدیریت مالی': 'finance',
-            'مدیریت کیف پول': 'wallet_management',
-            'آمار جغرافیایی': 'geography_analytics',
-            'مدیریت دسته‌بندی‌ها': 'categories',
-            'دستیار SEO هوشمند': 'seo_management',
-            'تنظیمات سرور': 'server_config',
-            'اطلاعات شرکت': 'company_information',
-            'User Guide': 'user_guide',
-            'مدیریت سایت': 'site_management',
-            'ماژول مارکتینگ': 'marketing_module',
-            'مدیریت و پیگیری سفارشات': 'order_management'
-          };
-
-          // Convert Persian names to technical IDs
-          const technicalModules = permissions.map(perm => 
-            persianToTechnicalMap[perm] || perm
-          ).filter(Boolean);
-
           console.log(`✓ [PERMISSIONS] Custom user ${customUser.email} has modules:`, permissions);
-          console.log(`✓ [PERMISSIONS] Converted to technical IDs:`, technicalModules);
+          console.log(`✓ [PERMISSIONS] Custom user ${customUser.email} has modules:`, permissions);
 
           return res.json({
             success: true,
-            permissions: technicalModules.map(moduleId => ({
+            permissions: permissions.map(moduleId => ({
               moduleId,
               canView: true,
               canCreate: true,
@@ -31442,7 +31398,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
               canDelete: true,
               canApprove: true
             })),
-            modules: technicalModules,
+            modules: permissions,
             roles: [customUser.role_id],
             roleInfo: {
               name: customUser.role_name,
@@ -31482,73 +31438,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
         if (userRole.length > 0) {
           // Parse permissions from JSON array
-          const permissions = Array.isArray(userRole[0].permissions) 
-            ? userRole[0].permissions 
-            : JSON.parse(userRole[0].permissions || '[]');
-
-          // Map Persian display names to technical module IDs
-          const persianToTechnicalMap = {
-            'شاخص‌های عملکرد (KPI)': 'kpi_dashboard',
-            'داشبورد مدیریتی': 'management_dashboard',
-            'تنظیمات ایمیل': 'email_settings',
-            'پشتیبان‌گیری پایگاه داده': 'database_backup',
-            'مدیریت SEO': 'seo',
-            'مدیریت پیامک': 'sms',
-            'مدیریت واتساپ CRM': 'whatsapp_crm',
-            'تنظیمات هوش مصنوعی': 'ai_settings',
-            'کنترل تازه‌سازی': 'refresh_control',
-            'سیستم تیکتینگ': 'ticketing_system',
-            'مدیریت محتوا': 'content_management',
-            'مدیریت بارکد': 'barcode',
-            'همگام‌سازی فروشگاه': 'syncing_shop',
-            'مدیریت فروشگاه': 'shop_management',
-            'مدیریت محصولات': 'product_management',
-            'مدیریت سفارشات': 'order_management',
-            'مدیریت انبار': 'warehouse_management',
-            'مدیریت لجستیک': 'logistics_management',
-            'مدیریت استعلامات': 'inquiries',
-            'مدیریت CRM': 'crm',
-            'مدیریت کارخانه': 'factory',
-            'مدیریت کاربران': 'user_management',
-            'مدیریت روش‌ها': 'procedures',
-            'مدیریت پرداخت': 'payment_management',
-            'مدیریت حسابداری': 'accounting_management',
-            'مدیریت مالی': 'finance',
-            'مدیریت کیف پول': 'wallet_management',
-            'آمار جغرافیایی': 'geography_analytics',
-            'مدیریت دسته‌بندی‌ها': 'categories',
-            'دستیار SEO هوشمند': 'seo_management',
-            'تنظیمات سرور': 'server_config',
-            'اطلاعات شرکت': 'company_information',
-            'User Guide': 'user_guide',
-            'مدیریت سایت': 'site_management',
-            'ماژول مارکتینگ': 'marketing_module',
-            'مدیریت و پیگیری سفارشات': 'order_management'
-          };
-
-          // Convert Persian names to technical IDs
-          const technicalModules = permissions.map(perm => 
-            persianToTechnicalMap[perm] || perm
-          ).filter(Boolean);
-
-          console.log(`✓ [PERMISSIONS] User ${customUser[0].email} has modules:`, permissions);
-          console.log(`✓ [PERMISSIONS] Converted to technical IDs:`, technicalModules);
-
-          return res.json({
-            success: true,
-            permissions: technicalModules.map(moduleId => ({
-              moduleId,
-              canView: true,
-              canCreate: true,
-              canEdit: true,
-              canDelete: true,
-              canApprove: true
-            })),
-            modules: technicalModules,
-            roles: [userRole[0].id],
-            roleInfo: {
-              name: userRole[0].name,
-              displayName: userRole[0].displayName
+const permissions = Array.isArray(userRole[0].permissions)             ? userRole[0].permissions             : JSON.parse(userRole[0].permissions || '[]');          console.log(`✓ [PERMISSIONS] User ${customUser[0].email} has modules:`, permissions);          return res.json({            success: true,            permissions: permissions.map(moduleId => ({              moduleId,              canView: true,              canCreate: true,              canEdit: true,              canDelete: true,              canApprove: true            })),            modules: permissions,            roles: [userRole[0].id],            roleInfo: {              name: userRole[0].name,              displayName: userRole[0].displayName            }          });        }      }
             }
           });
         }
@@ -52047,6 +51937,165 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: 'خطا در بررسی وضعیت migration'
+      });
+    }
+  });
+
+
+  // =============================================================================
+  // AWS S3 SETTINGS ENDPOINTS
+  // =============================================================================
+
+  // Get AWS S3 settings
+  app.get("/api/admin/aws-s3/settings", requireAuth, async (req, res) => {
+    try {
+      const settings = await storage.getActiveAwsS3Settings();
+      
+      if (!settings) {
+        return res.json({
+          success: true,
+          settings: null
+        });
+      }
+
+      // Return settings without exposing actual keys
+      res.json({
+        success: true,
+        settings: {
+          ...settings,
+          accessKeyId: settings.accessKeyId ? '••••••••' : '',
+          secretAccessKey: settings.secretAccessKey ? '••••••••' : ''
+        }
+      });
+    } catch (error: any) {
+      console.error('Error fetching AWS S3 settings:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت تنظیمات'
+      });
+    }
+  });
+
+  // Save/Update AWS S3 settings
+  app.post("/api/admin/aws-s3/settings", requireAuth, async (req, res) => {
+    try {
+      const { accessKeyId, secretAccessKey, region, bucketName, isActive, endpoint, usePathStyle, publicUrl, description } = req.body;
+
+      // Check if settings already exist
+      const existingSettings = await storage.getActiveAwsS3Settings();
+
+      // Validate required fields
+      if (!region || !bucketName) {
+        return res.status(400).json({
+          success: false,
+          message: 'Region و Bucket Name الزامی هستند'
+        });
+      }
+
+      // For new settings, keys are required
+      if (!existingSettings && (!accessKeyId || !secretAccessKey)) {
+        return res.status(400).json({
+          success: false,
+          message: 'برای ایجاد تنظیمات جدید، Access Key و Secret Key الزامی هستند'
+        });
+      }
+
+      // Import encryption functions
+      const { encrypt } = await import('./aws-s3-service');
+
+      let savedSettings;
+      if (existingSettings) {
+        // Update existing settings
+        // Use existing keys if not provided or if masked
+        const encryptedAccessKey = (accessKeyId && accessKeyId !== '••••••••') 
+          ? encrypt(accessKeyId) 
+          : existingSettings.accessKeyId;
+        const encryptedSecretKey = (secretAccessKey && secretAccessKey !== '••••••••') 
+          ? encrypt(secretAccessKey) 
+          : existingSettings.secretAccessKey;
+
+        savedSettings = await storage.updateAwsS3Settings(existingSettings.id, {
+          accessKeyId: encryptedAccessKey,
+          secretAccessKey: encryptedSecretKey,
+          region,
+          bucketName,
+          isActive: isActive !== undefined ? isActive : existingSettings.isActive,
+          endpoint: endpoint !== undefined ? endpoint : existingSettings.endpoint,
+          usePathStyle: usePathStyle !== undefined ? usePathStyle : existingSettings.usePathStyle,
+          publicUrl: publicUrl !== undefined ? publicUrl : existingSettings.publicUrl,
+          description: description !== undefined ? description : existingSettings.description
+        });
+      } else {
+        // Create new settings
+        savedSettings = await storage.createAwsS3Settings({
+          accessKeyId: encrypt(accessKeyId),
+          secretAccessKey: encrypt(secretAccessKey),
+          region,
+          bucketName,
+          isActive: isActive !== undefined ? isActive : true,
+          endpoint: endpoint || undefined,
+          usePathStyle: usePathStyle || false,
+          publicUrl: publicUrl || undefined,
+          description: description || undefined
+        });
+      }
+
+      // Initialize AWS S3 service with new settings
+      const { getAwsS3Service } = await import('./aws-s3-service');
+      const s3Service = getAwsS3Service();
+      s3Service.initialize(savedSettings);
+
+      res.json({
+        success: true,
+        message: 'تنظیمات با موفقیت ذخیره شد',
+        settings: {
+          ...savedSettings,
+          accessKeyId: '••••••••',
+          secretAccessKey: '••••••••'
+        }
+      });
+    } catch (error: any) {
+      console.error('Error saving AWS S3 settings:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در ذخیره تنظیمات: ' + error.message
+      });
+    }
+  });
+  // Test AWS S3 connection
+  app.post("/api/admin/aws-s3/test", requireAuth, async (req, res) => {
+    try {
+      const settings = await storage.getActiveAwsS3Settings();
+      
+      if (!settings) {
+        return res.status(400).json({
+          success: false,
+          message: 'تنظیمات AWS S3 یافت نشد. ابتدا تنظیمات را ذخیره کنید.'
+        });
+      }
+
+      const { getAwsS3Service } = await import('./aws-s3-service');
+      const s3Service = getAwsS3Service();
+      s3Service.initialize(settings);
+      
+      const testResult = await s3Service.testConnection();
+      
+      if (testResult.success) {
+        res.json({
+          success: true,
+          message: testResult.message
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: testResult.message
+        });
+      }
+    } catch (error: any) {
+      console.error('Error testing AWS S3 connection:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در تست اتصال: ' + error.message
       });
     }
   });
