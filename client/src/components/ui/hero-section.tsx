@@ -20,8 +20,8 @@ const HeroSection = () => {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white">
         <div className="max-w-3xl">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            {t.advancedChemicalSolutions}{" "}
-            <span className="text-yellow-400">Solutions</span> {t.solutionsForIndustry}
+            {t.advancedChemical}{" "}
+            <span className="text-yellow-400">{t.solutions}</span> {t.forIndustry}
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-gray-100 leading-relaxed">
             {t.heroDescription}
