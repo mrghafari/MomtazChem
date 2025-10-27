@@ -60,17 +60,20 @@
   direction: ltr;
 }
 
-/* Language-specific fonts */
+/* Language-specific fonts - Premium Arabic Fonts */
 .lang-ar {
-  font-family: "Noto Sans Arabic", "Amiri", "Scheherazade New", "Arabic UI Text", "Traditional Arabic", "Segoe UI", "Tahoma", Arial, sans-serif;
+  font-family: "Cairo", "Tajawal", "Almarai", "IBM Plex Sans Arabic", "Arabic UI Text", "Segoe UI", "Tahoma", Arial, sans-serif;
+  font-weight: 500;
 }
 
 .lang-ku {
-  font-family: "Noto Sans Kurdish", "Amiri", "Scheherazade New", "Arabic UI Text", "Traditional Arabic", "Segoe UI", "Tahoma", Arial, sans-serif;
+  font-family: "Cairo", "Tajawal", "Almarai", "IBM Plex Sans Arabic", "Arabic UI Text", "Segoe UI", "Tahoma", Arial, sans-serif;
+  font-weight: 500;
 }
 
 .lang-en {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 500;
 }
 
 /* Required Field Styling */
@@ -103,24 +106,58 @@
   flex-direction: row;
 }
 
-/* Better Arabic and Kurdish font rendering */
+/* Better Arabic and Kurdish font rendering - Premium Typography */
 .lang-ar, .lang-ku {
   font-feature-settings: "liga" 1, "kern" 1, "calt" 1;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.6;
+  line-height: 1.75;
+  letter-spacing: -0.01em;
 }
 
-/* Improved typography for RTL languages */
-.lang-ar h1, .lang-ar h2, .lang-ar h3, .lang-ar h4, .lang-ar h5, .lang-ar h6,
-.lang-ku h1, .lang-ku h2, .lang-ku h3, .lang-ku h4, .lang-ku h5, .lang-ku h6 {
-  font-weight: 600;
-  letter-spacing: -0.025em;
+/* Improved typography for RTL languages - Modern Arabic Design */
+.lang-ar h1, .lang-ku h1 {
+  font-family: "Cairo", "Tajawal", sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.3;
+}
+
+.lang-ar h2, .lang-ku h2 {
+  font-family: "Cairo", "Tajawal", sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+}
+
+.lang-ar h3, .lang-ar h4, .lang-ar h5, .lang-ar h6,
+.lang-ku h3, .lang-ku h4, .lang-ku h5, .lang-ku h6 {
+  font-family: "Cairo", "Tajawal", sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.4;
 }
 
 .lang-ar p, .lang-ku p {
-  line-height: 1.7;
+  font-family: "Tajawal", "Cairo", "Almarai", sans-serif;
+  line-height: 1.8;
+  font-weight: 400;
+}
+
+/* Button and UI text in Arabic */
+.lang-ar button, .lang-ar .button,
+.lang-ku button, .lang-ku .button {
+  font-family: "Cairo", "Tajawal", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Hero section special styling for Arabic */
+.lang-ar .hero-title, .lang-ku .hero-title {
+  font-family: "Cairo", sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.04em;
 }
 
 /* Beautiful text shadows for Kurdish */

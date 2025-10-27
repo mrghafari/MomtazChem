@@ -601,7 +601,14 @@ export const translations: Record<Language, Translation> = {
     followUs: 'Follow Us',
     allRightsReserved: 'All Rights Reserved',
     
-    // Home Page
+    // Home Page - Hero Section
+    advancedChemicalSolutions: 'Advanced Chemical',
+    solutionsForIndustry: 'for Industry',
+    heroDescription: 'Leading manufacturer of premium fuel additives, water treatment systems, paint & thinner products, and agricultural fertilizers for global industries.',
+    exploreProducts: 'Explore Products',
+    contactSales: 'Contact Sales',
+    
+    // Home Page - Products
     ourProductPortfolio: 'Our Product Portfolio',
     productPortfolioDesc: 'Comprehensive chemical solutions across four key industries, engineered for performance and reliability.',
     products_plural: 'Products',
@@ -943,7 +950,14 @@ export const translations: Record<Language, Translation> = {
     followUs: 'تابعونا',
     allRightsReserved: 'جميع الحقوق محفوظة',
     
-    // Home Page
+    // Home Page - Hero Section
+    advancedChemicalSolutions: 'حلول كيميائية متقدمة',
+    solutionsForIndustry: 'للصناعة',
+    heroDescription: 'الشركة الرائدة في تصنيع إضافات الوقود المتميزة، وأنظمة معالجة المياه، ومنتجات الدهانات والمذيبات، والأسمدة الزراعية للصناعات العالمية.',
+    exploreProducts: 'استكشف المنتجات',
+    contactSales: 'اتصل بالمبيعات',
+    
+    // Home Page - Products
     ourProductPortfolio: 'مجموعة منتجاتنا',
     productPortfolioDesc: 'حلول كيميائية شاملة عبر أربعة صناعات رئيسية، مصممة للأداء والموثوقية.',
     products_plural: 'منتجات',
