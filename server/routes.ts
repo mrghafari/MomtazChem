@@ -31520,6 +31520,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'مدیریت دسته‌بندی‌ها': 'categories',
             'دستیار SEO هوشمند': 'seo_management',
             'تنظیمات سرور': 'server_config',
+            'تنظیمات AWS S3': 'aws_s3_settings',
             'اطلاعات شرکت': 'company_information',
             'User Guide': 'user_guide',
             'مدیریت سایت': 'site_management',
