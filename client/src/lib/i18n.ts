@@ -47,6 +47,32 @@ export interface Translation {
     loginWelcome: string;
     unit: string;
     units: string;
+    
+    // Filters & Sorting
+    filters: string;
+    searchProducts: string;
+    searchProductsPlaceholder: string;
+    sortBy: string;
+    relevance: string;
+    name: string;
+    categories: string;
+    priceRange: string;
+    clearAllFilters: string;
+    clearFilters: string;
+    ascending: string;
+    descending: string;
+    highToLow: string;
+    lowToHigh: string;
+    aToZ: string;
+    zToA: string;
+    availability: string;
+    inStockOnly: string;
+    newest: string;
+    showingProducts: string;
+    page: string;
+    of: string;
+    product: string;
+    products: string;
   };
   
   // Common actions
@@ -652,7 +678,33 @@ export const translations: Record<Language, Translation> = {
       loginSuccessful: 'Login Successful',
       loginWelcome: 'Welcome back! You can now checkout',
       unit: 'unit',
-      units: 'units'
+      units: 'units',
+      
+      // Filters & Sorting
+      filters: 'Filters',
+      searchProducts: 'Search Products',
+      searchProductsPlaceholder: '...Search products',
+      sortBy: 'Sort by',
+      relevance: 'Relevance',
+      name: 'Name',
+      categories: 'Categories',
+      priceRange: 'Price Range',
+      clearAllFilters: 'Clear All Filters',
+      clearFilters: 'Clear all filters',
+      ascending: 'Ascending',
+      descending: 'Descending',
+      highToLow: 'High to Low',
+      lowToHigh: 'Low to High',
+      aToZ: 'A-Z',
+      zToA: 'Z-A',
+      availability: 'Availability',
+      inStockOnly: 'In Stock Only',
+      newest: 'Newest',
+      showingProducts: 'Showing',
+      page: 'page',
+      of: 'of',
+      product: 'product',
+      products: 'products',
     },
     
     // Common actions
@@ -1233,7 +1285,33 @@ export const translations: Record<Language, Translation> = {
       loginSuccessful: 'تم تسجيل الدخول',
       loginWelcome: 'مرحباً بعودتك! يمكنك الآن إتمام الطلب',
       unit: 'وحدة',
-      units: 'وحدات'
+      units: 'وحدات',
+      
+      // Filters & Sorting
+      filters: 'الفلاتر',
+      searchProducts: 'البحث عن المنتجات',
+      searchProductsPlaceholder: '...ابحث عن المنتجات',
+      sortBy: 'ترتيب حسب',
+      relevance: 'الأكثر صلة',
+      name: 'الاسم',
+      categories: 'التصنيفات',
+      priceRange: 'نطاق السعر',
+      clearAllFilters: 'مسح جميع الفلاتر',
+      clearFilters: 'مسح جميع الفلاتر',
+      ascending: 'تصاعدي',
+      descending: 'تنازلي',
+      highToLow: 'من الأعلى للأقل',
+      lowToHigh: 'من الأقل للأعلى',
+      aToZ: 'أ-ي',
+      zToA: 'ي-أ',
+      availability: 'التوفر',
+      inStockOnly: 'المتوفر فقط',
+      newest: 'الأحدث',
+      showingProducts: 'عرض',
+      page: 'صفحة',
+      of: 'من',
+      product: 'منتج',
+      products: 'منتجات',
     },
     
     // Common actions

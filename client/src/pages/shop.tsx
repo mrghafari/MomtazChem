@@ -1016,19 +1016,19 @@ const Shop = () => {
           <div className="w-full lg:w-64 flex-shrink-0">
             <Card>
               <CardHeader className="p-3 sm:p-6">
-                <CardTitle className="text-base sm:text-lg">Filters</CardTitle>
+                <CardTitle className="text-base sm:text-lg">{t.shop.filters}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 sm:space-y-6 p-3 sm:p-6">
                 {/* Advanced Search */}
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">Search Products</label>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">{t.shop.searchProducts}</label>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Search className={`absolute ${direction === 'rtl' ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4`} />
                     <Input
-                      placeholder="Search products..."
+                      placeholder={t.shop.searchProductsPlaceholder}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10"
+                      className={`w-full ${direction === 'rtl' ? 'pr-10' : 'pl-10'}`}
                     />
                   </div>
                 </div>
@@ -1037,7 +1037,7 @@ const Shop = () => {
 
                 {/* Sort Options */}
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">Sort by</label>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">{t.shop.sortBy}</label>
                   <div className="space-y-2">
                     <Select 
                       value={filters.sortBy} 
@@ -1047,10 +1047,10 @@ const Shop = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="relevance">Relevance</SelectItem>
-                        <SelectItem value="name">Name</SelectItem>
-                        <SelectItem value="price">Price</SelectItem>
-                        <SelectItem value="created">Newest</SelectItem>
+                        <SelectItem value="relevance">{t.shop.relevance}</SelectItem>
+                        <SelectItem value="name">{t.shop.name}</SelectItem>
+                        <SelectItem value="price">{t.price}</SelectItem>
+                        <SelectItem value="created">{t.shop.newest}</SelectItem>
                       </SelectContent>
                     </Select>
                     <Select 
@@ -1061,8 +1061,8 @@ const Shop = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="asc">A-Z / Low-High</SelectItem>
-                        <SelectItem value="desc">Z-A / High-Low</SelectItem>
+                        <SelectItem value="asc">{t.shop.aToZ} / {t.shop.lowToHigh}</SelectItem>
+                        <SelectItem value="desc">{t.shop.zToA} / {t.shop.highToLow}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1074,7 +1074,7 @@ const Shop = () => {
                 {availableFilters?.categories && availableFilters.categories.length > 0 && (
                   <>
                     <div>
-                      <label className="text-sm font-medium text-gray-700 mb-2 block">Categories</label>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">{t.shop.categories}</label>
                       <div className="space-y-2 max-h-48 overflow-y-auto">
                         {availableFilters.categories.map((cat: any) => (
                           <div key={cat.name} className="flex items-center space-x-2">
@@ -1128,8 +1128,8 @@ const Shop = () => {
 
                 {/* Stock Status */}
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">Availability</label>
-                  <div className="flex items-center space-x-2">
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">{t.shop.availability}</label>
+                  <div className={`flex items-center ${direction === 'rtl' ? 'space-x-reverse' : ''} space-x-2`}>
                     <Checkbox
                       id="in-stock"
                       checked={filters.inStock === true}
@@ -1138,7 +1138,7 @@ const Shop = () => {
                       }
                     />
                     <label htmlFor="in-stock" className="text-sm cursor-pointer">
-                      In Stock Only
+                      {t.shop.inStockOnly}
                     </label>
                   </div>
                 </div>
@@ -1154,7 +1154,7 @@ const Shop = () => {
                   onClick={clearFilters}
                   disabled={!Object.values(filters).some(v => v && (Array.isArray(v) ? v.length > 0 : true))}
                 >
-                  Clear All Filters
+                  {t.shop.clearAllFilters}
                 </Button>
               </CardContent>
             </Card>
@@ -1165,7 +1165,7 @@ const Shop = () => {
             {/* View Toggle */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
               <p className="text-sm sm:text-base text-gray-600">
-                Showing {totalResults} product{totalResults !== 1 ? 's' : ''} {currentPage > 0 ? `(page ${currentPage + 1} of ${totalPages})` : ''}
+                {t.shop.showingProducts} {totalResults} {totalResults !== 1 ? t.shop.products : t.shop.product} {currentPage > 0 ? `(${t.shop.page} ${currentPage + 1} ${t.shop.of} ${totalPages})` : ''}
               </p>
               <div className="flex items-center gap-2">
                 <Button
