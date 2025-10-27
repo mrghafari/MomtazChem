@@ -31469,14 +31469,14 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       if (legacyUser[0].id === 15 || legacyUser[0].email === 'admin@momtazchem.com') {
         console.log(`🔍 [DEBUG] SUPER ADMIN PATH ACTIVATED for ${legacyUser[0].email}`);
         const allModules = [
-          "kpi_dashboard", "management_dashboard", "accounting_management",
-          "syncing_shop", "inquiries", "barcode", "email_settings", "database_backup",
-          "crm", "seo", "categories", "sms", "whatsapp_crm", "factory", "user_management",
-          "shop_management", "procedures", "order_management", "product_management",
-          "payment_management", "finance", "wallet_management", "geography_analytics", "ai_settings",
-          "refresh_control", "content_management", "marketing_module",
-          "warehouse_management", "logistics_management", "ticketing_system", "remote_desktop",
-          "server_config", "company_information", "user_guide", "site_management"
+          "kpi_dashboard", "management_dashboard", "syncing_shop", "shop_management",
+          "product_management", "order_management", "warehouse_management", "logistics_management",
+          "inquiries", "crm", "barcode", "email_settings", "database_backup", "seo",
+          "categories", "sms", "factory", "user_management", "procedures", "payment_management",
+          "accounting_management", "finance", "wallet_management", "geography_analytics",
+          "ai_settings", "refresh_control", "content_management", "ticketing_system",
+          "remote_desktop", "server_config", "company_information", "user_guide",
+          "marketing_module", "aws_s3_settings", "whatsapp_crm", "order_tracking"
         ];
         
         console.log('🔍 [DEBUG] allModules array contains:', allModules.length, 'modules');
