@@ -1418,7 +1418,7 @@ const Shop = () => {
                             </div>
                             <div className="flex flex-col gap-1">
                               <Badge variant={product.inStock ? "secondary" : "destructive"}>
-                                {product.inStock ? "In Stock" : "Out of Stock"}
+                                {product.inStock ? t.shop.inStock : t.shop.outOfStock}
                               </Badge>
                               
 
@@ -1461,7 +1461,7 @@ const Shop = () => {
                                   <div className="flex items-center">
                                     <div className="flex items-center gap-2">
                                       <div className="w-3 h-3 bg-yellow-400 rounded-full shadow-lg animate-pulse"></div>
-                                      <span className="text-xs font-semibold uppercase tracking-wider">Volume Deals</span>
+                                      <span className="text-xs font-semibold uppercase tracking-wider">{t.shop.volumeDeals}</span>
                                     </div>
                                   </div>
                                   
@@ -1503,10 +1503,10 @@ const Shop = () => {
                                                 <div className="flex items-center justify-between text-xs">
                                                   <div className="flex items-center gap-1">
                                                     <Sparkles className="w-2.5 h-2.5 animate-spin" />
-                                                    <span className="font-bold">🔥 {t.shop?.max || 'MAX'} {(highestDiscount.discount * 100).toFixed(0)}% {t.shop?.off || 'OFF'}!</span>
+                                                    <span className="font-bold">🔥 {t.shop.max} {(highestDiscount.discount * 100).toFixed(0)}% {t.shop.off}!</span>
                                                   </div>
                                                   <span className="font-bold text-yellow-200">
-                                                    {t.shop?.buy || 'Buy'} {highestDiscount.minQty}+
+                                                    {t.shop.buy} {highestDiscount.minQty}+
                                                   </span>
                                                 </div>
                                               </div>
@@ -1519,10 +1519,10 @@ const Shop = () => {
                                               <div className="flex items-center justify-between text-xs">
                                                 <div className="flex items-center gap-1">
                                                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                                                  <span className="font-semibold text-green-700">{(currentDiscount.discount * 100).toFixed(0)}% ACTIVE</span>
+                                                  <span className="font-semibold text-green-700">{(currentDiscount.discount * 100).toFixed(0)}% {t.shop.active}</span>
                                                 </div>
                                                 <span className="font-semibold text-green-700">
-                                                  {Math.floor(parseFloat(product.price || "0") * currentDiscount.discount * currentQty)} IQD OFF
+                                                  {Math.floor(parseFloat(product.price || "0") * currentDiscount.discount * currentQty)} IQD {t.shop.off}
                                                 </span>
                                               </div>
                                             </div>
@@ -1531,7 +1531,7 @@ const Shop = () => {
                                               <div className="flex items-center gap-1 text-xs">
                                                 <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
                                                 <span className="font-semibold text-orange-700">
-                                                  +{nextDiscount.remaining} more → {(nextDiscount.discount * 100).toFixed(0)}% OFF
+                                                  +{nextDiscount.remaining} {t.shop.more} → {(nextDiscount.discount * 100).toFixed(0)}% {t.shop.off}
                                                 </span>
                                               </div>
                                             </div>
@@ -1540,7 +1540,7 @@ const Shop = () => {
                                               <div className="flex items-center gap-1 text-xs">
                                                 <div className="w-2 h-2 bg-white/70 rounded-full"></div>
                                                 <span className="font-bold text-white/90">
-                                                  {product.quantityDiscounts[0].minQty}+ items: {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% OFF
+                                                  {product.quantityDiscounts[0].minQty}+ {t.shop.items}: {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% {t.shop.off}
                                                 </span>
                                               </div>
                                             </div>
@@ -1598,7 +1598,7 @@ const Shop = () => {
                                       onClick={() => window.open(product.pdfCatalogUrl, '_blank')}
                                     >
                                       <Eye className="w-3 h-3 mr-1" />
-                                      کاتالوگ
+                                      {t.shop.catalog}
                                     </Button>
                                   )}
 

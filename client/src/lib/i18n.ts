@@ -13,6 +13,16 @@ export interface Translation {
     priceFilter: string;
     minPrice: string;
     maxPrice: string;
+    inStock: string;
+    outOfStock: string;
+    volumeDeals: string;
+    active: string;
+    off: string;
+    more: string;
+    items: string;
+    max: string;
+    buy: string;
+    catalog: string;
   };
   
   // Common actions
@@ -376,7 +386,17 @@ export const translations: Record<Language, Translation> = {
       lowStockWarning: 'Only {count} items left!',
       priceFilter: 'Price Filter',
       minPrice: 'Min',
-      maxPrice: 'Max'
+      maxPrice: 'Max',
+      inStock: 'In Stock',
+      outOfStock: 'Out of Stock',
+      volumeDeals: 'Volume Deals',
+      active: 'ACTIVE',
+      off: 'OFF',
+      more: 'more',
+      items: 'items',
+      max: 'MAX',
+      buy: 'Buy',
+      catalog: 'Catalog'
     },
     
     // Common actions
@@ -739,7 +759,17 @@ export const translations: Record<Language, Translation> = {
       lowStockWarning: 'لم يتبق سوى {count} قطعة!',
       priceFilter: 'فلتر السعر',
       minPrice: 'الحد الأدنى',
-      maxPrice: 'الحد الأقصى'
+      maxPrice: 'الحد الأقصى',
+      inStock: 'متوفر',
+      outOfStock: 'غير متوفر',
+      volumeDeals: 'عروض الكمية',
+      active: 'نشط',
+      off: 'خصم',
+      more: 'إضافية',
+      items: 'قطع',
+      max: 'أقصى',
+      buy: 'اشترِ',
+      catalog: 'الكتالوج'
     },
     
     // Common actions
