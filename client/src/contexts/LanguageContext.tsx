@@ -18,7 +18,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   const [language, setLanguage] = useState<Language>(() => {
     // Get saved language from localStorage or default to English
     const saved = localStorage.getItem('language') as Language;
-    return saved && (saved === 'en' || saved === 'ar' || saved === 'ku' || saved === 'tr') ? saved : 'en';
+    return saved && (saved === 'en' || saved === 'ar') ? saved : 'en';
   });
 
   const direction = getDirection(language);
