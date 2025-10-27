@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { insertContactSchema } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { useMultilingualToast } from "@/hooks/use-multilingual-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,9 +23,9 @@ interface ContentItem {
 }
 
 const Contact = () => {
-  const { toast } = useToast();
+  const { toast } = useMultilingualToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { language } = useLanguage();
+  const { language, t, direction } = useLanguage();
 
   // Map language codes to content management language codes
   const getLanguageCode = () => {
@@ -76,17 +76,17 @@ const Contact = () => {
     },
     onSuccess: () => {
       toast({
-        title: "Message Sent Successfully",
-        description: "Thank you for your inquiry. We will get back to you within 24 hours.",
+        title: 'contactPage.messageSent' as any,
+        description: 'contactPage.messageSentDesc' as any,
       });
       form.reset();
       setIsSubmitting(false);
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
-        variant: "destructive",
+        title: 'contactPage.errorTitle' as any,
+        description: 'contactPage.errorDesc' as any,
+        variant: 'destructive',
       });
       setIsSubmitting(false);
     },
@@ -151,7 +151,7 @@ const Contact = () => {
   ];
 
   return (
-    <div className="pt-20">
+    <div className="pt-20" dir={direction}>
       {/* Hero Section */}
       <section className="relative py-20 bg-gradient-to-r from-primary to-secondary text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -183,9 +183,9 @@ const Contact = () => {
                       name="firstName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>First Name</FormLabel>
+                          <FormLabel>{t.contactPage.firstName}</FormLabel>
                           <FormControl>
-                            <Input placeholder="John" {...field} />
+                            <Input placeholder={t.contactPage.firstNamePlaceholder} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -196,9 +196,9 @@ const Contact = () => {
                       name="lastName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Last Name</FormLabel>
+                          <FormLabel>{t.contactPage.lastName}</FormLabel>
                           <FormControl>
-                            <Input placeholder="Doe" {...field} />
+                            <Input placeholder={t.contactPage.lastNamePlaceholder} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -211,9 +211,9 @@ const Contact = () => {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email Address</FormLabel>
+                        <FormLabel>{t.contactPage.emailAddress}</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="john@company.com" {...field} />
+                          <Input type="email" placeholder={t.contactPage.emailPlaceholder} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -225,9 +225,9 @@ const Contact = () => {
                     name="company"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Company</FormLabel>
+                        <FormLabel>{t.contactPage.company}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Your Company" {...field} />
+                          <Input placeholder={t.contactPage.companyPlaceholder} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -239,22 +239,22 @@ const Contact = () => {
                     name="productInterest"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Product Interest</FormLabel>
+                        <FormLabel>{t.contactPage.productInterest}</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select a product category" />
+                              <SelectValue placeholder={t.contactPage.productInterestPlaceholder} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="water-treatment">Water Treatment - پکیج تصفیه آب</SelectItem>
-                            <SelectItem value="fuel-additives">Fuel Additives - مکمل‌های سوخت</SelectItem>
-                            <SelectItem value="paint-thinner">Paint & Thinner - رنگ و تینر</SelectItem>
-                            <SelectItem value="agricultural-fertilizers">Agricultural Fertilizers - کودهای کشاورزی</SelectItem>
-                            <SelectItem value="industrial-chemicals">Industrial Chemicals - مواد شیمیایی صنعتی</SelectItem>
-                            <SelectItem value="technical-equipment">Technical Equipment - تجهیزات فنی</SelectItem>
-                            <SelectItem value="commercial-goods">Commercial Goods - کالاهای تجاری</SelectItem>
-                            <SelectItem value="custom-solutions">Custom Solutions - راه‌حل‌های سفارشی</SelectItem>
+                            <SelectItem value="water-treatment">{t.contactPage.waterTreatment}</SelectItem>
+                            <SelectItem value="fuel-additives">{t.contactPage.fuelAdditives}</SelectItem>
+                            <SelectItem value="paint-thinner">{t.contactPage.paintThinner}</SelectItem>
+                            <SelectItem value="agricultural-fertilizers">{t.contactPage.agriculturalFertilizers}</SelectItem>
+                            <SelectItem value="industrial-chemicals">{t.contactPage.industrialChemicals}</SelectItem>
+                            <SelectItem value="technical-equipment">{t.contactPage.technicalEquipment}</SelectItem>
+                            <SelectItem value="commercial-goods">{t.contactPage.commercialGoods}</SelectItem>
+                            <SelectItem value="custom-solutions">{t.contactPage.customSolutions}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -267,11 +267,11 @@ const Contact = () => {
                     name="message"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Message</FormLabel>
+                        <FormLabel>{t.contactPage.message}</FormLabel>
                         <FormControl>
                           <Textarea 
                             rows={4} 
-                            placeholder="Tell us about your requirements..." 
+                            placeholder={t.contactPage.messagePlaceholder} 
                             {...field} 
                           />
                         </FormControl>
@@ -285,7 +285,7 @@ const Contact = () => {
                     className="w-full bg-primary-blue hover:bg-primary-blue-dark" 
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Sending..." : "Send Message"}
+                    {isSubmitting ? t.contactPage.sending : t.contactPage.sendMessage}
                   </Button>
                 </form>
               </Form>
@@ -294,7 +294,7 @@ const Contact = () => {
             {/* Contact Information */}
             <div className="space-y-8">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.contactPage.contactInformation}</h2>
                 
                 <div className="space-y-6">
                   {contactInfo.map((info, index) => (
@@ -365,8 +365,8 @@ const Contact = () => {
               {/* Certifications */}
               <div className="bg-gray-50 rounded-xl p-6">
                 <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                  <IdCard className="h-5 w-5 mr-2" />
-                  Our Certifications
+                  <IdCard className={`h-5 w-5 ${direction === 'rtl' ? 'ml-2' : 'mr-2'}`} />
+                  {t.contactPage.ourCertifications}
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-4 bg-white rounded-lg">
@@ -388,8 +388,8 @@ const Contact = () => {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Find Us</h2>
-            <p className="text-xl text-gray-600">Visit our headquarters and manufacturing facilities</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t.contactPage.findUs}</h2>
+            <p className="text-xl text-gray-600">{t.contactPage.visitHeadquarters}</p>
           </div>
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="relative">
@@ -420,7 +420,7 @@ const Contact = () => {
                         rel="noopener noreferrer"
                         className="text-primary-blue hover:text-primary-blue-dark text-sm font-medium"
                       >
-                        View in Google Maps →
+                        {t.contactPage.viewInMaps} {direction === 'rtl' ? '←' : '→'}
                       </a>
                     </div>
                   </div>
@@ -439,7 +439,7 @@ const Contact = () => {
                   rel="noopener noreferrer"
                   className="bg-primary-blue hover:bg-primary-blue-dark text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
                 >
-                  Get Directions
+                  {t.contactPage.getDirections}
                 </a>
               </div>
             </div>

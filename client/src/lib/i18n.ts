@@ -424,6 +424,53 @@ export interface Translation {
   customerReviewTitle: string;
   product: string;
   
+  // Contact Page
+  contactPage: {
+    // Form Labels
+    firstName: string;
+    lastName: string;
+    emailAddress: string;
+    company: string;
+    productInterest: string;
+    message: string;
+    
+    // Form Placeholders
+    firstNamePlaceholder: string;
+    lastNamePlaceholder: string;
+    emailPlaceholder: string;
+    companyPlaceholder: string;
+    productInterestPlaceholder: string;
+    messagePlaceholder: string;
+    
+    // Product Categories
+    waterTreatment: string;
+    fuelAdditives: string;
+    paintThinner: string;
+    agriculturalFertilizers: string;
+    industrialChemicals: string;
+    technicalEquipment: string;
+    commercialGoods: string;
+    customSolutions: string;
+    
+    // Buttons
+    sending: string;
+    sendMessage: string;
+    
+    // Toast Messages
+    messageSent: string;
+    messageSentDesc: string;
+    errorTitle: string;
+    errorDesc: string;
+    
+    // Sections
+    contactInformation: string;
+    ourCertifications: string;
+    findUs: string;
+    visitHeadquarters: string;
+    getDirections: string;
+    viewInMaps: string;
+  };
+  
   // Services Page
   servicesPage: {
     title: string;
@@ -825,10 +872,13 @@ export const translations: Record<Language, Translation> = {
     comment: 'Comment',
     customerName: 'Customer Name',
     submitReview: 'Submit Review',
-    reviewSubmitted: 'Success',
+    reviewSubmitted: 'Review Submitted',
     reviewSubmittedDesc: 'Your review has been submitted successfully',
-    reviewError: 'Error',
-    reviewErrorDesc: 'Error submitting review',
+    reviewError: 'Error Submitting Review',
+    reviewErrorDesc: 'Error',
+    loadingReviews: 'Loading reviews...',
+    customerReviewTitle: 'Customer Review about',
+    product: 'Product',
     backToShop: 'Back to Shop',
     averageRating: 'Average Rating',
     totalReviews: 'Total Reviews',
@@ -969,14 +1019,52 @@ export const translations: Record<Language, Translation> = {
     weightsAndBatch: 'Weights & Batch',
     productDetails: 'Product Details',
     
-    // Product Reviews
-    reviewSubmitted: 'Review Submitted',
-    reviewSubmittedDesc: 'Your review has been submitted successfully',
-    reviewError: 'Error Submitting Review',
-    reviewErrorDesc: 'Error',
-    loadingReviews: 'Loading reviews...',
-    customerReviewTitle: 'Customer Review about',
-    product: 'Product',
+    // Contact Page
+    contactPage: {
+      // Form Labels
+      firstName: 'First Name',
+      lastName: 'Last Name',
+      emailAddress: 'Email Address',
+      company: 'Company',
+      productInterest: 'Product Interest',
+      message: 'Message',
+      
+      // Form Placeholders
+      firstNamePlaceholder: 'John',
+      lastNamePlaceholder: 'Doe',
+      emailPlaceholder: 'john@company.com',
+      companyPlaceholder: 'Your Company',
+      productInterestPlaceholder: 'Select a product category',
+      messagePlaceholder: 'Tell us about your requirements...',
+      
+      // Product Categories
+      waterTreatment: 'Water Treatment',
+      fuelAdditives: 'Fuel Additives',
+      paintThinner: 'Paint & Thinner',
+      agriculturalFertilizers: 'Agricultural Fertilizers',
+      industrialChemicals: 'Industrial Chemicals',
+      technicalEquipment: 'Technical Equipment',
+      commercialGoods: 'Commercial Goods',
+      customSolutions: 'Custom Solutions',
+      
+      // Buttons
+      sending: 'Sending...',
+      sendMessage: 'Send Message',
+      
+      // Toast Messages
+      messageSent: 'Message Sent Successfully',
+      messageSentDesc: 'Thank you for your inquiry. We will get back to you within 24 hours.',
+      errorTitle: 'Error',
+      errorDesc: 'Failed to send message. Please try again.',
+      
+      // Sections
+      contactInformation: 'Contact Information',
+      ourCertifications: 'Our Certifications',
+      findUs: 'Find Us',
+      visitHeadquarters: 'Visit our headquarters and manufacturing facilities',
+      getDirections: 'Get Directions',
+      viewInMaps: 'View in Google Maps',
+    },
     
     // Services Page
     servicesPage: {
@@ -1352,10 +1440,13 @@ export const translations: Record<Language, Translation> = {
     comment: 'التعليق',
     customerName: 'اسم العميل',
     submitReview: 'إرسال المراجعة',
-    reviewSubmitted: 'نجح',
-    reviewSubmittedDesc: 'تم إرسال مراجعتك بنجاح',
-    reviewError: 'خطأ',
-    reviewErrorDesc: 'خطأ في إرسال المراجعة',
+    reviewSubmitted: 'تم تقديم المراجعة',
+    reviewSubmittedDesc: 'تم تقديم مراجعتك بنجاح',
+    reviewError: 'خطأ في تقديم المراجعة',
+    reviewErrorDesc: 'خطأ',
+    loadingReviews: 'جاري تحميل المراجعات...',
+    customerReviewTitle: 'رأي العميل حول',
+    product: 'المنتج',
     backToShop: 'العودة للمتجر',
     averageRating: 'متوسط التقييم',
     totalReviews: 'إجمالي المراجعات',
@@ -1364,6 +1455,53 @@ export const translations: Record<Language, Translation> = {
     productSpecifications: 'المواصفات',
     reviewsAndRatings: 'المراجعات والتقييمات',
     customerFeedback: 'ملاحظات العملاء',
+    
+    // Contact Page
+    contactPage: {
+      // Form Labels
+      firstName: 'الاسم الأول',
+      lastName: 'اسم العائلة',
+      emailAddress: 'البريد الإلكتروني',
+      company: 'الشركة',
+      productInterest: 'الاهتمام بالمنتج',
+      message: 'الرسالة',
+      
+      // Form Placeholders
+      firstNamePlaceholder: 'أحمد',
+      lastNamePlaceholder: 'علي',
+      emailPlaceholder: 'ahmed@company.com',
+      companyPlaceholder: 'شركتك',
+      productInterestPlaceholder: 'اختر فئة المنتج',
+      messagePlaceholder: 'أخبرنا عن متطلباتك...',
+      
+      // Product Categories
+      waterTreatment: 'معالجة المياه',
+      fuelAdditives: 'إضافات الوقود',
+      paintThinner: 'الدهان والمذيبات',
+      agriculturalFertilizers: 'الأسمدة الزراعية',
+      industrialChemicals: 'المواد الكيميائية الصناعية',
+      technicalEquipment: 'المعدات الفنية',
+      commercialGoods: 'السلع التجارية',
+      customSolutions: 'حلول مخصصة',
+      
+      // Buttons
+      sending: 'جاري الإرسال...',
+      sendMessage: 'إرسال الرسالة',
+      
+      // Toast Messages
+      messageSent: 'تم إرسال الرسالة بنجاح',
+      messageSentDesc: 'شكراً لاستفساركم. سنعود إليكم خلال 24 ساعة.',
+      errorTitle: 'خطأ',
+      errorDesc: 'فشل إرسال الرسالة. يرجى المحاولة مرة أخرى.',
+      
+      // Sections
+      contactInformation: 'معلومات الاتصال',
+      ourCertifications: 'شهاداتنا',
+      findUs: 'ابحث عنا',
+      visitHeadquarters: 'قم بزيارة مقرنا الرئيسي ومنشآتنا التصنيعية',
+      getDirections: 'احصل على الاتجاهات',
+      viewInMaps: 'عرض في خرائط Google',
+    },
     
     // Footer
     aboutCompany: 'حول الشركة',
@@ -1495,15 +1633,6 @@ export const translations: Record<Language, Translation> = {
     shopSettings: 'إعدادات المتجر',
     weightsAndBatch: 'الأوزان والدفعة',
     productDetails: 'تفاصيل المنتج',
-    
-    // Product Reviews
-    reviewSubmitted: 'تم تقديم المراجعة',
-    reviewSubmittedDesc: 'تم تقديم مراجعتك بنجاح',
-    reviewError: 'خطأ في تقديم المراجعة',
-    reviewErrorDesc: 'خطأ',
-    loadingReviews: 'جاري تحميل المراجعات...',
-    customerReviewTitle: 'رأي العميل حول',
-    product: 'المنتج',
     
     // Services Page
     servicesPage: {
