@@ -18,7 +18,7 @@ const HeroSection = () => {
         }}
       />
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white">
-        <div className="max-w-3xl">
+        <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
             {t.advancedChemical}{" "}
             <span className="text-yellow-400">{t.solutions}</span> {t.forIndustry}
@@ -26,7 +26,7 @@ const HeroSection = () => {
           <p className="text-xl md:text-2xl mb-8 text-gray-100 leading-relaxed">
             {t.heroDescription}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/products/fuel-additives">
               <Button
                 size="lg"

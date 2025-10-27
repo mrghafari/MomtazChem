@@ -290,12 +290,12 @@ const Home = () => {
 
           <div className="grid md:grid-cols-3 gap-8">
             {services.map((service, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
+              <div key={index} className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 text-center">
                 <div className={`w-16 h-16 ${service.iconBg} rounded-lg flex items-center justify-center mb-6 mx-auto`}>
                   {service.icon}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">{service.title}</h3>
-                <p className="text-gray-600 text-center mb-6">{service.description}</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">{service.title}</h3>
+                <p className="text-gray-600 mb-6">{service.description}</p>
                 <ul className="space-y-2">
                   {service.features.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-center text-gray-600">
