@@ -73,11 +73,10 @@ import WaterTreatment from "@/pages/products/water-treatment";
 import PaintThinner from "@/pages/products/paint-thinner";
 import AgriculturalFertilizers from "@/pages/products/agricultural-fertilizers";
 import OtherProducts from "@/pages/products/other";
+import TechnicalEquipment from "@/pages/products/technical-equipment";
+import CommercialGoods from "@/pages/products/commercial-goods";
 import WebRTC from "@/pages/webrtc";
 import JitsiMeetPage from "@/pages/jitsi";
-import IndustrialChemicals from "@/pages/industrial-chemicals";
-import CommercialGoods from "@/pages/commercial-goods";
-import TechnicalEquipment from "@/pages/technical-equipment";
 import QuotePage from "@/pages/quote";
 import Dashboard from "@/pages/dashboard";
 import InquiryDetail from "@/pages/inquiry-detail";
@@ -316,7 +315,7 @@ function Router() {
           <Route path="/products/paint-solvents" component={PaintThinner} />
           <Route path="/products/agricultural-fertilizers" component={AgriculturalFertilizers} />
           <Route path="/products/other" component={OtherProducts} />
-          <Route path="/products/industrial-chemicals" component={IndustrialChemicals} />
+          <Route path="/products/industrial-chemicals" component={OtherProducts} />
           <Route path="/products/commercial-goods" component={CommercialGoods} />
           <Route path="/products/technical-equipment" component={TechnicalEquipment} />
           <Route path="/product-reviews/:id" component={ProductReviews} />
