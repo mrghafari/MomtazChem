@@ -142,16 +142,6 @@ export default function Header() {
       titleHover: "group-hover:text-purple-600 dark:group-hover:text-purple-400"
     },
     {
-      title: t.paintThinner,
-      href: "/products/paint-thinner",
-      description: t.paintThinnerDesc,
-      icon: <Package className="h-6 w-6" />,
-      color: "amber",
-      hoverBg: "hover:bg-amber-50 dark:hover:bg-amber-900/20",
-      iconColor: "text-amber-600 dark:text-amber-400",
-      titleHover: "group-hover:text-amber-600 dark:group-hover:text-amber-400"
-    },
-    {
       title: t.technicalEquipment,
       href: "/products/technical-equipment",
       description: t.technicalEquipmentDesc,
