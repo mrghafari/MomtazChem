@@ -120,12 +120,6 @@ const WaterTreatment = () => {
         </div>
       </section>
 
-      {/* Random Products from Shop */}
-      <RandomCategoryProducts 
-        categoryDisplayName="Water Treatment" 
-        category="water-treatment" 
-      />
-
       {/* Products Grid */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -306,13 +300,10 @@ const WaterTreatment = () => {
               ))}
             </div>
           ) : (
-            <Card className="bg-white">
-              <CardContent className="p-8 text-center">
-                <Droplets className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">No Water Treatment Products Available</h3>
-                <p className="text-gray-500">No water treatment products have been added yet.</p>
-              </CardContent>
-            </Card>
+            <RandomCategoryProducts 
+              categoryDisplayName="Water Treatment" 
+              category="water-treatment" 
+            />
           )}
         </div>
       </section>

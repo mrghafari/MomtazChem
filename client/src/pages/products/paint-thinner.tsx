@@ -117,12 +117,6 @@ const PaintThinnerPage = () => {
         </div>
       </section>
 
-      {/* Random Products from Shop */}
-      <RandomCategoryProducts 
-        categoryDisplayName="Paint & Solvents" 
-        category="paint-thinner" 
-      />
-
       {/* Products Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -251,16 +245,10 @@ const PaintThinnerPage = () => {
           )}
 
           {!isLoading && (!products || products.length === 0) && (
-            <div className="text-center py-12">
-              <PaintBucket className="h-24 w-24 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No Paint & Thinner Products Yet</h3>
-              <p className="text-gray-500 mb-6">Our paint and thinner product catalog is being updated. Please check back soon.</p>
-              <Link href="/contact">
-                <Button className="bg-orange-600 hover:bg-orange-700 text-white">
-                  Contact Us for Information
-                </Button>
-              </Link>
-            </div>
+            <RandomCategoryProducts 
+              categoryDisplayName="Paint & Solvents" 
+              category="paint-thinner" 
+            />
           )}
         </div>
       </section>

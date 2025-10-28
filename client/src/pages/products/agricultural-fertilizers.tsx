@@ -412,12 +412,6 @@ const AgriculturalFertilizersPage = () => {
         </div>
       </section>
 
-      {/* Random Products from Shop */}
-      <RandomCategoryProducts 
-        categoryDisplayName="کودهای کشاورزی" 
-        category="agricultural-fertilizers" 
-      />
-
       {/* Products Section */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -603,16 +597,10 @@ const AgriculturalFertilizersPage = () => {
           )}
 
           {!isLoading && (!products || products.length === 0) && (
-            <div className="text-center py-12">
-              <Wheat className="h-24 w-24 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No Agricultural Fertilizer Products Yet</h3>
-              <p className="text-gray-500 mb-6">Our agricultural fertilizer catalog is being updated. Please check back soon.</p>
-              <Link href="/contact">
-                <Button className="bg-green-600 hover:bg-green-700 text-white">
-                  Contact Us for Information
-                </Button>
-              </Link>
-            </div>
+            <RandomCategoryProducts 
+              categoryDisplayName="کودهای کشاورزی" 
+              category="agricultural-fertilizers" 
+            />
           )}
         </div>
       </section>
