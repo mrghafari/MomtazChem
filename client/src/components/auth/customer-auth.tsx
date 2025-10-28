@@ -14,27 +14,103 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { User, Mail, Lock, Phone, MapPin, Building, AlertCircle, Eye, EyeOff, ChevronDown, ChevronUp, Settings } from "lucide-react";
 
-// Form schemas
+// Custom Zod error map for translating validation errors
+function getZodErrorMap(t: any): z.ZodErrorMap {
+  return (issue, ctx) => {
+    // Handle custom error messages (like passwords_must_match)
+    if (issue.code === z.ZodIssueCode.custom) {
+      if (issue.message === "passwords_must_match") {
+        return { message: t.auth.validation.passwordsMustMatch };
+      }
+      return { message: issue.message || ctx.defaultError };
+    }
+    
+    // Handle invalid_type errors (like invalid email)
+    if (issue.code === z.ZodIssueCode.invalid_type) {
+      if (issue.expected === "string") {
+        // Check path to determine which field
+        const path = issue.path[0];
+        if (path === "email") {
+          return { message: t.auth.validation.invalidEmail };
+        }
+      }
+      return { message: ctx.defaultError };
+    }
+    
+    // Handle invalid_string errors (like email format)
+    if (issue.code === z.ZodIssueCode.invalid_string) {
+      if (issue.validation === "email") {
+        return { message: t.auth.validation.invalidEmail };
+      }
+      return { message: ctx.defaultError };
+    }
+    
+    // Handle too_small errors (min length validations)
+    if (issue.code === z.ZodIssueCode.too_small) {
+      if (issue.type === "string") {
+        const path = issue.path[0];
+        const minimum = issue.minimum;
+        
+        // Map based on field name and minimum value
+        if (path === "email") {
+          return { message: t.auth.validation.invalidEmail };
+        }
+        if (path === "password" && minimum === 6) {
+          return { message: t.auth.validation.passwordMin6 };
+        }
+        if (path === "firstName" && minimum === 2) {
+          return { message: t.auth.validation.firstNameMin2 };
+        }
+        if (path === "lastName" && minimum === 2) {
+          return { message: t.auth.validation.lastNameMin2 };
+        }
+        if (path === "phone" && minimum === 10) {
+          return { message: t.auth.validation.phoneMin10 };
+        }
+        if (path === "address" && minimum === 5) {
+          return { message: t.auth.validation.addressMin5 };
+        }
+        if (path === "country" && minimum === 2) {
+          return { message: t.auth.validation.countryRequired };
+        }
+        if (path === "province" && minimum === 1) {
+          return { message: t.auth.validation.provinceRequired };
+        }
+        if (path === "city" && minimum === 1) {
+          return { message: t.auth.validation.cityRequired };
+        }
+      }
+      return { message: ctx.defaultError };
+    }
+    
+    // Default error message
+    return { message: ctx.defaultError };
+  };
+}
+
+// Form schemas - simplified without hardcoded messages
+// Error messages will be handled by the custom error map
 const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().email(),
+  password: z.string().min(6),
 });
 
 const registerSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  firstName: z.string().min(2),
+  lastName: z.string().min(2),
+  email: z.string().email(),
+  password: z.string().min(6),
   confirmPassword: z.string(),
-  phone: z.string().min(10, "Phone number is required"),
+  phone: z.string().min(10),
   whatsappNumber: z.string().optional(),
   company: z.string().optional(),
-  country: z.string().min(2, "Country is required"),
-  province: z.string().min(1, "Province is required"),
-  city: z.string().min(1, "City is required"),
-  address: z.string().min(5, "Address is required"),
+  country: z.string().min(2),
+  province: z.string().min(1),
+  city: z.string().min(1),
+  address: z.string().min(5),
   secondaryAddress: z.string().optional(),
   postalCode: z.string().optional(),
   alternatePhone: z.string().optional(),
@@ -45,7 +121,7 @@ const registerSchema = z.object({
   preferredLanguage: z.enum(['en', 'fa', 'ar']).default('en'),
   marketingConsent: z.boolean().default(false),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Password and confirm password must match",
+  message: "passwords_must_match", // Will be translated in FormMessage
   path: ["confirmPassword"],
 });
 
@@ -63,6 +139,13 @@ interface CustomerAuthProps {
 
 export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onRegisterSuccess, initialMode = 'login', existingCustomer }: CustomerAuthProps) {
   const { toast } = useToast();
+  const { t } = useLanguage();
+  
+  // Apply custom error map for translated validation messages
+  useEffect(() => {
+    z.setErrorMap(getZodErrorMap(t));
+  }, [t]);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'login' | 'register'>(initialMode);
   const [emailExists, setEmailExists] = useState(false);
@@ -198,34 +281,34 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
 
       if (result.success) {
         toast({
-          title: "خوش آمدید",
-          description: "با موفقیت وارد شدید",
+          title: t.auth.welcome,
+          description: t.auth.loginSuccess,
         });
         onLoginSuccess(result.customer);
         onOpenChange(false);
         loginForm.reset();
       } else {
         // Set error message to display under form
-        const errorMessage = result.message || "ایمیل یا رمز عبور اشتباه است";
+        const errorMessage = result.message || t.auth.invalidCredentials;
         setLoginError(errorMessage);
         
         toast({
           variant: "destructive",
-          title: "خطای ورود",
+          title: t.auth.loginError,
           description: errorMessage,
         });
       }
     } catch (error) {
       // Set generic error message for network issues
-      setLoginError("خطا در اتصال به سرور. لطفاً دوباره تلاش کنید");
+      setLoginError(t.auth.serverError);
       
       // Completely suppress authentication errors - they are handled by response checking
       // Only show actual network connection errors
       if (error && typeof error === 'object' && (error as any).name === 'TypeError' && (error as any).message?.includes('fetch')) {
         toast({
           variant: "destructive",
-          title: "خطای شبکه",
-          description: "مشکل در اتصال. لطفاً دوباره تلاش کنید.",
+          title: t.auth.networkError,
+          description: t.auth.networkErrorDesc,
         });
       }
     } finally {
@@ -261,8 +344,8 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
         
         if (updateResult.success) {
           toast({
-            title: "Profile Updated",
-            description: "Your profile has been updated successfully",
+            title: t.auth.profileUpdated,
+            description: t.auth.profileUpdatedDesc,
           });
           onLoginSuccess({ ...existingCustomer, ...registerData });
           onOpenChange(false);
@@ -271,8 +354,8 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
         } else {
           toast({
             variant: "destructive",
-            title: "Update Error",
-            description: updateResult.message || "Failed to update profile",
+            title: t.auth.updateError,
+            description: updateResult.message || t.auth.updateFailed,
           });
           return;
         }
@@ -303,13 +386,13 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
           setShowDualVerification(true);
           
           toast({
-            title: "کدهای تأیید ارسال شد",
+            title: t.auth.verificationCodesSent,
             description: verificationResult.message,
           });
         } else {
           toast({
             variant: "destructive",
-            title: "خطا در ارسال کدهای تأیید",
+            title: t.auth.verificationCodesError,
             description: verificationResult.message,
           });
         }
@@ -339,8 +422,8 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
           setShowVerificationForm(true);
           
           toast({
-            title: "Registration Successful",
-            description: "A verification code has been sent to your mobile number",
+            title: t.auth.registrationVerificationSent,
+            description: t.auth.verificationSentDesc,
           });
         } else {
           // Check for duplicate email error
@@ -350,15 +433,15 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
             setActiveTab("login");
             loginForm.setValue("email", data.email);
             toast({
-              title: "Email Already Registered",
-              description: "This email is already registered. Please login instead.",
+              title: t.auth.emailAlreadyRegistered,
+              description: t.auth.emailAlreadyRegisteredDesc,
               variant: "destructive",
             });
           } else {
             toast({
               variant: "destructive",
-              title: "Registration Error",
-              description: result.message || "An error occurred during registration",
+              title: t.auth.registrationError,
+              description: result.message || t.auth.registrationError,
             });
           }
         }
@@ -369,8 +452,8 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
       if (error && typeof error === 'object' && (error as any).name === 'TypeError' && (error as any).message?.includes('fetch')) {
         toast({
           variant: "destructive",
-          title: "Network Error",
-          description: "Connection problem. Please try again.",
+          title: t.auth.networkError,
+          description: t.auth.networkErrorDesc,
         });
       }
     } finally {
@@ -426,8 +509,8 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
 
         if (registerResult.success) {
           toast({
-            title: "ثبت نام موفق",
-            description: "حساب کاربری شما با موفقیت ایجاد شد",
+            title: t.auth.registrationSuccessful,
+            description: t.auth.accountCreated,
           });
           
           // Auto-login after successful registration
@@ -441,14 +524,14 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
           setEmailCode("");
           setRegistrationData(null);
         } else {
-          setDualVerificationError(registerResult.message || "خطا در ثبت نام");
+          setDualVerificationError(registerResult.message || t.auth.registrationError);
         }
       } else {
-        setDualVerificationError(result.message || "کدهای تأیید نامعتبر است");
+        setDualVerificationError(result.message || t.auth.invalidCodes);
       }
     } catch (error) {
       console.error("Dual verification error:", error);
-      setDualVerificationError("خطا در تأیید کدها. لطفاً دوباره تلاش کنید");
+      setDualVerificationError(t.auth.verificationError);
     } finally {
       setIsLoading(false);
     }
@@ -553,12 +636,12 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {showVerificationForm ? "Verify Your Mobile Number" : "Customer Login"}
+            {showVerificationForm ? t.auth.verifyMobileNumber : t.auth.customerLogin}
           </DialogTitle>
           <DialogDescription>
             {showVerificationForm 
-              ? "Enter the 4-digit verification code sent to your mobile number"
-              : "Sign in to your account or create a new one"
+              ? t.auth.verificationCodeDescription
+              : t.auth.signInOrRegister
             }
           </DialogDescription>
         </DialogHeader>
@@ -567,14 +650,14 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
           <Alert className="mb-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Email "{duplicateEmail}" is already registered. Please login instead.
+              {t.auth.emailAlreadyRegisteredMessage.replace('{email}', duplicateEmail)}
               <Button 
                 variant="link" 
                 size="sm" 
                 onClick={switchToLogin}
                 className="p-0 h-auto ml-2"
               >
-                Switch to Login
+                {t.auth.switchToLogin}
               </Button>
             </AlertDescription>
           </Alert>
@@ -583,20 +666,20 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
         {showVerificationForm && (
           <div className="space-y-4">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">SMS Verification</h3>
+              <h3 className="text-lg font-semibold mb-2">{t.auth.smsVerification}</h3>
               <p className="text-sm text-gray-600 mb-4">
-                We've sent a 4-digit code to {registrationData?.phone}
+                {t.auth.codeSentTo} {registrationData?.phone}
               </p>
             </div>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Enter Verification Code
+                  {t.auth.enterVerificationCode}
                 </label>
                 <Input
                   type="text"
-                  placeholder="Enter 4-digit code"
+                  placeholder={t.auth.enter4DigitCode}
                   value={verificationCode}
                   onChange={(e) => {
                     const value = e.target.value.replace(/\D/g, '').slice(0, 4);
@@ -617,14 +700,14 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                   disabled={isLoading || verificationCode.length !== 4}
                   className="flex-1"
                 >
-                  {isLoading ? "Verifying..." : "Verify Code"}
+                  {isLoading ? t.auth.verifying : t.auth.verifyCode}
                 </Button>
                 <Button
                   variant="outline"
                   onClick={onResendCode}
                   disabled={isLoading}
                 >
-                  Resend
+                  {t.auth.resend}
                 </Button>
               </div>
               
@@ -638,7 +721,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                 }}
                 className="w-full"
               >
-                Cancel
+                {t.cancel}
               </Button>
             </div>
           </div>
@@ -647,8 +730,8 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
         {!showVerificationForm && (
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'register')} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="register">Register</TabsTrigger>
+            <TabsTrigger value="login">{t.auth.login}</TabsTrigger>
+            <TabsTrigger value="register">{t.auth.register}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="login" className="space-y-4">
@@ -661,10 +744,10 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
                         <Mail className="h-4 w-4" />
-                        Email
+                        {t.email}
                       </FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="Enter your email" {...field} />
+                        <Input type="email" placeholder={t.auth.enterEmail} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -677,13 +760,13 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
                         <Lock className="h-4 w-4" />
-                        Password
+                        {t.auth.password}
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input 
                             type={showLoginPassword ? "text" : "password"} 
-                            placeholder="Enter your password" 
+                            placeholder={t.auth.enterPassword} 
                             className="pr-10"
                             {...field} 
                           />
@@ -707,7 +790,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                   )}
                 />
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "در حال ورود..." : "ورود"}
+                  {isLoading ? t.auth.loggingIn : t.auth.login}
                 </Button>
                 
                 {/* Display login error under form */}
@@ -728,7 +811,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                     }}
                     className="text-sm text-blue-600 hover:text-blue-800 underline"
                   >
-                    رمز عبور را فراموش کرده‌اید؟
+                    {t.auth.forgotPassword}
                   </button>
                 </div>
               </form>
@@ -745,7 +828,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                     <Button variant="outline" className="w-full justify-between bg-blue-50 hover:bg-blue-100 border-blue-200 py-3 text-base font-semibold text-blue-800">
                       <span className="flex items-center gap-2">
                         <User className="h-5 w-5 text-blue-600" />
-                        Basic Information
+                        {t.auth.basicInformation}
                       </span>
                       {basicInfoOpen ? <ChevronUp className="h-5 w-5 text-blue-600" /> : <ChevronDown className="h-5 w-5 text-blue-600" />}
                     </Button>
@@ -757,9 +840,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                         name="firstName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>First Name *</FormLabel>
+                            <FormLabel>{t.firstName} *</FormLabel>
                             <FormControl>
-                              <Input placeholder="First Name" {...field} />
+                              <Input placeholder={t.firstName} {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -770,9 +853,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                         name="lastName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Last Name *</FormLabel>
+                            <FormLabel>{t.lastName} *</FormLabel>
                             <FormControl>
-                              <Input placeholder="Last Name" {...field} />
+                              <Input placeholder={t.lastName} {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -787,10 +870,10 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                         <FormItem>
                           <FormLabel className="flex items-center gap-2">
                             <Mail className="h-4 w-4" />
-                            Email *
+                            {t.email} *
                           </FormLabel>
                           <FormControl>
-                            <Input type="email" placeholder="Email" {...field} />
+                            <Input type="email" placeholder={t.email} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -805,13 +888,13 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                           <FormItem>
                             <FormLabel className="flex items-center gap-2">
                               <Lock className="h-4 w-4" />
-                              Password *
+                              {t.auth.password} *
                             </FormLabel>
                             <FormControl>
                               <div className="relative">
                                 <Input 
                                   type={showRegisterPassword ? "text" : "password"} 
-                                  placeholder="Password" 
+                                  placeholder={t.auth.password} 
                                   className="pr-10"
                                   {...field} 
                                 />
@@ -839,12 +922,12 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                         name="confirmPassword"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Confirm Password *</FormLabel>
+                            <FormLabel>{t.auth.confirmPassword} *</FormLabel>
                             <FormControl>
                               <div className="relative">
                                 <Input 
                                   type={showConfirmPassword ? "text" : "password"} 
-                                  placeholder="Confirm Password" 
+                                  placeholder={t.auth.confirmPassword} 
                                   className="pr-10"
                                   {...field} 
                                 />
@@ -877,7 +960,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                     <Button variant="outline" className="w-full justify-between bg-green-50 hover:bg-green-100 border-green-200 py-3 text-base font-semibold text-green-800">
                       <span className="flex items-center gap-2">
                         <Phone className="h-5 w-5 text-green-600" />
-                        Contact Information
+                        {t.auth.contactInformation}
                       </span>
                       {contactInfoOpen ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
                     </Button>
@@ -889,9 +972,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                         name="phone"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Mobile Number *</FormLabel>
+                            <FormLabel>{t.auth.mobileNumber} *</FormLabel>
                             <FormControl>
-                              <Input placeholder="Phone number" {...field} />
+                              <Input placeholder={t.phone} {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -904,10 +987,10 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                           <FormItem>
                             <FormLabel className="flex items-center gap-2">
                               <Building className="h-4 w-4" />
-                              Company
+                              {t.company}
                             </FormLabel>
                             <FormControl>
-                              <Input placeholder="Company (optional)" {...field} />
+                              <Input placeholder={t.auth.companyOptional} {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -920,12 +1003,12 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                       name="whatsappNumber"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>WhatsApp Number (if different)</FormLabel>
+                          <FormLabel>{t.auth.whatsappNumber}</FormLabel>
                           <FormControl>
-                            <Input placeholder="WhatsApp number (optional)" {...field} />
+                            <Input placeholder={t.auth.whatsappOptional} {...field} />
                           </FormControl>
                           <FormDescription className="text-xs text-gray-500">
-                            Leave empty if same as mobile number
+                            {t.auth.leaveEmptyIfSame}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -940,7 +1023,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                     <Button variant="outline" className="w-full justify-between bg-orange-50 hover:bg-orange-100 border-orange-200 py-3 text-base font-semibold text-orange-800">
                       <span className="flex items-center gap-2">
                         <MapPin className="h-5 w-5 text-orange-600" />
-                        Address Information
+                        {t.auth.addressInformation}
                       </span>
                       {addressInfoOpen ? <ChevronUp className="h-5 w-5 text-orange-600" /> : <ChevronDown className="h-5 w-5 text-orange-600" />}
                     </Button>
@@ -951,11 +1034,11 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                       name="country"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Country *</FormLabel>
+                          <FormLabel>{t.country} *</FormLabel>
                           <Select value={field.value} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select country" />
+                                <SelectValue placeholder={t.auth.selectCountry} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -973,7 +1056,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                         name="province"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Province *</FormLabel>
+                            <FormLabel>{t.auth.province} *</FormLabel>
                             <Select 
                               value={field.value} 
                               onValueChange={(value) => {
@@ -985,7 +1068,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                             >
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select province" />
+                                  <SelectValue placeholder={t.auth.selectProvince} />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
@@ -1005,11 +1088,11 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                         name="city"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>City *</FormLabel>
+                            <FormLabel>{t.city} *</FormLabel>
                             <Select value={field.value} onValueChange={field.onChange}>
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select city" />
+                                  <SelectValue placeholder={t.auth.selectCity} />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
@@ -1031,9 +1114,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                       name="address"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Address *</FormLabel>
+                          <FormLabel>{t.address} *</FormLabel>
                           <FormControl>
-                            <Input placeholder="Full address" {...field} />
+                            <Input placeholder={t.auth.fullAddress} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1048,7 +1131,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                     <Button variant="outline" className="w-full justify-between bg-purple-50 hover:bg-purple-100 border-purple-200 py-3 text-base font-semibold text-purple-800">
                       <span className="flex items-center gap-2">
                         <Settings className="h-5 w-5 text-purple-600" />
-                        Additional Information (Optional)
+                        {t.auth.additionalInformation}
                       </span>
                       {additionalInfoOpen ? <ChevronUp className="h-5 w-5 text-purple-600" /> : <ChevronDown className="h-5 w-5 text-purple-600" />}
                     </Button>
@@ -1059,9 +1142,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                       name="secondaryAddress"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Secondary Address</FormLabel>
+                          <FormLabel>{t.auth.secondaryAddress}</FormLabel>
                           <FormControl>
-                            <Input placeholder="Secondary address (optional)" {...field} />
+                            <Input placeholder={t.auth.secondaryAddressOptional} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1073,9 +1156,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                       name="postalCode"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Postal Code</FormLabel>
+                          <FormLabel>{t.auth.postalCode}</FormLabel>
                           <FormControl>
-                            <Input placeholder="Postal code" {...field} />
+                            <Input placeholder={t.auth.postalCode} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1085,7 +1168,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                 </Collapsible>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Creating Account..." : "Create Account"}
+                  {isLoading ? t.auth.creatingAccount : t.auth.createAccount}
                 </Button>
               </form>
             </Form>
@@ -1098,12 +1181,12 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
           <div className="p-6 space-y-4">
             <div className="text-center">
               <h3 className="text-lg font-semibold text-gray-900">
-                تأیید دوگانه حساب کاربری
+                {t.auth.dualVerification}
               </h3>
               <p className="text-sm text-gray-600 mt-2">
-                کدهای تأیید به {verificationMethods?.sms ? 'شماره موبایل' : ''} 
-                {verificationMethods?.sms && verificationMethods?.email ? ' و ' : ''}
-                {verificationMethods?.email ? 'ایمیل' : ''} شما ارسال شد
+                {t.auth.verificationCodesSentTo} {verificationMethods?.sms ? t.auth.mobileNumber : ''} 
+                {verificationMethods?.sms && verificationMethods?.email ? t.auth.and : ''}
+                {verificationMethods?.email ? t.email : ''}
               </p>
             </div>
 
@@ -1119,12 +1202,12 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
               {verificationMethods?.sms && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    کد تأیید پیامک
+                    {t.auth.smsVerificationCode}
                   </label>
                   <Input
                     type="text"
                     maxLength={4}
-                    placeholder="کد 4 رقمی"
+                    placeholder={t.auth.fourDigitCode}
                     value={smsCode}
                     onChange={(e) => setSmsCode(e.target.value.replace(/\D/g, ''))}
                     className="text-center text-lg tracking-widest"
@@ -1135,12 +1218,12 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
               {verificationMethods?.email && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    کد تأیید ایمیل
+                    {t.auth.emailVerificationCode}
                   </label>
                   <Input
                     type="text"
                     maxLength={6}
-                    placeholder="کد 6 رقمی"
+                    placeholder={t.auth.sixDigitCode}
                     value={emailCode}
                     onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, ''))}
                     className="text-center text-lg tracking-widest"
@@ -1158,7 +1241,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                   (verificationMethods?.email && (!emailCode || emailCode.length !== 6))
                 }
               >
-                {isLoading ? "در حال تأیید..." : "تأیید کدها"}
+                {isLoading ? t.auth.verifying : t.auth.verifyCodes}
               </Button>
 
               <Button 
@@ -1172,7 +1255,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                   setDualVerificationError("");
                 }}
               >
-                بازگشت
+                {t.auth.back}
               </Button>
             </div>
           </div>
