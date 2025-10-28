@@ -454,9 +454,33 @@ export class ShopStorage implements IShopStorage {
       );
     }
 
-    // Category filter
+    // Category filter - check both category name and slug
     if (category) {
-      whereConditions.push(eq(shopProducts.category, category));
+      // Find the category in shop_categories to get both name and slug
+      const categoryRecord = await shopDb
+        .select()
+        .from(shopCategories)
+        .where(
+          or(
+            eq(shopCategories.name, category),
+            eq(shopCategories.slug, category)
+          )
+        )
+        .limit(1);
+      
+      if (categoryRecord.length > 0) {
+        const cat = categoryRecord[0];
+        // Match products using either the category name or slug
+        whereConditions.push(
+          or(
+            eq(shopProducts.category, cat.name),
+            eq(shopProducts.category, cat.slug)
+          )
+        );
+      } else {
+        // If category not found in shop_categories, try direct match
+        whereConditions.push(eq(shopProducts.category, category));
+      }
     }
 
     // Price range filter
