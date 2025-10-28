@@ -338,7 +338,10 @@ export class ShopStorage implements IShopStorage {
       'fuel-additives': ['Fuel Additives', 'fuel-additives', 'Fuel additives'],
       'water-treatment': ['Water Treatment', 'water-treatment', 'Water treatment'],
       'agricultural-fertilizers': ['Agricultural Fertilizers', 'agricultural-fertilizers', 'Fertilizers'],
-      'other': ['Other', 'other', 'Miscellaneous']
+      'technical-equipment': ['Technical equipment', 'Technical Equipment', 'technical-equipment'],
+      'commercial-goods': ['Commercial goods', 'Commercial Goods', 'commercial-goods'],
+      'industrial-chemicals': ['Industrial Chemicals', 'industrial-chemicals', 'Other'],
+      'other': ['Other', 'other', 'Miscellaneous', 'Industrial Chemicals']
     };
     
     // Get possible category names for this category
