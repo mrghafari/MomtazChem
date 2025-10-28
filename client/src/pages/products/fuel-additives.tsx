@@ -287,7 +287,8 @@ const FuelAdditives = () => {
           ) : (
             <RandomCategoryProducts 
               categoryDisplayName="Fuel Additives" 
-              category="fuel-additives" 
+              category="fuel-additives"
+              hideTitle={true}
             />
           )}
         </div>

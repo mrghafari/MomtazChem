@@ -130,7 +130,8 @@ const CommercialGoods = () => {
           ) : (
             <RandomCategoryProducts 
               categoryDisplayName="Commercial Goods" 
-              category="commercial-goods" 
+              category="commercial-goods"
+              hideTitle={true}
             />
           )}
         </div>

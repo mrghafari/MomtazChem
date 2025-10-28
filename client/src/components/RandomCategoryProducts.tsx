@@ -20,9 +20,10 @@ interface RandomCategoryProductsProps {
   category: string;
   title?: string;
   categoryDisplayName?: string;
+  hideTitle?: boolean;
 }
 
-export function RandomCategoryProducts({ category, title, categoryDisplayName }: RandomCategoryProductsProps) {
+export function RandomCategoryProducts({ category, title, categoryDisplayName, hideTitle = false }: RandomCategoryProductsProps) {
   const [, navigate] = useLocation();
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
@@ -135,14 +136,16 @@ export function RandomCategoryProducts({ category, title, categoryDisplayName }:
   return (
     <section className="py-16 bg-gradient-to-br from-blue-50 to-green-50 dark:from-gray-800 dark:to-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className={`text-center mb-12 ${isRTL ? 'rtl' : 'ltr'}`}>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            {displayTitle}
-          </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            {displaySubtitle}
-          </p>
-        </div>
+        {!hideTitle && (
+          <div className={`text-center mb-12 ${isRTL ? 'rtl' : 'ltr'}`}>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              {displayTitle}
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              {displaySubtitle}
+            </p>
+          </div>
+        )}
         
         <div className="grid md:grid-cols-2 gap-8 mb-12">
           {uniqueProducts.map((product) => {

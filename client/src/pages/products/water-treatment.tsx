@@ -302,7 +302,8 @@ const WaterTreatment = () => {
           ) : (
             <RandomCategoryProducts 
               categoryDisplayName="Water Treatment" 
-              category="water-treatment" 
+              category="water-treatment"
+              hideTitle={true}
             />
           )}
         </div>

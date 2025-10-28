@@ -599,7 +599,8 @@ const AgriculturalFertilizersPage = () => {
           {!isLoading && (!products || products.length === 0) && (
             <RandomCategoryProducts 
               categoryDisplayName="کودهای کشاورزی" 
-              category="agricultural-fertilizers" 
+              category="agricultural-fertilizers"
+              hideTitle={true}
             />
           )}
         </div>

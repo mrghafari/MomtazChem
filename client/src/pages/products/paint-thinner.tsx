@@ -247,7 +247,8 @@ const PaintThinnerPage = () => {
           {!isLoading && (!products || products.length === 0) && (
             <RandomCategoryProducts 
               categoryDisplayName="Paint & Solvents" 
-              category="paint-thinner" 
+              category="paint-thinner"
+              hideTitle={true}
             />
           )}
         </div>
