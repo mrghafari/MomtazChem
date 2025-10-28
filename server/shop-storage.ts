@@ -550,6 +550,7 @@ export class ShopStorage implements IShopStorage {
       .orderBy(asc(shopCategories.displayOrder), asc(shopCategories.name));
 
     // Count products for each category
+    // Check both category name and slug since products may use either format
     const categoriesWithCount = await Promise.all(
       allCategories.map(async (cat) => {
         const [result] = await shopDb
@@ -558,11 +559,15 @@ export class ShopStorage implements IShopStorage {
           .where(
             and(
               eq(shopProducts.isActive, true),
-              eq(shopProducts.category, cat.name)
+              or(
+                eq(shopProducts.category, cat.name),
+                eq(shopProducts.category, cat.slug)
+              )
             )
           );
         return {
           name: cat.name,
+          slug: cat.slug,
           count: result.count
         };
       })
