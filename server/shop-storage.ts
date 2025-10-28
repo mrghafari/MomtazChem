@@ -541,15 +541,35 @@ export class ShopStorage implements IShopStorage {
       .from(shopProducts)
       .where(and(...whereConditions));
 
-    // Get filter metadata
-    const categoriesResult = await shopDb
-      .select({
-        category: shopProducts.category,
-        count: count()
+    // Get filter metadata from shop_categories table
+    // First, get all active categories with their product counts
+    const allCategories = await shopDb
+      .select()
+      .from(shopCategories)
+      .where(eq(shopCategories.isActive, true))
+      .orderBy(asc(shopCategories.displayOrder), asc(shopCategories.name));
+
+    // Count products for each category
+    const categoriesWithCount = await Promise.all(
+      allCategories.map(async (cat) => {
+        const [result] = await shopDb
+          .select({ count: count() })
+          .from(shopProducts)
+          .where(
+            and(
+              eq(shopProducts.isActive, true),
+              eq(shopProducts.category, cat.name)
+            )
+          );
+        return {
+          name: cat.name,
+          count: result.count
+        };
       })
-      .from(shopProducts)
-      .where(eq(shopProducts.isActive, true))
-      .groupBy(shopProducts.category);
+    );
+
+    // Filter out categories with no products
+    const categoriesResult = categoriesWithCount.filter(cat => cat.count > 0);
 
     const priceRangeResult = await shopDb
       .select({
@@ -613,10 +633,7 @@ export class ShopStorage implements IShopStorage {
       products: productsWithDiscounts,
       total: totalResult.count,
       filters: {
-        categories: categoriesResult.map(cat => ({
-          name: cat.category,
-          count: cat.count
-        })),
+        categories: categoriesResult,
         priceRange: {
           min: priceRangeResult[0]?.min || 0,
           max: priceRangeResult[0]?.max || 0
