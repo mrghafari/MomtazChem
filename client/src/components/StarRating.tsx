@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface StarRatingProps {
   rating: number;
@@ -22,6 +23,7 @@ export default function StarRating({
   onRatingChange,
   className = ''
 }: StarRatingProps) {
+  const { t } = useLanguage();
   const [hoverRating, setHoverRating] = React.useState(0);
   
   const sizeClasses = {
@@ -96,7 +98,7 @@ export default function StarRating({
       
       {reviewCount !== undefined && (
         <span className={`text-gray-500 ${textSize}`}>
-          ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
+          ({reviewCount} {reviewCount === 1 ? t.review : t.reviews})
         </span>
       )}
     </div>

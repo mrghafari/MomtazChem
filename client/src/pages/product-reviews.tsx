@@ -64,7 +64,7 @@ export default function ProductReviews() {
       const payload = {
         rating: reviewData.rating,
         comment: reviewData.comment.trim(),
-        title: `${t.customerReviewTitle} ${product?.name || t.product}`, // Generate meaningful title
+        title: `${t.customerReviewTitle} ${product?.name || t.shop.product}`, // Generate meaningful title
       };
       console.log('🔥 [REVIEW SUBMIT] Sending payload:', payload);
       const response = await fetch(`/api/products/${id}/reviews`, {

@@ -114,8 +114,8 @@ export default function ProductRating({
       setIsEditing(false);
       
       toast({
-        title: isEditing ? "نظر با موفقیت به‌روزرسانی شد" : t.reviewSubmitted,
-        description: isEditing ? "تغییرات شما ذخیره شد" : t.reviewSubmittedDesc
+        title: isEditing ? t.reviewUpdated : t.reviewSubmitted,
+        description: isEditing ? t.reviewUpdatedDesc : t.reviewSubmittedDesc
       });
     } catch (error) {
       toast({
@@ -156,7 +156,7 @@ export default function ProductRating({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
-            نظرات محصول: {productName}
+            {t.productReviewsFor} {productName}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -168,8 +168,8 @@ export default function ProductRating({
               <StarRating rating={averageRating} size="lg" />
             </div>
             <div className="text-gray-600">
-              <div className="text-lg font-semibold">{totalReviews} نظر کل</div>
-              <div className="text-sm">بازخورد مشتریان</div>
+              <div className="text-lg font-semibold">{totalReviews} {t.totalReviewsCount}</div>
+              <div className="text-sm">{t.customerFeedback}</div>
             </div>
           </div>
         </CardContent>
@@ -190,30 +190,30 @@ export default function ProductRating({
             <div className="text-center py-8">
               <Lock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                برای ثبت نظر ابتدا وارد شوید
+                {t.loginToReview}
               </h3>
               <p className="text-gray-600">
-                جهت ثبت نظر و امتیاز دادن به محصولات، ابتدا باید وارد حساب کاربری خود شوید
+                {t.loginToReviewDesc}
               </p>
             </div>
           ) : (
             <>
               <p className="text-sm text-gray-600 mb-4">
-                ثبت نظر به نام: {customer.firstName} {customer.lastName}
+                {t.reviewingAs} {customer.firstName} {customer.lastName}
               </p>
               
               {/* Show existing review and edit button if user has already reviewed */}
               {existingReview && !isEditing && (
                 <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-blue-800">نظر قبلی شما:</h3>
+                    <h3 className="font-semibold text-blue-800">{t.yourPreviousReview}</h3>
                     <Button 
                       variant="outline" 
                       size="sm"
                       onClick={handleStartEdit}
                       className="text-blue-600 border-blue-300 hover:bg-blue-100"
                     >
-                      ویرایش نظر
+                      {t.editReview}
                     </Button>
                   </div>
                   <div className="mb-2">
@@ -221,7 +221,7 @@ export default function ProductRating({
                   </div>
                   <p className="text-gray-700">{existingReview.comment}</p>
                   <p className="text-xs text-gray-500 mt-2">
-                    ثبت شده در: {formatDate(existingReview.createdAt)}
+                    {t.postedOn} {formatDate(existingReview.createdAt)}
                   </p>
                 </div>
               )}
@@ -247,7 +247,7 @@ export default function ProductRating({
                       id="comment"
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
-                      placeholder={isEditing ? "نظر خود را ویرایش کنید..." : t.writeReview}
+                      placeholder={isEditing ? t.editYourReview : t.writeReview}
                       className="mt-1"
                       rows={4}
                     />
@@ -259,7 +259,7 @@ export default function ProductRating({
                       disabled={isSubmitting}
                       className="flex-1"
                     >
-                      {isSubmitting ? t.loading : (isEditing ? "به‌روزرسانی نظر" : t.submitReview)}
+                      {isSubmitting ? t.loading : (isEditing ? t.updateReview : t.submitReview)}
                     </Button>
                     
                     {isEditing && (
@@ -269,7 +269,7 @@ export default function ProductRating({
                         onClick={handleCancelEdit}
                         disabled={isSubmitting}
                       >
-                        لغو
+                        {t.cancel}
                       </Button>
                     )}
                   </div>
@@ -286,14 +286,11 @@ export default function ProductRating({
           <CardTitle>{t.customerReviews}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 p-2 bg-gray-100 rounded text-sm">
-            DEBUG: تعداد نظرات: {reviews.length} | آیدی محصول: {productId}
-          </div>
           {reviews.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-              <p>هنوز نظری ثبت نشده</p>
-              <p className="text-sm">اولین نفری باشید که نظر می‌دهید</p>
+              <p>{t.noReviewsYet}</p>
+              <p className="text-sm">{t.beFirstToReview}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -315,7 +312,7 @@ export default function ProductRating({
                           <div className="flex items-center gap-2">
                             <span className={`font-semibold ${isOwnReview ? 'text-blue-700' : ''}`}>
                               {review.customerName}
-                              {isOwnReview && <span className="text-xs text-blue-600">(شما)</span>}
+                              {isOwnReview && <span className="text-xs text-blue-600">{t.you}</span>}
                             </span>
                             <span className="text-sm text-gray-500">
                               {formatDate(review.createdAt)}
@@ -328,7 +325,7 @@ export default function ProductRating({
                               onClick={handleStartEdit}
                               className="text-blue-600 border-blue-300 hover:bg-blue-100"
                             >
-                              ویرایش
+                              {t.edit}
                             </Button>
                           )}
                         </div>

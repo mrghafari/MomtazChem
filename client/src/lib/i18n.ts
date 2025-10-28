@@ -295,6 +295,22 @@ export interface Translation {
   noReviewsDesc: string;
   reviewsAndRatings: string;
   customerFeedback: string;
+  productReviewsFor: string;
+  totalReviewsCount: string;
+  loginToReview: string;
+  loginToReviewDesc: string;
+  reviewingAs: string;
+  yourPreviousReview: string;
+  editReview: string;
+  postedOn: string;
+  editYourReview: string;
+  updateReview: string;
+  beFirstToReview: string;
+  you: string;
+  reviewUpdated: string;
+  reviewUpdatedDesc: string;
+  review: string;
+  reviews: string;
   
   // Footer
   aboutCompany: string;
@@ -440,15 +456,8 @@ export interface Translation {
   shopSettings: string;
   weightsAndBatch: string;
   productDetails: string;
-  
-  // Product Reviews
-  reviewSubmitted: string;
-  reviewSubmittedDesc: string;
-  reviewError: string;
-  reviewErrorDesc: string;
   loadingReviews: string;
   customerReviewTitle: string;
-  product: string;
   
   // Contact Page
   contactPage: {
@@ -930,7 +939,6 @@ export const translations: Record<Language, Translation> = {
     reviewErrorDesc: 'Error',
     loadingReviews: 'Loading reviews...',
     customerReviewTitle: 'Customer Review about',
-    product: 'Product',
     backToShop: 'Back to Shop',
     averageRating: 'Average Rating',
     totalReviews: 'Total Reviews',
@@ -939,6 +947,22 @@ export const translations: Record<Language, Translation> = {
     productSpecifications: 'Specifications',
     reviewsAndRatings: 'Reviews & Ratings',
     customerFeedback: 'Customer Feedback',
+    productReviewsFor: 'Product Reviews:',
+    totalReviewsCount: 'Total Reviews',
+    loginToReview: 'Login to Submit a Review',
+    loginToReviewDesc: 'To submit a review and rate products, please login to your account first',
+    reviewingAs: 'Reviewing as:',
+    yourPreviousReview: 'Your Previous Review:',
+    editReview: 'Edit Review',
+    postedOn: 'Posted on:',
+    editYourReview: 'Edit your review...',
+    updateReview: 'Update Review',
+    beFirstToReview: 'Be the first to review',
+    you: '(You)',
+    reviewUpdated: 'Review Updated Successfully',
+    reviewUpdatedDesc: 'Your changes have been saved',
+    review: 'review',
+    reviews: 'reviews',
     
     // Footer
     aboutCompany: 'About Company',
@@ -1524,7 +1548,6 @@ export const translations: Record<Language, Translation> = {
     reviewErrorDesc: 'خطأ',
     loadingReviews: 'جاري تحميل المراجعات...',
     customerReviewTitle: 'رأي العميل حول',
-    product: 'المنتج',
     backToShop: 'العودة للمتجر',
     averageRating: 'متوسط التقييم',
     totalReviews: 'إجمالي المراجعات',
@@ -1533,6 +1556,22 @@ export const translations: Record<Language, Translation> = {
     productSpecifications: 'المواصفات',
     reviewsAndRatings: 'المراجعات والتقييمات',
     customerFeedback: 'ملاحظات العملاء',
+    productReviewsFor: 'آراء المنتج:',
+    totalReviewsCount: 'إجمالي الآراء',
+    loginToReview: 'سجل دخولك لإضافة رأيك',
+    loginToReviewDesc: 'لإضافة رأيك وتقييم المنتجات، يرجى تسجيل الدخول إلى حسابك أولاً',
+    reviewingAs: 'المراجعة باسم:',
+    yourPreviousReview: 'رأيك السابق:',
+    editReview: 'تعديل الرأي',
+    postedOn: 'نُشر في:',
+    editYourReview: 'عدّل رأيك...',
+    updateReview: 'تحديث الرأي',
+    beFirstToReview: 'كن أول من يقيّم',
+    you: '(أنت)',
+    reviewUpdated: 'تم تحديث الرأي بنجاح',
+    reviewUpdatedDesc: 'تم حفظ تغييراتك',
+    review: 'رأي',
+    reviews: 'آراء',
     
     // Contact Page
     contactPage: {
