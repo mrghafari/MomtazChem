@@ -575,6 +575,7 @@ export class ShopStorage implements IShopStorage {
 
     // Count products for each category
     // Check both category name and slug since products may use either format
+    // Apply same stock conditions as getShopProducts() to ensure counts match
     const categoriesWithCount = await Promise.all(
       allCategories.map(async (cat) => {
         const [result] = await shopDb
@@ -583,6 +584,11 @@ export class ShopStorage implements IShopStorage {
           .where(
             and(
               eq(shopProducts.isActive, true),
+              // Show products that are either in stock OR have showWhenOutOfStock enabled
+              or(
+                gt(shopProducts.stockQuantity, 0),
+                eq(shopProducts.showWhenOutOfStock, true)
+              ),
               or(
                 eq(shopProducts.category, cat.name),
                 eq(shopProducts.category, cat.slug)
