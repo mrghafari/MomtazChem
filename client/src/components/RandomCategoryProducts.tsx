@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { ShoppingCart, ArrowRight } from "lucide-react";
+import { ShoppingCart, ArrowRight, Package } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Product {
@@ -78,19 +78,59 @@ export function RandomCategoryProducts({ category, title, categoryDisplayName }:
     );
   }
 
-  if (error || !uniqueProducts || uniqueProducts.length === 0) {
-    return null; // Don't show anything if no products available
-  }
-
   const displayTitle = title || (
     isRTL 
-      ? `محصولات پیشنهادی از دسته ${categoryDisplayName || category}` 
-      : `Recommended ${categoryDisplayName || category} Products`
+      ? `محصولات ${categoryDisplayName || category}` 
+      : `Our ${categoryDisplayName || category} Products`
   );
   
   const displaySubtitle = isRTL
-    ? 'نمونه‌ای از محصولات موجود در فروشگاه ما - برای مشاهده کامل محصولات و قیمت‌ها کلیک کنید'
-    : 'Sample products from our shop - click to view all products and prices';
+    ? `مجموعه‌ای کامل از ${categoryDisplayName || category} با کیفیت بالا`
+    : `Discover our comprehensive range of premium ${categoryDisplayName || category.toLowerCase()} solutions`;
+  
+  // Empty state when no products available
+  if (error || !uniqueProducts || uniqueProducts.length === 0) {
+    return (
+      <section className="py-16 bg-white dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className={`text-center mb-12 ${isRTL ? 'rtl' : 'ltr'}`}>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              {displayTitle}
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              {displaySubtitle}
+            </p>
+          </div>
+          
+          {/* Empty State */}
+          <div className="text-center py-16">
+            <div className="inline-flex items-center justify-center w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full mb-6">
+              <Package className="h-12 w-12 text-gray-400" />
+            </div>
+            <h3 className="text-2xl font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              {isRTL 
+                ? `هنوز محصولی از ${categoryDisplayName || category} موجود نیست` 
+                : `No ${categoryDisplayName || category} Products Yet`
+              }
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto">
+              {isRTL
+                ? 'کاتالوگ محصولات ما در حال به‌روزرسانی است. لطفاً به زودی مراجعه کنید.'
+                : 'Our product catalog is being updated. Please check back soon.'
+              }
+            </p>
+            <Button 
+              onClick={() => navigate('/contact')}
+              className="bg-orange-600 hover:bg-orange-700 text-white"
+              data-testid="button-contact-for-information"
+            >
+              {isRTL ? 'تماس با ما برای اطلاعات' : 'Contact Us for Information'}
+            </Button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 bg-gradient-to-br from-blue-50 to-green-50 dark:from-gray-800 dark:to-gray-900">

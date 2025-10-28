@@ -538,9 +538,9 @@ export function OtherProducts() {
       </Dialog>
 
       {/* Random Products from Shop */}
-      <RandomCategoryProducts categoryDisplayName="Other Products" 
-        category="other" 
-        
+      <RandomCategoryProducts 
+        categoryDisplayName="Industrial Chemicals" 
+        category="industrial-chemicals" 
       />
     </div>
   );

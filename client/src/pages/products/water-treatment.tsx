@@ -120,6 +120,12 @@ const WaterTreatment = () => {
         </div>
       </section>
 
+      {/* Random Products from Shop */}
+      <RandomCategoryProducts 
+        categoryDisplayName="Water Treatment" 
+        category="water-treatment" 
+      />
+
       {/* Products Grid */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -379,6 +385,8 @@ const WaterTreatment = () => {
         </div>
       </section>
 
+
+      {/* Random Products from Shop */}
       {/* CTA Section */}
       <section className="py-20 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -398,12 +406,6 @@ const WaterTreatment = () => {
           </div>
         </div>
       </section>
-
-      {/* Random Products from Shop */}
-      <RandomCategoryProducts categoryDisplayName="Water Treatment" 
-        category="water-treatment" 
-        
-      />
 
       {/* Live Chat Support */}
 

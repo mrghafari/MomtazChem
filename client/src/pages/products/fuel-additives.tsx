@@ -105,6 +105,12 @@ const FuelAdditives = () => {
         </div>
       </section>
 
+      {/* Random Products from Shop */}
+      <RandomCategoryProducts 
+        categoryDisplayName="Fuel Additives" 
+        category="fuel-additives" 
+      />
+
       {/* Products Grid */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -366,6 +372,8 @@ const FuelAdditives = () => {
         </div>
       </section>
 
+
+      {/* Random Products from Shop */}
       {/* CTA Section */}
       <section className="py-20 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -385,12 +393,6 @@ const FuelAdditives = () => {
           </div>
         </div>
       </section>
-
-      {/* Random Products from Shop */}
-      <RandomCategoryProducts categoryDisplayName="Fuel Additives" 
-        category="fuel-additives" 
-        
-      />
 
       {/* Live Chat Support */}
 

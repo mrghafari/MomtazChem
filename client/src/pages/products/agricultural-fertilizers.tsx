@@ -412,6 +412,12 @@ const AgriculturalFertilizersPage = () => {
         </div>
       </section>
 
+      {/* Random Products from Shop */}
+      <RandomCategoryProducts 
+        categoryDisplayName="کودهای کشاورزی" 
+        category="agricultural-fertilizers" 
+      />
+
       {/* Products Section */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -879,6 +885,8 @@ const AgriculturalFertilizersPage = () => {
         </div>
       </section>
 
+
+      {/* Random Products from Shop */}
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white relative overflow-hidden">
         <div className="absolute inset-0">
@@ -945,12 +953,6 @@ const AgriculturalFertilizersPage = () => {
           </div>
         </div>
       </section>
-
-      {/* Random Products from Shop */}
-      <RandomCategoryProducts categoryDisplayName="Agricultural Fertilizers" 
-        category="agricultural-fertilizers" 
-        
-      />
 
       {/* Live Chat Support */}
 

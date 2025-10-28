@@ -117,6 +117,12 @@ const PaintThinnerPage = () => {
         </div>
       </section>
 
+      {/* Random Products from Shop */}
+      <RandomCategoryProducts 
+        categoryDisplayName="Paint & Solvents" 
+        category="paint-thinner" 
+      />
+
       {/* Products Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -260,6 +266,8 @@ const PaintThinnerPage = () => {
       </section>
 
 
+
+      {/* Random Products from Shop */}
       {/* CTA Section */}
       <section className="py-16 bg-gradient-to-r from-orange-600 to-red-600 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -282,12 +290,6 @@ const PaintThinnerPage = () => {
           </div>
         </div>
       </section>
-
-      {/* Random Products from Shop */}
-      <RandomCategoryProducts categoryDisplayName="Paint & Solvents" 
-        category="paint-thinner" 
-        
-      />
 
       {/* Live Chat Support */}
 
