@@ -27,6 +27,7 @@ import FIFOBatchDisplay from "@/components/ui/fifo-batch-display";
 
 // Custom form schema that handles numeric inputs properly
 const formSchema = insertShowcaseProductSchema.extend({
+  category: z.string().min(1, "دسته‌بندی محصول اجباری است"),
   unitPrice: z.coerce.number().min(0),
   stockQuantity: z.coerce.number().min(0),
   minStockLevel: z.coerce.number().min(0),
@@ -644,6 +645,9 @@ export default function ProductsPage() {
   // Function to validate fields and set errors
   const validateRequiredFields = (data: z.infer<typeof formSchema>) => {
     const errors: Record<string, string> = {};
+    
+    // Validate category - MUST be selected
+    if (!data.category?.trim()) errors.category = "دسته‌بندی محصول اجباری است";
     
     // Validate Pricing & Inventory section
     if (!data.sku?.trim()) errors.sku = "فیلد SKU اجباری است";
