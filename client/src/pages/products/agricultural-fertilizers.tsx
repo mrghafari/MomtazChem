@@ -223,7 +223,7 @@ const AgriculturalFertilizersPage = () => {
             </div>
           ) : (
             <RandomCategoryProducts 
-              categoryDisplayName="کودهای کشاورزی" 
+              categoryDisplayName="Agricultural Fertilizers" 
               category="agricultural-fertilizers"
               hideTitle={true}
             />
