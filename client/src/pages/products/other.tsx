@@ -249,6 +249,12 @@ export function OtherProducts() {
         </div>
       </section>
 
+      {/* Random Products from Shop */}
+      <RandomCategoryProducts 
+        categoryDisplayName="Industrial Chemicals" 
+        category="industrial-chemicals" 
+      />
+
       {/* Products Grid */}
       <section className="py-20">
         <div className="container mx-auto px-4">
@@ -536,12 +542,6 @@ export function OtherProducts() {
           </Form>
         </DialogContent>
       </Dialog>
-
-      {/* Random Products from Shop */}
-      <RandomCategoryProducts 
-        categoryDisplayName="Industrial Chemicals" 
-        category="industrial-chemicals" 
-      />
     </div>
   );
 }
