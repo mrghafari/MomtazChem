@@ -947,9 +947,9 @@ const AgriculturalFertilizersPage = () => {
       </section>
 
       {/* Random Products from Shop */}
-      <RandomCategoryProducts 
+      <RandomCategoryProducts categoryDisplayName="Agricultural Fertilizers" 
         category="agricultural-fertilizers" 
-        title="محصولات پیشنهادی کود و مغذی کشاورزی از فروشگاه"
+        
       />
 
       {/* Live Chat Support */}

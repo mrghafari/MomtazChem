@@ -3,22 +3,29 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { ShoppingCart, ArrowRight } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Product {
   id: number;
   name: string;
   description: string;
+  thumbnailUrl?: string;
   imageUrl?: string;
   category: string;
+  price?: string;
+  priceUnit?: string;
 }
 
 interface RandomCategoryProductsProps {
   category: string;
   title?: string;
+  categoryDisplayName?: string;
 }
 
-export function RandomCategoryProducts({ category, title }: RandomCategoryProductsProps) {
+export function RandomCategoryProducts({ category, title, categoryDisplayName }: RandomCategoryProductsProps) {
   const [, navigate] = useLocation();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
   
   const { data: productsResponse, isLoading, error } = useQuery({
     queryKey: ['/api/products/random', category],
@@ -75,61 +82,76 @@ export function RandomCategoryProducts({ category, title }: RandomCategoryProduc
     return null; // Don't show anything if no products available
   }
 
+  const displayTitle = title || (
+    isRTL 
+      ? `محصولات پیشنهادی از دسته ${categoryDisplayName || category}` 
+      : `Recommended ${categoryDisplayName || category} Products`
+  );
+  
+  const displaySubtitle = isRTL
+    ? 'نمونه‌ای از محصولات موجود در فروشگاه ما - برای مشاهده کامل محصولات و قیمت‌ها کلیک کنید'
+    : 'Sample products from our shop - click to view all products and prices';
+
   return (
-    <section className="py-16 bg-gradient-to-br from-blue-50 to-green-50">
+    <section className="py-16 bg-gradient-to-br from-blue-50 to-green-50 dark:from-gray-800 dark:to-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            {title || `محصولات پیشنهادی از دسته ${category}`}
+        <div className={`text-center mb-12 ${isRTL ? 'rtl' : 'ltr'}`}>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            {displayTitle}
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            نمونه‌ای از محصولات موجود در فروشگاه ما - برای مشاهده کامل محصولات و قیمت‌ها کلیک کنید
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            {displaySubtitle}
           </p>
         </div>
         
         <div className="grid md:grid-cols-2 gap-8 mb-12">
-          {uniqueProducts.map((product) => (
-            <Card 
-              key={product.id} 
-              className="bg-white hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
-              onClick={() => navigate('/shop')}
-            >
-              {product.imageUrl && (
-                <div className="aspect-video w-full overflow-hidden bg-gray-100 relative">
-                  <img 
-                    src={product.imageUrl} 
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                  <div className="absolute top-4 right-4">
-                    <div className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                      موجود در فروشگاه
+          {uniqueProducts.map((product) => {
+            const productImage = product.thumbnailUrl || product.imageUrl;
+            return (
+              <Card 
+                key={product.id} 
+                className="bg-white dark:bg-gray-800 hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+                onClick={() => navigate('/shop')}
+                data-testid={`random-product-card-${product.id}`}
+              >
+                {productImage && (
+                  <div className="aspect-video w-full overflow-hidden bg-gray-100 dark:bg-gray-700 relative">
+                    <img 
+                      src={productImage} 
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                    <div className={`absolute top-4 ${isRTL ? 'right-4' : 'left-4'}`}>
+                      <div className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        {isRTL ? 'موجود در فروشگاه' : 'Available in Shop'}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
-                  {product.name}
-                </h3>
-                <p className="text-gray-600 mb-4 line-clamp-3">
-                  {product.description}
-                </p>
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-500">
-                    کتگوری: <span className="font-medium">{product.category}</span>
+                )}
+                <CardContent className={`p-6 ${isRTL ? 'rtl' : 'ltr'}`}>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2">
+                    {product.name}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                    {product.description}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      {isRTL ? 'کتگوری: ' : 'Category: '}
+                      <span className="font-medium">{product.category}</span>
+                    </div>
+                    <div className={`flex items-center text-green-600 font-medium ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      {isRTL ? 'مشاهده در فروشگاه' : 'View in Shop'}
+                      <ArrowRight className={`h-4 w-4 ${isRTL ? 'ml-2 rotate-180' : 'mr-2'}`} />
+                    </div>
                   </div>
-                  <div className="flex items-center text-green-600 font-medium">
-                    مشاهده در فروشگاه
-                    <ArrowRight className="h-4 w-4 mr-2" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Call to Action */}
@@ -138,9 +160,10 @@ export function RandomCategoryProducts({ category, title }: RandomCategoryProduc
             size="lg"
             onClick={() => navigate('/shop')}
             className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg font-semibold"
+            data-testid="button-view-all-shop-products"
           >
-            <ShoppingCart className="h-5 w-5 ml-2" />
-            مشاهده تمام محصولات فروشگاه
+            <ShoppingCart className={`h-5 w-5 ${isRTL ? 'mr-2' : 'ml-2'}`} />
+            {isRTL ? 'مشاهده تمام محصولات فروشگاه' : 'View All Shop Products'}
           </Button>
         </div>
       </div>

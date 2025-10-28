@@ -31386,7 +31386,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             : JSON.parse(customUser.permissions || '[]');
 
           console.log(`✓ [PERMISSIONS] Custom user ${customUser.email} has modules:`, permissions);
-          console.log(`✓ [PERMISSIONS] Custom user ${customUser.email} has modules:`, permissions);
 
           return res.json({
             success: true,
@@ -31438,7 +31437,27 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
         if (userRole.length > 0) {
           // Parse permissions from JSON array
-const permissions = Array.isArray(userRole[0].permissions)             ? userRole[0].permissions             : JSON.parse(userRole[0].permissions || '[]');          console.log(`✓ [PERMISSIONS] User ${customUser[0].email} has modules:`, permissions);          return res.json({            success: true,            permissions: permissions.map(moduleId => ({              moduleId,              canView: true,              canCreate: true,              canEdit: true,              canDelete: true,              canApprove: true            })),            modules: permissions,            roles: [userRole[0].id],            roleInfo: {              name: userRole[0].name,              displayName: userRole[0].displayName            }          });        }      }
+          const permissions = Array.isArray(userRole[0].permissions) 
+            ? userRole[0].permissions 
+            : JSON.parse(userRole[0].permissions || '[]');
+          
+          console.log(`✓ [PERMISSIONS] User ${customUser[0].email} has modules:`, permissions);
+
+          return res.json({
+            success: true,
+            permissions: permissions.map(moduleId => ({
+              moduleId,
+              canView: true,
+              canCreate: true,
+              canEdit: true,
+              canDelete: true,
+              canApprove: true
+            })),
+            modules: permissions,
+            roles: [userRole[0].id],
+            roleInfo: {
+              name: userRole[0].name,
+              displayName: userRole[0].displayName
             }
           });
         }
@@ -31450,14 +31469,14 @@ const permissions = Array.isArray(userRole[0].permissions)             ? userRol
       if (legacyUser[0].id === 15 || legacyUser[0].email === 'admin@momtazchem.com') {
         console.log(`🔍 [DEBUG] SUPER ADMIN PATH ACTIVATED for ${legacyUser[0].email}`);
         const allModules = [
-          "kpi_dashboard", "management_dashboard", "accounting_management",
-          "syncing_shop", "inquiries", "barcode", "email_settings", "database_backup",
-          "crm", "seo", "categories", "sms", "whatsapp_crm", "factory", "user_management",
-          "shop_management", "procedures", "order_management", "product_management",
-          "payment_management", "finance", "wallet_management", "geography_analytics", "ai_settings",
-          "refresh_control", "content_management", "marketing_module",
-          "warehouse_management", "logistics_management", "ticketing_system", "remote_desktop",
-          "server_config", "company_information", "user_guide", "site_management"
+          "kpi_dashboard", "management_dashboard", "syncing_shop", "shop_management",
+          "product_management", "order_management", "warehouse_management", "logistics_management",
+          "inquiries", "crm", "barcode", "email_settings", "database_backup", "seo",
+          "categories", "sms", "factory", "user_management", "procedures", "payment_management",
+          "accounting_management", "finance", "wallet_management", "geography_analytics",
+          "ai_settings", "refresh_control", "content_management", "ticketing_system",
+          "remote_desktop", "server_config", "company_information", "user_guide",
+          "marketing_module", "aws_s3_settings", "whatsapp_crm"
         ];
         
         console.log('🔍 [DEBUG] allModules array contains:', allModules.length, 'modules');

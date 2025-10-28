@@ -387,9 +387,9 @@ const FuelAdditives = () => {
       </section>
 
       {/* Random Products from Shop */}
-      <RandomCategoryProducts 
+      <RandomCategoryProducts categoryDisplayName="Fuel Additives" 
         category="fuel-additives" 
-        title="محصولات پیشنهادی افزودنی سوخت از فروشگاه"
+        
       />
 
       {/* Live Chat Support */}

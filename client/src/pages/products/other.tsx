@@ -538,9 +538,9 @@ export function OtherProducts() {
       </Dialog>
 
       {/* Random Products from Shop */}
-      <RandomCategoryProducts 
+      <RandomCategoryProducts categoryDisplayName="Other Products" 
         category="other" 
-        title="محصولات پیشنهادی سایر محصولات از فروشگاه"
+        
       />
     </div>
   );

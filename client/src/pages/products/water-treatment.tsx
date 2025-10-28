@@ -400,9 +400,9 @@ const WaterTreatment = () => {
       </section>
 
       {/* Random Products from Shop */}
-      <RandomCategoryProducts 
+      <RandomCategoryProducts categoryDisplayName="Water Treatment" 
         category="water-treatment" 
-        title="محصولات پیشنهادی تصفیه آب از فروشگاه"
+        
       />
 
       {/* Live Chat Support */}

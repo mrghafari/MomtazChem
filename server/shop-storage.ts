@@ -75,6 +75,7 @@ export interface IShopStorage {
     };
   }>;
   getShopProductBySku(sku: string): Promise<ShopProduct | undefined>;
+  getRandomProductsByCategory(category: string, limit: number): Promise<ShopProduct[]>;
   createShopProduct(product: InsertShopProduct): Promise<ShopProduct>;
   updateShopProduct(id: number, product: Partial<InsertShopProduct>): Promise<ShopProduct>;
   deleteShopProduct(id: number): Promise<void>;
@@ -325,6 +326,46 @@ export class ShopStorage implements IShopStorage {
       .from(shopProducts)
       .where(eq(shopProducts.sku, sku));
     return product;
+  }
+
+  async getRandomProductsByCategory(category: string, limit: number = 2): Promise<ShopProduct[]> {
+    // Validate limit to prevent abuse
+    const safeLimit = Math.min(Math.max(1, limit), 10);
+    
+    // Category name mapping from slug format to actual category names
+    const categoryMap: Record<string, string[]> = {
+      'paint-thinner': ['Paint & Solvents', 'paint-thinner', 'Paint Thinner'],
+      'fuel-additives': ['Fuel Additives', 'fuel-additives', 'Fuel additives'],
+      'water-treatment': ['Water Treatment', 'water-treatment', 'Water treatment'],
+      'agricultural-fertilizers': ['Agricultural Fertilizers', 'agricultural-fertilizers', 'Fertilizers'],
+      'other': ['Other', 'other', 'Miscellaneous']
+    };
+    
+    // Get possible category names for this category
+    const categoryNames = categoryMap[category] || [category];
+    
+    // Build OR condition for all possible category names
+    const categoryConditions = categoryNames.map(name => eq(shopProducts.category, name));
+    
+    // Get random products from the specified category that are active and in stock
+    const products = await shopDb
+      .select()
+      .from(shopProducts)
+      .where(
+        and(
+          eq(shopProducts.isActive, true),
+          or(...categoryConditions),
+          // Show products that are either in stock OR have showWhenOutOfStock enabled
+          or(
+            gt(shopProducts.stockQuantity, 0),
+            eq(shopProducts.showWhenOutOfStock, true)
+          )
+        )
+      )
+      .orderBy(sql`RANDOM()`)
+      .limit(safeLimit);
+    
+    return products;
   }
 
   // SKU validation helper

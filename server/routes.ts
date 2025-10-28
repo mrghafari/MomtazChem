@@ -4255,140 +4255,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get random products for category page display based on content management settings
+  // Get random products from a category for recommendation display
   app.get("/api/products/random/:category", async (req, res) => {
     try {
       const { category } = req.params;
-      console.log(`🎲 [RANDOM PRODUCTS] Fetching random products for category: ${category}`);
+      const limit = parseInt(req.query.limit as string) || 2;
       
-      // Get kardex showcase products for this category
-      const kardexProducts = await storage.getProductsByCategory(category);
-      console.log(`📦 [RANDOM PRODUCTS] Found ${kardexProducts.length} kardex products in category ${category}`);
+      console.log(`🎲 [RANDOM PRODUCTS] Fetching ${limit} random products for category: ${category}`);
       
-      // Get assigned shop products for this category from content management
-      const { pool } = await import('./db');
-      let shopProducts = [];
+      // Use the new shopStorage method to get random products
+      const randomProducts = await shopStorage.getRandomProductsByCategory(category, limit);
       
-      try {
-        // Get assigned product IDs for this category
-        const assignmentResult = await db
-          .select()
-          .from(contentItems)
-          .where(and(
-            eq(contentItems.section, 'category_products'),
-            eq(contentItems.key, category),
-            eq(contentItems.isActive, true)
-          ))
-          .limit(1);
-
-        if (assignmentResult.length > 0) {
-          const productIds = JSON.parse(assignmentResult[0].content || '[]');
-          console.log(`🛍️ [RANDOM PRODUCTS] Found assigned shop product IDs:`, productIds);
-          
-          if (productIds.length > 0) {
-            // Get shop products by IDs
-            const shopQuery = `
-              SELECT 
-                id, name, category, description, short_description as "shortDescription",
-                price, price_unit as "priceUnit", stock_quantity as "stockQuantity", 
-                sku, barcode, thumbnail_url as "imageUrl", 
-                is_active as "isActive", visible_in_shop as "visibleInShop"
-              FROM shop_products 
-              WHERE id = ANY($1) AND is_active = true AND visible_in_shop = true
-              ORDER BY name ASC
-            `;
-            
-            const shopResult = await pool.query(shopQuery, [productIds]);
-            shopProducts = shopResult.rows;
-            console.log(`🛒 [RANDOM PRODUCTS] Found ${shopProducts.length} shop products`);
-          }
-        }
-      } catch (shopError) {
-        console.error('Error fetching assigned shop products:', shopError);
-        // Continue with just kardex products if shop products fail
-      }
-
-      // Combine both types of products
-      const allProducts = [...kardexProducts, ...shopProducts];
-      console.log(`📦 [RANDOM PRODUCTS] Total combined products: ${allProducts.length} (${kardexProducts.length} kardex + ${shopProducts.length} shop)`);
-      
-      if (allProducts.length === 0) {
-        return res.json({
-          success: true,
-          data: [],
-          message: "No products found in category"
-        });
-      }
-      
-      // Get content management settings for this category
-      const randomDisplaySetting = await db
-        .select()
-        .from(contentItems)
-        .where(eq(contentItems.key, `random_display_${category}`))
-        .limit(1);
-        
-      const maxDisplaySetting = await db
-        .select()
-        .from(contentItems)
-        .where(eq(contentItems.key, `max_display_${category}`))
-        .limit(1);
-      
-      console.log(`🔍 [RANDOM PRODUCTS] Random display settings:`, {
-        found: randomDisplaySetting.length > 0,
-        setting: randomDisplaySetting[0] || null,
-        isActive: randomDisplaySetting[0]?.isActive,
-        content: randomDisplaySetting[0]?.content
-      });
-      
-      // Check if random display is enabled
-      const isRandomEnabled = randomDisplaySetting.length > 0 && 
-                             randomDisplaySetting[0].isActive && 
-                             randomDisplaySetting[0].content === 'true';
-      
-      if (!isRandomEnabled) {
-        console.log(`❌ [RANDOM PRODUCTS] Random display is disabled for category ${category}`);
-        return res.json({
-          success: true,
-          data: [],
-          message: "Random display is disabled for this category"
-        });
-      }
-      
-      // Get max display count (default: 3)
-      const maxDisplay = maxDisplaySetting.length > 0 ? 
-                        parseInt(maxDisplaySetting[0].content) : 3;
-      
-      console.log(`🎯 [RANDOM PRODUCTS] Random display enabled, max display: ${maxDisplay}`);
-      
-      // Shuffle products and select random ones
-      const shuffledProducts = [...allProducts].sort(() => Math.random() - 0.5);
-      const randomProducts = shuffledProducts.slice(0, Math.min(maxDisplay, allProducts.length));
-      
-      console.log(`✅ [RANDOM PRODUCTS] Returning ${randomProducts.length} random products`);
+      console.log(`✅ [RANDOM PRODUCTS] Returning ${randomProducts.length} random products from category ${category}`);
       
       res.json({
         success: true,
-        data: randomProducts,
-        settings: {
-          category,
-          randomEnabled: isRandomEnabled,
-          maxDisplay,
-          totalProducts: allProducts.length,
-          selectedCount: randomProducts.length,
-          kardexCount: kardexProducts.length,
-          shopCount: shopProducts.length
-        }
+        data: randomProducts
       });
       
     } catch (error) {
-      console.error("Error fetching random products:", error);
+      console.error("❌ [RANDOM PRODUCTS] Error fetching random products:", error);
       res.status(500).json({ 
         success: false, 
-        message: "Internal server error",
+        message: "Failed to fetch random products",
         error: error instanceof Error ? error.message : String(error)
       });
     }
   });
-
   app.get("/api/products/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);

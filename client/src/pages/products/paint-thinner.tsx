@@ -284,9 +284,9 @@ const PaintThinnerPage = () => {
       </section>
 
       {/* Random Products from Shop */}
-      <RandomCategoryProducts 
+      <RandomCategoryProducts categoryDisplayName="Paint & Solvents" 
         category="paint-thinner" 
-        title="محصولات پیشنهادی رنگ و حلال از فروشگاه"
+        
       />
 
       {/* Live Chat Support */}
