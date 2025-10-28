@@ -73,7 +73,6 @@ import WaterTreatment from "@/pages/products/water-treatment";
 import PaintThinner from "@/pages/products/paint-thinner";
 import AgriculturalFertilizers from "@/pages/products/agricultural-fertilizers";
 import OtherProducts from "@/pages/products/other";
-import PaintSolvents from "@/pages/paint-solvents";
 import WebRTC from "@/pages/webrtc";
 import JitsiMeetPage from "@/pages/jitsi";
 import IndustrialChemicals from "@/pages/industrial-chemicals";
@@ -314,9 +313,9 @@ function Router() {
           <Route path="/products/fuel-additives" component={FuelAdditives} />
           <Route path="/products/water-treatment" component={WaterTreatment} />
           <Route path="/products/paint-thinner" component={PaintThinner} />
+          <Route path="/products/paint-solvents" component={PaintThinner} />
           <Route path="/products/agricultural-fertilizers" component={AgriculturalFertilizers} />
           <Route path="/products/other" component={OtherProducts} />
-          <Route path="/products/paint-solvents" component={PaintSolvents} />
           <Route path="/products/industrial-chemicals" component={IndustrialChemicals} />
           <Route path="/products/commercial-goods" component={CommercialGoods} />
           <Route path="/products/technical-equipment" component={TechnicalEquipment} />

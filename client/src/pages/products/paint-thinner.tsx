@@ -56,9 +56,9 @@ const PaintThinnerPage = () => {
             <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-6">
               <PaintBucket className="h-10 w-10 text-white" />
             </div>
-            <h1 className="text-5xl font-bold mb-6">Paint & Thinner Solutions</h1>
+            <h1 className="text-5xl font-bold mb-6">Paint & Solvents</h1>
             <p className="text-xl text-orange-100 max-w-3xl mx-auto mb-8">
-              Premium paint formulations and thinners for automotive, architectural, and industrial applications with superior durability and finish quality.
+              Premium paint formulations, specialty solvents, and thinners for automotive, architectural, and industrial applications with superior durability and finish quality.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Badge className="bg-white/20 text-white border-0 px-4 py-2">
