@@ -1340,11 +1340,11 @@ const Shop = () => {
                                       showNumber={false}
                                       className="text-yellow-400"
                                     />
-                                    <span className="text-xs text-gray-600 ml-1">
-                                      {productStatsData?.[product.id]?.totalReviews > 0 
-                                        ? productStatsData[product.id].averageRating.toFixed(1)
-                                        : 'نظر'}
-                                    </span>
+                                    {productStatsData?.[product.id]?.totalReviews > 0 && (
+                                      <span className="text-xs text-gray-600 ml-1">
+                                        {productStatsData[product.id].averageRating.toFixed(1)}
+                                      </span>
+                                    )}
                                   </>
                                 )}
                               </div>
@@ -1758,11 +1758,11 @@ const Shop = () => {
                                       showNumber={false}
                                       className="text-yellow-400"
                                     />
-                                    <span className="text-xs text-gray-600 ml-1">
-                                      {productStatsData?.[product.id]?.totalReviews > 0 
-                                        ? productStatsData[product.id].averageRating.toFixed(1)
-                                        : 'نظر'}
-                                    </span>
+                                    {productStatsData?.[product.id]?.totalReviews > 0 && (
+                                      <span className="text-xs text-gray-600 ml-1">
+                                        {productStatsData[product.id].averageRating.toFixed(1)}
+                                      </span>
+                                    )}
                                   </>
                                 )}
                               </div>
