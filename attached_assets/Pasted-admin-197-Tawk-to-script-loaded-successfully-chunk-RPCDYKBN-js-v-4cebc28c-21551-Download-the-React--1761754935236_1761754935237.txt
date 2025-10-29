@@ -1,0 +1,204 @@
+admin:197 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=4cebc28c:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=4cebc28c:840
+run @ @tanstack_react-query.js?v=4cebc28c:494
+start @ @tanstack_react-query.js?v=4cebc28c:536
+fetch @ @tanstack_react-query.js?v=4cebc28c:926
+executeFetch_fn @ @tanstack_react-query.js?v=4cebc28c:2211
+onSubscribe @ @tanstack_react-query.js?v=4cebc28c:1898
+subscribe @ @tanstack_react-query.js?v=4cebc28c:24
+(anonymous) @ @tanstack_react-query.js?v=4cebc28c:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=4cebc28c:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=4cebc28c:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=4cebc28c:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=4cebc28c:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=4cebc28c:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=4cebc28c:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=4cebc28c:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=4cebc28c:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=4cebc28c:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=4cebc28c:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=4cebc28c:19432
+commitRoot @ chunk-RPCDYKBN.js?v=4cebc28c:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=4cebc28c:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=4cebc28c:18718
+workLoop @ chunk-RPCDYKBN.js?v=4cebc28c:197
+flushWork @ chunk-RPCDYKBN.js?v=4cebc28c:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=4cebc28c:384
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:118313)
+    at t.value (twk-chunk-common.js:2:151397)
+    at p.updateUUID (twk-chunk-common.js:2:203049)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:125328)
+    at twk-chunk-common.js:2:124639
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+via.placeholder.com/128x128?text=WeChat+QR:1  GET https://via.placeholder.com/128x128?text=WeChat+QR net::ERR_NAME_NOT_RESOLVED
+Image
+commitMount @ chunk-RPCDYKBN.js?v=4cebc28c:8412
+commitLayoutEffectOnFiber @ chunk-RPCDYKBN.js?v=4cebc28c:17102
+commitLayoutMountEffects_complete @ chunk-RPCDYKBN.js?v=4cebc28c:17980
+commitLayoutEffects_begin @ chunk-RPCDYKBN.js?v=4cebc28c:17969
+commitLayoutEffects @ chunk-RPCDYKBN.js?v=4cebc28c:17920
+commitRootImpl @ chunk-RPCDYKBN.js?v=4cebc28c:19353
+commitRoot @ chunk-RPCDYKBN.js?v=4cebc28c:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=4cebc28c:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=4cebc28c:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=4cebc28c:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=4cebc28c:555
+flush @ @tanstack_react-query.js?v=4cebc28c:569
+batch @ @tanstack_react-query.js?v=4cebc28c:587
+dispatch_fn @ @tanstack_react-query.js?v=4cebc28c:996
+setData @ @tanstack_react-query.js?v=4cebc28c:696
+onSuccess @ @tanstack_react-query.js?v=4cebc28c:897
+resolve @ @tanstack_react-query.js?v=4cebc28c:456
+Promise.then
+run @ @tanstack_react-query.js?v=4cebc28c:498
+start @ @tanstack_react-query.js?v=4cebc28c:536
+fetch @ @tanstack_react-query.js?v=4cebc28c:926
+executeFetch_fn @ @tanstack_react-query.js?v=4cebc28c:2211
+onSubscribe @ @tanstack_react-query.js?v=4cebc28c:1898
+subscribe @ @tanstack_react-query.js?v=4cebc28c:24
+(anonymous) @ @tanstack_react-query.js?v=4cebc28c:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=4cebc28c:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=4cebc28c:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=4cebc28c:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=4cebc28c:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=4cebc28c:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=4cebc28c:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=4cebc28c:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=4cebc28c:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=4cebc28c:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=4cebc28c:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=4cebc28c:19432
+commitRoot @ chunk-RPCDYKBN.js?v=4cebc28c:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=4cebc28c:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=4cebc28c:18718
+workLoop @ chunk-RPCDYKBN.js?v=4cebc28c:197
+flushWork @ chunk-RPCDYKBN.js?v=4cebc28c:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=4cebc28c:384
+admin:169 Tawk.to Live Chat loaded successfully
+site-management-fixed.tsx:24 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:70 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+site-management-fixed.tsx:24 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:70 🔍 [DEBUG] useEffect triggered, userPermissions: {success: true, permissions: Array(35), modules: Array(35), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:73 🔍 [DEBUG] userPermissions modules: (35) ['kpi_dashboard', 'management_dashboard', 'syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse_management', 'logistics_management', 'inquiries', 'crm', 'barcode', 'email_settings', 'database_backup', 'seo', 'categories', 'sms', 'factory', 'user_management', 'procedures', 'payment_management', 'accounting_management', 'finance', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'content_management', 'ticketing_system', 'remote_desktop', 'server_config', 'company_information', 'user_guide', 'marketing_module', 'aws_s3_settings', 'whatsapp_crm']
+site-management-fixed.tsx:400 🔍 [DEBUG] Full userPermissions response: {success: true, permissions: Array(35), modules: Array(35), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:401 🔍 [DEBUG] userPermissions.modules: (35) ['kpi_dashboard', 'management_dashboard', 'syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse_management', 'logistics_management', 'inquiries', 'crm', 'barcode', 'email_settings', 'database_backup', 'seo', 'categories', 'sms', 'factory', 'user_management', 'procedures', 'payment_management', 'accounting_management', 'finance', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'content_management', 'ticketing_system', 'remote_desktop', 'server_config', 'company_information', 'user_guide', 'marketing_module', 'aws_s3_settings', 'whatsapp_crm']
+site-management-fixed.tsx:402 🔍 [DEBUG] userPermissions.permissions: (35) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+site-management-fixed.tsx:407 🔍 [DEBUG] Total allButtons count: 35
+site-management-fixed.tsx:408 🔍 [DEBUG] AI Settings exists in allButtons: false
+site-management-fixed.tsx:409 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:411 🔍 [DEBUG] allowedModules: (35) ['kpi_dashboard', 'management_dashboard', 'syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse_management', 'logistics_management', 'inquiries', 'crm', 'barcode', 'email_settings', 'database_backup', 'seo', 'categories', 'sms', 'factory', 'user_management', 'procedures', 'payment_management', 'accounting_management', 'finance', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'content_management', 'ticketing_system', 'remote_desktop', 'server_config', 'company_information', 'user_guide', 'marketing_module', 'aws_s3_settings', 'whatsapp_crm']
+site-management-fixed.tsx:412 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:413 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:414 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:415 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:416 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:417 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:423 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:431 🔍 [CRITICAL] Missing buttons count: 0
+site-management-fixed.tsx:433 🔍 [DEBUG] finance button found in allButtons? {id: 'finance', label: 'Finance', icon: {…}, className: 'border-green-300 text-green-600 hover:bg-green-50 hover:text-green-800', onClick: ƒ, …}
+site-management-fixed.tsx:434 🔍 [DEBUG] geography_analytics button found in allButtons? {id: 'geography-analytics', label: 'Geography Analytics', icon: {…}, className: 'border-teal-300 text-teal-600 hover:bg-teal-50 hover:text-teal-800', onClick: ƒ, …}
+site-management-fixed.tsx:435 🔍 [DEBUG] ai_settings button found in allButtons? undefined
+site-management-fixed.tsx:436 🔍 [DEBUG] content_management button found in allButtons? {id: 'content-management', label: 'Content Management', icon: {…}, className: 'border-lime-300 text-lime-600 hover:bg-lime-50 hover:text-lime-800', onClick: ƒ, …}
+site-management-fixed.tsx:437 🔍 [DEBUG] finance button in filtered? {id: 'finance', label: 'Finance', icon: {…}, className: 'border-green-300 text-green-600 hover:bg-green-50 hover:text-green-800', onClick: ƒ, …}
+site-management-fixed.tsx:438 🔍 [DEBUG] geography_analytics button in filtered? {id: 'geography-analytics', label: 'Geography Analytics', icon: {…}, className: 'border-teal-300 text-teal-600 hover:bg-teal-50 hover:text-teal-800', onClick: ƒ, …}
+site-management-fixed.tsx:439 🔍 [DEBUG] ai_settings button in filtered? undefined
+site-management-fixed.tsx:440 🔍 [DEBUG] content_management button in filtered? {id: 'content-management', label: 'Content Management', icon: {…}, className: 'border-lime-300 text-lime-600 hover:bg-lime-50 hover:text-lime-800', onClick: ƒ, …}
+site-management-fixed.tsx:75 🔍 [DEBUG] filtered buttons count: 35
+site-management-fixed.tsx:76 🔍 [DEBUG] First 5 filtered buttons: (5) [{…}, {…}, {…}, {…}, {…}]
+site-management-fixed.tsx:77 🔍 [DEBUG] AI Control button in filtered: undefined
+site-management-fixed.tsx:78 🔍 [DEBUG] Content Management button in filtered: {id: 'content-management', label: 'Content Management', icon: {…}, className: 'border-lime-300 text-lime-600 hover:bg-lime-50 hover:text-lime-800', onClick: ƒ, …}
+site-management-fixed.tsx:24 🔍 [DEBUG] Site Management component initialized
+advanced-email-settings.tsx:497 Loading category data: undefined undefined
+site-management-fixed.tsx:400 🔍 [DEBUG] Full userPermissions response: {success: true, permissions: Array(35), modules: Array(35), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:401 🔍 [DEBUG] userPermissions.modules: (35) ['kpi_dashboard', 'management_dashboard', 'syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse_management', 'logistics_management', 'inquiries', 'crm', 'barcode', 'email_settings', 'database_backup', 'seo', 'categories', 'sms', 'factory', 'user_management', 'procedures', 'payment_management', 'accounting_management', 'finance', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'content_management', 'ticketing_system', 'remote_desktop', 'server_config', 'company_information', 'user_guide', 'marketing_module', 'aws_s3_settings', 'whatsapp_crm']
+site-management-fixed.tsx:402 🔍 [DEBUG] userPermissions.permissions: (35) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+site-management-fixed.tsx:407 🔍 [DEBUG] Total allButtons count: 35
+site-management-fixed.tsx:408 🔍 [DEBUG] AI Settings exists in allButtons: false
+site-management-fixed.tsx:409 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:411 🔍 [DEBUG] allowedModules: (35) ['kpi_dashboard', 'management_dashboard', 'syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse_management', 'logistics_management', 'inquiries', 'crm', 'barcode', 'email_settings', 'database_backup', 'seo', 'categories', 'sms', 'factory', 'user_management', 'procedures', 'payment_management', 'accounting_management', 'finance', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'content_management', 'ticketing_system', 'remote_desktop', 'server_config', 'company_information', 'user_guide', 'marketing_module', 'aws_s3_settings', 'whatsapp_crm']
+site-management-fixed.tsx:412 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:413 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:414 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:415 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:416 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:417 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:423 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:431 🔍 [CRITICAL] Missing buttons count: 0
+site-management-fixed.tsx:433 🔍 [DEBUG] finance button found in allButtons? {id: 'finance', label: 'Finance', icon: {…}, className: 'border-green-300 text-green-600 hover:bg-green-50 hover:text-green-800', onClick: ƒ, …}
+site-management-fixed.tsx:434 🔍 [DEBUG] geography_analytics button found in allButtons? {id: 'geography-analytics', label: 'Geography Analytics', icon: {…}, className: 'border-teal-300 text-teal-600 hover:bg-teal-50 hover:text-teal-800', onClick: ƒ, …}
+site-management-fixed.tsx:435 🔍 [DEBUG] ai_settings button found in allButtons? undefined
+site-management-fixed.tsx:436 🔍 [DEBUG] content_management button found in allButtons? {id: 'content-management', label: 'Content Management', icon: {…}, className: 'border-lime-300 text-lime-600 hover:bg-lime-50 hover:text-lime-800', onClick: ƒ, …}
+site-management-fixed.tsx:437 🔍 [DEBUG] finance button in filtered? {id: 'finance', label: 'Finance', icon: {…}, className: 'border-green-300 text-green-600 hover:bg-green-50 hover:text-green-800', onClick: ƒ, …}
+site-management-fixed.tsx:438 🔍 [DEBUG] geography_analytics button in filtered? {id: 'geography-analytics', label: 'Geography Analytics', icon: {…}, className: 'border-teal-300 text-teal-600 hover:bg-teal-50 hover:text-teal-800', onClick: ƒ, …}
+site-management-fixed.tsx:439 🔍 [DEBUG] ai_settings button in filtered? undefined
+site-management-fixed.tsx:440 🔍 [DEBUG] content_management button in filtered? {id: 'content-management', label: 'Content Management', icon: {…}, className: 'border-lime-300 text-lime-600 hover:bg-lime-50 hover:text-lime-800', onClick: ƒ, …}
+advanced-email-settings.tsx:148 Categories API Response: {success: true, categories: Array(9)}
+advanced-email-settings.tsx:585 Email Status Light Debug: Admin & General Contact {id: 1, categoryId: 1, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:599 SMTP Configuration Check for Admin & General Contact {host: 'smtppro.zoho.eu', username: 'info@momtazchem.com', password: 'SET', fromEmail: 'info@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:614 Final status for Admin & General Contact : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:585 Email Status Light Debug: Agricultural Fertilizers Department {id: 2, categoryId: 4, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:599 SMTP Configuration Check for Agricultural Fertilizers Department {host: 'smtppro.zoho.eu', username: 'fertilizer@momtazchem.com', password: 'SET', fromEmail: 'fertilizer@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:614 Final status for Agricultural Fertilizers Department : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:585 Email Status Light Debug: Fuel Additives Department {id: 4, categoryId: 2, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:599 SMTP Configuration Check for Fuel Additives Department {host: 'smtppro.zoho.eu', username: 'fuel@momtazchem.com', password: 'SET', fromEmail: 'fuel@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:614 Final status for Fuel Additives Department : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:585 Email Status Light Debug: Inventory Alerts {id: 19, categoryId: 12, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:599 SMTP Configuration Check for Inventory Alerts {host: 'smtppro.zoho.eu', username: 'inventory@momtazchem.com', password: 'SET', fromEmail: 'inventory@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:614 Final status for Inventory Alerts : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:585 Email Status Light Debug: Paint & Thinner Department {id: 6, categoryId: 5, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:599 SMTP Configuration Check for Paint & Thinner Department {host: 'smtppro.zoho.eu', username: 'thinner@momtazchem.com', password: 'SET', fromEmail: 'thinner@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:614 Final status for Paint & Thinner Department : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:585 Email Status Light Debug: Password Reset {id: 9, categoryId: 8, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:599 SMTP Configuration Check for Password Reset {host: 'smtppro.zoho.eu', username: 'noreply@momtazchem.com', password: 'SET', fromEmail: 'noreply@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:614 Final status for Password Reset : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:585 Email Status Light Debug: Sales department {id: 5, categoryId: 6, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:599 SMTP Configuration Check for Sales department {host: 'smtppro.zoho.eu', username: 'sales@momtazchem.com', password: 'SET', fromEmail: 'sales@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:614 Final status for Sales department : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:585 Email Status Light Debug: Support {id: 7, categoryId: 7, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:599 SMTP Configuration Check for Support {host: 'smtppro.zoho.eu', username: 'support@momtazchem.com', password: 'SET', fromEmail: 'support@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:614 Final status for Support : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:585 Email Status Light Debug: Water Treatment Department {id: 3, categoryId: 3, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:599 SMTP Configuration Check for Water Treatment Department {host: 'smtppro.zoho.eu', username: 'water@momtazchem.com', password: 'SET', fromEmail: 'water@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:614 Final status for Water Treatment Department : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+automated-email-logs.tsx:290 📧 [Email Logs Debug - Raw] {isLoading: true, hasResponse: false, responseType: 'undefined', responseKeys: Array(0), rawResponse: undefined, …}
+automated-email-logs.tsx:304 📧 [Email Logs Debug - Processed] {logsCount: 0, firstLog: undefined}
+automated-email-logs.tsx:290 📧 [Email Logs Debug - Raw] {isLoading: false, hasResponse: true, responseType: 'object', responseKeys: Array(3), rawResponse: {…}, …}
+automated-email-logs.tsx:304 📧 [Email Logs Debug - Processed] {logsCount: 0, firstLog: undefined}
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+automated-email-logs.tsx:290 📧 [Email Logs Debug - Raw] {isLoading: false, hasResponse: true, responseType: 'object', responseKeys: Array(3), rawResponse: {…}, …}
+automated-email-logs.tsx:304 📧 [Email Logs Debug - Processed] {logsCount: 0, firstLog: undefined}

@@ -264,6 +264,8 @@ export default function AutomatedEmailLogsPage() {
     return (texts as any)[key]?.[language] || (texts as any)[key]?.en || key;
   };
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   // Check authentication
   useEffect(() => {
     const checkAuth = async () => {
@@ -272,6 +274,8 @@ export default function AutomatedEmailLogsPage() {
         const data = await response.json();
         if (!data.success || !data.authenticated) {
           setLocation("/admin/login");
+        } else {
+          setIsAuthenticated(true);
         }
       } catch (error) {
         setLocation("/admin/login");
@@ -280,31 +284,14 @@ export default function AutomatedEmailLogsPage() {
     checkAuth();
   }, [setLocation]);
 
-  // Fetch email logs
+  // Fetch email logs - only when authenticated
   const { data: emailLogsResponse, isLoading, refetch } = useQuery({
     queryKey: ["/api/admin/email/logs"],
+    enabled: isAuthenticated, // Only fetch when authenticated
     refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
 
-  // Debug logging BEFORE processing
-  console.log('📧 [Email Logs Debug - Raw]', {
-    isLoading,
-    hasResponse: !!emailLogsResponse,
-    responseType: typeof emailLogsResponse,
-    responseKeys: emailLogsResponse ? Object.keys(emailLogsResponse) : [],
-    rawResponse: emailLogsResponse,
-    logsProperty: (emailLogsResponse as any)?.logs,
-    logsType: typeof (emailLogsResponse as any)?.logs,
-    logsIsArray: Array.isArray((emailLogsResponse as any)?.logs)
-  });
-  
   const emailLogs: EmailLog[] = (emailLogsResponse as any)?.logs || [];
-  
-  // Debug logging AFTER processing
-  console.log('📧 [Email Logs Debug - Processed]', {
-    logsCount: emailLogs.length,
-    firstLog: emailLogs[0]
-  });
 
   // Filter logs based on search and filters
   const filteredLogs = emailLogs.filter((log) => {
