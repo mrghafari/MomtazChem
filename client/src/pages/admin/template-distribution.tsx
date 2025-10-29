@@ -36,7 +36,7 @@ const TEMPLATE_DISTRIBUTION = {
   مدیریتی: {
     color: 'purple',
     icon: Settings,
-    templates: ['#06', '#11', '#12'],
+    templates: ['#06'],
     location: '/admin/user-management',
     description: 'قالب‌های مدیریت کاربران و تنظیمات سیستم'
   },
@@ -67,6 +67,13 @@ const TEMPLATE_DISTRIBUTION = {
     templates: ['#16'],
     location: '/admin/security-management',
     description: 'قالب‌های هشدارهای امنیتی'
+  },
+  'سفارش‌های رها شده': {
+    color: 'amber',
+    icon: AlertTriangle,
+    templates: ['سفارش رها شده'],
+    location: '/admin/orders',
+    description: 'قالب‌های یادآوری برای سفارش‌های رها شده'
   }
 };
 
@@ -93,7 +100,8 @@ export default function TemplateDistribution() {
       orange: 'border-orange-300 bg-orange-50 text-orange-800',
       red: 'border-red-300 bg-red-50 text-red-800',
       emerald: 'border-emerald-300 bg-emerald-50 text-emerald-800',
-      rose: 'border-rose-300 bg-rose-50 text-rose-800'
+      rose: 'border-rose-300 bg-rose-50 text-rose-800',
+      amber: 'border-amber-300 bg-amber-50 text-amber-800'
     };
     return colors[color as keyof typeof colors] || colors.blue;
   };
@@ -114,7 +122,7 @@ export default function TemplateDistribution() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">🎯 توزیع قالب‌های ایمیل</h1>
           <p className="text-gray-600 mt-1">
-            قالب‌های ایمیل در ۷ بخش مختلف سیستم توزیع شده‌اند
+            قالب‌های ایمیل در ۸ بخش مختلف سیستم توزیع شده‌اند
           </p>
         </div>
       </div>
@@ -138,7 +146,7 @@ export default function TemplateDistribution() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-green-100">بخش‌های سیستم</p>
-                <p className="text-2xl font-bold">7</p>
+                <p className="text-2xl font-bold">8</p>
               </div>
               <Settings className="w-8 h-8 text-green-200" />
             </div>
@@ -162,7 +170,7 @@ export default function TemplateDistribution() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-orange-100">دسته‌بندی‌ها</p>
-                <p className="text-2xl font-bold">7</p>
+                <p className="text-2xl font-bold">8</p>
               </div>
               <Package className="w-8 h-8 text-orange-200" />
             </div>
