@@ -1,0 +1,157 @@
+ Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+ 🔍 [EMAIL TEMPLATES] Fetching templates directly from database...
+ 🔍 [EMAIL TEMPLATES] Templates data: Array(0)
+ 🔍 [EMAIL TEMPLATES] Templates array: true 0
+ 🔍 [EMAIL TEMPLATES] Selected category: all
+ 🔍 [EMAIL TEMPLATES] Filtered templates: Array(0)
+ 🔍 [EMAIL TEMPLATES] Filtered length: 0
+ 🔍 [EMAIL TEMPLATES] Is loading: true
+ 🔍 [EMAIL TEMPLATES] Error: null
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ ✅ [EMAIL TEMPLATES] Database templates loaded: Object
+ 🔍 [EMAIL TEMPLATES] Templates data: Array(18)
+email-templates-central.tsx:349 🔍 [EMAIL TEMPLATES] Templates array: true 18
+email-templates-central.tsx:350 🔍 [EMAIL TEMPLATES] Selected category: all
+email-templates-central.tsx:351 🔍 [EMAIL TEMPLATES] Filtered templates: Array(18)
+email-templates-central.tsx:352 🔍 [EMAIL TEMPLATES] Filtered length: 18
+email-templates-central.tsx:353 🔍 [EMAIL TEMPLATES] Is loading: false
+email-templates-central.tsx:354 🔍 [EMAIL TEMPLATES] Error: null
+email-templates-central.tsx:358 🔍 [EMAIL TEMPLATES] Sample template structure: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 1: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 2: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 3: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 4: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 5: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 6: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 7: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 8: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 9: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 10: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 11: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 12: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 13: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 14: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 15: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 16: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 17: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 18: Object
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:118313)
+    at t.value (twk-chunk-common.js:2:151397)
+    at p.updateUUID (twk-chunk-common.js:2:203049)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:125328)
+    at twk-chunk-common.js:2:124639
+value @ twk-chunk-common.js:2
+email-templates-central:169 Tawk.to Live Chat loaded successfully
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+email-templates-central.tsx:348 🔍 [EMAIL TEMPLATES] Templates data: Array(18)
+email-templates-central.tsx:349 🔍 [EMAIL TEMPLATES] Templates array: true 18
+email-templates-central.tsx:350 🔍 [EMAIL TEMPLATES] Selected category: notifications
+email-templates-central.tsx:351 🔍 [EMAIL TEMPLATES] Filtered templates: Array(1)
+email-templates-central.tsx:352 🔍 [EMAIL TEMPLATES] Filtered length: 1
+email-templates-central.tsx:353 🔍 [EMAIL TEMPLATES] Is loading: false
+email-templates-central.tsx:354 🔍 [EMAIL TEMPLATES] Error: null
+email-templates-central.tsx:358 🔍 [EMAIL TEMPLATES] Sample template structure: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 1: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 2: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 3: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 4: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 5: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 6: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 7: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 8: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 9: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 10: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 11: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 12: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 13: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 14: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 15: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 16: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 17: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 18: Object
+email-templates-central.tsx:348 🔍 [EMAIL TEMPLATES] Templates data: Array(18)
+email-templates-central.tsx:349 🔍 [EMAIL TEMPLATES] Templates array: true 18
+email-templates-central.tsx:350 🔍 [EMAIL TEMPLATES] Selected category: notification
+email-templates-central.tsx:351 🔍 [EMAIL TEMPLATES] Filtered templates: Array(1)
+email-templates-central.tsx:352 🔍 [EMAIL TEMPLATES] Filtered length: 1
+email-templates-central.tsx:353 🔍 [EMAIL TEMPLATES] Is loading: false
+email-templates-central.tsx:354 🔍 [EMAIL TEMPLATES] Error: null
+email-templates-central.tsx:358 🔍 [EMAIL TEMPLATES] Sample template structure: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 1: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 2: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 3: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 4: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 5: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 6: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 7: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 8: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 9: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 10: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 11: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 12: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 13: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 14: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 15: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 16: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 17: Object
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 18: Object
+email-templates-central.tsx:348 🔍 [EMAIL TEMPLATES] Templates data: (18) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+email-templates-central.tsx:349 🔍 [EMAIL TEMPLATES] Templates array: true 18
+email-templates-central.tsx:350 🔍 [EMAIL TEMPLATES] Selected category: notifications
+email-templates-central.tsx:351 🔍 [EMAIL TEMPLATES] Filtered templates: [{…}]
+email-templates-central.tsx:352 🔍 [EMAIL TEMPLATES] Filtered length: 1
+email-templates-central.tsx:353 🔍 [EMAIL TEMPLATES] Is loading: false
+email-templates-central.tsx:354 🔍 [EMAIL TEMPLATES] Error: null
+email-templates-central.tsx:358 🔍 [EMAIL TEMPLATES] Sample template structure: {id: 1, name: '#01 - Technical Support Response', templateName: '#01 - Technical Support Response', subject: 'Re: Technical Support Request - {{ticket_number}}', html_content: '<div style="font-family: Arial, sans-serif; max-wi…t System: Available 24/7</p>\n</div>\n</div>\n</div>', …}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 1: {name: '#01 - Technical Support Response', templateNumber: '#01', category: 'technical_support', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 2: {name: '#02 - Product Information Response', templateNumber: '#02', category: 'product_info', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 3: {name: '#03 - General Inquiry Response', templateNumber: '#03', category: 'inquiry_response', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 4: {name: '#04 - Inquiry Response Template | قالب الرد على الاستفسار', templateNumber: '#04', category: 'inquiry_response', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 5: {name: '#05 - Momtaz Chemical Follow-up Response', templateNumber: '#05', category: 'inquiry', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 6: {name: '#06 - Password Management | إدارة كلمة المرور', templateNumber: '#06', category: 'password-reset', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 7: {name: '#07 - Product Inquiry Admin Notification', templateNumber: '#07', category: 'notifications', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 8: {name: '#08 - Customer Inquiry Confirmation', templateNumber: '#08', category: 'notifications', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 9: {name: '#10 - Quote Request Notification', templateNumber: '#10', category: 'notifications', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 10: {name: '#13 - Low Stock Alert (Universal Service)', templateNumber: '#13', category: 'inventory_alerts', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 11: {name: '#14 - Payment Confirmation', templateNumber: '#14', category: 'payment_notifications', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 12: {name: '#15 - System Notification', templateNumber: '#15', category: 'system_notifications', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 13: {name: '#16 - Security Alert', templateNumber: '#16', category: 'security_alerts', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 14: {name: '#17 - Comprehensive Inventory Alert System', templateNumber: '#17', category: 'inventory_alerts', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 15: {name: '#09 - Contact Receipt Acknowledgment | إشعار استلام الرسالة', templateNumber: '#09', category: 'notifications', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 16: {name: 'Abandoned Order - First Reminder | طلب متروك - تذكير أول', templateNumber: '', category: 'notification', inRegistry: false}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 17: {name: 'Abandoned Order - Second Reminder | طلب متروك - تذكير ثاني', templateNumber: '', category: 'notification', inRegistry: false}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 18: {name: 'Abandoned Order - Final Reminder | طلب متروك - تذكير نهائي', templateNumber: '', category: 'notification', inRegistry: false}
+email-templates-central.tsx:348 🔍 [EMAIL TEMPLATES] Templates data: (18) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+email-templates-central.tsx:349 🔍 [EMAIL TEMPLATES] Templates array: true 18
+email-templates-central.tsx:350 🔍 [EMAIL TEMPLATES] Selected category: notification
+email-templates-central.tsx:351 🔍 [EMAIL TEMPLATES] Filtered templates: [{…}]
+email-templates-central.tsx:352 🔍 [EMAIL TEMPLATES] Filtered length: 1
+email-templates-central.tsx:353 🔍 [EMAIL TEMPLATES] Is loading: false
+email-templates-central.tsx:354 🔍 [EMAIL TEMPLATES] Error: null
+email-templates-central.tsx:358 🔍 [EMAIL TEMPLATES] Sample template structure: {id: 1, name: '#01 - Technical Support Response', templateName: '#01 - Technical Support Response', subject: 'Re: Technical Support Request - {{ticket_number}}', html_content: '<div style="font-family: Arial, sans-serif; max-wi…t System: Available 24/7</p>\n</div>\n</div>\n</div>', …}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 1: {name: '#01 - Technical Support Response', templateNumber: '#01', category: 'technical_support', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 2: {name: '#02 - Product Information Response', templateNumber: '#02', category: 'product_info', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 3: {name: '#03 - General Inquiry Response', templateNumber: '#03', category: 'inquiry_response', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 4: {name: '#04 - Inquiry Response Template | قالب الرد على الاستفسار', templateNumber: '#04', category: 'inquiry_response', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 5: {name: '#05 - Momtaz Chemical Follow-up Response', templateNumber: '#05', category: 'inquiry', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 6: {name: '#06 - Password Management | إدارة كلمة المرور', templateNumber: '#06', category: 'password-reset', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 7: {name: '#07 - Product Inquiry Admin Notification', templateNumber: '#07', category: 'notifications', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 8: {name: '#08 - Customer Inquiry Confirmation', templateNumber: '#08', category: 'notifications', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 9: {name: '#10 - Quote Request Notification', templateNumber: '#10', category: 'notifications', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 10: {name: '#13 - Low Stock Alert (Universal Service)', templateNumber: '#13', category: 'inventory_alerts', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 11: {name: '#14 - Payment Confirmation', templateNumber: '#14', category: 'payment_notifications', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 12: {name: '#15 - System Notification', templateNumber: '#15', category: 'system_notifications', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 13: {name: '#16 - Security Alert', templateNumber: '#16', category: 'security_alerts', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 14: {name: '#17 - Comprehensive Inventory Alert System', templateNumber: '#17', category: 'inventory_alerts', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 15: {name: '#09 - Contact Receipt Acknowledgment | إشعار استلام الرسالة', templateNumber: '#09', category: 'notifications', inRegistry: true}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 16: {name: 'Abandoned Order - First Reminder | طلب متروك - تذكير أول', templateNumber: '', category: 'notification', inRegistry: false}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 17: {name: 'Abandoned Order - Second Reminder | طلب متروك - تذكير ثاني', templateNumber: '', category: 'notification', inRegistry: false}
+email-templates-central.tsx:362 🔍 [EMAIL TEMPLATES] Template 18: {name: 'Abandoned Order - Final Reminder | طلب متروك - تذكير نهائي', templateNumber: '', category: 'notification', inRegistry: false}
