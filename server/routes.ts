@@ -6609,6 +6609,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // This should be the SINGLE SOURCE OF TRUTH for all modules
     // Any changes here will automatically sync to User Management
     return [
+      'kpi_dashboard',
+      'management_dashboard',
       'syncing_shop',
       'shop_management', 
       'product_management',
@@ -6627,6 +6629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'user_management',
       'procedures',
       'payment_management',
+      'accounting_management',
       'finance',
       'wallet_management',
       'geography_analytics',
@@ -6636,9 +6639,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'ticketing_system',
       'remote_desktop',
       'server_config',
-      'kpi_dashboard',
-      'management_dashboard'
-      // Total: 28 modules - automatically synced with Site Management
+      'company_information',
+      'user_guide',
+      'marketing_module',
+      'aws_s3_settings',
+      'whatsapp_crm'
+      // Total: 35 modules - automatically synced with Site Management
     ];
   };
 

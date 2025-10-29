@@ -153,38 +153,43 @@ type Module = {
 
 // Function to extract modules dynamically from Site Management configuration
 const extractSiteManagementModules = (): Module[] => {
-  // Complete synchronized list with ALL 29 modules from Site Management - using original English names
+  // Complete synchronized list with ALL 35 modules from Site Management - using original English names
   const siteManagementModules = [
+    { moduleId: 'kpi_dashboard', label: 'KPI Dashboard', icon: BarChart3, color: 'bg-purple-600' },
+    { moduleId: 'management_dashboard', label: 'Management Dashboard', icon: LayoutDashboard, color: 'bg-indigo-600' },
     { moduleId: 'syncing_shop', label: 'Syncing Shop', icon: Database, color: 'bg-blue-500' },
     { moduleId: 'shop_management', label: 'Shop Management', icon: ShoppingCart, color: 'bg-purple-500' },
     { moduleId: 'product_management', label: 'Product Management', icon: Package, color: 'bg-violet-500' },
     { moduleId: 'order_management', label: 'Order Management', icon: Truck, color: 'bg-orange-500' },
-    { moduleId: 'warehouse-management', label: 'Warehouse Management', icon: Warehouse, color: 'bg-emerald-500' },
+    { moduleId: 'warehouse_management', label: 'Warehouse Management', icon: Warehouse, color: 'bg-emerald-500' },
     { moduleId: 'logistics_management', label: 'Logistics Management', icon: Truck, color: 'bg-indigo-500' },
-    { moduleId: 'crm', label: 'CRM', icon: Users, color: 'bg-pink-500' },
-    { moduleId: 'wallet_management', label: 'Wallet Management', icon: Wallet, color: 'bg-yellow-500' },
-    { moduleId: 'payment_settings', label: 'Payment Settings', icon: CreditCard, color: 'bg-red-500' },
-    { moduleId: 'geography_analytics', label: 'Geography Analytics', icon: MapPin, color: 'bg-teal-500' },
     { moduleId: 'inquiries', label: 'Inquiries', icon: BarChart3, color: 'bg-amber-500' },
+    { moduleId: 'crm', label: 'CRM', icon: Users, color: 'bg-pink-500' },
+    { moduleId: 'barcode', label: 'Barcode Management', icon: QrCode, color: 'bg-rose-500' },
     { moduleId: 'email_settings', label: 'Email Settings', icon: Mail, color: 'bg-cyan-500' },
-    { moduleId: 'content_management', label: 'Content Management', icon: Edit3, color: 'bg-lime-500' },
+    { moduleId: 'database_backup', label: 'Database Backup', icon: HardDrive, color: 'bg-stone-500' },
     { moduleId: 'seo', label: 'SEO Management', icon: Globe, color: 'bg-emerald-500' },
     { moduleId: 'categories', label: 'Categories', icon: Package, color: 'bg-violet-500' },
-    { moduleId: 'barcode', label: 'Barcode Management', icon: QrCode, color: 'bg-rose-500' },
-    { moduleId: 'database_backup', label: 'Database Backup', icon: Database, color: 'bg-stone-500' },
-    { moduleId: 'ai_settings', label: 'AI Settings', icon: Zap, color: 'bg-sky-500' },
-    { moduleId: 'user_management', label: 'User Management', icon: UserCog, color: 'bg-slate-500' },
     { moduleId: 'sms', label: 'SMS Management', icon: Smartphone, color: 'bg-gray-500' },
     { moduleId: 'factory', label: 'Factory Management', icon: Factory, color: 'bg-neutral-500' },
+    { moduleId: 'user_management', label: 'User Management', icon: UserCog, color: 'bg-slate-500' },
     { moduleId: 'procedures', label: 'Procedures', icon: BookOpen, color: 'bg-zinc-500' },
+    { moduleId: 'payment_management', label: 'Payment Management', icon: CreditCard, color: 'bg-green-600' },
+    { moduleId: 'accounting_management', label: 'Accounting Management', icon: DollarSign, color: 'bg-blue-600' },
+    { moduleId: 'finance', label: 'Finance Management', icon: DollarSign, color: 'bg-emerald-600' },
+    { moduleId: 'wallet_management', label: 'Wallet Management', icon: Wallet, color: 'bg-yellow-500' },
+    { moduleId: 'geography_analytics', label: 'Geography Analytics', icon: MapPin, color: 'bg-teal-500' },
+    { moduleId: 'ai_settings', label: 'AI Settings', icon: Zap, color: 'bg-sky-500' },
     { moduleId: 'refresh_control', label: 'Refresh Control', icon: RefreshCw, color: 'bg-green-500' },
+    { moduleId: 'content_management', label: 'Content Management', icon: Edit3, color: 'bg-lime-500' },
     { moduleId: 'ticketing_system', label: 'Ticketing System', icon: Ticket, color: 'bg-rose-500' },
     { moduleId: 'remote_desktop', label: 'Remote Desktop', icon: Monitor, color: 'bg-slate-600' },
     { moduleId: 'server_config', label: 'Server Config', icon: Server, color: 'bg-gray-600' },
-    { moduleId: 'kpi_dashboard', label: 'KPI Dashboard', icon: BarChart3, color: 'bg-purple-600' },
-    { moduleId: 'management_dashboard', label: 'Management Dashboard', icon: LayoutDashboard, color: 'bg-indigo-600' },
-    { moduleId: 'procedures_management', label: 'Procedures Management', icon: FileText, color: 'bg-blue-600' },
-    { moduleId: 'payment_management', label: 'Payment Management', icon: CreditCard, color: 'bg-green-600' }
+    { moduleId: 'company_information', label: 'Company Information', icon: FileText, color: 'bg-cyan-600' },
+    { moduleId: 'user_guide', label: 'User Guide', icon: BookOpen, color: 'bg-amber-600' },
+    { moduleId: 'marketing_module', label: 'Marketing Module', icon: Send, color: 'bg-pink-600' },
+    { moduleId: 'aws_s3_settings', label: 'AWS S3 Settings', icon: HardDrive, color: 'bg-orange-600' },
+    { moduleId: 'whatsapp_crm', label: 'WhatsApp CRM', icon: MessageSquare, color: 'bg-green-600' }
   ];
 
   return siteManagementModules.map(module => ({
@@ -193,7 +198,7 @@ const extractSiteManagementModules = (): Module[] => {
     displayName: module.label,
     description: `${module.label} Module`,
     category: 'system',
-    isCore: ['syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse-management', 'crm', 'user_management'].includes(module.moduleId),
+    isCore: ['syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse_management', 'crm', 'user_management', 'finance', 'accounting_management'].includes(module.moduleId),
     icon: module.icon,
     color: module.color
   }));
