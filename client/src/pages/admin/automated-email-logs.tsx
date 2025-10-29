@@ -287,6 +287,16 @@ export default function AutomatedEmailLogsPage() {
   });
 
   const emailLogs: EmailLog[] = (emailLogsResponse as any)?.logs || [];
+  
+  // Debug logging
+  console.log('📧 [Email Logs Debug]', {
+    isLoading,
+    hasResponse: !!emailLogsResponse,
+    responseType: typeof emailLogsResponse,
+    logsCount: emailLogs.length,
+    firstLog: emailLogs[0],
+    rawResponse: emailLogsResponse
+  });
 
   // Filter logs based on search and filters
   const filteredLogs = emailLogs.filter((log) => {
