@@ -337,15 +337,6 @@ function UserManagement() {
     });
   }, [modulesData]);
 
-  // Check if modules are out of sync and show warning
-  const isOutOfSync = React.useMemo(() => {
-    if (!siteManagementModules.length || !modulesData?.modules) return false;
-    
-    const siteModuleIds = siteManagementModules.sort();
-    const customModuleIds = modulesData.modules.map((m: any) => m.id).sort();
-    
-    return JSON.stringify(siteModuleIds) !== JSON.stringify(customModuleIds);
-  }, [siteManagementModules, modulesData]);
 
   // Mutations
   const createRoleMutation = useMutation({
@@ -468,14 +459,6 @@ function UserManagement() {
     }
   });
 
-  // Get current Site Management modules for comparison
-  const { data: siteModules } = useQuery({
-    queryKey: ['/api/site-management/modules'],
-    staleTime: getCrmRefreshInterval() / 1000 // Use same interval as other CRM data
-  });
-
-  // Check for module count mismatch
-  const moduleCountMismatch = siteModules && siteModules.count !== availableModules.length;
 
   // Sync modules mutation
   const syncModulesMutation = useMutation({
@@ -582,26 +565,6 @@ function UserManagement() {
 
   return (
     <div className="container mx-auto p-6 space-y-6" dir="rtl">
-      {/* Module Sync Status Alert */}
-      {moduleCountMismatch && (
-        <Alert className="border-amber-200 bg-amber-50">
-          <AlertTriangle className="h-4 w-4 text-amber-600" />
-          <AlertTitle className="text-amber-800">نیاز به همگام‌سازی ماژول‌ها</AlertTitle>
-          <AlertDescription className="text-amber-700">
-            Site Management دارای {siteManagementModules.length || 'نامشخص'} ماژول است، اما User Management دارای {availableModules.length} ماژول است.
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="mr-2 mt-2"
-              onClick={() => syncModulesMutation.mutate()}
-              disabled={syncModulesMutation.isPending}
-            >
-              {syncModulesMutation.isPending ? 'در حال همگام‌سازی...' : 'همگام‌سازی کن'}
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">مدیریت کاربران و نقش‌ها</h1>
@@ -615,14 +578,6 @@ function UserManagement() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline"
-            onClick={() => syncModulesMutation.mutate()}
-            disabled={syncModulesMutation.isPending}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${syncModulesMutation.isPending ? 'animate-spin' : ''}`} />
-            همگام‌سازی ماژول‌ها
-          </Button>
           <Button onClick={() => setSmsDialogOpen(true)} disabled={selectedUsers.length === 0}>
             <MessageSquare className="h-4 w-4 mr-2" />
             ارسال SMS ({selectedUsers.length})
