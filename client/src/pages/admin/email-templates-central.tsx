@@ -117,28 +117,28 @@ const TEMPLATE_CATEGORIES = {
 // Complete registry of all 17 templates from EMAIL_TEMPLATES_GUIDE.md
 const TEMPLATE_REGISTRY = {
   '#01': { 
-    category: 'support', 
+    category: 'technical_support', 
     ref: 'TPL-001', 
     usage: 'Technical Support Response',
     autoUse: false,
     priority: 'medium'
   },
   '#02': { 
-    category: 'support', 
+    category: 'product_info', 
     ref: 'TPL-002', 
     usage: 'Product Information Response',
     autoUse: false,
     priority: 'medium'
   },
   '#03': { 
-    category: 'inquiry', 
+    category: 'inquiry_response', 
     ref: 'TPL-003', 
     usage: 'General Inquiry Response',
     autoUse: false,
     priority: 'medium'
   },
   '#04': { 
-    category: 'inquiry', 
+    category: 'inquiry_response', 
     ref: 'TPL-004', 
     usage: 'قالب پاسخ استعلام - طراحی زیبا و حرفه‌ای',
     autoUse: false,
@@ -152,35 +152,35 @@ const TEMPLATE_REGISTRY = {
     priority: 'high'
   },
   '#06': { 
-    category: 'admin', 
+    category: 'password-reset', 
     ref: 'TPL-006', 
     usage: 'Password Management Template',
     autoUse: true,
     priority: 'high'
   },
   '#07': { 
-    category: 'notification', 
+    category: 'notifications', 
     ref: 'TPL-007', 
     usage: 'Product Inquiry Admin Notification',
     autoUse: false,
     priority: 'medium'
   },
   '#08': { 
-    category: 'notification', 
+    category: 'notifications', 
     ref: 'TPL-008', 
     usage: 'Customer Inquiry Confirmation',
     autoUse: false,
     priority: 'medium'
   },
   '#09': { 
-    category: 'notification', 
+    category: 'notifications', 
     ref: 'TPL-009', 
     usage: 'Sales Inquiry Notification',
     autoUse: false,
     priority: 'medium'
   },
   '#10': { 
-    category: 'notification', 
+    category: 'notifications', 
     ref: 'TPL-010', 
     usage: 'Quote Request Notification',
     autoUse: false,
@@ -201,35 +201,35 @@ const TEMPLATE_REGISTRY = {
     priority: 'medium'
   },
   '#13': { 
-    category: 'inventory', 
+    category: 'inventory_alerts', 
     ref: 'TPL-013', 
     usage: 'Low Stock Alert (Universal Service)',
     autoUse: true,
     priority: 'high'
   },
   '#14': { 
-    category: 'payment', 
+    category: 'payment_notifications', 
     ref: 'TPL-014', 
     usage: 'Payment Confirmation',
     autoUse: false,
     priority: 'medium'
   },
   '#15': { 
-    category: 'notification', 
+    category: 'system_notifications', 
     ref: 'TPL-015', 
     usage: 'System Notification',
     autoUse: false,
     priority: 'medium'
   },
   '#16': { 
-    category: 'security', 
+    category: 'security_alerts', 
     ref: 'TPL-016', 
     usage: 'Security Alert',
     autoUse: false,
     priority: 'high'
   },
   '#17': { 
-    category: 'inventory', 
+    category: 'inventory_alerts', 
     ref: 'TPL-017', 
     usage: 'Comprehensive Inventory Alert System',
     autoUse: true,
