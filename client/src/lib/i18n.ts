@@ -74,6 +74,131 @@ export interface Translation {
     product: string;
     products: string;
   };
+
+  // Checkout page
+  checkout_page: {
+    // Page titles & headers
+    welcomeTitle: string;
+    orderPlacedSuccess: string;
+    orderFailed: string;
+    orderFailedDesc: string;
+    
+    // Customer Information
+    customerInfo: string;
+    firstName: string;
+    lastName: string;
+    emailAddress: string;
+    phoneNumber: string;
+    company: string;
+    required: string;
+    
+    // Address Fields
+    billingAddress: string;
+    shippingAddress: string;
+    fullAddress: string;
+    addressLine1: string;
+    addressLine2: string;
+    city: string;
+    state: string;
+    province: string;
+    postalCode: string;
+    country: string;
+    selectProvince: string;
+    selectCity: string;
+    selectProvinceFirst: string;
+    
+    // Recipient Information
+    recipientInfo: string;
+    recipientName: string;
+    recipientPhone: string;
+    recipientMobile: string;
+    recipientAddress: string;
+    deliveryAddress: string;
+    fullRecipientName: string;
+    recipientMobilePlaceholder: string;
+    fullDeliveryAddress: string;
+    
+    // Second Address
+    secondAddress: string;
+    secondDeliveryAddress: string;
+    secondFullAddress: string;
+    secondCity: string;
+    secondProvince: string;
+    secondPostalCode: string;
+    mobileDeliveryRecipient: string;
+    
+    // Shipping & Delivery
+    shippingMethod: string;
+    selectShippingMethod: string;
+    smartSelection: string;
+    deliveryMethod: string;
+    estimatedDelivery: string;
+    shippingCost: string;
+    vehicleType: string;
+    
+    // Payment
+    paymentInfo: string;
+    selectPaymentMethod: string;
+    walletPayment: string;
+    useWallet: string;
+    walletBalance: string;
+    amountToUse: string;
+    maxAmount: string;
+    remainingBalance: string;
+    secondaryPayment: string;
+    selectSecondaryPayment: string;
+    
+    // Order Notes
+    orderNotes: string;
+    orderNotesOptional: string;
+    orderNotesPlaceholder: string;
+    specialInstructions: string;
+    
+    // Actions
+    placeOrder: string;
+    processingOrder: string;
+    continueToPayment: string;
+    backToShop: string;
+    
+    // Purchase Order Summary
+    purchaseOrder: string;
+    orderSummary: string;
+    productList: string;
+    subtotal: string;
+    totalWeight: string;
+    shipping: string;
+    tax: string;
+    discount: string;
+    walletUsed: string;
+    total: string;
+    minimize: string;
+    
+    // Cart Management
+    cartManagement: string;
+    removeItem: string;
+    updateQuantity: string;
+    emptyCart: string;
+    
+    // Validation Messages
+    validEmail: string;
+    minCharacters: string;
+    validPhone: string;
+    addressRequired: string;
+    cityRequired: string;
+    stateRequired: string;
+    postalRequired: string;
+    countryRequired: string;
+    selectShipping: string;
+    selectPayment: string;
+    
+    // Units & Measurements
+    kg: string;
+    ton: string;
+    liter: string;
+    piece: string;
+    iqd: string;
+    usd: string;
+  };
   
   // Common actions
   login: string;
@@ -714,6 +839,131 @@ export const translations: Record<Language, Translation> = {
       of: 'of',
       product: 'product',
       products: 'products',
+    },
+
+    // Checkout page
+    checkout_page: {
+      // Page titles & headers
+      welcomeTitle: 'Welcome to Checkout',
+      orderPlacedSuccess: 'Order Placed Successfully!',
+      orderFailed: 'Order Failed',
+      orderFailedDesc: 'There was an error processing your order. Please try again.',
+      
+      // Customer Information
+      customerInfo: 'Customer Information',
+      firstName: 'First Name',
+      lastName: 'Last Name',
+      emailAddress: 'Email Address',
+      phoneNumber: 'Phone Number',
+      company: 'Company',
+      required: '*',
+      
+      // Address Fields
+      billingAddress: 'Billing Address',
+      shippingAddress: 'Shipping Address',
+      fullAddress: 'Full Address',
+      addressLine1: 'Address Line 1',
+      addressLine2: 'Address Line 2',
+      city: 'City',
+      state: 'State/Province',
+      province: 'Province',
+      postalCode: 'Postal Code',
+      country: 'Country',
+      selectProvince: 'Select Province',
+      selectCity: 'Select City',
+      selectProvinceFirst: 'Select Province First',
+      
+      // Recipient Information
+      recipientInfo: 'Recipient Information',
+      recipientName: 'Recipient Name',
+      recipientPhone: 'Recipient Phone',
+      recipientMobile: 'Recipient Mobile',
+      recipientAddress: 'Recipient Address',
+      deliveryAddress: 'Delivery Address',
+      fullRecipientName: 'Full Recipient Name',
+      recipientMobilePlaceholder: '09123456789',
+      fullDeliveryAddress: 'Full Delivery Address',
+      
+      // Second Address
+      secondAddress: 'Second Address',
+      secondDeliveryAddress: 'Second Delivery Address',
+      secondFullAddress: 'Second Full Address',
+      secondCity: 'Second City',
+      secondProvince: 'Second Province',
+      secondPostalCode: 'Second Postal Code',
+      mobileDeliveryRecipient: 'Mobile Delivery Recipient',
+      
+      // Shipping & Delivery
+      shippingMethod: 'Shipping Method',
+      selectShippingMethod: 'Select Shipping Method',
+      smartSelection: 'Smart Selection',
+      deliveryMethod: 'Delivery Method',
+      estimatedDelivery: 'Estimated Delivery',
+      shippingCost: 'Shipping Cost',
+      vehicleType: 'Vehicle Type',
+      
+      // Payment
+      paymentInfo: 'Payment Information',
+      selectPaymentMethod: 'Select Payment Method',
+      walletPayment: 'Wallet Payment',
+      useWallet: 'Use Wallet',
+      walletBalance: 'Wallet Balance',
+      amountToUse: 'Amount to Use',
+      maxAmount: 'Max',
+      remainingBalance: 'Remaining Balance',
+      secondaryPayment: 'Secondary Payment Method',
+      selectSecondaryPayment: 'Select Secondary Payment Method',
+      
+      // Order Notes
+      orderNotes: 'Order Notes',
+      orderNotesOptional: 'Order Notes (Optional)',
+      orderNotesPlaceholder: 'Special delivery instructions or additional information...',
+      specialInstructions: 'Special Instructions',
+      
+      // Actions
+      placeOrder: 'Place Order',
+      processingOrder: 'Processing Order...',
+      continueToPayment: 'Continue to Payment',
+      backToShop: 'Back to Shop',
+      
+      // Purchase Order Summary
+      purchaseOrder: 'Purchase Order',
+      orderSummary: 'Order Summary',
+      productList: 'Product List',
+      subtotal: 'Subtotal',
+      totalWeight: 'Total Weight',
+      shipping: 'Shipping',
+      tax: 'Tax',
+      discount: 'Discount',
+      walletUsed: 'Wallet Used',
+      total: 'Total',
+      minimize: 'Minimize',
+      
+      // Cart Management
+      cartManagement: 'Cart Management',
+      removeItem: 'Remove Item',
+      updateQuantity: 'Update Quantity',
+      emptyCart: 'Empty Cart',
+      
+      // Validation Messages
+      validEmail: 'Please enter a valid email address',
+      minCharacters: 'Must be at least {min} characters',
+      validPhone: 'Please enter a valid phone number',
+      addressRequired: 'Address is required',
+      cityRequired: 'City is required',
+      stateRequired: 'State/Province is required',
+      postalRequired: 'Postal code is required',
+      countryRequired: 'Country is required',
+      selectShipping: 'Please select a shipping method',
+      selectPayment: 'Please select a payment method',
+      
+      // Units & Measurements
+      kg: 'kg',
+      ton: 'ton',
+      liter: 'L',
+      piece: 'pc',
+      iqd: 'IQD',
+      usd: 'USD',
     },
     
     // Common actions
@@ -1451,6 +1701,131 @@ export const translations: Record<Language, Translation> = {
       of: 'من',
       product: 'منتج',
       products: 'منتجات',
+    },
+
+    // Checkout page
+    checkout_page: {
+      // Page titles & headers
+      welcomeTitle: 'مرحباً بك في صفحة الدفع',
+      orderPlacedSuccess: 'تم تقديم الطلب بنجاح!',
+      orderFailed: 'فشل الطلب',
+      orderFailedDesc: 'حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى.',
+      
+      // Customer Information
+      customerInfo: 'معلومات العميل',
+      firstName: 'الاسم الأول',
+      lastName: 'الاسم الأخير',
+      emailAddress: 'عنوان البريد الإلكتروني',
+      phoneNumber: 'رقم الهاتف',
+      company: 'الشركة',
+      required: '*',
+      
+      // Address Fields
+      billingAddress: 'عنوان الفواتير',
+      shippingAddress: 'عنوان الشحن',
+      fullAddress: 'العنوان الكامل',
+      addressLine1: 'سطر العنوان 1',
+      addressLine2: 'سطر العنوان 2',
+      city: 'المدينة',
+      state: 'الولاية/المحافظة',
+      province: 'المحافظة',
+      postalCode: 'الرمز البريدي',
+      country: 'الدولة',
+      selectProvince: 'اختر المحافظة',
+      selectCity: 'اختر المدينة',
+      selectProvinceFirst: 'اختر المحافظة أولاً',
+      
+      // Recipient Information
+      recipientInfo: 'معلومات المستلم',
+      recipientName: 'اسم المستلم',
+      recipientPhone: 'هاتف المستلم',
+      recipientMobile: 'موبايل المستلم',
+      recipientAddress: 'عنوان المستلم',
+      deliveryAddress: 'عنوان التسليم',
+      fullRecipientName: 'الاسم الكامل للمستلم',
+      recipientMobilePlaceholder: '09123456789',
+      fullDeliveryAddress: 'عنوان التسليم الكامل',
+      
+      // Second Address
+      secondAddress: 'العنوان الثاني',
+      secondDeliveryAddress: 'عنوان التسليم الثاني',
+      secondFullAddress: 'العنوان الكامل الثاني',
+      secondCity: 'المدينة الثانية',
+      secondProvince: 'المحافظة الثانية',
+      secondPostalCode: 'الرمز البريدي الثاني',
+      mobileDeliveryRecipient: 'موبايل المستلم',
+      
+      // Shipping & Delivery
+      shippingMethod: 'طريقة الشحن',
+      selectShippingMethod: 'اختر طريقة الشحن',
+      smartSelection: 'الاختيار الذكي',
+      deliveryMethod: 'طريقة التوصيل',
+      estimatedDelivery: 'التسليم المتوقع',
+      shippingCost: 'تكلفة الشحن',
+      vehicleType: 'نوع المركبة',
+      
+      // Payment
+      paymentInfo: 'معلومات الدفع',
+      selectPaymentMethod: 'اختر طريقة الدفع',
+      walletPayment: 'الدفع عبر المحفظة',
+      useWallet: 'استخدام المحفظة',
+      walletBalance: 'رصيد المحفظة',
+      amountToUse: 'المبلغ المستخدم',
+      maxAmount: 'الحد الأقصى',
+      remainingBalance: 'الرصيد المتبقي',
+      secondaryPayment: 'طريقة الدفع الثانوية',
+      selectSecondaryPayment: 'اختر طريقة الدفع الثانوية',
+      
+      // Order Notes
+      orderNotes: 'ملاحظات الطلب',
+      orderNotesOptional: 'ملاحظات الطلب (اختياري)',
+      orderNotesPlaceholder: 'تعليمات خاصة بالتسليم أو معلومات إضافية...',
+      specialInstructions: 'تعليمات خاصة',
+      
+      // Actions
+      placeOrder: 'تأكيد الطلب',
+      processingOrder: 'جاري معالجة الطلب...',
+      continueToPayment: 'المتابعة للدفع',
+      backToShop: 'العودة للمتجر',
+      
+      // Purchase Order Summary
+      purchaseOrder: 'طلب الشراء',
+      orderSummary: 'ملخص الطلب',
+      productList: 'قائمة المنتجات',
+      subtotal: 'المجموع الفرعي',
+      totalWeight: 'الوزن الكلي',
+      shipping: 'الشحن',
+      tax: 'الضريبة',
+      discount: 'الخصم',
+      walletUsed: 'المحفظة المستخدمة',
+      total: 'الإجمالي',
+      minimize: 'تصغير',
+      
+      // Cart Management
+      cartManagement: 'إدارة السلة',
+      removeItem: 'إزالة المنتج',
+      updateQuantity: 'تحديث الكمية',
+      emptyCart: 'سلة فارغة',
+      
+      // Validation Messages
+      validEmail: 'يرجى إدخال عنوان بريد إلكتروني صالح',
+      minCharacters: 'يجب أن يكون على الأقل {min} حرفاً',
+      validPhone: 'يرجى إدخال رقم هاتف صالح',
+      addressRequired: 'العنوان مطلوب',
+      cityRequired: 'المدينة مطلوبة',
+      stateRequired: 'الولاية/المحافظة مطلوبة',
+      postalRequired: 'الرمز البريدي مطلوب',
+      countryRequired: 'الدولة مطلوبة',
+      selectShipping: 'يرجى اختيار طريقة الشحن',
+      selectPayment: 'يرجى اختيار طريقة الدفع',
+      
+      // Units & Measurements
+      kg: 'كغ',
+      ton: 'طن',
+      liter: 'لتر',
+      piece: 'قطعة',
+      iqd: 'دينار',
+      usd: 'دولار',
     },
     
     // Common actions
