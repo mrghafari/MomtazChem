@@ -17,23 +17,25 @@ import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import AddressSelector from "@/components/checkout/address-selector";
 import AuthModal from "@/components/checkout/auth-modal";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations, type Translation } from "@/lib/i18n";
 
 // Dynamic checkout form validation schema - required fields only if not logged in
-const createCheckoutFormSchema = (isLoggedIn: boolean) => z.object({
+const createCheckoutFormSchema = (isLoggedIn: boolean, t: Translation) => z.object({
   // Customer Information (required if not logged in)
-  email: isLoggedIn ? z.string().optional() : z.string().email("Please enter a valid email address"),
-  firstName: isLoggedIn ? z.string().optional() : z.string().min(2, "First name must be at least 2 characters"),
-  lastName: isLoggedIn ? z.string().optional() : z.string().min(2, "Last name must be at least 2 characters"),
-  phone: isLoggedIn ? z.string().optional() : z.string().min(10, "Please enter a valid phone number"),
+  email: isLoggedIn ? z.string().optional() : z.string().email(t.checkout_page.validEmail),
+  firstName: isLoggedIn ? z.string().optional() : z.string().min(2, t.checkout_page.minTwoCharacters),
+  lastName: isLoggedIn ? z.string().optional() : z.string().min(2, t.checkout_page.minTwoCharacters),
+  phone: isLoggedIn ? z.string().optional() : z.string().min(10, t.checkout_page.validPhone),
   company: z.string().optional(),
   
   // Billing Address (pre-filled if logged in)
-  billingAddress1: z.string().min(5, "Address is required"),
+  billingAddress1: z.string().min(5, t.checkout_page.addressRequired),
   billingAddress2: z.string().optional(),
-  billingCity: z.string().min(2, "City is required"),
-  billingState: z.string().min(2, "State/Province is required"),
-  billingPostalCode: z.string().min(3, "Postal code is required"),
-  billingCountry: z.string().min(2, "Country is required"),
+  billingCity: z.string().min(2, t.checkout_page.cityRequired),
+  billingState: z.string().min(2, t.checkout_page.stateRequired),
+  billingPostalCode: z.string().min(3, t.checkout_page.postalRequired),
+  billingCountry: z.string().min(2, t.checkout_page.countryRequired),
   
   // Shipping Address
   sameAsShipping: z.boolean().default(true),
@@ -57,8 +59,8 @@ const createCheckoutFormSchema = (isLoggedIn: boolean) => z.object({
   recipientMobile: z.string().optional(),
   
   // Order Details
-  shippingMethod: z.string().min(1, "Please select a shipping method"),
-  paymentMethod: z.string().min(1, "Please select a payment method"),
+  shippingMethod: z.string().min(1, t.checkout_page.selectShipping),
+  paymentMethod: z.string().min(1, t.checkout_page.selectPayment),
   notes: z.string().optional(),
 });
 
@@ -71,6 +73,10 @@ interface CheckoutProps {
 }
 
 export default function Checkout({ cart, products, onOrderComplete }: CheckoutProps) {
+  // Language & Translations
+  const { language } = useLanguage();
+  const t = translations[language];
+  
   const [currentStep, setCurrentStep] = useState(1);
   const [isOrderComplete, setIsOrderComplete] = useState(false);
   const [selectedSecondaryProvinceId, setSelectedSecondaryProvinceId] = useState<number | null>(null);
@@ -208,7 +214,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const isUserLoggedIn = (customerData?.success && customerData.customer) || isLoggedIn;
   
   const form = useForm<CheckoutFormData>({
-    resolver: zodResolver(createCheckoutFormSchema(!!isUserLoggedIn)),
+    resolver: zodResolver(createCheckoutFormSchema(!!isUserLoggedIn, t)),
     defaultValues: {
       email: "",
       firstName: "",
@@ -333,16 +339,6 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     }
   }, [customerData, form, isLoggedIn]);
 
-  // Update form validation when authentication status changes
-  useEffect(() => {
-    // Re-create form with new validation schema based on login status
-    const newResolver = zodResolver(createCheckoutFormSchema(!!isUserLoggedIn));
-    form.clearErrors(); // Clear any existing validation errors
-    // Force form re-validation
-    setTimeout(() => {
-      form.trigger();
-    }, 100);
-  }, [isUserLoggedIn, form]);
 
   // Fetch wallet balance for logged in users
   const fetchWalletBalance = async () => {
@@ -663,7 +659,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     } else {
       // For logged in users: use CRM data or second address
       if (form.watch('secondDeliveryCity')) {
-        city = form.watch('secondDeliveryCity');
+        city = form.watch('secondDeliveryCity') || '';
       } else if (customerData?.customer?.city) {
         city = customerData.customer.city;
       } else if (customerData?.customer?.cityRegion) {
@@ -1133,10 +1129,10 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
             <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">Your cart is empty</h2>
-            <p className="text-gray-500 mb-6">Add some products to your cart to proceed with checkout.</p>
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">{t.checkout_page.emptyCart}</h2>
+            <p className="text-gray-500 mb-6">{t.shop.addToCart}</p>
             <Button onClick={() => setLocation("/shop")} className="w-full">
-              Continue Shopping
+              {t.checkout_page.backToShop}
             </Button>
           </CardContent>
         </Card>
@@ -1150,24 +1146,24 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         <Card className="w-full max-w-lg">
           <CardContent className="p-8 text-center">
             <CheckCircle className="w-20 h-20 text-green-600 mx-auto mb-6" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Order Confirmed!</h2>
-            <p className="text-gray-600 mb-2">Thank you for your order.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{t.checkout_page.orderPlacedSuccess}</h2>
+            <p className="text-gray-600 mb-2">{t.thankYou}</p>
             <p className="text-lg font-semibold text-gray-900 mb-6">
-              Order Number: #{orderNumber}
+              {t.checkout_page.orderNumber}: #{orderNumber}
             </p>
             <p className="text-sm text-gray-500 mb-8">
-              You will receive an email confirmation shortly with tracking information.
+              {t.emailSent}
             </p>
             <div className="space-y-3">
               <Button onClick={() => setLocation("/shop")} className="w-full">
-                Continue Shopping
+                {t.checkout_page.backToShop}
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => setLocation("/")}
                 className="w-full"
               >
-                Back to Home
+                {t.checkout_page.backToShop}
               </Button>
             </div>
           </CardContent>
@@ -1181,8 +1177,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
-          <p className="text-gray-600">Complete your order details below</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t.checkout}</h1>
+          <p className="text-gray-600">{t.checkout_page.welcomeTitle}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -1191,12 +1187,12 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
             {!isUserLoggedIn ? (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-center">Welcome to Checkout</CardTitle>
+                  <CardTitle className="text-center">{t.checkout_page.welcomeTitle}</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center py-8 space-y-6">
                   <User className="w-16 h-16 text-gray-300 mx-auto" />
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-700">Choose an option to continue</h3>
+                    <h3 className="text-lg font-semibold text-gray-700">{t.login}</h3>
                     <div className="grid grid-cols-1 gap-3 max-w-sm mx-auto">
                       <Button 
                         onClick={() => {
@@ -1206,7 +1202,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         variant="default"
                         className="h-12 text-base"
                       >
-                        Login to Existing Account
+                        {t.login}
                       </Button>
                       <Button 
                         onClick={() => {
@@ -1216,24 +1212,24 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         variant="outline"
                         className="h-12 text-base"
                       >
-                        Create New Account
+                        {t.register}
                       </Button>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             ) : (
-              <Form {...form}>
+              <Form {...form} key={`checkout-form-${language}`}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                   {/* Customer Information */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <User className="w-5 h-5" />
-                        Customer Information
+                        {t.checkout_page.customerInfo}
                         {isUserLoggedIn && (
                           <Badge variant="secondary" className="ml-2">
-                            Auto-filled from account
+                            {t.checkout_page.required}
                           </Badge>
                         )}
                       </CardTitle>
@@ -1245,7 +1241,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         name="firstName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>First Name {!isUserLoggedIn && "*"}</FormLabel>
+                            <FormLabel>{t.checkout_page.firstName} {!isUserLoggedIn && "*"}</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -1258,7 +1254,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         name="lastName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Last Name {!isUserLoggedIn && "*"}</FormLabel>
+                            <FormLabel>{t.checkout_page.lastName} {!isUserLoggedIn && "*"}</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -1273,7 +1269,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Email Address {!isUserLoggedIn && "*"}</FormLabel>
+                            <FormLabel>{t.checkout_page.emailAddress} {!isUserLoggedIn && "*"}</FormLabel>
                             <FormControl>
                               <Input {...field} type="email" />
                             </FormControl>
@@ -1286,7 +1282,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         name="phone"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Phone Number {!isUserLoggedIn && "*"}</FormLabel>
+                            <FormLabel>{t.checkout_page.phoneNumber} {!isUserLoggedIn && "*"}</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -1300,7 +1296,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       name="company"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Company (Optional)</FormLabel>
+                          <FormLabel>{t.checkout_page.company} ({t.optional})</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
@@ -2109,11 +2105,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       name="notes"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Order Notes (Optional)</FormLabel>
+                          <FormLabel>{t.checkout_page.orderNotes} ({t.optional})</FormLabel>
                           <FormControl>
                             <Textarea 
                               {...field} 
-                              placeholder="Special delivery instructions or additional information..."
+                              placeholder={t.checkout_page.orderNotesPlaceholder}
                               rows={3}
                             />
                           </FormControl>
@@ -2129,7 +2125,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     className="w-full"
                     disabled={createOrderMutation.isPending}
                   >
-                    {createOrderMutation.isPending ? "Processing Order..." : "Place Order"}
+                    {createOrderMutation.isPending ? t.checkout_page.processingOrder : t.checkout_page.placeOrder}
                   </Button>
                 </form>
               </Form>
@@ -2189,7 +2185,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <ShoppingCart className="w-5 h-5 text-blue-600" />
-                    <span className="text-blue-600">Purchase Order</span>
+                    <span className="text-blue-600">{t.checkout_page.purchaseOrder}</span>
                     <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
                       {isDragging ? '🖱️ در حال جابجایی...' : '🖱️ قابل جابجایی'}
                     </span>
@@ -2204,7 +2200,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         setShowPurchaseOrder(false);
                       }}
                       className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
-                      title="Minimize Purchase Order"
+                      title={t.checkout_page.minimize}
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -2765,20 +2761,10 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             <div className="flex items-center gap-2">
                               <h4 className="font-medium text-sm">{item.name}</h4>
                               {item.isFlammable && (
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <div className="flex items-center cursor-help">
-                                        <Flame className="w-4 h-4 text-red-500" />
-                                        <span className="text-xs text-red-600 font-medium ml-1">آتش‌زا</span>
-                                      </div>
-                                    </TooltipTrigger>
-                                    <TooltipContent className="bg-red-700 text-white">
-                                      <p className="text-sm">⚠️ محصول آتش‌زا - حمل ویژه مورد نیاز</p>
-                                      <p className="text-xs">تنها خودروهای مجاز امکان حمل دارند</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
+                                <div className="flex items-center">
+                                  <Flame className="w-4 h-4 text-red-500" />
+                                  <span className="text-xs text-red-600 font-medium ml-1">Flammable</span>
+                                </div>
                               )}
                             </div>
                             <p className="text-xs text-gray-500 mt-1">
@@ -3141,8 +3127,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
           form.trigger();
           // Show success message
           toast({
-            title: "ورود موفق",
-            description: "اکنون می‌توانید خرید خود را تکمیل کنید",
+            title: t.loginSuccessful,
+            description: t.welcomeMessage,
           });
         }}
         initialMode={authMode}

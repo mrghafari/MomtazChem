@@ -159,6 +159,7 @@ export interface Translation {
     processingOrder: string;
     continueToPayment: string;
     backToShop: string;
+    orderNumber: string;
     
     // Purchase Order Summary
     purchaseOrder: string;
@@ -182,6 +183,7 @@ export interface Translation {
     // Validation Messages
     validEmail: string;
     minCharacters: string;
+    minTwoCharacters: string;
     validPhone: string;
     addressRequired: string;
     cityRequired: string;
@@ -925,6 +927,7 @@ export const translations: Record<Language, Translation> = {
       processingOrder: 'Processing Order...',
       continueToPayment: 'Continue to Payment',
       backToShop: 'Back to Shop',
+      orderNumber: 'Order Number',
       
       // Purchase Order Summary
       purchaseOrder: 'Purchase Order',
@@ -948,6 +951,7 @@ export const translations: Record<Language, Translation> = {
       // Validation Messages
       validEmail: 'Please enter a valid email address',
       minCharacters: 'Must be at least {min} characters',
+      minTwoCharacters: 'Minimum 2 characters required',
       validPhone: 'Please enter a valid phone number',
       addressRequired: 'Address is required',
       cityRequired: 'City is required',
@@ -1787,6 +1791,7 @@ export const translations: Record<Language, Translation> = {
       processingOrder: 'جاري معالجة الطلب...',
       continueToPayment: 'المتابعة للدفع',
       backToShop: 'العودة للمتجر',
+      orderNumber: 'رقم الطلب',
       
       // Purchase Order Summary
       purchaseOrder: 'طلب الشراء',
@@ -1810,6 +1815,7 @@ export const translations: Record<Language, Translation> = {
       // Validation Messages
       validEmail: 'يرجى إدخال عنوان بريد إلكتروني صالح',
       minCharacters: 'يجب أن يكون على الأقل {min} حرفاً',
+      minTwoCharacters: 'يجب أن يكون على الأقل حرفين',
       validPhone: 'يرجى إدخال رقم هاتف صالح',
       addressRequired: 'العنوان مطلوب',
       cityRequired: 'المدينة مطلوبة',
