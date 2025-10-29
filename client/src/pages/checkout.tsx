@@ -470,7 +470,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
           weight: weight,
           destinationCity: destination,
           destinationProvince: destination,
-          originCity: 'اربیل',
+          originCity: t.checkout_page.erbilCity,
           cart: Object.fromEntries(Object.entries(cart).map(([id, qty]) => [id, qty])),
           useSecondaryAddress: false
         })
@@ -566,7 +566,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       const flammableAuthorizedVehicles = vehicleTemplates?.filter((vehicle: any) => {
         const canHandleWeight = vehicle.isActive && parseFloat(vehicle.maxWeightKg) >= weight;
         const supportsFlammable = vehicle.supportsFlammable === true;
-        const isHeavyTruck = vehicle.name?.includes('سنگین') || vehicle.vehicleType === 'heavy_truck';
+        const isHeavyTruck = vehicle.name?.includes(t.checkout_page.heavyTruck) || vehicle.vehicleType === 'heavy_truck';
         
         console.log('🚛 [FALLBACK FLAMMABLE CHECK] Vehicle:', {
           name: vehicle.name,
@@ -588,7 +588,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       const selectedVehicle = flammableAuthorizedVehicles[0];
       setSelectedVehicle({
         ...selectedVehicle,
-        name: selectedVehicle.name + ' (مواد آتش‌زا)',
+        name: selectedVehicle.name + t.checkout_page.flammableSuffix,
         type: 'heavy_truck_flammable'
       });
       
@@ -1067,7 +1067,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         activeRecipientPhone: recipientPhone,
         activeRecipientName: recipientName,
         // For warehouse and logistics tracking
-        warehouseNotes: `آدرس فعال: ${activeDeliveryInfo.isSecondAddress ? 'آدرس دوم' : 'آدرس CRM'} | تلفن فعال: ${activeDeliveryInfo.isDifferentMobile ? 'موبایل متفاوت' : 'تلفن CRM'}`,
+        warehouseNotes: `${t.checkout_page.warehouseNoteActive} ${activeDeliveryInfo.isSecondAddress ? t.checkout_page.warehouseNoteSecond : t.checkout_page.warehouseNoteCRM} | ${t.checkout_page.warehouseNotePhone} ${activeDeliveryInfo.isDifferentMobile ? t.checkout_page.warehouseNoteDifferentMobile : t.checkout_page.warehouseNoteCRMPhone}`,
       },
       items: cartItems.map(item => ({
         productId: item.id,
@@ -1312,7 +1312,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CreditCard className="w-5 h-5" />
-                      آدرس تحویل
+                      {t.checkout_page.deliveryTitle}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -1360,14 +1360,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 className="rounded"
                               />
                               <label htmlFor="useSecondaryAddress" className="text-sm font-medium text-blue-700 dark:text-blue-300 cursor-pointer">
-                                استفاده از آدرس دوم (Secondary Address)
+                                {t.checkout_page.useSecondaryAddress}
                               </label>
                             </div>
                             {useSecondaryAddress && (
                               <div className="mt-3 p-3 bg-white dark:bg-gray-800 rounded border text-sm">
                                 <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
                                   <MapPin className="w-4 h-4" />
-                                  <span className="font-medium">آدرس دوم انتخاب شده:</span>
+                                  <span className="font-medium">{t.checkout_page.secondaryAddressSelected}</span>
                                 </div>
                                 <p className="mt-1 text-gray-700 dark:text-gray-300">{customerInfo.secondaryAddress}</p>
                               </div>
@@ -1384,7 +1384,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                           name="billingAddress1"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>آدرس کامل *</FormLabel>
+                              <FormLabel>{t.checkout_page.fullAddress} *</FormLabel>
                               <FormControl>
                                 <Input {...field} />
                               </FormControl>
@@ -1398,7 +1398,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             name="billingCity"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>شهر *</FormLabel>
+                                <FormLabel>{t.checkout_page.cityLabel} *</FormLabel>
                                 <FormControl>
                                   <Input {...field} />
                                 </FormControl>
@@ -1411,7 +1411,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             name="billingPostalCode"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>کد پستی</FormLabel>
+                                <FormLabel>{t.checkout_page.postalCodeLabel}</FormLabel>
                                 <FormControl>
                                   <Input {...field} />
                                 </FormControl>
@@ -1430,14 +1430,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <User className="w-5 h-5" />
-                      اطلاعات گیرنده
+                      {t.checkout_page.recipientInfoTitle}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2 space-x-reverse">
-                          <span className="font-medium text-purple-800 dark:text-purple-300">اطلاعات گیرنده</span>
+                          <span className="font-medium text-purple-800 dark:text-purple-300">{t.checkout_page.recipientInfoLabel}</span>
                         </div>
                         <Button
                           type="button"
@@ -1453,7 +1453,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       {showRecipientFields && (
                         <div className="mt-4 space-y-4">
                           <div className="text-sm text-purple-600 dark:text-purple-400 mb-3">
-                            در صورتی که گیرنده شخص متفاوتی از مشتری است، این فیلدها را پر کنید
+                            {t.checkout_page.recipientInfoNote}
                           </div>
                           
                           <FormField
@@ -1461,9 +1461,9 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             name="recipientName"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>نام گیرنده</FormLabel>
+                                <FormLabel>{t.checkout_page.recipientNameLabel}</FormLabel>
                                 <FormControl>
-                                  <Input {...field} placeholder="نام کامل گیرنده" />
+                                  <Input {...field} placeholder={t.checkout_page.recipientNamePlaceholder} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -1475,7 +1475,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             name="recipientPhone"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>شماره موبایل گیرنده</FormLabel>
+                                <FormLabel>{t.checkout_page.recipientPhoneLabel}</FormLabel>
                                 <FormControl>
                                   <Input {...field} placeholder="09123456789" />
                                 </FormControl>
@@ -1489,9 +1489,9 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             name="recipientAddress"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>آدرس دریافت کالا</FormLabel>
+                                <FormLabel>{t.checkout_page.recipientAddressLabel}</FormLabel>
                                 <FormControl>
-                                  <Textarea {...field} placeholder="آدرس کامل محل تحویل" className="min-h-[80px]" />
+                                  <Textarea {...field} placeholder={t.checkout_page.recipientAddressPlaceholder} className="min-h-[80px]" />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -1509,19 +1509,19 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <MapPin className="w-5 h-5" />
-                        آدرس دوم یا شماره موبایل متفاوت
+                        {t.checkout_page.secondAddressOrMobile}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         <div className="text-sm text-gray-600 mb-4">
-                          در صورت نیاز به آدرس متفاوت یا شماره موبایل جدید برای تحویل، این بخش را پر کنید
+                          {t.checkout_page.secondAddressNote}
                         </div>
                         
                         {/* Second Address Section */}
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
-                            <label className="text-sm font-medium">آدرس دوم (اختیاری)</label>
+                            <label className="text-sm font-medium">{t.checkout_page.secondAddressOptional}</label>
                             <Button
                               type="button"
                               size="sm"
@@ -1540,7 +1540,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                               }}
                               className="text-blue-600 hover:text-blue-800"
                             >
-                              {showSecondAddress ? 'پنهان کردن' : 'افزودن آدرس دوم'}
+                              {showSecondAddress ? t.checkout_page.hideButton : t.checkout_page.addSecondAddress}
                             </Button>
                           </div>
                           
@@ -1551,9 +1551,9 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 name="secondDeliveryAddress"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>آدرس کامل دوم</FormLabel>
+                                    <FormLabel>{t.checkout_page.secondFullAddressLabel}</FormLabel>
                                     <FormControl>
-                                      <Textarea {...field} placeholder="آدرس کامل محل تحویل دوم" className="min-h-[80px]" />
+                                      <Textarea {...field} placeholder={t.checkout_page.secondFullAddressPlaceholder} className="min-h-[80px]" />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
@@ -1566,7 +1566,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   name="secondDeliveryProvince"
                                   render={({ field }) => (
                                     <FormItem>
-                                      <FormLabel>استان</FormLabel>
+                                      <FormLabel>{t.checkout_page.provinceLabel}</FormLabel>
                                       <Select 
                                         onValueChange={(value) => {
                                           field.onChange(value);
@@ -1582,7 +1582,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                       >
                                         <FormControl>
                                           <SelectTrigger>
-                                            <SelectValue placeholder="انتخاب استان" />
+                                            <SelectValue placeholder={t.checkout_page.selectProvincePlaceholder} />
                                           </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -1603,7 +1603,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   name="secondDeliveryCity"
                                   render={({ field }) => (
                                     <FormItem>
-                                      <FormLabel>شهر</FormLabel>
+                                      <FormLabel>{t.checkout_page.citySelectLabel}</FormLabel>
                                       <Select 
                                         onValueChange={field.onChange} 
                                         value={field.value}
@@ -1611,7 +1611,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                       >
                                         <FormControl>
                                           <SelectTrigger>
-                                            <SelectValue placeholder={selectedSecondaryProvinceId ? "انتخاب شهر" : "ابتدا استان را انتخاب کنید"} />
+                                            <SelectValue placeholder={selectedSecondaryProvinceId ? t.checkout_page.selectCityPlaceholder : t.checkout_page.selectProvinceFirst} />
                                           </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -1632,9 +1632,9 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   name="secondDeliveryPostalCode"
                                   render={({ field }) => (
                                     <FormItem>
-                                      <FormLabel>کد پستی</FormLabel>
+                                      <FormLabel>{t.checkout_page.postalCodeLabel}</FormLabel>
                                       <FormControl>
-                                        <Input {...field} placeholder="کد پستی" />
+                                        <Input {...field} placeholder={t.checkout_page.postalCodePlaceholder} />
                                       </FormControl>
                                       <FormMessage />
                                     </FormItem>
@@ -1648,7 +1648,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         {/* Different Mobile Section */}
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
-                            <label className="text-sm font-medium">شماره موبایل متفاوت (اختیاری)</label>
+                            <label className="text-sm font-medium">{t.checkout_page.differentMobileOptional}</label>
                             <Button
                               type="button"
                               size="sm"
@@ -1664,7 +1664,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                               }}
                               className="text-blue-600 hover:text-blue-800"
                             >
-                              {showRecipientMobile ? 'پنهان کردن' : 'افزودن شماره متفاوت'}
+                              {showRecipientMobile ? t.checkout_page.hideButton : t.checkout_page.addDifferentNumber}
                             </Button>
                           </div>
                           
@@ -1675,7 +1675,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 name="recipientMobile"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>شماره موبایل تحویل‌گیرنده</FormLabel>
+                                    <FormLabel>{t.checkout_page.recipientMobileLabel}</FormLabel>
                                     <FormControl>
                                       <Input {...field} placeholder="09123456789" />
                                     </FormControl>
@@ -1696,7 +1696,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Truck className="w-5 h-5" />
-                      روش ارسال
+                      {t.checkout_page.shippingMethodTitle}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -1705,7 +1705,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       name="shippingMethod"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>انتخاب روش ارسال * (انتخاب هوشمند)</FormLabel>
+                          <FormLabel>{t.checkout_page.selectShippingLabel}</FormLabel>
                           <FormControl>
                             <Select value={field.value} onValueChange={field.onChange}>
                               <SelectTrigger>
@@ -1713,7 +1713,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   placeholder={
                                     selectedVehicle && destinationCity && totalWeight > 0
                                       ? `🚚 ${selectedVehicle.name} - ${shippingCost.toLocaleString()} IQD (${destinationCity})`
-                                      : "روش ارسال را انتخاب کنید"
+                                      : t.checkout_page.selectShippingPlaceholder
                                   }
                                 />
                               </SelectTrigger>
@@ -1729,22 +1729,22 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                           <div className="flex flex-col gap-1 w-full">
                                             <div className="flex items-center justify-between">
                                               <span className="font-medium text-emerald-700 dark:text-emerald-300">
-                                                🚚 {selectedVehicle.name} (هوشمند)
+                                                🚚 {selectedVehicle.name} ({t.checkout_page.smartSelectionNote})
                                               </span>
                                               <span className="text-emerald-600 dark:text-emerald-400 font-bold">
                                                 {shippingCost.toLocaleString()} IQD
                                               </span>
                                             </div>
                                             <div className="text-xs text-emerald-600 dark:text-emerald-400 space-y-1">
-                                              <div>📍 مقصد: {destinationCity} • وزن: {totalWeight.toFixed(1)} کگ</div>
+                                              <div>📍 {t.checkout_page.destination} {destinationCity} • {t.checkout_page.weight} {totalWeight.toFixed(1)} {t.checkout_page.kg}</div>
                                               <div>
-                                                💰 پایه: {parseFloat(selectedVehicle.basePrice || '0').toLocaleString()} • 
-                                                فاصله: {(parseFloat(iraqiCities?.find((city: any) => 
+                                                💰 {t.checkout_page.basePrice} {parseFloat(selectedVehicle.basePrice || '0').toLocaleString()} • 
+                                                {t.checkout_page.distance} {(parseFloat(iraqiCities?.find((city: any) => 
                                                   city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
                                                   city.nameArabic?.includes(destinationCity) ||
                                                   city.name?.toLowerCase().includes(destinationCity.toLowerCase())
                                                 )?.distanceFromErbilKm || '0') * parseFloat(selectedVehicle.pricePerKm || '0')).toLocaleString()} • 
-                                                وزن: {(totalWeight * parseFloat(selectedVehicle.pricePerKg || '0')).toLocaleString()} IQD
+                                                {t.checkout_page.weight} {(totalWeight * parseFloat(selectedVehicle.pricePerKg || '0')).toLocaleString()} IQD
                                               </div>
                                             </div>
                                           </div>
@@ -1760,13 +1760,13 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                                 🚚 {method.label}
                                               </span>
                                               <span className="text-emerald-600 dark:text-emerald-400 text-xs">
-                                                محاسبه خودکار
+                                                {t.checkout_page.autoCalculate}
                                               </span>
                                             </div>
                                             <div className="text-xs text-emerald-600 dark:text-emerald-400">
-                                              {!destinationCity ? "📍 لطفاً شهر مقصد را مشخص کنید" :
-                                               totalWeight <= 0 ? "⚖️ محصولات را به سبد خرید اضافه کنید" :
-                                               "🔄 در حال محاسبه بهترین خودرو..."}
+                                              {!destinationCity ? t.checkout_page.specifyDestinationCity :
+                                               totalWeight <= 0 ? t.checkout_page.addProductsToCart :
+                                               t.checkout_page.calculatingBestVehicle}
                                             </div>
                                           </div>
                                         </SelectItem>
@@ -1784,8 +1784,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                       <div className="flex items-center justify-between w-full">
                                         <span>{method.label}</span>
                                         <span className="ml-2 text-sm">
-                                          {qualifiesForFreeShipping ? 'رایگان' : `${baseCost.toLocaleString()} IQD`}
-                                          {method.estimatedDays && ` (${method.estimatedDays} روز)`}
+                                          {qualifiesForFreeShipping ? t.checkout_page.freeShipping : `${baseCost.toLocaleString()} IQD`}
+                                          {method.estimatedDays && ` (${method.estimatedDays} ${t.checkout_page.days})`}
                                         </span>
                                       </div>
                                     </SelectItem>
@@ -1804,29 +1804,29 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between items-center">
-                            <span>هزینه ارسال:</span>
+                            <span>{t.checkout_page.shippingCostLabel}</span>
                             <span className="font-medium">
-                              {shippingCost === 0 ? 'رایگان' : `${shippingCost.toLocaleString()} IQD`}
+                              {shippingCost === 0 ? t.checkout_page.freeShipping : `${shippingCost.toLocaleString()} IQD`}
                             </span>
                           </div>
                           {selectedMethod.value === 'smart_vehicle' && selectedVehicle ? (
                             <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded p-2 border border-emerald-200 dark:border-emerald-800">
                               <div className="text-xs text-emerald-700 dark:text-emerald-300 space-y-1">
-                                <div className="font-medium">📋 جزئیات انتخاب هوشمند:</div>
-                                <div>🚛 خودرو انتخابی: {selectedVehicle.name}</div>
-                                <div>⚖️ ظرفیت وزنی: {selectedVehicle.maxWeight} کگ</div>
-                                <div>📦 ظرفیت حجمی: {selectedVehicle.maxVolume} متر مکعب</div>
-                                <div>🛣️ مسیرهای مجاز: {selectedVehicle.allowedRoutes}</div>
-                                {selectedVehicle.hazardousMaterials && <div>⚠️ حمل مواد خطرناک</div>}
-                                {selectedVehicle.refrigeratedTransport && <div>❄️ حمل یخچالی</div>}
-                                {selectedVehicle.fragileItems && <div>📱 مناسب اقلام شکستنی</div>}
+                                <div className="font-medium">{t.checkout_page.smartSelectionDetails}</div>
+                                <div>{t.checkout_page.selectedVehicleLabel} {selectedVehicle.name}</div>
+                                <div>{t.checkout_page.weightCapacity} {selectedVehicle.maxWeight} {t.checkout_page.kg}</div>
+                                <div>{t.checkout_page.volumeCapacity} {selectedVehicle.maxVolume} {t.checkout_page.cubicMeter}</div>
+                                <div>{t.checkout_page.allowedRoutesLabel} {selectedVehicle.allowedRoutes}</div>
+                                {selectedVehicle.hazardousMaterials && <div>{t.checkout_page.hazardousTransport}</div>}
+                                {selectedVehicle.refrigeratedTransport && <div>{t.checkout_page.refrigeratedTransport}</div>}
+                                {selectedVehicle.fragileItems && <div>{t.checkout_page.fragileHandling}</div>}
                               </div>
                             </div>
                           ) : selectedMethod.freeShippingThreshold && parseFloat(selectedMethod.freeShippingThreshold) > 0 ? (
                             <div className="text-xs text-green-600 dark:text-green-400">
                               {subtotal >= parseFloat(selectedMethod.freeShippingThreshold) 
-                                ? `✓ ارسال رایگان برای خریدهای بالای ${parseFloat(selectedMethod.freeShippingThreshold).toLocaleString()} IQD`
-                                : `برای ارسال رایگان ${(parseFloat(selectedMethod.freeShippingThreshold) - subtotal).toLocaleString()} IQD بیشتر خرید کنید`
+                                ? `${t.checkout_page.freeShippingOver} ${parseFloat(selectedMethod.freeShippingThreshold).toLocaleString()} IQD`
+                                : `${(parseFloat(selectedMethod.freeShippingThreshold) - subtotal).toLocaleString()} IQD ${t.checkout_page.moreForFreeShipping}`
                               }
                             </div>
                           ) : null}
@@ -1846,7 +1846,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CreditCard className="w-5 h-5" />
-                      روش پرداخت
+                      {t.checkout_page.paymentMethodTitle}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -1855,11 +1855,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       name="paymentMethod"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>انتخاب روش پرداخت *</FormLabel>
+                          <FormLabel>{t.checkout_page.selectPaymentMethod}</FormLabel>
                           <FormControl>
                             <Select value={field.value} onValueChange={field.onChange}>
                               <SelectTrigger>
-                                <SelectValue placeholder="روش پرداخت را انتخاب کنید" />
+                                <SelectValue placeholder={t.checkout_page.selectPaymentPlaceholder} />
                               </SelectTrigger>
                               <SelectContent>
                                 {/* Dynamic payment methods based on admin settings */}
@@ -1872,7 +1872,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                       if (!isUserLoggedIn || walletBalance <= 0) return null;
                                       return (
                                         <SelectItem key={setting.methodKey} value="wallet_combined">
-                                          {setting.methodName} - موجودی: {walletBalance.toLocaleString()} IQD
+                                          {setting.methodName} - {t.checkout_page.walletBalance} {walletBalance.toLocaleString()} IQD
                                         </SelectItem>
                                       );
                                     }
@@ -1888,8 +1888,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 {/* Fallback for when no settings are loaded yet */}
                                 {paymentSettings.length === 0 && (
                                   <>
-                                    <SelectItem value="bank_receipt">ارسال فیش واریزی بانکی</SelectItem>
-                                    <SelectItem value="online_payment">پرداخت آنلاین</SelectItem>
+                                    <SelectItem value="bank_receipt">{t.checkout_page.bankReceiptUpload}</SelectItem>
+                                    <SelectItem value="online_payment">{t.checkout_page.onlinePaymentMethod}</SelectItem>
                                   </>
                                 )}
                               </SelectContent>
@@ -1905,16 +1905,16 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between items-center">
-                            <span>هزینه ارسال:</span>
+                            <span>{t.checkout_page.shippingCostLabel}</span>
                             <span className="font-medium">
-                              {shippingCost === 0 ? 'رایگان' : `${shippingCost.toLocaleString()} IQD`}
+                              {shippingCost === 0 ? t.checkout_page.freeShipping : `${shippingCost.toLocaleString()} IQD`}
                             </span>
                           </div>
                           {selectedMethod.freeShippingThreshold && parseFloat(selectedMethod.freeShippingThreshold) > 0 && (
                             <div className="text-xs text-green-600 dark:text-green-400">
                               {subtotal >= parseFloat(selectedMethod.freeShippingThreshold) 
-                                ? `✓ ارسال رایگان برای خریدهای بالای ${parseFloat(selectedMethod.freeShippingThreshold).toLocaleString()} IQD`
-                                : `برای ارسال رایگان ${(parseFloat(selectedMethod.freeShippingThreshold) - subtotal).toLocaleString()} IQD بیشتر خرید کنید`
+                                ? `${t.checkout_page.freeShippingOver} ${parseFloat(selectedMethod.freeShippingThreshold).toLocaleString()} IQD`
+                                : `${(parseFloat(selectedMethod.freeShippingThreshold) - subtotal).toLocaleString()} IQD ${t.checkout_page.moreForFreeShipping}`
                               }
                             </div>
                           )}
@@ -1934,7 +1934,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CreditCard className="w-5 h-5" />
-                      روش پرداخت
+                      {t.checkout_page.paymentMethodTitle}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -1943,11 +1943,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       name="paymentMethod"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>انتخاب روش پرداخت *</FormLabel>
+                          <FormLabel>{t.checkout_page.selectPaymentMethod}</FormLabel>
                           <FormControl>
                             <Select value={field.value} onValueChange={field.onChange}>
                               <SelectTrigger>
-                                <SelectValue placeholder="روش پرداخت را انتخاب کنید" />
+                                <SelectValue placeholder={t.checkout_page.selectPaymentPlaceholder} />
                               </SelectTrigger>
                               <SelectContent>
                                 {/* Dynamic payment methods based on admin settings */}
@@ -1960,7 +1960,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                       if (!isUserLoggedIn || walletBalance <= 0) return null;
                                       return (
                                         <SelectItem key={setting.methodKey} value="wallet_combined">
-                                          {setting.methodName} - موجودی: {walletBalance.toLocaleString()} IQD
+                                          {setting.methodName} - {t.checkout_page.walletBalance} {walletBalance.toLocaleString()} IQD
                                         </SelectItem>
                                       );
                                     }
@@ -1976,8 +1976,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 {/* Fallback for when no settings are loaded yet */}
                                 {paymentSettings.length === 0 && (
                                   <>
-                                    <SelectItem value="bank_receipt">ارسال فیش واریزی بانکی</SelectItem>
-                                    <SelectItem value="online_payment">پرداخت آنلاین</SelectItem>
+                                    <SelectItem value="bank_receipt">{t.checkout_page.bankReceiptUpload}</SelectItem>
+                                    <SelectItem value="online_payment">{t.checkout_page.onlinePaymentMethod}</SelectItem>
                                   </>
                                 )}
                               </SelectContent>
@@ -1993,8 +1993,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       <div className="p-4 bg-green-50 rounded-lg space-y-4">
                         <div className="flex items-center justify-between">
                           <div>
-                            <h4 className="font-medium text-green-800">موجودی کیف پول</h4>
-                            <p className="text-sm text-green-600">{walletBalance.toLocaleString()} IQD موجود است</p>
+                            <h4 className="font-medium text-green-800">{t.checkout_page.walletPaymentTitle}</h4>
+                            <p className="text-sm text-green-600">{walletBalance.toLocaleString()} IQD {t.checkout_page.availableFunds}</p>
                           </div>
 
                         </div>
@@ -2002,7 +2002,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         {useWallet && (
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-green-700">
-                              مبلغ مورد استفاده از کیف پول (IQD)
+                              {t.checkout_page.walletAmountToUse}
                             </label>
                             <input
                               type="number"
@@ -2014,30 +2014,30 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 setWalletAmountToUse(Math.min(value, maxWalletUsage));
                               }}
                               className="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                              placeholder={`حداکثر ${maxWalletUsage.toLocaleString()} IQD`}
+                              placeholder={`${t.checkout_page.maximum} ${maxWalletUsage.toLocaleString()} IQD`}
                             />
                             <div className="flex justify-between text-xs text-green-600">
-                              <span>موجودی: {walletBalance.toLocaleString()} IQD</span>
-                              <span>حداکثر قابل استفاده: {maxWalletUsage.toLocaleString()} IQD</span>
+                              <span>{t.checkout_page.walletBalance} {walletBalance.toLocaleString()} IQD</span>
+                              <span>{t.checkout_page.maximum}: {maxWalletUsage.toLocaleString()} IQD</span>
                             </div>
                             
                             {actualWalletUsage > 0 && (
                               <div className="mt-2 p-2 bg-green-100 rounded text-sm text-green-800">
                                 <div className="flex justify-between">
-                                  <span>مبلغ از کیف پول:</span>
+                                  <span>{t.checkout_page.amountFromWallet}</span>
                                   <span className="font-semibold">-{actualWalletUsage.toLocaleString()} IQD</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span>مبلغ باقی‌مانده:</span>
+                                  <span>{t.checkout_page.remainingAmount}</span>
                                   <span className="font-semibold">{totalAmount.toLocaleString()} IQD</span>
                                 </div>
                                 {actualWalletUsage >= beforeWalletTotal ? (
                                   <div className="mt-1 text-green-700 font-medium">
-                                    ✓ سفارش کاملاً با کیف پول پرداخت می‌شود - هیچ پرداخت اضافی نیاز نیست
+                                    {t.checkout_page.orderFullyPaidByWallet}
                                   </div>
                                 ) : (
                                   <div className="mt-1 text-blue-700 font-medium">
-                                    → مبلغ باقی‌مانده ({totalAmount.toLocaleString()} IQD) با روش انتخابی شما پرداخت خواهد شد
+                                    → {t.checkout_page.remainingAmount} ({totalAmount.toLocaleString()} IQD)
                                   </div>
                                 )}
                               </div>
@@ -2055,9 +2055,9 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                           <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
                             <div className="flex items-center justify-between">
                               <div>
-                                <h4 className="font-medium text-orange-800">مبلغ باقی‌مانده برای پرداخت</h4>
+                                <h4 className="font-medium text-orange-800">{t.checkout_page.remainingAmount}</h4>
                                 <p className="text-sm text-orange-600">
-                                  بعد از کسر مبلغ والت ({actualWalletUsage.toLocaleString()} IQD)
+                                  {t.checkout_page.amountFromWallet} ({actualWalletUsage.toLocaleString()} IQD)
                                 </p>
                               </div>
                               <div className="text-right">
@@ -2071,10 +2071,10 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         
                         {/* Payment Method Selection */}
                         <div className="p-4 bg-blue-50 rounded-lg">
-                          <h4 className="font-medium text-blue-800 mb-3">انتخاب روش پرداخت برای مبلغ باقی‌مانده</h4>
+                          <h4 className="font-medium text-blue-800 mb-3">{t.checkout_page.selectPaymentMethod}</h4>
                           <Select value={secondaryPaymentMethod} onValueChange={setSecondaryPaymentMethod}>
                             <SelectTrigger>
-                              <SelectValue placeholder="روش پرداخت را انتخاب کنید" />
+                              <SelectValue placeholder={t.checkout_page.selectPaymentPlaceholder} />
                             </SelectTrigger>
                             <SelectContent>
                               {/* Dynamic secondary payment methods based on admin settings */}
@@ -2090,8 +2090,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                               {/* Fallback options if no settings are loaded */}
                               {paymentSettings.length === 0 && (
                                 <>
-                                  <SelectItem value="bank_receipt">پرداخت بانکی - ارسال فیش واریزی</SelectItem>
-                                  <SelectItem value="online_payment">پرداخت آنلاین</SelectItem>
+                                  <SelectItem value="bank_receipt">{t.checkout_page.bankReceiptUpload}</SelectItem>
+                                  <SelectItem value="online_payment">{t.checkout_page.onlinePaymentMethod}</SelectItem>
                                 </>
                               )}
                             </SelectContent>
@@ -2153,7 +2153,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-3 text-center">
               <div className="text-sm font-medium text-blue-800 mb-1">🎉 Enhanced Checkout Features</div>
               <div className="text-xs text-blue-600">
-کارت Purchase Order حالا کاملاً قابل جابجایی است! کلیک و درگ کنید.
+                {t.checkout_page.draggableCardMessage}
               </div>
             </div>
             
@@ -2171,7 +2171,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                 zIndex: isDragging ? 9999 : 'auto',
                 transform: isDragging ? 'none' : 'scale(1)',
               }}
-              title="کلیک کنید و بکشید تا کارت را جابجا کنید!"
+              title={t.checkout_page.dragToMove}
             >
               <CardHeader 
                 className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors drag-handle"
@@ -2187,7 +2187,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     <ShoppingCart className="w-5 h-5 text-blue-600" />
                     <span className="text-blue-600">{t.checkout_page.purchaseOrder}</span>
                     <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                      {isDragging ? '🖱️ در حال جابجایی...' : '🖱️ قابل جابجایی'}
+                      {isDragging ? t.checkout_page.dragging : t.checkout_page.draggable}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -2211,7 +2211,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
                     <div className="text-sm text-gray-600">
-                      سفارش خرید شما شامل {cartItems.length} قلم محصول است
+                      {t.checkout_page.orderContainsItems.replace('{count}', cartItems.length.toString())}
                     </div>
                     
                     {/* CRM Default Address Information - Only for logged in users */}
@@ -2228,8 +2228,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         }`}>
                           <MapPin className="w-3 h-3" />
                           {(isPrimaryAddressDisabled || isPrimaryMobileDisabled) 
-                            ? 'آدرس پیش‌فرض (غیرفعال)' 
-                            : 'آدرس پیش‌فرض تحویل'}
+                            ? t.checkout_page.defaultAddressInactive 
+                            : t.checkout_page.defaultDeliveryAddress}
                         </div>
                         <div className={`space-y-1 text-xs ${
                           (isPrimaryAddressDisabled || isPrimaryMobileDisabled)
@@ -2237,20 +2237,20 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             : 'text-blue-700 dark:text-blue-400'
                         }`}>
                           <div className="flex justify-between">
-                            <span>استان:</span>
-                            <span className="font-medium">{customerData.customer.province || customerData.customer.state || 'نامشخص'}</span>
+                            <span>{t.checkout_page.provinceField}</span>
+                            <span className="font-medium">{customerData.customer.province || customerData.customer.state || t.checkout_page.unknown}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span>شهر:</span>
-                            <span className="font-medium">{customerData.customer.city || 'نامشخص'}</span>
+                            <span>{t.checkout_page.cityField}</span>
+                            <span className="font-medium">{customerData.customer.city || t.checkout_page.unknown}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span>آدرس کامل:</span>
-                            <span className="font-medium text-right max-w-[60%]">{customerData.customer.address || 'نامشخص'}</span>
+                            <span>{t.checkout_page.fullAddress}</span>
+                            <span className="font-medium text-right max-w-[60%]">{customerData.customer.address || t.checkout_page.unknown}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span>کد پستی:</span>
-                            <span className="font-medium">{customerData.customer.postalCode || 'نامشخص'}</span>
+                            <span>{t.checkout_page.postalCode}</span>
+                            <span className="font-medium">{customerData.customer.postalCode || t.checkout_page.unknown}</span>
                           </div>
                         </div>
                         <div className={`mt-2 pt-2 border-t transition-colors ${
@@ -2264,8 +2264,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                               : 'text-blue-600 dark:text-blue-400'
                           }`}>
                             {(isPrimaryAddressDisabled || isPrimaryMobileDisabled) 
-                              ? '⚠️ آدرس یا شماره جدید مشخص شده - این آدرس استفاده نخواهد شد'
-                              : '💡 این آدرس به عنوان آدرس پیش‌فرض تحویل استفاده می‌شود. برای تغییر، آدرس دوم یا شماره موبایل متفاوت وارد کنید.'}
+                              ? t.checkout_page.addressNotUsed
+                              : t.checkout_page.defaultAddressNote}
                           </div>
                         </div>
                       </div>
@@ -2276,30 +2276,30 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
                         <div className="text-xs font-medium text-green-800 dark:text-green-300 mb-2 flex items-center gap-2">
                           <MapPin className="w-3 h-3" />
-                          آدرس و اطلاعات فعال برای تحویل
+                          {t.checkout_page.activeDeliveryInfo}
                         </div>
                         <div className="space-y-1 text-xs text-green-700 dark:text-green-400">
                           {form.watch('secondDeliveryAddress') && (
                             <>
                               <div className="flex justify-between">
-                                <span>آدرس فعال:</span>
+                                <span>{t.checkout_page.activeAddress}</span>
                                 <span className="font-medium text-right max-w-[60%]">{form.watch('secondDeliveryAddress')}</span>
                               </div>
                               {form.watch('secondDeliveryProvince') && (
                                 <div className="flex justify-between">
-                                  <span>استان:</span>
+                                  <span>{t.checkout_page.provinceField}</span>
                                   <span className="font-medium">{form.watch('secondDeliveryProvince')}</span>
                                 </div>
                               )}
                               {form.watch('secondDeliveryCity') && (
                                 <div className="flex justify-between">
-                                  <span>شهر:</span>
+                                  <span>{t.checkout_page.cityField}</span>
                                   <span className="font-medium">{form.watch('secondDeliveryCity')}</span>
                                 </div>
                               )}
                               {form.watch('secondDeliveryPostalCode') && (
                                 <div className="flex justify-between">
-                                  <span>کد پستی:</span>
+                                  <span>{t.checkout_page.postalCode}</span>
                                   <span className="font-medium">{form.watch('secondDeliveryPostalCode')}</span>
                                 </div>
                               )}
@@ -2307,14 +2307,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                           )}
                           {form.watch('recipientMobile') && (
                             <div className="flex justify-between">
-                              <span>شماره تحویل‌گیرنده:</span>
+                              <span>{t.checkout_page.recipientPhoneNumber}</span>
                               <span className="font-medium">{form.watch('recipientMobile')}</span>
                             </div>
                           )}
                         </div>
                         <div className="mt-2 pt-2 border-t border-green-200 dark:border-green-700">
                           <div className="text-xs text-green-600 dark:text-green-400 italic">
-                            ✅ این اطلاعات برای تحویل سفارش استفاده خواهد شد
+                            {t.checkout_page.infoWillBeUsed}
                           </div>
                         </div>
                       </div>
@@ -2322,22 +2322,22 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
 
                     <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
                       <div className="text-xs font-medium text-blue-800 dark:text-blue-300 mb-2">
-                        خلاصه سفارش
+                        {t.checkout_page.orderSummaryTitle}
                       </div>
                       <div className="space-y-1 text-xs text-blue-700 dark:text-blue-400">
                         <div className="flex justify-between">
-                          <span>تعداد اقلام:</span>
-                          <span>{cartItems.reduce((sum, item) => sum + item.quantity, 0)} عدد</span>
+                          <span>{t.checkout_page.itemCount}</span>
+                          <span>{cartItems.reduce((sum, item) => sum + item.quantity, 0)} {t.checkout_page.items}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>وزن تقریبی:</span>
+                          <span>{t.checkout_page.approximateWeight}</span>
                           <span className="font-semibold flex items-center gap-1">
                             <Weight className="w-3 h-3" />
-                            {totalWeight.toFixed(2)} کیلوگرم
+                            {totalWeight.toFixed(2)} {t.checkout_page.kg}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span>تاریخ سفارش:</span>
+                          <span>{t.checkout_page.orderDate}</span>
                           <span>{new Date().toLocaleDateString('fa-IR')}</span>
                         </div>
                       </div>
@@ -2348,24 +2348,24 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
                         <div className="text-xs font-medium text-green-800 dark:text-green-300 mb-2 flex items-center gap-1">
                           <Car className="w-3 h-3" />
-                          خودرو انتخاب شده (هوشمند)
+                          {t.checkout_page.smartVehicleSelectionLabel}
                         </div>
                         <div className="space-y-1 text-xs text-green-700 dark:text-green-400">
                           <div className="flex justify-between">
-                            <span>نوع خودرو:</span>
+                            <span>{t.checkout_page.vehicleTypeLabel}</span>
                             <span className="font-semibold">{selectedVehicle.name}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span>ظرفیت وزن:</span>
-                            <span>{parseFloat(selectedVehicle.maxWeightKg || '0').toLocaleString()} کیلوگرم</span>
+                            <span>{t.checkout_page.weightCapacityLabel}</span>
+                            <span>{parseFloat(selectedVehicle.maxWeightKg || '0').toLocaleString()} {t.checkout_page.kg}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span>مقصد:</span>
+                            <span>{t.checkout_page.destinationLabel}</span>
                             <span className="font-semibold">{destinationCity}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span>هزینه پایه:</span>
-                            <span>{parseFloat(selectedVehicle.basePrice || '0').toLocaleString()} IQD</span>
+                            <span>{t.checkout_page.baseCostLabel}</span>
+                            <span>{parseFloat(selectedVehicle.basePrice || '0').toLocaleString()} {t.checkout_page.iqd}</span>
                           </div>
                           {iraqiCities?.find((city: any) => 
                             city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
@@ -2373,19 +2373,19 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             city.name?.toLowerCase().includes(destinationCity.toLowerCase())
                           ) && (
                             <div className="flex justify-between">
-                              <span>فاصله از اربیل:</span>
+                              <span>{t.checkout_page.distanceFromErbil}</span>
                               <span>{iraqiCities.find((city: any) => 
                                 city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
                                 city.nameArabic?.includes(destinationCity) ||
                                 city.name?.toLowerCase().includes(destinationCity.toLowerCase())
-                              )?.distanceFromErbilKm} کیلومتر</span>
+                              )?.distanceFromErbilKm} {t.checkout_page.kilometer}</span>
                             </div>
                           )}
                         </div>
                         <div className="mt-2 pt-2 border-t border-green-200 dark:border-green-700">
                           <div className="text-xs text-green-600 dark:text-green-400 italic flex items-center gap-1">
                             <Calculator className="w-3 h-3" />
-                            محاسبه خودکار بر اساس وزن و مقصد
+                            {t.checkout_page.autoCalculation}
                           </div>
                         </div>
                       </div>
@@ -2420,7 +2420,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   <FormControl>
                                     <Textarea
                                       {...field}
-                                      placeholder="آدرس دوم برای تحویل کالا..."
+                                      placeholder={t.checkout_page.secondAddressDeliveryPlaceholder}
                                       className="min-h-[60px] text-sm"
                                     />
                                   </FormControl>
@@ -2568,12 +2568,12 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     {/* Second Delivery Address Section in Purchase Order */}
                     {isUserLoggedIn && (
                       <div className="space-y-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <h4 className="text-sm font-medium text-gray-800 dark:text-gray-200">آدرس دوم یا شماره موبایل متفاوت</h4>
+                        <h4 className="text-sm font-medium text-gray-800 dark:text-gray-200">{t.checkout_page.secondAddressTitle}</h4>
                         
                         {/* Second Address Option */}
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">آدرس دوم (اختیاری)</span>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.checkout_page.secondAddressOptional}</span>
                             <Button
                               type="button"
                               size="sm"
@@ -2592,11 +2592,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 name="secondDeliveryAddress"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel className="text-sm">آدرس کامل</FormLabel>
+                                    <FormLabel className="text-sm">{t.checkout_page.fullAddressLabel}</FormLabel>
                                     <FormControl>
                                       <Textarea
                                         {...field}
-                                        placeholder="آدرس دوم برای تحویل کالا..."
+                                        placeholder={t.checkout_page.secondAddressDeliveryPlaceholder}
                                         className="min-h-[60px]"
                                       />
                                     </FormControl>
@@ -2609,7 +2609,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   name="secondDeliveryProvince"
                                   render={({ field }) => (
                                     <FormItem>
-                                      <FormLabel className="text-sm">استان</FormLabel>
+                                      <FormLabel className="text-sm">{t.checkout_page.provinceLabel}</FormLabel>
                                       <Select 
                                         onValueChange={(value) => {
                                           field.onChange(value);
@@ -2625,7 +2625,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                       >
                                         <FormControl>
                                           <SelectTrigger>
-                                            <SelectValue placeholder="انتخاب استان" />
+                                            <SelectValue placeholder={t.checkout_page.selectProvincePlaceholder} />
                                           </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -2644,7 +2644,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   name="secondDeliveryCity"
                                   render={({ field }) => (
                                     <FormItem>
-                                      <FormLabel className="text-sm">شهر</FormLabel>
+                                      <FormLabel className="text-sm">{t.checkout_page.citySelectLabel}</FormLabel>
                                       <Select 
                                         onValueChange={field.onChange} 
                                         value={field.value}
@@ -2652,7 +2652,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                       >
                                         <FormControl>
                                           <SelectTrigger>
-                                            <SelectValue placeholder={selectedSecondaryProvinceId ? "انتخاب شهر" : "ابتدا استان را انتخاب کنید"} />
+                                            <SelectValue placeholder={selectedSecondaryProvinceId ? t.checkout_page.selectCityPlaceholder : t.checkout_page.selectProvinceFirst} />
                                           </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -2671,7 +2671,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   name="secondDeliveryPostalCode"
                                   render={({ field }) => (
                                     <FormItem>
-                                      <FormLabel className="text-sm">کد پستی</FormLabel>
+                                      <FormLabel className="text-sm">{t.checkout_page.postalCodeLabel}</FormLabel>
                                       <FormControl>
                                         <Input {...field} placeholder="12345" />
                                       </FormControl>
@@ -2686,7 +2686,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         {/* Recipient Mobile */}
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">شماره موبایل متفاوت</span>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.checkout_page.differentMobileNumberLabel}</span>
                             <Button
                               type="button"
                               size="sm"
@@ -2705,7 +2705,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 name="recipientMobile"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel className="text-sm">شماره موبایل گیرنده</FormLabel>
+                                    <FormLabel className="text-sm">{t.checkout_page.recipientMobileLabel}</FormLabel>
                                     <FormControl>
                                       <Input
                                         {...field}
@@ -2717,7 +2717,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 )}
                               />
                               <p className="mt-2 text-sm text-gray-500">
-                                این شماره برای تماس تحویل استفاده می‌شود
+                                {t.checkout_page.thisNumberForDelivery}
                               </p>
                             </div>
                           )}
@@ -2726,7 +2726,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     )}
                     
                     <div className="text-xs text-gray-500 mt-4">
-                      کد سفارش پس از تکمیل خرید ارائه خواهد شد
+                      {t.checkout_page.orderCodeAfterCheckout}
                     </div>
                   </div>
                 </CardContent>
@@ -2768,7 +2768,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                               )}
                             </div>
                             <p className="text-xs text-gray-500 mt-1">
-                              کد محصول: {item.sku || 'N/A'}
+                              {t.checkout_page.productCode} {item.sku || 'N/A'}
                             </p>
                           </div>
                           <Button
@@ -2778,8 +2778,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             onClick={() => {
                               // Remove item from cart logic would go here
                               toast({
-                                title: "حذف از سبد خرید",
-                                description: `${item.name} از سبد خرید حذف شد`,
+                                title: t.checkout_page.removeFromCart,
+                                description: `${item.name} ${t.checkout_page.removedFromCartMsg}`,
                               });
                             }}
                           >
@@ -2839,8 +2839,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       }`}>
                         <MapPin className="w-3 h-3" />
                         {(isPrimaryAddressDisabled || isPrimaryMobileDisabled) 
-                          ? 'آدرس پیش‌فرض (غیرفعال)' 
-                          : 'آدرس پیش‌فرض (CRM)'}
+                          ? t.checkout_page.defaultAddressInactive 
+                          : t.checkout_page.defaultAddressCRM}
                       </div>
                       <div className={`space-y-1 text-xs ${
                         (isPrimaryAddressDisabled || isPrimaryMobileDisabled)
@@ -2848,16 +2848,16 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                           : 'text-blue-700 dark:text-blue-400'
                       }`}>
                         <div className="flex justify-between">
-                          <span>استان:</span>
-                          <span className="font-medium">{customerData.customer.province || customerData.customer.state || 'نامشخص'}</span>
+                          <span>{t.checkout_page.provinceField}</span>
+                          <span className="font-medium">{customerData.customer.province || customerData.customer.state || t.checkout_page.unknown}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>شهر:</span>
-                          <span className="font-medium">{customerData.customer.city || 'نامشخص'}</span>
+                          <span>{t.checkout_page.cityField}</span>
+                          <span className="font-medium">{customerData.customer.city || t.checkout_page.unknown}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>تلفن:</span>
-                          <span className="font-medium">{customerData.customer.phone || 'نامشخص'}</span>
+                          <span>{t.checkout_page.phoneField}</span>
+                          <span className="font-medium">{customerData.customer.phone || t.checkout_page.unknown}</span>
                         </div>
                       </div>
                     </div>
@@ -2866,12 +2866,12 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   {/* Second Delivery Address Section in Cart Management */}
                   {isUserLoggedIn && (
                     <div className="space-y-3 pt-3 border-t">
-                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">آدرس دوم یا شماره موبایل متفاوت</h4>
+                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.checkout_page.secondAddressTitle}</h4>
                       
                       {/* Second Address Option */}
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">آدرس دوم (اختیاری)</span>
+                          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{t.checkout_page.secondAddressOptional}</span>
                           <Button
                             type="button"
                             size="sm"
@@ -2890,11 +2890,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                               name="secondDeliveryAddress"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel className="text-xs">آدرس کامل</FormLabel>
+                                  <FormLabel className="text-xs">{t.checkout_page.fullAddressLabel}</FormLabel>
                                   <FormControl>
                                     <Textarea
                                       {...field}
-                                      placeholder="آدرس دوم برای تحویل کالا..."
+                                      placeholder={t.checkout_page.secondAddressDeliveryPlaceholder}
                                       className="min-h-[50px] text-xs"
                                     />
                                   </FormControl>
@@ -2907,7 +2907,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 name="secondDeliveryProvince"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel className="text-xs">استان</FormLabel>
+                                    <FormLabel className="text-xs">{t.checkout_page.provinceLabel}</FormLabel>
                                     <Select 
                                       onValueChange={(value) => {
                                         field.onChange(value);
@@ -2923,7 +2923,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                     >
                                       <FormControl>
                                         <SelectTrigger className="text-xs h-7">
-                                          <SelectValue placeholder="انتخاب استان" />
+                                          <SelectValue placeholder={t.checkout_page.selectProvincePlaceholder} />
                                         </SelectTrigger>
                                       </FormControl>
                                       <SelectContent>
@@ -2942,7 +2942,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 name="secondDeliveryCity"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel className="text-xs">شهر</FormLabel>
+                                    <FormLabel className="text-xs">{t.checkout_page.citySelectLabel}</FormLabel>
                                     <Select 
                                       onValueChange={field.onChange} 
                                       value={field.value}
@@ -2950,7 +2950,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                     >
                                       <FormControl>
                                         <SelectTrigger className="text-xs h-7">
-                                          <SelectValue placeholder={selectedSecondaryProvinceId ? "انتخاب شهر" : "ابتدا استان را انتخاب کنید"} />
+                                          <SelectValue placeholder={selectedSecondaryProvinceId ? t.checkout_page.selectCityPlaceholder : t.checkout_page.selectProvinceFirst} />
                                         </SelectTrigger>
                                       </FormControl>
                                       <SelectContent>
@@ -2969,7 +2969,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 name="secondDeliveryPostalCode"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel className="text-xs">کد پستی</FormLabel>
+                                    <FormLabel className="text-xs">{t.checkout_page.postalCodeLabel}</FormLabel>
                                     <FormControl>
                                       <Input {...field} placeholder="12345" className="text-xs h-7" />
                                     </FormControl>
@@ -2984,7 +2984,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       {/* Recipient Mobile */}
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">شماره موبایل متفاوت</span>
+                          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{t.checkout_page.differentMobileNumberLabel}</span>
                           <Button
                             type="button"
                             size="sm"
@@ -3003,7 +3003,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                               name="recipientMobile"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel className="text-xs">شماره موبایل گیرنده</FormLabel>
+                                  <FormLabel className="text-xs">{t.checkout_page.recipientMobileLabel}</FormLabel>
                                   <FormControl>
                                     <Input
                                       {...field}
@@ -3016,7 +3016,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                               )}
                             />
                             <p className="mt-1 text-xs text-gray-500">
-                              این شماره برای تماس تحویل استفاده می‌شود
+                              {t.checkout_page.thisNumberForDelivery}
                             </p>
                           </div>
                         )}
@@ -3032,7 +3032,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       className="w-full text-xs"
                       onClick={() => setLocation("/shop")}
                     >
-                      ادامه خرید
+                      {t.checkout_page.continueShoppingBtn}
                     </Button>
                     <Button
                       variant="outline"
@@ -3041,12 +3041,12 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       onClick={() => {
                         // Clear cart logic
                         toast({
-                          title: "سبد خرید پاک شد",
-                          description: "تمام محصولات از سبد خرید حذف شدند",
+                          title: t.checkout_page.cartClearedTitle,
+                          description: t.checkout_page.allProductsRemoved,
                         });
                       }}
                     >
-                      پاک کردن سبد خرید
+                      {t.checkout_page.clearCartBtn}
                     </Button>
                   </div>
                 </CardContent>
@@ -3056,39 +3056,39 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
             {/* Payment Summary */}
             <Card>
               <CardHeader>
-                <CardTitle>خلاصه پرداخت</CardTitle>
+                <CardTitle>{t.checkout_page.paymentSummaryTitle}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span>جمع کالاها:</span>
+                    <span>{t.checkout_page.itemsTotal}</span>
                     <span>{subtotal.toLocaleString()} IQD</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>هزینه ارسال:</span>
-                    <span>{shippingCost === 0 ? "رایگان" : `${shippingCost.toLocaleString()} IQD`}</span>
+                    <span>{t.checkout_page.shippingCostSummary}</span>
+                    <span>{shippingCost === 0 ? t.checkout_page.free : `${shippingCost.toLocaleString()} ${t.checkout_page.iqd}`}</span>
                   </div>
                   {vatAmount > 0 && (
                     <div className="flex justify-between">
-                      <span>مالیات بر ارزش افزوده ({(vatRate * 100).toFixed(0)}%):</span>
+                      <span>{t.checkout_page.valueAddedTax} ({(vatRate * 100).toFixed(0)}%):</span>
                       <span>{vatAmount.toLocaleString()} IQD</span>
                     </div>
                   )}
                   {dutiesAmount > 0 && (
                     <div className="flex justify-between">
-                      <span>عوارض بر ارزش افزوده ({(dutiesRate * 100).toFixed(0)}%):</span>
+                      <span>{t.checkout_page.valueAddedDuty} ({(dutiesRate * 100).toFixed(0)}%):</span>
                       <span>{dutiesAmount.toLocaleString()} IQD</span>
                     </div>
                   )}
                   <Separator />
                   {actualWalletUsage > 0 && (
                     <div className="flex justify-between text-green-600">
-                      <span>کیف پول استفاده شده:</span>
+                      <span>{t.checkout_page.walletUsedSummary}</span>
                       <span>-{actualWalletUsage.toLocaleString()} IQD</span>
                     </div>
                   )}
                   <div className="flex justify-between text-lg font-bold">
-                    <span>مجموع قابل پرداخت:</span>
+                    <span>{t.checkout_page.totalPayable}</span>
                     <span>{totalAmount.toLocaleString()} IQD</span>
                   </div>
                 </div>
@@ -3096,7 +3096,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                 {shippingCost === 0 && (
                   <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
                     <p className="text-sm text-green-800 dark:text-green-300">
-                      🎉 شما واجد شرایط ارسال رایگان هستید!
+                      {t.checkout_page.freeShippingEligible}
                     </p>
                   </div>
                 )}
@@ -3104,7 +3104,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                 {actualWalletUsage >= beforeWalletTotal && (
                   <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
                     <p className="text-sm text-blue-800 dark:text-blue-300">
-                      💳 این سفارش کاملاً با کیف پول شما پرداخت خواهد شد
+                      {t.checkout_page.fullyPaidByWallet}
                     </p>
                   </div>
                 )}

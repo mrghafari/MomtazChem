@@ -134,17 +134,44 @@ export interface Translation {
     deliveryMethod: string;
     estimatedDelivery: string;
     shippingCost: string;
+    shippingCostLabel: string;
+    freeShipping: string;
+    days: string;
     vehicleType: string;
+    calculatingBestVehicle: string;
+    smartSelectionDetails: string;
+    selectedVehicleLabel: string;
+    weightCapacity: string;
+    volumeCapacity: string;
+    allowedRoutesLabel: string;
+    hazardousTransport: string;
+    refrigeratedTransport: string;
+    fragileHandling: string;
+    freeShippingOver: string;
+    moreForFreeShipping: string;
+    cubicMeter: string;
     
     // Payment
     paymentInfo: string;
+    paymentMethodTitle: string;
     selectPaymentMethod: string;
+    selectPaymentPlaceholder: string;
+    bankReceiptUpload: string;
+    onlinePaymentMethod: string;
     walletPayment: string;
+    walletPaymentTitle: string;
     useWallet: string;
     walletBalance: string;
+    walletAmountToUse: string;
     amountToUse: string;
     maxAmount: string;
+    maximum: string;
+    amountFromWallet: string;
+    remainingAmount: string;
     remainingBalance: string;
+    availableFunds: string;
+    orderFullyPaidByWallet: string;
+    noAdditionalPaymentNeeded: string;
     secondaryPayment: string;
     selectSecondaryPayment: string;
     
@@ -200,6 +227,129 @@ export interface Translation {
     piece: string;
     iqd: string;
     usd: string;
+    
+    // New translations for checkout.tsx
+    deliveryTitle: string;
+    useSecondaryAddress: string;
+    secondaryAddressSelected: string;
+    cityLabel: string;
+    recipientInfoTitle: string;
+    recipientInfoLabel: string;
+    recipientInfoNote: string;
+    recipientNameLabel: string;
+    recipientNamePlaceholder: string;
+    recipientPhoneLabel: string;
+    recipientAddressLabel: string;
+    recipientAddressPlaceholder: string;
+    secondAddressOrMobile: string;
+    secondAddressNote: string;
+    secondAddressOptional: string;
+    hideButton: string;
+    addSecondAddress: string;
+    secondFullAddressLabel: string;
+    secondFullAddressPlaceholder: string;
+    fullAddressLabel: string;
+    secondAddressDeliveryPlaceholder: string;
+    provinceLabel: string;
+    selectProvincePlaceholder: string;
+    citySelectLabel: string;
+    selectCityPlaceholder: string;
+    postalCodeLabel: string;
+    postalCodePlaceholder: string;
+    differentMobileOptional: string;
+    differentMobileLabel: string;
+    addDifferentNumber: string;
+    recipientMobileLabel: string;
+    thisNumberForDelivery: string;
+    mobileForDeliveryContact: string;
+    shippingMethodTitle: string;
+    selectShippingLabel: string;
+    selectShippingPlaceholder: string;
+    smartSelectionNote: string;
+    destination: string;
+    weight: string;
+    basePrice: string;
+    distance: string;
+    autoCalculate: string;
+    specifyDestinationCity: string;
+    addProductsToCart: string;
+    erbilCity: string;
+    heavyTruck: string;
+    flammableSuffix: string;
+    warehouseNoteActive: string;
+    warehouseNoteSecond: string;
+    warehouseNoteCRM: string;
+    warehouseNotePhone: string;
+    warehouseNoteDifferentMobile: string;
+    warehouseNoteCRMPhone: string;
+    orderCodeAfterCheckout: string;
+    productCode: string;
+    removeFromCart: string;
+    removedFromCartMsg: string;
+    defaultAddressInactive: string;
+    defaultAddressCRM: string;
+    provinceField: string;
+    cityField: string;
+    phoneField: string;
+    unknown: string;
+    secondAddressOrDifferentMobile: string;
+    
+    // Order Summary Section
+    orderSummaryTitle: string;
+    itemCount: string;
+    approximateWeight: string;
+    defaultDeliveryAddress: string;
+    activeDeliveryInfo: string;
+    draggableCardMessage: string;
+    smartVehicleSelectionLabel: string;
+    
+    // Draggable Card
+    dragging: string;
+    draggable: string;
+    dragToMove: string;
+    
+    // Order Details
+    orderContainsItems: string;
+    items: string;
+    orderDate: string;
+    
+    // Vehicle Selection
+    vehicleTypeLabel: string;
+    weightCapacityLabel: string;
+    destinationLabel: string;
+    baseCostLabel: string;
+    distanceFromErbil: string;
+    kilometer: string;
+    autoCalculation: string;
+    
+    // Active Address Info
+    activeAddress: string;
+    recipientPhoneNumber: string;
+    infoWillBeUsed: string;
+    addressNotUsed: string;
+    defaultAddressNote: string;
+    
+    // Form Labels
+    secondAddressTitle: string;
+    differentMobileNumberLabel: string;
+    
+    // Actions
+    continueShoppingBtn: string;
+    clearCartBtn: string;
+    cartClearedTitle: string;
+    allProductsRemoved: string;
+    
+    // Payment Summary
+    paymentSummaryTitle: string;
+    itemsTotal: string;
+    shippingCostSummary: string;
+    free: string;
+    valueAddedTax: string;
+    valueAddedDuty: string;
+    walletUsedSummary: string;
+    totalPayable: string;
+    freeShippingEligible: string;
+    fullyPaidByWallet: string;
   };
   
   // Common actions
@@ -902,17 +1052,44 @@ export const translations: Record<Language, Translation> = {
       deliveryMethod: 'Delivery Method',
       estimatedDelivery: 'Estimated Delivery',
       shippingCost: 'Shipping Cost',
+      shippingCostLabel: 'Shipping Cost:',
+      freeShipping: 'Free',
+      days: 'days',
       vehicleType: 'Vehicle Type',
+      calculatingBestVehicle: '🔄 Calculating best vehicle...',
+      smartSelectionDetails: '📋 Smart Selection Details:',
+      selectedVehicleLabel: '🚛 Selected Vehicle:',
+      weightCapacity: '⚖️ Weight Capacity:',
+      volumeCapacity: '📦 Volume Capacity:',
+      allowedRoutesLabel: '🛣️ Allowed Routes:',
+      hazardousTransport: '⚠️ Hazardous Materials Transport',
+      refrigeratedTransport: '❄️ Refrigerated Transport',
+      fragileHandling: '📱 Suitable for Fragile Items',
+      freeShippingOver: '✓ Free shipping for purchases over',
+      moreForFreeShipping: 'more for free shipping',
+      cubicMeter: 'cubic meters',
       
       // Payment
       paymentInfo: 'Payment Information',
-      selectPaymentMethod: 'Select Payment Method',
+      paymentMethodTitle: 'Payment Method',
+      selectPaymentMethod: 'Select Payment Method *',
+      selectPaymentPlaceholder: 'Select payment method',
+      bankReceiptUpload: 'Bank Receipt Upload',
+      onlinePaymentMethod: 'Online Payment',
       walletPayment: 'Wallet Payment',
+      walletPaymentTitle: 'Wallet Balance',
       useWallet: 'Use Wallet',
-      walletBalance: 'Wallet Balance',
+      walletBalance: 'Balance:',
+      walletAmountToUse: 'Amount to Use from Wallet (IQD)',
       amountToUse: 'Amount to Use',
       maxAmount: 'Max',
+      maximum: 'Maximum',
+      amountFromWallet: 'Amount from Wallet:',
+      remainingAmount: 'Remaining Amount:',
       remainingBalance: 'Remaining Balance',
+      availableFunds: 'available',
+      orderFullyPaidByWallet: '✓ Order will be fully paid by wallet - no additional payment needed',
+      noAdditionalPaymentNeeded: 'no additional payment needed',
       secondaryPayment: 'Secondary Payment Method',
       selectSecondaryPayment: 'Select Secondary Payment Method',
       
@@ -968,6 +1145,129 @@ export const translations: Record<Language, Translation> = {
       piece: 'pc',
       iqd: 'IQD',
       usd: 'USD',
+      
+      // New translations for checkout.tsx
+      deliveryTitle: 'Delivery Address',
+      useSecondaryAddress: 'Use Secondary Address',
+      secondaryAddressSelected: 'Second address selected:',
+      cityLabel: 'City',
+      recipientInfoTitle: 'Recipient Information',
+      recipientInfoLabel: 'Recipient Information',
+      recipientInfoNote: 'If the recipient is a different person from the customer, fill in these fields',
+      recipientNameLabel: 'Recipient Name',
+      recipientNamePlaceholder: 'Full recipient name',
+      recipientPhoneLabel: 'Recipient Mobile Number',
+      recipientAddressLabel: 'Delivery Address',
+      recipientAddressPlaceholder: 'Full delivery address',
+      secondAddressOrMobile: 'Second Address or Different Mobile Number',
+      secondAddressNote: 'If you need a different address or mobile number for delivery, fill in this section',
+      secondAddressOptional: 'Second Address (Optional)',
+      hideButton: 'Hide',
+      addSecondAddress: 'Add Second Address',
+      secondFullAddressLabel: 'Second Full Address',
+      secondFullAddressPlaceholder: 'Second full delivery address',
+      fullAddressLabel: 'Full Address',
+      secondAddressDeliveryPlaceholder: 'Second address for product delivery...',
+      provinceLabel: 'Province',
+      selectProvincePlaceholder: 'Select Province',
+      citySelectLabel: 'City',
+      selectCityPlaceholder: 'Select City',
+      postalCodeLabel: 'Postal Code',
+      postalCodePlaceholder: 'Postal Code',
+      differentMobileOptional: 'Different Mobile Number (Optional)',
+      differentMobileLabel: 'Different Mobile Number',
+      addDifferentNumber: 'Add Different Number',
+      recipientMobileLabel: 'Recipient Mobile Number',
+      thisNumberForDelivery: 'This number will be used for delivery contact',
+      mobileForDeliveryContact: 'This number will be used for delivery contact',
+      shippingMethodTitle: 'Shipping Method',
+      selectShippingLabel: 'Select Shipping Method * (Smart Selection)',
+      selectShippingPlaceholder: 'Select shipping method',
+      smartSelectionNote: 'Smart',
+      destination: 'Destination:',
+      weight: 'Weight:',
+      basePrice: 'Base:',
+      distance: 'Distance:',
+      autoCalculate: 'Auto Calculate',
+      specifyDestinationCity: '📍 Please specify destination city',
+      addProductsToCart: '⚖️ Add products to cart',
+      erbilCity: 'Erbil',
+      heavyTruck: 'Heavy',
+      flammableSuffix: ' (Flammable Materials)',
+      warehouseNoteActive: 'Active address:',
+      warehouseNoteSecond: 'Second address',
+      warehouseNoteCRM: 'CRM address',
+      warehouseNotePhone: 'Active phone:',
+      warehouseNoteDifferentMobile: 'Different mobile',
+      warehouseNoteCRMPhone: 'CRM phone',
+      orderCodeAfterCheckout: 'Order code will be provided after checkout completion',
+      productCode: 'Product Code:',
+      removeFromCart: 'Remove from cart',
+      removedFromCartMsg: 'removed from cart',
+      defaultAddressInactive: 'Default Address (Inactive)',
+      defaultAddressCRM: 'Default Address (CRM)',
+      provinceField: 'Province:',
+      cityField: 'City:',
+      phoneField: 'Phone:',
+      unknown: 'Unknown',
+      secondAddressOrDifferentMobile: 'Second Address or Different Mobile Number',
+      
+      // Order Summary Section
+      orderSummaryTitle: 'Order Summary',
+      itemCount: 'Item Count:',
+      approximateWeight: 'Approximate Weight:',
+      defaultDeliveryAddress: 'Default Delivery Address',
+      activeDeliveryInfo: 'Active Delivery Address & Information',
+      draggableCardMessage: 'Purchase Order card is now fully draggable! Click and drag.',
+      smartVehicleSelectionLabel: 'Selected Vehicle (Smart)',
+      
+      // Draggable Card
+      dragging: '🖱️ Dragging...',
+      draggable: '🖱️ Draggable',
+      dragToMove: 'Click and drag to move the card!',
+      
+      // Order Details
+      orderContainsItems: 'Your purchase order contains {count} items',
+      items: 'items',
+      orderDate: 'Order Date:',
+      
+      // Vehicle Selection
+      vehicleTypeLabel: 'Vehicle Type:',
+      weightCapacityLabel: 'Weight Capacity:',
+      destinationLabel: 'Destination:',
+      baseCostLabel: 'Base Cost:',
+      distanceFromErbil: 'Distance from Erbil:',
+      kilometer: 'kilometers',
+      autoCalculation: 'Auto calculation based on weight and destination',
+      
+      // Active Address Info
+      activeAddress: 'Active Address:',
+      recipientPhoneNumber: 'Recipient Phone Number:',
+      infoWillBeUsed: '✅ This information will be used for order delivery',
+      addressNotUsed: '⚠️ New address or number specified - This address will not be used',
+      defaultAddressNote: '💡 This address will be used as the default delivery address. To change, enter a second address or different mobile number.',
+      
+      // Form Labels
+      secondAddressTitle: 'Second Address or Different Mobile Number',
+      differentMobileNumberLabel: 'Different Mobile Number',
+      
+      // Actions
+      continueShoppingBtn: 'Continue Shopping',
+      clearCartBtn: 'Clear Cart',
+      cartClearedTitle: 'Cart Cleared',
+      allProductsRemoved: 'All products removed from cart',
+      
+      // Payment Summary
+      paymentSummaryTitle: 'Payment Summary',
+      itemsTotal: 'Items Total:',
+      shippingCostSummary: 'Shipping Cost:',
+      free: 'Free',
+      valueAddedTax: 'Value Added Tax (VAT)',
+      valueAddedDuty: 'Value Added Duty',
+      walletUsedSummary: 'Wallet Used:',
+      totalPayable: 'Total Payable:',
+      freeShippingEligible: '🎉 You qualify for free shipping!',
+      fullyPaidByWallet: '💳 This order will be fully paid with your wallet',
     },
     
     // Common actions
@@ -1766,17 +2066,44 @@ export const translations: Record<Language, Translation> = {
       deliveryMethod: 'طريقة التوصيل',
       estimatedDelivery: 'التسليم المتوقع',
       shippingCost: 'تكلفة الشحن',
+      shippingCostLabel: 'تكلفة الشحن:',
+      freeShipping: 'مجاني',
+      days: 'أيام',
       vehicleType: 'نوع المركبة',
+      calculatingBestVehicle: '🔄 جاري حساب أفضل مركبة...',
+      smartSelectionDetails: '📋 تفاصيل الاختيار الذكي:',
+      selectedVehicleLabel: '🚛 المركبة المختارة:',
+      weightCapacity: '⚖️ سعة الوزن:',
+      volumeCapacity: '📦 السعة الحجمية:',
+      allowedRoutesLabel: '🛣️ الطرق المسموحة:',
+      hazardousTransport: '⚠️ نقل المواد الخطرة',
+      refrigeratedTransport: '❄️ نقل مبرد',
+      fragileHandling: '📱 مناسب للأشياء الهشة',
+      freeShippingOver: '✓ شحن مجاني للمشتريات فوق',
+      moreForFreeShipping: 'المزيد للشحن المجاني',
+      cubicMeter: 'متر مكعب',
       
       // Payment
       paymentInfo: 'معلومات الدفع',
-      selectPaymentMethod: 'اختر طريقة الدفع',
+      paymentMethodTitle: 'طريقة الدفع',
+      selectPaymentMethod: 'اختر طريقة الدفع *',
+      selectPaymentPlaceholder: 'اختر طريقة الدفع',
+      bankReceiptUpload: 'تحميل إيصال البنك',
+      onlinePaymentMethod: 'الدفع عبر الإنترنت',
       walletPayment: 'الدفع عبر المحفظة',
+      walletPaymentTitle: 'رصيد المحفظة',
       useWallet: 'استخدام المحفظة',
-      walletBalance: 'رصيد المحفظة',
+      walletBalance: 'الرصيد:',
+      walletAmountToUse: 'المبلغ المستخدم من المحفظة (دينار)',
       amountToUse: 'المبلغ المستخدم',
       maxAmount: 'الحد الأقصى',
+      maximum: 'الحد الأقصى',
+      amountFromWallet: 'المبلغ من المحفظة:',
+      remainingAmount: 'المبلغ المتبقي:',
       remainingBalance: 'الرصيد المتبقي',
+      availableFunds: 'متوفر',
+      orderFullyPaidByWallet: '✓ سيتم دفع الطلب بالكامل من المحفظة - لا حاجة لدفع إضافي',
+      noAdditionalPaymentNeeded: 'لا حاجة لدفع إضافي',
       secondaryPayment: 'طريقة الدفع الثانوية',
       selectSecondaryPayment: 'اختر طريقة الدفع الثانوية',
       
@@ -1832,6 +2159,129 @@ export const translations: Record<Language, Translation> = {
       piece: 'قطعة',
       iqd: 'دينار',
       usd: 'دولار',
+      
+      // New translations for checkout.tsx
+      deliveryTitle: 'عنوان التسليم',
+      useSecondaryAddress: 'استخدام العنوان الثانوي',
+      secondaryAddressSelected: 'تم اختيار العنوان الثاني:',
+      cityLabel: 'المدينة',
+      recipientInfoTitle: 'معلومات المستلم',
+      recipientInfoLabel: 'معلومات المستلم',
+      recipientInfoNote: 'إذا كان المستلم شخصاً مختلفاً عن العميل، املأ هذه الحقول',
+      recipientNameLabel: 'اسم المستلم',
+      recipientNamePlaceholder: 'الاسم الكامل للمستلم',
+      recipientPhoneLabel: 'رقم موبايل المستلم',
+      recipientAddressLabel: 'عنوان التسليم',
+      recipientAddressPlaceholder: 'عنوان التسليم الكامل',
+      secondAddressOrMobile: 'عنوان ثاني أو رقم موبايل مختلف',
+      secondAddressNote: 'إذا كنت بحاجة إلى عنوان أو رقم موبايل مختلف للتسليم، املأ هذا القسم',
+      secondAddressOptional: 'العنوان الثاني (اختياري)',
+      hideButton: 'إخفاء',
+      addSecondAddress: 'إضافة عنوان ثاني',
+      secondFullAddressLabel: 'العنوان الكامل الثاني',
+      secondFullAddressPlaceholder: 'عنوان التسليم الكامل الثاني',
+      fullAddressLabel: 'العنوان الكامل',
+      secondAddressDeliveryPlaceholder: 'العنوان الثاني لتسليم المنتجات...',
+      provinceLabel: 'المحافظة',
+      selectProvincePlaceholder: 'اختر المحافظة',
+      citySelectLabel: 'المدينة',
+      selectCityPlaceholder: 'اختر المدينة',
+      postalCodeLabel: 'الرمز البريدي',
+      postalCodePlaceholder: 'الرمز البريدي',
+      differentMobileOptional: 'رقم موبايل مختلف (اختياري)',
+      differentMobileLabel: 'رقم موبايل مختلف',
+      addDifferentNumber: 'إضافة رقم مختلف',
+      recipientMobileLabel: 'رقم موبايل المستلم',
+      thisNumberForDelivery: 'سيتم استخدام هذا الرقم للاتصال بالتسليم',
+      mobileForDeliveryContact: 'سيتم استخدام هذا الرقم للاتصال بالتسليم',
+      shippingMethodTitle: 'طريقة الشحن',
+      selectShippingLabel: 'اختر طريقة الشحن * (الاختيار الذكي)',
+      selectShippingPlaceholder: 'اختر طريقة الشحن',
+      smartSelectionNote: 'ذكي',
+      destination: 'الوجهة:',
+      weight: 'الوزن:',
+      basePrice: 'السعر الأساسي:',
+      distance: 'المسافة:',
+      autoCalculate: 'حساب تلقائي',
+      specifyDestinationCity: '📍 الرجاء تحديد مدينة الوجهة',
+      addProductsToCart: '⚖️ أضف منتجات إلى السلة',
+      erbilCity: 'أربيل',
+      heavyTruck: 'ثقيل',
+      flammableSuffix: ' (مواد قابلة للاشتعال)',
+      warehouseNoteActive: 'العنوان النشط:',
+      warehouseNoteSecond: 'العنوان الثاني',
+      warehouseNoteCRM: 'عنوان CRM',
+      warehouseNotePhone: 'الهاتف النشط:',
+      warehouseNoteDifferentMobile: 'موبايل مختلف',
+      warehouseNoteCRMPhone: 'هاتف CRM',
+      orderCodeAfterCheckout: 'سيتم تقديم رمز الطلب بعد إتمام الدفع',
+      productCode: 'رمز المنتج:',
+      removeFromCart: 'إزالة من السلة',
+      removedFromCartMsg: 'تمت الإزالة من السلة',
+      defaultAddressInactive: 'العنوان الافتراضي (غير نشط)',
+      defaultAddressCRM: 'العنوان الافتراضي (CRM)',
+      provinceField: 'المحافظة:',
+      cityField: 'المدينة:',
+      phoneField: 'الهاتف:',
+      unknown: 'غير معروف',
+      secondAddressOrDifferentMobile: 'عنوان ثاني أو رقم موبايل مختلف',
+      
+      // Order Summary Section
+      orderSummaryTitle: 'ملخص الطلب',
+      itemCount: 'عدد العناصر:',
+      approximateWeight: 'الوزن التقريبي:',
+      defaultDeliveryAddress: 'عنوان التسليم الافتراضي',
+      activeDeliveryInfo: 'عنوان ومعلومات التسليم النشطة',
+      draggableCardMessage: 'بطاقة أمر الشراء قابلة للسحب الآن! انقر واسحب.',
+      smartVehicleSelectionLabel: 'المركبة المحددة (ذكية)',
+      
+      // Draggable Card
+      dragging: '🖱️ جاري السحب...',
+      draggable: '🖱️ قابل للسحب',
+      dragToMove: 'انقر واسحب لنقل البطاقة!',
+      
+      // Order Details
+      orderContainsItems: 'يحتوي طلب الشراء الخاص بك على {count} عناصر',
+      items: 'عناصر',
+      orderDate: 'تاريخ الطلب:',
+      
+      // Vehicle Selection
+      vehicleTypeLabel: 'نوع المركبة:',
+      weightCapacityLabel: 'سعة الوزن:',
+      destinationLabel: 'الوجهة:',
+      baseCostLabel: 'التكلفة الأساسية:',
+      distanceFromErbil: 'المسافة من أربيل:',
+      kilometer: 'كيلومترات',
+      autoCalculation: 'حساب تلقائي بناءً على الوزن والوجهة',
+      
+      // Active Address Info
+      activeAddress: 'العنوان النشط:',
+      recipientPhoneNumber: 'رقم هاتف المستلم:',
+      infoWillBeUsed: '✅ سيتم استخدام هذه المعلومات لتسليم الطلب',
+      addressNotUsed: '⚠️ تم تحديد عنوان أو رقم جديد - لن يتم استخدام هذا العنوان',
+      defaultAddressNote: '💡 سيتم استخدام هذا العنوان كعنوان التسليم الافتراضي. للتغيير، أدخل عنوانًا ثانيًا أو رقم موبايل مختلف.',
+      
+      // Form Labels
+      secondAddressTitle: 'عنوان ثاني أو رقم موبايل مختلف',
+      differentMobileNumberLabel: 'رقم موبايل مختلف',
+      
+      // Actions
+      continueShoppingBtn: 'متابعة التسوق',
+      clearCartBtn: 'مسح السلة',
+      cartClearedTitle: 'تم مسح السلة',
+      allProductsRemoved: 'تمت إزالة جميع المنتجات من السلة',
+      
+      // Payment Summary
+      paymentSummaryTitle: 'ملخص الدفع',
+      itemsTotal: 'إجمالي العناصر:',
+      shippingCostSummary: 'تكلفة الشحن:',
+      free: 'مجاني',
+      valueAddedTax: 'ضريبة القيمة المضافة',
+      valueAddedDuty: 'رسوم القيمة المضافة',
+      walletUsedSummary: 'المحفظة المستخدمة:',
+      totalPayable: 'إجمالي المبلغ المستحق:',
+      freeShippingEligible: '🎉 أنت مؤهل للشحن المجاني!',
+      fullyPaidByWallet: '💳 سيتم دفع هذا الطلب بالكامل من محفظتك',
     },
     
     // Common actions
