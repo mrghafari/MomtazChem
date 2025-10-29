@@ -121,7 +121,6 @@ import OrderTrackingManagement from "@/pages/admin/order-tracking-management";
 import RemoteDesktop from "@/pages/admin/remote-desktop";
 
 import TemplateDistribution from "@/pages/admin/template-distribution";
-import TemplateNumberingSystem from "@/pages/admin/template-numbering-system";
 import WhatsAppCRM from "@/pages/admin/whatsapp-crm";
 import WhatsAppCRMEnglish from "@/pages/admin/whatsapp-crm-en";
 
@@ -196,7 +195,6 @@ function Router() {
           <Route path="/admin/automated-email-logs" component={AutomatedEmailLogs} />
           <Route path="/admin/email-templates-fixed" component={EmailTemplatesFixed} />
           <Route path="/admin/template-distribution" component={TemplateDistribution} />
-          <Route path="/admin/template-numbering-system" component={TemplateNumberingSystem} />
           <Route path="/admin/invoice-management" component={InvoiceManagement} />
           <Route path="/admin/payment-settings" component={PaymentSettings} />
           <Route path="/test-payment" component={PaymentTestPage} />

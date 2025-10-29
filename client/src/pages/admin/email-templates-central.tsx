@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Mail, Eye, RefreshCw, Star, Zap, Shield, CreditCard, Package, Bell, Settings, Hash, MessageSquare, ShoppingCart, Monitor, Key, Edit } from 'lucide-react';
+import { Mail, Eye, RefreshCw, Star, Zap, Shield, CreditCard, Package, Bell, Settings, MessageSquare, ShoppingCart, Monitor, Key, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 
@@ -473,14 +473,6 @@ const EmailTemplatesCentral: React.FC = () => {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">📧 مرکز قالب‌های ایمیل</h1>
             </div>
             <div className="flex gap-3">
-              <Button 
-                onClick={() => setLocation('/admin/template-numbering-system')}
-                className="bg-orange-600 hover:bg-orange-700 text-white"
-                size="sm"
-              >
-                <Hash className="w-4 h-4 mr-2" />
-                🔢 شماره‌گذاری قالب‌ها
-              </Button>
               <Button onClick={handleRefresh} variant="outline" size="sm">
                 <RefreshCw className="w-4 h-4 mr-2" />
                 بروزرسانی ({Array.isArray(templates) ? templates.length : 0})
