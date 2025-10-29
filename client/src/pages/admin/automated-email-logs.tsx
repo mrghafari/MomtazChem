@@ -286,16 +286,24 @@ export default function AutomatedEmailLogsPage() {
     refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
 
-  const emailLogs: EmailLog[] = (emailLogsResponse as any)?.logs || [];
-  
-  // Debug logging
-  console.log('📧 [Email Logs Debug]', {
+  // Debug logging BEFORE processing
+  console.log('📧 [Email Logs Debug - Raw]', {
     isLoading,
     hasResponse: !!emailLogsResponse,
     responseType: typeof emailLogsResponse,
+    responseKeys: emailLogsResponse ? Object.keys(emailLogsResponse) : [],
+    rawResponse: emailLogsResponse,
+    logsProperty: (emailLogsResponse as any)?.logs,
+    logsType: typeof (emailLogsResponse as any)?.logs,
+    logsIsArray: Array.isArray((emailLogsResponse as any)?.logs)
+  });
+  
+  const emailLogs: EmailLog[] = (emailLogsResponse as any)?.logs || [];
+  
+  // Debug logging AFTER processing
+  console.log('📧 [Email Logs Debug - Processed]', {
     logsCount: emailLogs.length,
-    firstLog: emailLogs[0],
-    rawResponse: emailLogsResponse
+    firstLog: emailLogs[0]
   });
 
   // Filter logs based on search and filters

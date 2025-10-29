@@ -1,0 +1,106 @@
+ Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Auth check result: Object
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ 
+value @ twk-chunk-common.js:2
+ Tawk.to Live Chat loaded successfully
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+ 🔍 [DEBUG] userPermissions modules: Array(35)
+ 🔍 [DEBUG] Full userPermissions response: Object
+ 🔍 [DEBUG] userPermissions.modules: Array(35)
+ 🔍 [DEBUG] userPermissions.permissions: Array(35)
+ 🔍 [DEBUG] Total allButtons count: 35
+ 🔍 [DEBUG] AI Settings exists in allButtons: false
+ 🔍 [DEBUG] Content Management exists in allButtons: true
+ 🔍 [DEBUG] allowedModules: Array(35)
+ 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+ 🔍 [DEBUG] management_dashboard in allowedModules? true
+ 🔍 [DEBUG] finance in allowedModules? true
+ 🔍 [DEBUG] geography_analytics in allowedModules? true
+ 🔍 [DEBUG] ai_settings in allowedModules? true
+ 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:423 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:431 🔍 [CRITICAL] Missing buttons count: 0
+site-management-fixed.tsx:433 🔍 [DEBUG] finance button found in allButtons? Object
+site-management-fixed.tsx:434 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+site-management-fixed.tsx:435 🔍 [DEBUG] ai_settings button found in allButtons? undefined
+site-management-fixed.tsx:436 🔍 [DEBUG] content_management button found in allButtons? Object
+site-management-fixed.tsx:437 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:438 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:439 🔍 [DEBUG] ai_settings button in filtered? undefined
+site-management-fixed.tsx:440 🔍 [DEBUG] content_management button in filtered? Object
+site-management-fixed.tsx:75 🔍 [DEBUG] filtered buttons count: 35
+site-management-fixed.tsx:76 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+site-management-fixed.tsx:77 🔍 [DEBUG] AI Control button in filtered: undefined
+site-management-fixed.tsx:78 🔍 [DEBUG] Content Management button in filtered: Object
+site-management-fixed.tsx:24 🔍 [DEBUG] Site Management component initialized
+advanced-email-settings.tsx:497 Loading category data: undefined undefined
+site-management-fixed.tsx:400 🔍 [DEBUG] Full userPermissions response: Object
+site-management-fixed.tsx:401 🔍 [DEBUG] userPermissions.modules: Array(35)
+site-management-fixed.tsx:402 🔍 [DEBUG] userPermissions.permissions: Array(35)
+site-management-fixed.tsx:407 🔍 [DEBUG] Total allButtons count: 35
+site-management-fixed.tsx:408 🔍 [DEBUG] AI Settings exists in allButtons: false
+site-management-fixed.tsx:409 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:411 🔍 [DEBUG] allowedModules: Array(35)
+site-management-fixed.tsx:412 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:413 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:414 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:415 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:416 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:417 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:423 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:431 🔍 [CRITICAL] Missing buttons count: 0
+site-management-fixed.tsx:433 🔍 [DEBUG] finance button found in allButtons? Object
+site-management-fixed.tsx:434 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+site-management-fixed.tsx:435 🔍 [DEBUG] ai_settings button found in allButtons? undefined
+site-management-fixed.tsx:436 🔍 [DEBUG] content_management button found in allButtons? Object
+site-management-fixed.tsx:437 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:438 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:439 🔍 [DEBUG] ai_settings button in filtered? undefined
+site-management-fixed.tsx:440 🔍 [DEBUG] content_management button in filtered? Object
+advanced-email-settings.tsx:148 Categories API Response: Object
+advanced-email-settings.tsx:585 Email Status Light Debug: Admin & General Contact Object
+advanced-email-settings.tsx:599 SMTP Configuration Check for Admin & General Contact Object
+advanced-email-settings.tsx:614 Final status for Admin & General Contact : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:585 Email Status Light Debug: Agricultural Fertilizers Department Object
+advanced-email-settings.tsx:599 SMTP Configuration Check for Agricultural Fertilizers Department Object
+advanced-email-settings.tsx:614 Final status for Agricultural Fertilizers Department : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:585 Email Status Light Debug: Fuel Additives Department Object
+advanced-email-settings.tsx:599 SMTP Configuration Check for Fuel Additives Department Object
+advanced-email-settings.tsx:614 Final status for Fuel Additives Department : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:585 Email Status Light Debug: Inventory Alerts Object
+advanced-email-settings.tsx:599 SMTP Configuration Check for Inventory Alerts Object
+advanced-email-settings.tsx:614 Final status for Inventory Alerts : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:585 Email Status Light Debug: Paint & Thinner Department Object
+advanced-email-settings.tsx:599 SMTP Configuration Check for Paint & Thinner Department Object
+advanced-email-settings.tsx:614 Final status for Paint & Thinner Department : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:585 Email Status Light Debug: Password Reset Object
+advanced-email-settings.tsx:599 SMTP Configuration Check for Password Reset Object
+advanced-email-settings.tsx:614 Final status for Password Reset : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:585 Email Status Light Debug: Sales department Object
+advanced-email-settings.tsx:599 SMTP Configuration Check for Sales department Object
+advanced-email-settings.tsx:614 Final status for Sales department : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:585 Email Status Light Debug: Support Object
+advanced-email-settings.tsx:599 SMTP Configuration Check for Support Object
+advanced-email-settings.tsx:614 Final status for Support : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:585 Email Status Light Debug: Water Treatment Department Object
+advanced-email-settings.tsx:599 SMTP Configuration Check for Water Treatment Department Object
+advanced-email-settings.tsx:614 Final status for Water Treatment Department : success
+advanced-email-settings.tsx:570 getTestStatusIcon called with status: success
+automated-email-logs.tsx:292 📧 [Email Logs Debug] Object
+useAuth.ts:43 Auth check result: Object
+automated-email-logs.tsx:292 📧 [Email Logs Debug] Object
+automated-email-logs.tsx:292 📧 [Email Logs Debug] {isLoading: false, hasResponse: true, responseType: 'object', logsCount: 0, firstLog: undefined, …}
