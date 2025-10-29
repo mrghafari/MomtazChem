@@ -29,7 +29,7 @@ const TEMPLATE_DISTRIBUTION = {
   استعلامات: {
     color: 'green', 
     icon: Mail,
-    templates: ['#04', '#05', '#07', '#08', '#09', '#10'],
+    templates: ['#04', '#05', '#07', '#10'],
     location: '/admin/inquiries',
     description: 'قالب‌های مرتبط با استعلامات و پیگیری‌های مشتریان'
   },
@@ -43,9 +43,9 @@ const TEMPLATE_DISTRIBUTION = {
   اطلاع‌رسانی: {
     color: 'orange',
     icon: AlertTriangle,
-    templates: ['#15'],
+    templates: ['#08', '#09', '#15', '#16'],
     location: '/admin/sms',
-    description: 'قالب‌های اطلاع‌رسانی عمومی سیستم'
+    description: 'قالب‌های اطلاع‌رسانی، اعلانات و هشدارهای سیستم'
   },
   موجودی: {
     color: 'red',
@@ -60,13 +60,6 @@ const TEMPLATE_DISTRIBUTION = {
     templates: ['#14'],
     location: '/admin/payment-settings',
     description: 'قالب‌های تأیید پرداخت و مالی'
-  },
-  امنیتی: {
-    color: 'rose',
-    icon: Shield,
-    templates: ['#16'],
-    location: '/admin/security-management',
-    description: 'قالب‌های هشدارهای امنیتی'
   },
   'سفارش‌های رها شده': {
     color: 'amber',
@@ -122,7 +115,7 @@ export default function TemplateDistribution() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">🎯 توزیع قالب‌های ایمیل</h1>
           <p className="text-gray-600 mt-1">
-            قالب‌های ایمیل در ۸ بخش مختلف سیستم توزیع شده‌اند
+            قالب‌های ایمیل در ۶ بخش مختلف سیستم توزیع شده‌اند
           </p>
         </div>
       </div>
@@ -146,7 +139,7 @@ export default function TemplateDistribution() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-green-100">بخش‌های سیستم</p>
-                <p className="text-2xl font-bold">8</p>
+                <p className="text-2xl font-bold">6</p>
               </div>
               <Settings className="w-8 h-8 text-green-200" />
             </div>
@@ -170,7 +163,7 @@ export default function TemplateDistribution() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-orange-100">دسته‌بندی‌ها</p>
-                <p className="text-2xl font-bold">8</p>
+                <p className="text-2xl font-bold">6</p>
               </div>
               <Package className="w-8 h-8 text-orange-200" />
             </div>
