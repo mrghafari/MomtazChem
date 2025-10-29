@@ -8928,7 +8928,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'ai_settings': { name: 'تنظیمات هوش مصنوعی', description: 'پیکربندی AI و SKU', category: 'system' },
         'refresh_control': { name: 'کنترل تازه‌سازی', description: 'تنظیمات تازه‌سازی خودکار', category: 'system' },
         'content_management': { name: 'مدیریت محتوا', description: 'ویرایش محتوای وبسایت', category: 'content' },
-        'ticketing_system': { name: 'سیستم تیکتینگ', description: 'مدیریت تیکت‌ها و پشتیبانی', category: 'support' }
+        'ticketing_system': { name: 'سیستم تیکتینگ', description: 'مدیریت تیکت‌ها و پشتیبانی', category: 'support' },
+        'remote_desktop': { name: 'دسکتاپ از راه دور', description: 'دسترسی از راه دور به سیستم', category: 'system' },
+        'company_information': { name: 'اطلاعات شرکت', description: 'مدیریت اطلاعات و پروفایل شرکت', category: 'content' },
+        'user_guide': { name: 'راهنمای کاربر', description: 'مستندات و راهنماهای کاربری', category: 'content' },
+        'marketing_module': { name: 'ماژول بازاریابی', description: 'مدیریت کمپین‌های بازاریابی', category: 'marketing' },
+        'aws_s3_settings': { name: 'تنظیمات AWS S3', description: 'پیکربندی ذخیره‌سازی ابری AWS', category: 'system' }
       };
       
       // Build modules array from current active modules
