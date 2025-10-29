@@ -732,7 +732,7 @@ export default function AdvancedEmailSettingsPage() {
                   <p className="text-sm text-gray-600">Central Email Templates</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-500">مدیریت یکپارچه همه ۱۷ قالب ایمیل سیستم با دسته‌بندی کامل</p>
+              <p className="text-sm text-gray-500">مدیریت یکپارچه همه قالب‌های ایمیل سیستم با دسته‌بندی کامل</p>
             </div>
           </Card>
 
