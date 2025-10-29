@@ -224,6 +224,23 @@ export class UniversalEmailService {
         sentAt: new Date(),
       });
 
+      // Increment template usage count
+      if (options.templateNumber) {
+        try {
+          const { pool } = await import('./db');
+          await pool.query(`
+            UPDATE email_templates 
+            SET usage_count = usage_count + 1, 
+                last_used = NOW(),
+                updated_at = NOW()
+            WHERE name LIKE $1
+          `, [`%${options.templateNumber}%`]);
+          console.log(`📊 [Template Usage] Incremented usage count for template ${options.templateNumber}`);
+        } catch (usageError) {
+          console.error(`❌ [Template Usage] Error incrementing usage count:`, usageError);
+        }
+      }
+
       console.log(`✅ [Universal Email] Email sent successfully for category: ${options.categoryKey}`);
       return true;
 
