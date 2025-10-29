@@ -80,9 +80,11 @@ export default function TemplateDistribution() {
   });
 
   const getTemplatesByCategory = (categoryTemplates: string[]) => {
-    return templates.filter(template => 
+    const filtered = templates.filter(template => 
       categoryTemplates.some(cat => template.name.startsWith(cat))
     );
+    console.log('🔍 Category templates:', categoryTemplates, 'Found:', filtered.length, filtered.map(t => t.name));
+    return filtered;
   };
 
   const getColorClasses = (color: string) => {
