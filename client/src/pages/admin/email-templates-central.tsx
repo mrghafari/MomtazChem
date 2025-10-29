@@ -369,20 +369,20 @@ const EmailTemplatesCentral: React.FC = () => {
     }
   }, [templates, selectedCategory, filteredTemplates, isLoading, error]);
 
-  // Get category stats
+  // Get category stats - use actual database category, not registry
   const getCategoryStats = (categoryKey: string) => {
     if (!Array.isArray(templates)) return { total: 0, active: 0, autoUse: 0 };
     
-    const categoryTemplates = templates.filter(template => {
-      const info = getTemplateInfo(template.name);
-      return info.category === categoryKey;
-    });
+    // Filter by actual database category
+    const categoryTemplates = templates.filter(template => template.category === categoryKey);
+    
     return {
       total: categoryTemplates.length,
       active: categoryTemplates.filter(t => t.is_active).length,
       autoUse: categoryTemplates.filter(t => {
-        const info = getTemplateInfo(t.name);
-        return info.autoUse;
+        const templateNumber = getTemplateNumber(t.name);
+        const info = TEMPLATE_REGISTRY[templateNumber];
+        return info?.autoUse || false;
       }).length
     };
   };
