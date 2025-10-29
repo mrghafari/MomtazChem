@@ -119,6 +119,7 @@ type Role = {
   color: string;
   priority: number;
   permissions: string[];
+  permissionCount?: number;
   userCount?: number;
   isActive: boolean;
   createdAt: string;
@@ -149,6 +150,7 @@ type Module = {
   isCore: boolean;
   icon?: any;
   color?: string;
+  moduleId?: string;
 };
 
 // Function to extract modules dynamically from Site Management configuration
@@ -264,7 +266,7 @@ function UserManagement() {
   const { data: roles = [], isLoading: rolesLoading } = useQuery<Role[]>({
     queryKey: ['/api/admin/custom-roles'],
     queryFn: async () => {
-      const response = await apiRequest('/api/admin/custom-roles');
+      const response = await apiRequest('/api/admin/custom-roles', undefined);
       return response.data || [];
     },
     staleTime: 0 // Force fresh data to see permission count fix
@@ -273,7 +275,7 @@ function UserManagement() {
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ['/api/admin/custom-users'],
     queryFn: async () => {
-      const response = await apiRequest('/api/admin/custom-users');
+      const response = await apiRequest('/api/admin/custom-users', undefined);
       return response.data || [];
     }
   });
@@ -299,7 +301,7 @@ function UserManagement() {
   const { data: modulesData, isLoading: modulesLoading } = useQuery({
     queryKey: ['/api/custom-modules'],
     queryFn: async () => {
-      const response = await apiRequest('/api/custom-modules');
+      const response = await apiRequest('/api/custom-modules', undefined);
       return response;
     },
     staleTime: 0, // Always fetch fresh data to stay synchronized
@@ -310,7 +312,7 @@ function UserManagement() {
   const { data: siteManagementModules = [], isLoading: siteModulesLoading } = useQuery({
     queryKey: ['/api/site-management/modules'],
     queryFn: async () => {
-      const response = await apiRequest('/api/site-management/modules');
+      const response = await apiRequest('/api/site-management/modules', undefined);
       return response.modules || [];
     },
     staleTime: 0,
@@ -519,7 +521,7 @@ function UserManagement() {
   };
 
   const getModulesByCategory = () => {
-    return availableModules.reduce((acc, module) => {
+    return availableModules.reduce((acc: Record<string, Module[]>, module: Module) => {
       if (!acc[module.category]) acc[module.category] = [];
       acc[module.category].push(module);
       return acc;
@@ -1077,15 +1079,15 @@ function UserManagement() {
                                 <Package className="h-4 w-4 text-blue-600" />
                                 <h3 className="font-medium text-blue-800">Available Modules</h3>
                                 <Badge variant="secondary" className="ml-auto">
-                                  {availableModules.filter(m => !selectedPermissions.includes(m.name)).length}
+                                  {availableModules.filter((m: Module) => !selectedPermissions.includes(m.name)).length}
                                 </Badge>
                               </div>
                               
                               <div className="max-h-80 overflow-y-auto p-3 bg-gray-50 rounded border-2 border-dashed border-gray-300">
                                 <div className="space-y-2">
                                   {availableModules
-                                    .filter(module => !selectedPermissions.includes(module.name))
-                                    .map((module) => {
+                                    .filter((module: Module) => !selectedPermissions.includes(module.name))
+                                    .map((module: Module) => {
                                       const IconComponent = module.icon || Settings;
                                       return (
                                         <div 
@@ -1107,7 +1109,7 @@ function UserManagement() {
                                       );
                                     })}
                                 </div>
-                                {availableModules.filter(m => !selectedPermissions.includes(m.name)).length === 0 && (
+                                {availableModules.filter((m: Module) => !selectedPermissions.includes(m.name)).length === 0 && (
                                   <div className="text-center text-gray-500 py-8">
                                     <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
                                     <p className="text-sm">All modules assigned</p>
@@ -1129,7 +1131,7 @@ function UserManagement() {
                               <div className="max-h-80 overflow-y-auto p-3 bg-gray-50 rounded border-2 border-dashed border-gray-300">
                                 <div className="space-y-2">
                                   {selectedPermissions.map((permissionName) => {
-                                    const module = availableModules.find(m => m.name === permissionName);
+                                    const module = availableModules.find((m: Module) => m.name === permissionName);
                                     if (!module) return null;
                                     
                                     const IconComponent = module.icon || Settings;
@@ -1175,7 +1177,7 @@ function UserManagement() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
-                                  const coreModules = availableModules.filter(m => m.isCore).map(m => m.name);
+                                  const coreModules = availableModules.filter((m: Module) => m.isCore).map((m: Module) => m.name);
                                   setSelectedPermissions(coreModules);
                                 }}
                                 className="text-xs"
@@ -1188,7 +1190,7 @@ function UserManagement() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
-                                  setSelectedPermissions(availableModules.map(m => m.name));
+                                  setSelectedPermissions(availableModules.map((m: Module) => m.name));
                                 }}
                                 className="text-xs"
                               >
@@ -1352,7 +1354,7 @@ function UserManagement() {
 
               {/* Display all modules in a simple grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-                {availableModules.map((module) => {
+                {availableModules.map((module: Module) => {
                   const IconComponent = module.icon || Settings;
                   return (
                     <div key={module.id} className="flex items-center space-x-3 p-3 bg-white rounded border hover:shadow-sm transition-all">
