@@ -50,6 +50,7 @@ import { AutoInvoiceConverter } from "./auto-invoice-converter";
 import { secureObjectStorageService } from "./secureObjectStorage";
 import { fileSecurityService, productImageSecurityService } from "./fileSecurityService";
 import { ObjectStorageService } from "./objectStorage";
+import { getAwsS3Service } from './aws-s3-service';
 
 import { 
   vehicleTemplates, 
@@ -193,27 +194,11 @@ const logosDir = path.join(uploadsDir, 'logos');
   }
 });
 
-// Multer configuration for image uploads
-const imageStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, imagesDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `product-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
+// Multer configuration for image uploads - using memory storage for S3 upload
+const imageStorage = multer.memoryStorage();
 
 // Multer configuration for catalog uploads
-const catalogStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, catalogsDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `catalog-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
+const catalogStorage = multer.memoryStorage();
 
 const uploadImage = multer({
   storage: imageStorage,
@@ -257,15 +242,7 @@ if (!fs.existsSync(msdsDir)) {
   fs.mkdirSync(msdsDir, { recursive: true });
 }
 
-const msdsStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, msdsDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `msds-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
+const msdsStorage = multer.memoryStorage();
 
 const uploadMsds = multer({
   storage: msdsStorage,
@@ -293,15 +270,7 @@ const documentStorage = multer.diskStorage({
 });
 
 // Receipt upload configuration
-const receiptStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, receiptsDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `receipt-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
+const receiptStorage = multer.memoryStorage();
 
 const uploadReceipt = multer({
   storage: receiptStorage,
@@ -451,17 +420,6 @@ const requireCustomerAuth = (req: Request, res: Response, next: NextFunction) =>
       next();
     } else {
       console.log('❌ [CSV EXPORT] Unauthorized access attempt');
-      res.status(401).json({ success: false, message: "احراز هویت مشتری مورد نیاز است" });
-    }
-  } catch (error) {
-    console.error('Customer authentication middleware error:', error);
-    res.status(500).json({
-      success: false,
-      message: "خطا در احراز هویت مشتری"
-    });
-  }
-};
-
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize sync service at startup
   console.log('🔄 [SYNC SERVICE] Initializing automatic table synchronization system...');
@@ -3363,7 +3321,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  app.post("/api/upload/image", requireAuth, uploadImage.single('image'), (req, res) => {
+
+  app.post("/api/upload/image", requireAuth, uploadImage.single('image'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
@@ -3372,29 +3331,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const imageUrl = `/uploads/images/${req.file.filename}`;
+      // Get S3 service instance
+      const s3Service = getAwsS3Service();
+      
+      // Upload file to S3
+      const uploadResult = await s3Service.uploadFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        'product-images'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload image to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Product image uploaded: ${uploadResult.key}`);
+
       res.json({ 
         success: true, 
-        url: imageUrl,
-        filename: req.file.filename,
+        url: uploadResult.url,
+        key: uploadResult.key,
+        filename: uploadResult.key?.split('/').pop() || req.file.originalname,
         originalName: req.file.originalname,
         size: req.file.size
       });
     } catch (error) {
+      console.error('❌ [S3 UPLOAD] Error uploading product image:', error);
       res.status(500).json({ 
         success: false, 
-        message: "Failed to upload image" 
+        message: "Failed to upload image to S3",
+        error: error.message
       });
     }
   });
-
-  app.post("/api/upload/catalog", requireAuth, uploadCatalog.single('catalog'), (req, res) => {
+  app.post("/api/upload/catalog", requireAuth, uploadCatalog.single('catalog'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
           success: false, 
           message: "No catalog file uploaded" 
         });
+      }
+
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        'product-catalogs'
+      );
+
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.message || 'S3 upload failed');
+      }
+
+      console.log(`✅ [S3 UPLOAD] [CATALOG] uploaded: ${uploadResult.key}`);
+
+      res.json({ 
+        success: true, 
+        url: uploadResult.url,
+        key: uploadResult.key,
+        originalName: req.file.originalname,
+        size: req.file.size
+      });
+    } catch (error) {
+      console.error('❌ [S3 UPLOAD] Catalog upload error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to upload catalog to S3",
+        error: error.message
+      });
+    }
+  });
       }
 
       const catalogUrl = `/uploads/catalogs/${req.file.filename}`;
@@ -3414,13 +3426,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // MSDS upload endpoint
-  app.post("/api/upload/msds", requireAuth, uploadMsds.single('msds'), (req, res) => {
+  app.post("/api/upload/msds", requireAuth, uploadMsds.single('msds'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
           success: false, 
           message: "No MSDS file uploaded" 
         });
+      }
+
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        'product-msds'
+      );
+
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.message || 'S3 upload failed');
+      }
+
+      console.log(`✅ [S3 UPLOAD] [MSDS] uploaded: ${uploadResult.key}`);
+
+      res.json({ 
+        success: true, 
+        url: uploadResult.url,
+        key: uploadResult.key,
+        originalName: req.file.originalname,
+        size: req.file.size
+      });
+    } catch (error) {
+      console.error('❌ [S3 UPLOAD] MSDS upload error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to upload MSDS file to S3",
+        error: error.message
+      });
+    }
+  });
       }
 
       const msdsUrl = `/uploads/msds/${req.file.filename}`;
@@ -34829,8 +34873,22 @@ momtazchem.com
         amountStatus = 'مبلغ فیش دقیقاً برابر با بدهی شما است';
       }
 
-      // ایجاد مسیر نسبی برای ذخیره در دیتابیس
-      const filePath = `/uploads/receipts/${file.filename}`;
+      // Upload to AWS S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadFile(
+        file.buffer,
+        file.originalname,
+        file.mimetype,
+        'payment-receipts'
+      );
+
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.message || 'S3 upload failed');
+      }
+
+      console.log(`✅ [S3 UPLOAD] [RECEIPT] uploaded: ${uploadResult.key}`);
+
+      const filePath = uploadResult.url; // S3 URL instead of local path
 
       // به‌روزرسانی سفارش با مسیر فیش بانکی و مبلغ فیش
       const uploadNote = `فیش بانکی آپلود شد در ${new Date().toLocaleString('fa-IR')} | مبلغ فیش: ${amount.toLocaleString()} دینار | مبلغ سفارش: ${orderAmount.toLocaleString()} دینار${walletCredit > 0 ? ` | مبلغ اضافی ${walletCredit.toLocaleString()} دینار در انتظار تایید واحد مالی` : ''}${walletDeduction > 0 ? ` | کمبود ${walletDeduction.toLocaleString()} دینار از والت کسر شد` : ''}${notes ? ` | توضیحات: ${notes}` : ''}`;
