@@ -17062,7 +17062,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // 🏭 [FINANCIAL HOLD] Wallet payment must be reviewed by financial department
         try {
-          await customerStorage.updateOrderStatus(order.id, 'confirmed');
+          await customerStorage.updateOrderStatus(order.id, 'finance_pending');
           
           // Update payment status and method directly in database
           await db
@@ -17118,7 +17118,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // 🏭 [AUTO WAREHOUSE] Send confirmed full wallet payment directly to warehouse
           try {
-            await customerStorage.updateOrderStatus(order.id, 'confirmed');
+            await customerStorage.updateOrderStatus(order.id, 'finance_pending');
             
             // Update payment status and method directly in database
             await db
