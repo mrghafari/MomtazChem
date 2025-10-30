@@ -7,9 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, CreditCard, Building2, Wallet, CheckCircle, Upload, FileText } from "lucide-react";
+import { AlertCircle, CreditCard, Building2, Wallet, CheckCircle, Upload, FileText, QrCode, Copy, Clock, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import QRCode from "qrcode";
 
 interface PaymentGatewayProps {
   paymentMethod: string;
@@ -34,6 +35,11 @@ const PaymentGateway = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  
+  const [fibPayment, setFibPayment] = useState<any>(null);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
+  const [timeRemaining, setTimeRemaining] = useState<number>(0);
+  const [paymentStatus, setPaymentStatus] = useState<string>("pending");
 
   // Auto-redirect for online payment method
   useEffect(() => {
@@ -217,6 +223,123 @@ const PaymentGateway = ({
 
     setIsProcessing(false);
     onPaymentSuccess(paymentData);
+  };
+
+  const handleFibPayment = async () => {
+    setIsProcessing(true);
+    try {
+      const response = await apiRequest('/api/fib/create-payment', {
+        method: 'POST',
+        body: JSON.stringify({
+          orderId,
+          amount: totalAmount,
+          currency: 'IQD'
+        })
+      });
+
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to create FIB payment');
+      }
+
+      const payment = response.data;
+      setFibPayment(payment);
+      setPaymentStatus(payment.status);
+
+      const qrUrl = await QRCode.toDataURL(payment.qrCode);
+      setQrCodeDataUrl(qrUrl);
+
+      const expiryTime = new Date(payment.validUntil).getTime();
+      const now = Date.now();
+      setTimeRemaining(Math.max(0, Math.floor((expiryTime - now) / 1000)));
+
+      toast({
+        title: "Payment Created",
+        description: "Scan the QR code with your FIB mobile app to complete payment"
+      });
+
+    } catch (error: any) {
+      console.error('FIB payment error:', error);
+      toast({
+        title: "Payment Error",
+        description: error.message || 'Failed to create payment',
+        variant: "destructive"
+      });
+      onPaymentError(error.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const checkFibPaymentStatus = async () => {
+    if (!fibPayment) return;
+
+    try {
+      const response = await apiRequest(`/api/fib/payment-status/${fibPayment.paymentId}`, {
+        method: 'GET'
+      });
+
+      if (response.success && response.data) {
+        const newStatus = response.data.status;
+        setPaymentStatus(newStatus);
+
+        if (newStatus === 'paid') {
+          toast({
+            title: "Payment Successful",
+            description: "Your payment has been confirmed"
+          });
+          onPaymentSuccess({
+            method: 'fib_online',
+            transactionId: fibPayment.paymentId,
+            amount: totalAmount,
+            orderId,
+            timestamp: new Date().toISOString()
+          });
+        } else if (newStatus === 'cancelled' || newStatus === 'expired') {
+          toast({
+            title: "Payment Failed",
+            description: `Payment ${newStatus}`,
+            variant: "destructive"
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Status check error:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (paymentMethod === 'fib_online' && fibPayment && timeRemaining > 0) {
+      const timer = setInterval(() => {
+        setTimeRemaining(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setPaymentStatus('expired');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [paymentMethod, fibPayment, timeRemaining]);
+
+  useEffect(() => {
+    if (paymentMethod === 'fib_online' && fibPayment && paymentStatus === 'pending') {
+      const statusChecker = setInterval(() => {
+        checkFibPaymentStatus();
+      }, 3000);
+
+      return () => clearInterval(statusChecker);
+    }
+  }, [paymentMethod, fibPayment, paymentStatus]);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied",
+      description: "Payment code copied to clipboard"
+    });
   };
 
   const renderIraqiBankTransfer = () => (
@@ -517,8 +640,197 @@ const PaymentGateway = ({
     </Card>
   );
 
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
+  const renderFibPayment = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <Building2 className="w-5 h-5 mr-2" />
+          First Iraqi Bank - البنك العراقي الأول
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {!fibPayment ? (
+          <div className="space-y-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-blue-900 mb-2">
+                Instant Payment via FIB Mobile App
+                <br />
+                الدفع الفوري عبر تطبيق FIB للهاتف المحمول
+              </h4>
+              <div className="space-y-2 text-sm text-blue-800">
+                <p><strong>Amount | المبلغ:</strong> {formatCurrency(totalAmount)}</p>
+                <p><strong>Order | الطلب:</strong> #{orderId}</p>
+                <p className="text-xs mt-3">
+                  You will receive a QR code and payment code to complete your payment using FIB Personal, Business, or Corporate app.
+                  <br />
+                  ستحصل على رمز QR ورمز الدفع لإتمام عملية الدفع باستخدام تطبيق FIB الشخصي أو التجاري أو المؤسسي.
+                </p>
+              </div>
+            </div>
+            
+            <Button 
+              onClick={handleFibPayment}
+              disabled={isProcessing}
+              size="lg"
+              className="w-full bg-blue-600 hover:bg-blue-700"
+              data-testid="button-create-fib-payment"
+            >
+              {isProcessing ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Creating Payment... | إنشاء الدفع...
+                </>
+              ) : (
+                <>
+                  <QrCode className="w-5 h-5 mr-2" />
+                  Generate Payment Code | إنشاء رمز الدفع
+                </>
+              )}
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {paymentStatus === 'paid' && (
+              <div className="bg-green-50 border-2 border-green-500 p-4 rounded-lg text-center">
+                <CheckCircle2 className="w-16 h-16 text-green-600 mx-auto mb-2" />
+                <h3 className="text-lg font-semibold text-green-800">
+                  Payment Successful! | تم الدفع بنجاح!
+                </h3>
+                <p className="text-sm text-green-700 mt-1">
+                  Your order has been confirmed | تم تأكيد طلبك
+                </p>
+              </div>
+            )}
 
+            {paymentStatus === 'expired' && (
+              <div className="bg-red-50 border-2 border-red-500 p-4 rounded-lg text-center">
+                <AlertCircle className="w-16 h-16 text-red-600 mx-auto mb-2" />
+                <h3 className="text-lg font-semibold text-red-800">
+                  Payment Expired | انتهت صلاحية الدفع
+                </h3>
+                <p className="text-sm text-red-700 mt-1">
+                  Please create a new payment | يرجى إنشاء دفعة جديدة
+                </p>
+                <Button 
+                  onClick={() => {
+                    setFibPayment(null);
+                    setPaymentStatus('pending');
+                    setQrCodeDataUrl('');
+                  }}
+                  className="mt-4"
+                  data-testid="button-retry-fib-payment"
+                >
+                  Create New Payment | إنشاء دفع جديد
+                </Button>
+              </div>
+            )}
+
+            {paymentStatus === 'pending' && (
+              <>
+                <div className="flex items-center justify-between bg-amber-50 p-3 rounded-lg">
+                  <div className="flex items-center">
+                    <Clock className="w-5 h-5 text-amber-600 mr-2" />
+                    <span className="font-semibold text-amber-900">
+                      Time Remaining | الوقت المتبقي
+                    </span>
+                  </div>
+                  <span className="text-2xl font-bold text-amber-900">
+                    {formatTime(timeRemaining)}
+                  </span>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900 text-center">
+                      Scan QR Code | امسح رمز QR
+                    </h4>
+                    {qrCodeDataUrl && (
+                      <div className="bg-white p-4 rounded-lg border-2 border-blue-200 flex justify-center">
+                        <img 
+                          src={qrCodeDataUrl} 
+                          alt="FIB Payment QR Code" 
+                          className="w-64 h-64"
+                          data-testid="img-fib-qr-code"
+                        />
+                      </div>
+                    )}
+                    <p className="text-xs text-center text-gray-600">
+                      Open FIB app and scan this code
+                      <br />
+                      افتح تطبيق FIB وامسح هذا الرمز
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900 text-center">
+                      Or Enter Code Manually | أو أدخل الرمز يدويًا
+                    </h4>
+                    <div className="bg-white p-6 rounded-lg border-2 border-blue-200">
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600 mb-2">
+                          Payment Code | رمز الدفع
+                        </p>
+                        <div className="flex items-center justify-center gap-2">
+                          <code 
+                            className="text-3xl font-mono font-bold text-blue-900 tracking-wider"
+                            data-testid="text-payment-code"
+                          >
+                            {fibPayment.readableCode}
+                          </code>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => copyToClipboard(fibPayment.readableCode)}
+                            data-testid="button-copy-code"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-center text-gray-600">
+                      Enter this code in your FIB app
+                      <br />
+                      أدخل هذا الرمز في تطبيق FIB الخاص بك
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-blue-900 mb-2 flex items-center">
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    How to Pay | كيفية الدفع
+                  </h4>
+                  <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+                    <li>Open your FIB mobile app (Personal/Business/Corporate)</li>
+                    <li>Go to Pay/Transfer section | انتقل إلى قسم الدفع / التحويل</li>
+                    <li>Scan the QR code or enter the payment code | امسح رمز QR أو أدخل رمز الدفع</li>
+                    <li>Confirm the payment | قم بتأكيد الدفع</li>
+                    <li>Wait for automatic confirmation | انتظر التأكيد التلقائي</li>
+                  </ol>
+                </div>
+
+                <div className="flex items-center justify-center">
+                  <div className="animate-pulse flex items-center text-blue-600">
+                    <div className="w-3 h-3 bg-blue-600 rounded-full mr-2 animate-ping"></div>
+                    <span className="text-sm font-medium">
+                      Waiting for payment... | في انتظار الدفع...
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 
 
   const renderOnlinePayment = () => (
@@ -592,6 +904,8 @@ const PaymentGateway = ({
         return renderInternationalBankTransfer();
       case 'online_payment':
         return renderOnlinePayment();
+      case 'fib_online':
+        return renderFibPayment();
       default:
         return (
           <Card>
