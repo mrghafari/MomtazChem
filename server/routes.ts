@@ -30,10 +30,11 @@ import { customerDb, customerPool } from "./customer-db";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema, emailLogs, emailCategories, smtpSettings, emailRecipients, categoryEmailAssignments, insertCategoryEmailAssignmentSchema } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema, paymentGateways, orders as shopOrders, shopProducts } from "@shared/shop-schema";
 import { sendContactEmail } from "./email";
+import { insertBlogPostSchema, insertBlogPostTranslationSchema, blogPosts, blogPostTranslations } from "@shared/blog-schema";
 import TemplateProcessor from "./template-processor";
 import InventoryAlertService from "./inventory-alerts";
 import { db } from "./db";
-import { sql, eq, and, or, isNull, isNotNull, desc, gte, inArray } from "drizzle-orm";
+import { sql, eq, and, or, ne, isNull, isNotNull, desc, gte, inArray } from "drizzle-orm";
 import { findCorruptedOrders, getDataIntegrityStats, validateOrderIntegrity, markCorruptedOrderAsDeleted } from './data-integrity-tools';
 import { z } from "zod";
 import * as schema from "@shared/schema";
@@ -52135,6 +52136,544 @@ momtazchem.com
 
 
   // Catch-all for unmatched API routes - return JSON 404 (must be last)
+  // ============================================================================
+  // BLOG API ROUTES
+  // ============================================================================
+
+  // ============================================================================
+  // ADMIN BLOG ROUTES (Authenticated)
+  // ============================================================================
+
+  /**
+   * GET /api/admin/blog
+   * List all blog posts with translations
+   * @access Admin only
+   */
+  app.get("/api/admin/blog", requireAdmin, async (req, res) => {
+    try {
+      const posts = await db
+        .select()
+        .from(blogPosts)
+        .orderBy(blogPosts.createdAt);
+
+      const postsWithTranslations = await Promise.all(
+        posts.map(async (post) => {
+          const translations = await db
+            .select()
+            .from(blogPostTranslations)
+            .where(eq(blogPostTranslations.postId, post.id));
+
+          return {
+            ...post,
+            translations,
+          };
+        })
+      );
+
+      res.json({
+        success: true,
+        data: postsWithTranslations,
+      });
+    } catch (error: any) {
+      console.error("Error fetching blog posts:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت مقالات / Error fetching blog posts",
+      });
+    }
+  });
+
+  /**
+   * POST /api/admin/blog
+   * Create new blog post with both English and Arabic translations
+   * @access Admin only
+   */
+  app.post("/api/admin/blog", requireAdmin, async (req, res) => {
+    try {
+      const { post, translations } = req.body;
+
+      // Validate post data
+      const validatedPost = insertBlogPostSchema.parse(post);
+
+      // Validate translations (should have both English and Arabic)
+      if (!translations || translations.length !== 2) {
+        return res.status(400).json({
+          success: false,
+          message: "يجب توفير ترجمتين (إنجليزي وعربي) / Both English and Arabic translations required",
+        });
+      }
+
+      const validatedTranslations = translations.map((t: any) =>
+        insertBlogPostTranslationSchema.parse(t)
+      );
+
+      // Check if English and Arabic are both present
+      const hasEnglish = validatedTranslations.some((t) => t.language === "en");
+      const hasArabic = validatedTranslations.some((t) => t.language === "ar");
+
+      if (!hasEnglish || !hasArabic) {
+        return res.status(400).json({
+          success: false,
+          message: "يجب توفير ترجمة إنجليزية وعربية / Both English and Arabic translations required",
+        });
+      }
+
+      // Create blog post
+      const [newPost] = await db
+        .insert(blogPosts)
+        .values(validatedPost)
+        .returning();
+
+      // Create translations
+      const newTranslations = await db
+        .insert(blogPostTranslations)
+        .values(
+          validatedTranslations.map((t) => ({
+            ...t,
+            postId: newPost.id,
+          }))
+        )
+        .returning();
+
+      res.json({
+        success: true,
+        data: {
+          ...newPost,
+          translations: newTranslations,
+        },
+      });
+    } catch (error: any) {
+      console.error("Error creating blog post:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا في إنشاء المقال / Error creating blog post",
+        error: error.message,
+      });
+    }
+  });
+
+  /**
+   * PUT /api/admin/blog/:id
+   * Update blog post and translations
+   * @access Admin only
+   */
+  app.put("/api/admin/blog/:id", requireAdmin, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const { post, translations } = req.body;
+
+      // Check if post exists
+      const existingPost = await db
+        .select()
+        .from(blogPosts)
+        .where(eq(blogPosts.id, postId))
+        .limit(1);
+
+      if (existingPost.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "المقال غير موجود / Blog post not found",
+        });
+      }
+
+      // Update blog post
+      const [updatedPost] = await db
+        .update(blogPosts)
+        .set({
+          ...post,
+          updatedAt: new Date(),
+        })
+        .where(eq(blogPosts.id, postId))
+        .returning();
+
+      // Update translations if provided
+      let updatedTranslations = [];
+      if (translations && translations.length > 0) {
+        // Delete existing translations
+        await db
+          .delete(blogPostTranslations)
+          .where(eq(blogPostTranslations.postId, postId));
+
+        // Insert new translations
+        updatedTranslations = await db
+          .insert(blogPostTranslations)
+          .values(
+            translations.map((t: any) => ({
+              ...t,
+              postId: postId,
+              updatedAt: new Date(),
+            }))
+          )
+          .returning();
+      }
+
+      res.json({
+        success: true,
+        data: {
+          ...updatedPost,
+          translations: updatedTranslations,
+        },
+      });
+    } catch (error: any) {
+      console.error("Error updating blog post:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا في تحديث المقال / Error updating blog post",
+        error: error.message,
+      });
+    }
+  });
+
+  /**
+   * DELETE /api/admin/blog/:id
+   * Delete blog post (cascade deletes translations)
+   * @access Admin only
+   */
+  app.delete("/api/admin/blog/:id", requireAdmin, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+
+      // Check if post exists
+      const existingPost = await db
+        .select()
+        .from(blogPosts)
+        .where(eq(blogPosts.id, postId))
+        .limit(1);
+
+      if (existingPost.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "المقال غير موجود / Blog post not found",
+        });
+      }
+
+      // Delete blog post (translations will be cascade deleted)
+      await db.delete(blogPosts).where(eq(blogPosts.id, postId));
+
+      res.json({
+        success: true,
+        message: "تم حذف المقال بنجاح / Blog post deleted successfully",
+      });
+    } catch (error: any) {
+      console.error("Error deleting blog post:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا في حذف المقال / Error deleting blog post",
+        error: error.message,
+      });
+    }
+  });
+
+  /**
+   * PATCH /api/admin/blog/:id/publish
+   * Toggle publish status and set publish_date
+   * @access Admin only
+   */
+  app.patch("/api/admin/blog/:id/publish", requireAdmin, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+
+      // Check if post exists
+      const existingPost = await db
+        .select()
+        .from(blogPosts)
+        .where(eq(blogPosts.id, postId))
+        .limit(1);
+
+      if (existingPost.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "المقال غير موجود / Blog post not found",
+        });
+      }
+
+      const currentStatus = existingPost[0].status;
+      const newStatus = currentStatus === "published" ? "draft" : "published";
+      const publishDate = newStatus === "published" ? new Date() : null;
+
+      const [updatedPost] = await db
+        .update(blogPosts)
+        .set({
+          status: newStatus,
+          publishDate: publishDate,
+          updatedAt: new Date(),
+        })
+        .where(eq(blogPosts.id, postId))
+        .returning();
+
+      res.json({
+        success: true,
+        data: updatedPost,
+        message:
+          newStatus === "published"
+            ? "تم نشر المقال بنجاح / Blog post published successfully"
+            : "تم إلغاء نشر المقال / Blog post unpublished",
+      });
+    } catch (error: any) {
+      console.error("Error toggling publish status:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا في تغيير حالة النشر / Error toggling publish status",
+        error: error.message,
+      });
+    }
+  });
+
+  // ============================================================================
+  // PUBLIC BLOG ROUTES (No Authentication)
+  // ============================================================================
+
+  /**
+   * GET /api/blog
+   * List published blog posts with pagination, filtering by tag, language support
+   * @access Public
+   * @query limit - number of posts per page (default: 10)
+   * @query offset - pagination offset (default: 0)
+   * @query tag - filter by tag
+   * @query language - filter by language (en or ar)
+   */
+  app.get("/api/blog", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const tag = req.query.tag as string;
+      const language = (req.query.language as string) || "en";
+
+      // Validate language
+      if (language !== "en" && language !== "ar") {
+        return res.status(400).json({
+          success: false,
+          message: "اللغة غير صالحة / Invalid language parameter",
+        });
+      }
+
+      // Build query for published posts
+      let query = db
+        .select()
+        .from(blogPosts)
+        .where(eq(blogPosts.status, "published"))
+        .orderBy(blogPosts.publishDate)
+        .limit(limit)
+        .offset(offset);
+
+      // Filter by tag if provided
+      if (tag) {
+        query = query.where(sql`${tag} = ANY(${blogPosts.tags})`);
+      }
+
+      const posts = await query;
+
+      // Get translations for each post
+      const postsWithTranslation = await Promise.all(
+        posts.map(async (post) => {
+          const [translation] = await db
+            .select()
+            .from(blogPostTranslations)
+            .where(
+              and(
+                eq(blogPostTranslations.postId, post.id),
+                eq(blogPostTranslations.language, language)
+              )
+            )
+            .limit(1);
+
+          return {
+            ...post,
+            translation,
+          };
+        })
+      );
+
+      res.json({
+        success: true,
+        data: postsWithTranslation,
+        pagination: {
+          limit,
+          offset,
+          total: posts.length,
+        },
+      });
+    } catch (error: any) {
+      console.error("Error fetching published blog posts:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا في دریافت المقالات / Error fetching blog posts",
+      });
+    }
+  });
+
+  /**
+   * GET /api/blog/:slug
+   * Get single blog post by slug with language parameter
+   * @access Public
+   * @query language - en or ar (default: en)
+   */
+  app.get("/api/blog/:slug", async (req, res) => {
+    try {
+      const slug = req.params.slug;
+      const language = (req.query.language as string) || "en";
+
+      // Validate language
+      if (language !== "en" && language !== "ar") {
+        return res.status(400).json({
+          success: false,
+          message: "اللغة غير صالحة / Invalid language parameter",
+        });
+      }
+
+      // Find translation by slug
+      const [translation] = await db
+        .select()
+        .from(blogPostTranslations)
+        .where(
+          and(
+            eq(blogPostTranslations.slug, slug),
+            eq(blogPostTranslations.language, language)
+          )
+        )
+        .limit(1);
+
+      if (!translation) {
+        return res.status(404).json({
+          success: false,
+          message: "المقال غير موجود / Blog post not found",
+        });
+      }
+
+      // Get the blog post
+      const [post] = await db
+        .select()
+        .from(blogPosts)
+        .where(
+          and(
+            eq(blogPosts.id, translation.postId),
+            eq(blogPosts.status, "published")
+          )
+        )
+        .limit(1);
+
+      if (!post) {
+        return res.status(404).json({
+          success: false,
+          message: "المقال غير موجود / Blog post not found",
+        });
+      }
+
+      // Increment view count
+      await db
+        .update(blogPosts)
+        .set({
+          viewCount: (post.viewCount || 0) + 1,
+        })
+        .where(eq(blogPosts.id, post.id));
+
+      res.json({
+        success: true,
+        data: {
+          ...post,
+          viewCount: (post.viewCount || 0) + 1,
+          translation,
+        },
+      });
+    } catch (error: any) {
+      console.error("Error fetching blog post by slug:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا في دریافت المقال / Error fetching blog post",
+      });
+    }
+  });
+
+  /**
+   * GET /api/blog/:id/related
+   * Get related blog posts by tags (same language)
+   * @access Public
+   * @query language - en or ar (default: en)
+   * @query limit - number of related posts (default: 5)
+   */
+  app.get("/api/blog/:id/related", async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const language = (req.query.language as string) || "en";
+      const limit = parseInt(req.query.limit as string) || 5;
+
+      // Validate language
+      if (language !== "en" && language !== "ar") {
+        return res.status(400).json({
+          success: false,
+          message: "اللغة غير صالحة / Invalid language parameter",
+        });
+      }
+
+      // Get the original post
+      const [originalPost] = await db
+        .select()
+        .from(blogPosts)
+        .where(eq(blogPosts.id, postId))
+        .limit(1);
+
+      if (!originalPost) {
+        return res.status(404).json({
+          success: false,
+          message: "المقال غير موجود / Blog post not found",
+        });
+      }
+
+      // If no tags, return empty array
+      if (!originalPost.tags || originalPost.tags.length === 0) {
+        return res.json({
+          success: true,
+          data: [],
+        });
+      }
+
+      // Find related posts with overlapping tags
+      const relatedPosts = await db
+        .select()
+        .from(blogPosts)
+        .where(
+          and(
+            eq(blogPosts.status, "published"),
+            ne(blogPosts.id, postId),
+            sql`${blogPosts.tags} && ${originalPost.tags}`
+          )
+        )
+        .limit(limit);
+
+      // Get translations for related posts
+      const relatedPostsWithTranslation = await Promise.all(
+        relatedPosts.map(async (post) => {
+          const [translation] = await db
+            .select()
+            .from(blogPostTranslations)
+            .where(
+              and(
+                eq(blogPostTranslations.postId, post.id),
+                eq(blogPostTranslations.language, language)
+              )
+            )
+            .limit(1);
+
+          return {
+            ...post,
+            translation,
+          };
+        })
+      );
+
+      res.json({
+        success: true,
+        data: relatedPostsWithTranslation,
+      });
+    } catch (error: any) {
+      console.error("Error fetching related blog posts:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا في دریافت المقالات ذات الصلة / Error fetching related posts",
+      });
+    }
+  });
+
   app.all('/api/*', (req, res) => {
     console.log(`❌ 404 - Unmatched API route: ${req.method} ${req.originalUrl}`);
     res.status(404).json({
