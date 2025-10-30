@@ -143,6 +143,7 @@ import AdminAbandonedOrders from "@/pages/admin-abandoned-orders";
 import FooterManagement from "@/pages/admin/footer-management";
 import ShopManagement from "@/pages/admin/shop-management";
 import VehicleHistoryPage from "@/pages/admin/vehicle-history";
+import BlogManagement from "@/pages/admin/blog-management";
 
 import NotFound from "@/pages/not-found";
 
@@ -285,6 +286,7 @@ function Router() {
           <Route path="/admin/vehicle-history" component={VehicleHistoryPage} />
           <Route path="/admin/logistics-geography" component={LogisticsGeography} />
           <Route path="/admin/pdf-test" component={lazy(() => import("@/pages/admin/pdf-test"))} />
+          <Route path="/admin/blog-management" component={BlogManagement} />
 
 
           
