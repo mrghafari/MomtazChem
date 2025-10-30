@@ -75,6 +75,24 @@ export interface Translation {
     products: string;
   };
 
+  // Blog page
+  blog: {
+    title: string;
+    subtitle: string;
+    searchPlaceholder: string;
+    allTags: string;
+    readMore: string;
+    by: string;
+    views: string;
+    noPostsFound: string;
+    noPostsMessage: string;
+    loadingPosts: string;
+    previousPage: string;
+    nextPage: string;
+    page: string;
+    of: string;
+  };
+
   // Checkout page
   checkout_page: {
     // Page titles & headers
@@ -991,6 +1009,24 @@ export const translations: Record<Language, Translation> = {
       of: 'of',
       product: 'product',
       products: 'products',
+    },
+
+    // Blog page
+    blog: {
+      title: 'Blog - Chemical Industry Insights',
+      subtitle: 'Latest articles, guides, and insights about chemical solutions, fuel additives, water treatment, and industrial chemicals',
+      searchPlaceholder: 'Search articles by title or content...',
+      allTags: 'All Tags',
+      readMore: 'Read More',
+      by: 'By',
+      views: 'views',
+      noPostsFound: 'No Posts Found',
+      noPostsMessage: 'We couldn\'t find any blog posts matching your criteria. Try adjusting your search or filters.',
+      loadingPosts: 'Loading posts...',
+      previousPage: 'Previous',
+      nextPage: 'Next',
+      page: 'Page',
+      of: 'of',
     },
 
     // Checkout page
@@ -2005,6 +2041,24 @@ export const translations: Record<Language, Translation> = {
       of: 'من',
       product: 'منتج',
       products: 'منتجات',
+    },
+
+    // Blog page
+    blog: {
+      title: 'مدونة - رؤى صناعة المواد الكيميائية',
+      subtitle: 'أحدث المقالات والأدلة والرؤى حول الحلول الكيميائية ومضافات الوقود ومعالجة المياه والمواد الكيميائية الصناعية',
+      searchPlaceholder: 'البحث في المقالات حسب العنوان أو المحتوى...',
+      allTags: 'جميع العلامات',
+      readMore: 'اقرأ المزيد',
+      by: 'بواسطة',
+      views: 'مشاهدة',
+      noPostsFound: 'لم يتم العثور على مقالات',
+      noPostsMessage: 'لم نتمكن من العثور على أي مقالات تطابق معاييرك. حاول ضبط البحث أو الفلاتر.',
+      loadingPosts: 'جاري تحميل المقالات...',
+      previousPage: 'السابق',
+      nextPage: 'التالي',
+      page: 'صفحة',
+      of: 'من',
     },
 
     // Checkout page
