@@ -1,5 +1,5 @@
 import { pool } from './db';
-import { FIBService } from './fib-service';
+import { fibService } from './fib-service';
 import { storage } from './storage';
 
 export interface PaymentGateway {
@@ -333,7 +333,7 @@ export class BankGatewayRouter {
   // پیاده‌سازی درگاه FIB (First Iraqi Bank)
   private async createFibPayment(gateway: PaymentGateway, request: BankPaymentRequest) {
     try {
-      const fibService = new FIBService();
+      // Using global fibService instance
       const formattedAmount = Math.round(parseFloat(request.amount.toString()));
       
       console.log(`💳 [FIB] Creating payment for amount: ${formattedAmount} IQD, Order: ${request.orderId}`);
