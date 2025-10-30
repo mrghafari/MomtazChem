@@ -4,6 +4,16 @@
 The Momtazchem Chemical Solutions Platform is a comprehensive, multilingual system integrating a public showcase website, e-commerce, and administrative tools for a chemical company. Its primary purpose is to optimize CRM, inventory, sales, logistics, and financial management while expanding market reach. Key capabilities include multi-language support (English, Arabic, Kurdish, Turkish), unified site management, advanced e-commerce, GPS tracking, real-time analytics, email automation, barcode and Kardex-synced inventory, and financial management. The project aims to establish Momtazchem as a digital leader in the chemical industry.
 
 ## Recent Changes (October 2025)
+- **First Iraqi Bank (FIB) Online Payment Integration (Oct 30, 2025)**:
+  - Integrated FIB payment gateway SDK (@first-iraqi-bank/sdk) for instant mobile app payments
+  - Created comprehensive database schema (fib_payments, fib_payment_callbacks, fib_payment_settings tables)
+  - Built backend service wrapper with OAuth2 authentication, payment creation, and status tracking
+  - Implemented RESTful API routes: /api/fib/create-payment, /api/fib/payment-status/:id, /api/fib/payment-callback
+  - Developed bilingual payment UI with QR code display, readable payment code, countdown timer, and real-time status polling
+  - Added FIB payment method to system with highest priority (100) for optimal user experience
+  - Supports all FIB mobile app ecosystems: Personal, Business, and Corporate
+  - Environment-aware callback URL routing (production/staging/development) with fallback logic
+  - Payment lifecycle management: pending → paid/cancelled/expired with automatic order status updates
 - **Complete SEO Optimization Implementation (Oct 30, 2025)**:
   - Implemented comprehensive Product Schema (JSON-LD) with complete product information, pricing, ratings, and availability
   - Added Open Graph meta tags to all main pages (home, shop, about, contact) with absolute URLs for social media sharing
@@ -75,7 +85,7 @@ Key tables cover Customer Management, Order Processing, Product Catalog, Invento
 - **Database**: Neon PostgreSQL cloud service
 - **Email Service**: Zoho Mail SMTP
 - **SMS Services**: Iraqi operators (Asiacell, Zain Iraq, Korek Telecom) and international providers (Twilio, Plivo, Infobip, MSG91)
-- **Payment Processing**: Iraqi banks (Rasheed Bank, Al-Rafidain Bank, Trade Bank of Iraq)
+- **Payment Processing**: First Iraqi Bank (FIB) Online Payment Gateway, Iraqi banks (Rasheed Bank, Al-Rafidain Bank, Trade Bank of Iraq)
 - **AI Services**: OpenAI API (for SKU generation, product recommendations)
 - **Live Chat**: Tawk.to
 - **PDF Generation**: Puppeteer, PDFKit/pdfMake
