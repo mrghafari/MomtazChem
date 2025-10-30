@@ -1,5 +1,7 @@
 import { Award, Leaf, Users, Globe, Target, Eye } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
+import OpenGraphTags from "@/components/seo/OpenGraphTags";
+import CanonicalUrl from "@/components/seo/CanonicalUrl";
 
 const About = () => {
   const { t, direction } = useLanguage();
@@ -29,6 +31,15 @@ const About = () => {
 
   return (
     <div className={`pt-20 ${direction === 'rtl' ? 'rtl' : 'ltr'}`} dir={direction}>
+      <OpenGraphTags
+        title="About Momtazchem - Leading Chemical Solutions Provider Since 2015"
+        description="Learn about Momtazchem, Iraq's trusted chemical solutions provider. 50+ countries served, ISO certified, committed to quality excellence and environmental responsibility. Discover our mission, vision, and values."
+        type="website"
+        image="https://momtazchem.com/og-about.jpg"
+        locale="en_US"
+      />
+      <CanonicalUrl path="/about" />
+      
       {/* Hero Section */}
       <section className="relative py-20 bg-gradient-to-r from-primary to-secondary text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

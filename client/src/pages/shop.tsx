@@ -30,6 +30,8 @@ import ProductRating from "@/components/ProductRating";
 import StarRating from "@/components/StarRating";
 import { ProductSpecsModal } from "@/components/ProductSpecsModal";
 import { formatIQDAmount } from "@/lib/currency-utils";
+import OpenGraphTags from "@/components/seo/OpenGraphTags";
+import CanonicalUrl from "@/components/seo/CanonicalUrl";
 
 const Shop = () => {
   const { toast } = useMultilingualToast();
@@ -847,6 +849,15 @@ const Shop = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <OpenGraphTags
+        title="Shop Chemical Products - Momtazchem | Order Online"
+        description="Browse and purchase premium chemical products online. Fuel additives, water treatment chemicals, paint thinners, and agricultural fertilizers. Secure checkout, fast delivery across Iraq and beyond."
+        type="website"
+        image="https://momtazchem.com/og-shop.jpg"
+        locale="en_US"
+      />
+      <CanonicalUrl path="/shop" />
+      
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 py-3 sm:py-6">

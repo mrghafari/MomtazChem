@@ -10,6 +10,8 @@ import { Award, Leaf, FlaskRound, Truck, Headphones, FuelIcon as Fuel, Droplets,
 import type { ShopProduct } from "@shared/shop-schema";
 import waterTreatmentImg from "@assets/download_1749877891276.jpeg";
 import { useLanguage } from "@/contexts/LanguageContext";
+import OpenGraphTags from "@/components/seo/OpenGraphTags";
+import CanonicalUrl from "@/components/seo/CanonicalUrl";
 
 const Home = () => {
   const { t } = useLanguage();
@@ -95,6 +97,15 @@ const Home = () => {
 
   return (
     <div>
+      <OpenGraphTags
+        title="Momtazchem - Premium Chemical Solutions | Industrial Chemicals & Fuel Additives"
+        description="Leading provider of high-quality chemical solutions in Iraq. Specializing in fuel additives, water treatment, paint thinners, and agricultural fertilizers. Quality guaranteed, 40+ countries served."
+        type="website"
+        image="https://momtazchem.com/og-home.jpg"
+        locale="en_US"
+      />
+      <CanonicalUrl path="/" />
+      
       {/* Hero Section */}
       <HeroSection />
 

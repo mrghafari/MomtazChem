@@ -12,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { MapPin, Phone, Mail, Clock, IdCard, Briefcase } from "lucide-react";
+import OpenGraphTags from "@/components/seo/OpenGraphTags";
+import CanonicalUrl from "@/components/seo/CanonicalUrl";
 
 interface ContentItem {
   id: number;
@@ -152,6 +154,15 @@ const Contact = () => {
 
   return (
     <div className="pt-20" dir={direction}>
+      <OpenGraphTags
+        title="Contact Momtazchem - Get Expert Chemical Solutions Support"
+        description="Reach out to Momtazchem for chemical product inquiries, technical support, quotes, and consultations. Available 24/7. Email, phone, and office locations in Iraq and worldwide."
+        type="website"
+        image="https://momtazchem.com/og-contact.jpg"
+        locale="en_US"
+      />
+      <CanonicalUrl path="/contact" />
+      
       {/* Hero Section */}
       <section className="relative py-20 bg-gradient-to-r from-primary to-secondary text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
