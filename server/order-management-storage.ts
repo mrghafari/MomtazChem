@@ -257,8 +257,9 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     // Update department-specific fields
     if (department === 'financial') {
       updateData.financialReviewerId = changedBy;
-      // 🚨 CRITICAL: Only set financialReviewedAt when actually approving, not for every update
-      if (newStatus === orderStatuses.FINANCIAL_APPROVED || newStatus === 'warehouse_pending') {
+      // 🚨 CRITICAL: Only set financialReviewedAt when explicitly approving (FINANCIAL_APPROVED status)
+      // NOT for routine updates or auto-sync transitions like warehouse_pending
+      if (newStatus === orderStatuses.FINANCIAL_APPROVED) {
         updateData.financialReviewedAt = new Date();
       }
       if (notes) updateData.financialNotes = notes;
