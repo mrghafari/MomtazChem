@@ -422,7 +422,12 @@ const requireCustomerAuth = (req: Request, res: Response, next: NextFunction) =>
       console.log('❌ [CSV EXPORT] Unauthorized access attempt');
       res.status(401).json({ success: false, message: "Unauthorized" });
     }
-  });
+  } catch (error) {
+    console.error('❌ [AUTH] Error in requireCustomerAuth:', error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize sync service at startup
   console.log('🔄 [SYNC SERVICE] Initializing automatic table synchronization system...');
@@ -3412,21 +3417,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
       }
 
-      const catalogUrl = `/uploads/catalogs/${req.file.filename}`;
-      res.json({ 
-        success: true, 
-        url: catalogUrl,
-        filename: req.file.filename,
-        originalName: req.file.originalname,
-        size: req.file.size
-      });
-    } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to upload catalog" 
-      });
-    }
-  });
 
   // MSDS upload endpoint
   app.post("/api/upload/msds", requireAuth, uploadMsds.single('msds'), async (req, res) => {
