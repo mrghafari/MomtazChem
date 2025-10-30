@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, DollarSign, BookOpen, Truck, Box, CreditCard, Wallet, MapPin, Barcode, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain, Monitor as RemoteMonitor, FileText, Server, MessageCircle, Cloud } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, DollarSign, BookOpen, Truck, Box, CreditCard, Wallet, MapPin, Barcode, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain, Monitor as RemoteMonitor, FileText, Server, MessageCircle, Cloud, PenTool } from "lucide-react";
 import { KardexSyncPanel } from "@/components/KardexSyncPanel";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -252,6 +252,14 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("seo", () => setLocation("/seo-management")),
       className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-800",
       moduleId: "seo"
+    },
+    {
+      id: "blog-management",
+      label: "Blog Management",
+      icon: PenTool,
+      onClick: () => trackButtonClick("blog-management", () => setLocation("/admin/blog-management")),
+      className: "border-fuchsia-300 text-fuchsia-600 hover:bg-fuchsia-50 hover:text-fuchsia-800",
+      moduleId: "blog"
     },
     {
       id: "categories",
