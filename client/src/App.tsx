@@ -145,6 +145,7 @@ import ShopManagement from "@/pages/admin/shop-management";
 import VehicleHistoryPage from "@/pages/admin/vehicle-history";
 import BlogManagement from "@/pages/admin/blog-management";
 import Blog from "@/pages/blog";
+import BlogPost from "@/pages/blog-post";
 
 import NotFound from "@/pages/not-found";
 
@@ -162,6 +163,7 @@ function Router() {
           <Route path="/help" component={UserGuide} />
           <Route path="/shop" component={Shop} />
           <Route path="/blog" component={Blog} />
+          <Route path="/blog/:slug" component={BlogPost} />
           <Route path="/payment-options" component={PaymentOptionsPage} />
           <Route path="/checkout" component={() => <Checkout cart={[]} products={[]} onOrderComplete={() => {}} />} />
           <Route path="/payment/:orderId" component={Payment} />

@@ -93,6 +93,30 @@ export interface Translation {
     of: string;
   };
 
+  // Blog post page
+  blogPost: {
+    loading: string;
+    notFound: string;
+    notFoundMessage: string;
+    backToBlog: string;
+    shareArticle: string;
+    copyLink: string;
+    linkCopied: string;
+    linkCopiedMessage: string;
+    tableOfContents: string;
+    aboutAuthor: string;
+    relatedPosts: string;
+    noRelatedPosts: string;
+    readingTime: string;
+    minutes: string;
+    publishedOn: string;
+    updatedOn: string;
+    previousPost: string;
+    nextPost: string;
+    tags: string;
+    share: string;
+  };
+
   // Checkout page
   checkout_page: {
     // Page titles & headers
@@ -1027,6 +1051,30 @@ export const translations: Record<Language, Translation> = {
       nextPage: 'Next',
       page: 'Page',
       of: 'of',
+    },
+
+    // Blog post page
+    blogPost: {
+      loading: 'Loading article...',
+      notFound: 'Article Not Found',
+      notFoundMessage: 'The article you are looking for does not exist or has been removed.',
+      backToBlog: 'Back to Blog',
+      shareArticle: 'Share Article',
+      copyLink: 'Copy Link',
+      linkCopied: 'Link Copied!',
+      linkCopiedMessage: 'The article link has been copied to your clipboard.',
+      tableOfContents: 'Table of Contents',
+      aboutAuthor: 'About the Author',
+      relatedPosts: 'Related Articles',
+      noRelatedPosts: 'No related articles found.',
+      readingTime: 'Reading Time',
+      minutes: 'min read',
+      publishedOn: 'Published on',
+      updatedOn: 'Updated on',
+      previousPost: 'Previous Article',
+      nextPost: 'Next Article',
+      tags: 'Tags',
+      share: 'Share',
     },
 
     // Checkout page
@@ -2059,6 +2107,30 @@ export const translations: Record<Language, Translation> = {
       nextPage: 'التالي',
       page: 'صفحة',
       of: 'من',
+    },
+
+    // Blog post page
+    blogPost: {
+      loading: 'جاري تحميل المقال...',
+      notFound: 'المقال غير موجود',
+      notFoundMessage: 'المقال الذي تبحث عنه غير موجود أو تم حذفه.',
+      backToBlog: 'العودة للمدونة',
+      shareArticle: 'مشاركة المقال',
+      copyLink: 'نسخ الرابط',
+      linkCopied: 'تم نسخ الرابط!',
+      linkCopiedMessage: 'تم نسخ رابط المقال إلى الحافظة.',
+      tableOfContents: 'جدول المحتويات',
+      aboutAuthor: 'عن الكاتب',
+      relatedPosts: 'مقالات ذات صلة',
+      noRelatedPosts: 'لم يتم العثور على مقالات ذات صلة.',
+      readingTime: 'وقت القراءة',
+      minutes: 'دقيقة',
+      publishedOn: 'نشر في',
+      updatedOn: 'آخر تحديث',
+      previousPost: 'المقال السابق',
+      nextPost: 'المقال التالي',
+      tags: 'العلامات',
+      share: 'مشاركة',
     },
 
     // Checkout page
