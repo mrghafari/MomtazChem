@@ -1,4 +1,4 @@
-import { users, leads, leadActivities, passwordResets, abandonedOrders, persistentCarts, aiApiSettings, awsS3Settings, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type AbandonedOrder, type InsertAbandonedOrder, type PersistentCart, type InsertPersistentCart, type AiApiSettings, type InsertAiApiSettings, type AwsS3Settings, type InsertAwsS3Settings } from "@shared/schema";
+import { users, leads, leadActivities, passwordResets, abandonedOrders, persistentCarts, aiApiSettings, awsS3Settings, fibPayments, fibPaymentCallbacks, fibSettings, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type AbandonedOrder, type InsertAbandonedOrder, type PersistentCart, type InsertPersistentCart, type AiApiSettings, type InsertAiApiSettings, type AwsS3Settings, type InsertAwsS3Settings, type FibPayment, type InsertFibPayment, type FibPaymentCallback, type InsertFibPaymentCallback, type FibSettings, type InsertFibSettings } from "@shared/schema";
 import { contacts, showcaseProducts, type Contact, type InsertContact, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { db } from "./db";
 import { showcaseDb } from "./showcase-db";
@@ -85,6 +85,25 @@ export interface IStorage {
   updateAwsS3Settings(id: number, settings: Partial<InsertAwsS3Settings>): Promise<AwsS3Settings>;
   deleteAwsS3Settings(id: number): Promise<void>;
   getActiveAwsS3Settings(): Promise<AwsS3Settings | undefined>;
+
+  // FIB Payment Management
+  createFibPayment(payment: InsertFibPayment): Promise<FibPayment>;
+  getFibPaymentById(id: number): Promise<FibPayment | undefined>;
+  getFibPaymentByPaymentId(paymentId: string): Promise<FibPayment | undefined>;
+  getFibPaymentsByCustomerId(customerId: number): Promise<FibPayment[]>;
+  getFibPaymentsByOrderId(orderId: number): Promise<FibPayment[]>;
+  updateFibPayment(id: number, payment: Partial<InsertFibPayment>): Promise<FibPayment>;
+  updateFibPaymentStatus(paymentId: string, status: string, metadata?: { paidAt?: Date; cancelledAt?: Date; refundedAt?: Date; expiredAt?: Date }): Promise<FibPayment>;
+  
+  // FIB Payment Callbacks
+  createFibPaymentCallback(callback: InsertFibPaymentCallback): Promise<FibPaymentCallback>;
+  getFibPaymentCallbacks(paymentId: string): Promise<FibPaymentCallback[]>;
+  
+  // FIB Settings
+  createFibSettings(settings: InsertFibSettings): Promise<FibSettings>;
+  getFibSettings(): Promise<FibSettings[]>;
+  getActiveFibSettings(): Promise<FibSettings | undefined>;
+  updateFibSettings(id: number, settings: Partial<InsertFibSettings>): Promise<FibSettings>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1053,6 +1072,133 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(awsS3Settings.createdAt))
       .limit(1);
     return results[0];
+  }
+
+  // FIB Payment Management Implementation
+  async createFibPayment(insertPayment: InsertFibPayment): Promise<FibPayment> {
+    const [payment] = await db
+      .insert(fibPayments)
+      .values(insertPayment)
+      .returning();
+    return payment;
+  }
+
+  async getFibPaymentById(id: number): Promise<FibPayment | undefined> {
+    const results = await db
+      .select()
+      .from(fibPayments)
+      .where(eq(fibPayments.id, id))
+      .limit(1);
+    return results[0];
+  }
+
+  async getFibPaymentByPaymentId(paymentId: string): Promise<FibPayment | undefined> {
+    const results = await db
+      .select()
+      .from(fibPayments)
+      .where(eq(fibPayments.paymentId, paymentId))
+      .limit(1);
+    return results[0];
+  }
+
+  async getFibPaymentsByCustomerId(customerId: number): Promise<FibPayment[]> {
+    return await db
+      .select()
+      .from(fibPayments)
+      .where(eq(fibPayments.customerId, customerId))
+      .orderBy(desc(fibPayments.createdAt));
+  }
+
+  async getFibPaymentsByOrderId(orderId: number): Promise<FibPayment[]> {
+    return await db
+      .select()
+      .from(fibPayments)
+      .where(eq(fibPayments.orderId, orderId))
+      .orderBy(desc(fibPayments.createdAt));
+  }
+
+  async updateFibPayment(id: number, updatePayment: Partial<InsertFibPayment>): Promise<FibPayment> {
+    const [payment] = await db
+      .update(fibPayments)
+      .set({ ...updatePayment, updatedAt: new Date() })
+      .where(eq(fibPayments.id, id))
+      .returning();
+    return payment;
+  }
+
+  async updateFibPaymentStatus(
+    paymentId: string, 
+    status: string, 
+    metadata?: { paidAt?: Date; cancelledAt?: Date; refundedAt?: Date; expiredAt?: Date }
+  ): Promise<FibPayment> {
+    const updateData: any = {
+      status,
+      updatedAt: new Date(),
+    };
+
+    if (metadata?.paidAt) updateData.paidAt = metadata.paidAt;
+    if (metadata?.cancelledAt) updateData.cancelledAt = metadata.cancelledAt;
+    if (metadata?.refundedAt) updateData.refundedAt = metadata.refundedAt;
+    if (metadata?.expiredAt) updateData.expiredAt = metadata.expiredAt;
+
+    const [payment] = await db
+      .update(fibPayments)
+      .set(updateData)
+      .where(eq(fibPayments.paymentId, paymentId))
+      .returning();
+    return payment;
+  }
+
+  // FIB Payment Callbacks Implementation
+  async createFibPaymentCallback(insertCallback: InsertFibPaymentCallback): Promise<FibPaymentCallback> {
+    const [callback] = await db
+      .insert(fibPaymentCallbacks)
+      .values(insertCallback)
+      .returning();
+    return callback;
+  }
+
+  async getFibPaymentCallbacks(paymentId: string): Promise<FibPaymentCallback[]> {
+    return await db
+      .select()
+      .from(fibPaymentCallbacks)
+      .where(eq(fibPaymentCallbacks.paymentId, paymentId))
+      .orderBy(desc(fibPaymentCallbacks.receivedAt));
+  }
+
+  // FIB Settings Implementation
+  async createFibSettings(insertSettings: InsertFibSettings): Promise<FibSettings> {
+    const [settings] = await db
+      .insert(fibSettings)
+      .values(insertSettings)
+      .returning();
+    return settings;
+  }
+
+  async getFibSettings(): Promise<FibSettings[]> {
+    return await db
+      .select()
+      .from(fibSettings)
+      .orderBy(desc(fibSettings.createdAt));
+  }
+
+  async getActiveFibSettings(): Promise<FibSettings | undefined> {
+    const results = await db
+      .select()
+      .from(fibSettings)
+      .where(eq(fibSettings.isActive, true))
+      .orderBy(desc(fibSettings.createdAt))
+      .limit(1);
+    return results[0];
+  }
+
+  async updateFibSettings(id: number, updateSettings: Partial<InsertFibSettings>): Promise<FibSettings> {
+    const [settings] = await db
+      .update(fibSettings)
+      .set({ ...updateSettings, updatedAt: new Date() })
+      .where(eq(fibSettings.id, id))
+      .returning();
+    return settings;
   }
 
 }
