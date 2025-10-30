@@ -1,4 +1,5 @@
 import express, { type Express, Request, Response, NextFunction } from "express";
+import { registerFibRoutes } from "./fib-routes";
 import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
 import multer from "multer";
@@ -52681,6 +52682,8 @@ momtazchem.com
     }
   });
 
+  // Register FIB payment routes
+  registerFibRoutes(app);
   app.all('/api/*', (req, res) => {
     console.log(`❌ 404 - Unmatched API route: ${req.method} ${req.originalUrl}`);
     res.status(404).json({
