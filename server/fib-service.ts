@@ -1,5 +1,7 @@
-import { FIBClient } from '@first-iraqi-bank/sdk';
+import { PaymentSDK } from '@first-iraqi-bank/sdk/payment';
 import { storage } from './storage';
+
+type Environment = "dev" | "stage" | "prod";
 
 interface CreatePaymentParams {
   amount: string;
@@ -25,7 +27,9 @@ interface PaymentResponse {
 }
 
 class FIBService {
-  private client: FIBClient | null = null;
+  private client: ReturnType<typeof PaymentSDK.getClient> | null = null;
+  private accessToken: string | null = null;
+  private tokenExpiry: Date | null = null;
   private initialized = false;
 
   async initialize(): Promise<void> {
@@ -41,16 +45,46 @@ class FIBService {
     }
 
     const settings = await storage.getActiveFibSettings();
-    const environment = settings?.environment || 'stage';
+    const environment = (settings?.environment || 'stage') as Environment;
 
-    this.client = new FIBClient({
-      clientId,
-      clientSecret,
-      environment: environment as 'stage' | 'production',
-    });
+    this.client = PaymentSDK.getClient(clientId, clientSecret, environment);
 
     this.initialized = true;
     console.log('✅ [FIB] FIB Payment Client initialized successfully');
+  }
+
+  private async getAccessToken(): Promise<string> {
+    if (!this.client) {
+      await this.initialize();
+    }
+
+    if (!this.client) {
+      throw new Error('FIB Client not initialized');
+    }
+
+    if (this.accessToken && this.tokenExpiry && this.tokenExpiry > new Date()) {
+      return this.accessToken;
+    }
+
+    try {
+      const response = await this.client.authenticate();
+      
+      if (!response.ok) {
+        throw new Error('Failed to authenticate with FIB');
+      }
+
+      const data = await response.json();
+
+      this.accessToken = data.access_token;
+      this.tokenExpiry = new Date(Date.now() + (data.expires_in - 60) * 1000);
+
+      console.log('✅ [FIB] Authentication successful');
+      
+      return this.accessToken;
+    } catch (error: any) {
+      console.error('❌ [FIB] Authentication error:', error);
+      throw new Error(`Failed to authenticate with FIB: ${error.message}`);
+    }
   }
 
   async createPayment(params: CreatePaymentParams): Promise<PaymentResponse> {
@@ -68,12 +102,22 @@ class FIBService {
     const callbackUrl = params.callbackUrl || `${baseUrl}/api/fib/payment-callback`;
 
     try {
-      const payment = await this.client.createPayment({
-        amount: params.amount,
-        currency: params.currency || 'IQD',
+      const accessToken = await this.getAccessToken();
+      
+      const amountInDinars = parseFloat(params.amount);
+      
+      const response = await this.client.createPayment({
+        amount: amountInDinars,
         description: params.description?.substring(0, 50) || 'Order Payment',
-        callbackUrl,
-      });
+        statusCallbackUrl: new URL(callbackUrl),
+        expiresIn: { minutes: 30 },
+      }, accessToken);
+
+      if (!response.ok) {
+        throw new Error('Failed to create payment');
+      }
+
+      const payment = await response.json();
 
       const fibPayment = await storage.createFibPayment({
         paymentId: payment.paymentId,
@@ -84,9 +128,9 @@ class FIBService {
         currency: params.currency || 'IQD',
         qrCode: payment.qrCode,
         readableCode: payment.readableCode,
-        personalAppLink: payment.personalAppLink,
-        businessAppLink: payment.businessAppLink,
-        corporateAppLink: payment.corporateAppLink,
+        personalAppLink: payment.personalAppLink || null,
+        businessAppLink: payment.businessAppLink || null,
+        corporateAppLink: payment.corporateAppLink || null,
         status: 'pending',
         description: params.description?.substring(0, 50),
         validUntil: payment.validUntil ? new Date(payment.validUntil) : null,
@@ -121,26 +165,34 @@ class FIBService {
     }
 
     try {
-      const status = await this.client.checkPaymentStatus(paymentId);
+      const accessToken = await this.getAccessToken();
+      const response = await this.client.getPaymentStatus(paymentId, accessToken);
+
+      if (!response.ok) {
+        throw new Error('Failed to get payment status');
+      }
+
+      const statusData = await response.json();
+      const normalizedStatus = this.normalizeStatus(statusData.status);
       
       const payment = await storage.getFibPaymentByPaymentId(paymentId);
-      if (payment && payment.status !== status.status) {
+      if (payment && payment.status !== normalizedStatus) {
         const metadata: any = { updatedAt: new Date() };
         
-        if (status.status === 'PAID' || status.status === 'paid') {
-          metadata.paidAt = new Date();
-        } else if (status.status === 'CANCELLED' || status.status === 'cancelled') {
-          metadata.cancelledAt = new Date();
-        } else if (status.status === 'EXPIRED' || status.status === 'expired') {
-          metadata.expiredAt = new Date();
+        if (normalizedStatus === 'paid' && statusData.status === 'PAID') {
+          metadata.paidAt = statusData.paidAt ? new Date(statusData.paidAt) : new Date();
+        } else if (normalizedStatus === 'cancelled' && statusData.status === 'DECLINED') {
+          metadata.cancelledAt = statusData.declinedAt ? new Date(statusData.declinedAt) : new Date();
+        } else if (normalizedStatus === 'refunded' && statusData.status === 'REFUNDED') {
+          metadata.refundedAt = new Date();
         }
 
-        await storage.updateFibPaymentStatus(paymentId, status.status.toLowerCase(), metadata);
-        console.log(`🔄 [FIB] Payment ${paymentId} status updated to: ${status.status}`);
+        await storage.updateFibPaymentStatus(paymentId, normalizedStatus, metadata);
+        console.log(`🔄 [FIB] Payment ${paymentId} status updated to: ${normalizedStatus}`);
       }
 
       return {
-        status: status.status.toLowerCase(),
+        status: normalizedStatus,
         updatedAt: new Date(),
       };
     } catch (error: any) {
@@ -157,7 +209,8 @@ class FIBService {
     }
 
     try {
-      await this.client.cancelPayment(paymentId);
+      const accessToken = await this.getAccessToken();
+      await this.client.cancelPayment(paymentId, accessToken);
       
       await storage.updateFibPaymentStatus(paymentId, 'cancelled', {
         cancelledAt: new Date(),
@@ -183,7 +236,8 @@ class FIBService {
     }
 
     try {
-      await this.client.refundPayment(paymentId);
+      const accessToken = await this.getAccessToken();
+      await this.client.refundPayment(paymentId, accessToken);
       
       await storage.updateFibPaymentStatus(paymentId, 'refunded', {
         refundedAt: new Date(),
@@ -201,12 +255,24 @@ class FIBService {
     }
   }
 
+  private normalizeStatus(status: string): string {
+    const statusMap: Record<string, string> = {
+      'UNPAID': 'pending',
+      'PAID': 'paid',
+      'DECLINED': 'cancelled',
+      'REFUNDED': 'refunded',
+      'REFUND_REQUESTED': 'refund_requested',
+    };
+
+    return statusMap[status] || status.toLowerCase();
+  }
+
   async handleCallback(callbackData: any): Promise<void> {
     try {
       const paymentId = callbackData.id || callbackData.paymentId;
-      const newStatus = callbackData.status;
+      const newStatus = this.normalizeStatus(callbackData.status);
 
-      if (!paymentId || !newStatus) {
+      if (!paymentId || !callbackData.status) {
         console.error('❌ [FIB] Invalid callback data:', callbackData);
         return;
       }
@@ -230,17 +296,15 @@ class FIBService {
       const previousStatus = payment.status;
 
       const metadata: any = {};
-      if (newStatus === 'PAID' || newStatus === 'paid') {
-        metadata.paidAt = new Date();
-      } else if (newStatus === 'CANCELLED' || newStatus === 'cancelled') {
-        metadata.cancelledAt = new Date();
-      } else if (newStatus === 'EXPIRED' || newStatus === 'expired') {
-        metadata.expiredAt = new Date();
-      } else if (newStatus === 'REFUNDED' || newStatus === 'refunded') {
+      if (newStatus === 'paid') {
+        metadata.paidAt = callbackData.paidAt ? new Date(callbackData.paidAt) : new Date();
+      } else if (newStatus === 'cancelled') {
+        metadata.cancelledAt = callbackData.declinedAt ? new Date(callbackData.declinedAt) : new Date();
+      } else if (newStatus === 'refunded') {
         metadata.refundedAt = new Date();
       }
 
-      await storage.updateFibPaymentStatus(paymentId, newStatus.toLowerCase(), metadata);
+      await storage.updateFibPaymentStatus(paymentId, newStatus, metadata);
 
       await storage.createFibPaymentCallback({
         paymentId,
@@ -261,7 +325,7 @@ class FIBService {
         await storage.createFibPaymentCallback({
           paymentId: callbackData.id || callbackData.paymentId,
           fibPaymentRecordId: null,
-          status: callbackData.status,
+          status: this.normalizeStatus(callbackData.status),
           previousStatus: null,
           callbackData,
           processedSuccessfully: false,
