@@ -113,10 +113,6 @@ export default function Blog() {
         url="/blog"
       />
 
-      {/* Page Title */}
-      <title>Blog - Chemical Industry Insights | Momtazchem</title>
-      <meta name="description" content="Latest articles, guides, and insights about chemical solutions, fuel additives, water treatment, and industrial chemicals from Momtazchem experts." />
-
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-900 dark:to-purple-900 text-white py-16" data-testid="blog-hero">
         <div className="container mx-auto px-4 max-w-7xl">

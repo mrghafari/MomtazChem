@@ -37,9 +37,36 @@ export default function OpenGraphTags({
   section,
   tags = []
 }: OpenGraphTagsProps) {
-  const currentUrl = url || (typeof window !== 'undefined' ? window.location.href : 'https://momtazchem.com');
+  // Ensure absolute URL for og:url
+  const getAbsoluteUrl = (path?: string): string => {
+    if (!path) {
+      return typeof window !== 'undefined' ? window.location.href : 'https://momtazchem.com';
+    }
+    // If already absolute, return as is
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    // Convert relative to absolute
+    const baseUrl = 'https://momtazchem.com';
+    return `${baseUrl}${path.startsWith('/') ? path : '/' + path}`;
+  };
 
+  const currentUrl = getAbsoluteUrl(url);
+  
   useEffect(() => {
+    // Set document title and meta description
+    document.title = title;
+    
+    // Set or update meta description
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.setAttribute('name', 'description');
+      metaDescription.setAttribute('data-og-tag', 'true');
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.setAttribute('content', description);
+
     const metaTags: Array<{ name?: string; property?: string; content: string }> = [
       // Primary Open Graph tags
       { property: 'og:title', content: title },

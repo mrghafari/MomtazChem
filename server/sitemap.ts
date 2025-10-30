@@ -1,6 +1,7 @@
 import { db } from './db';
 import { shopProducts, shopCategories } from '../shared/shop-schema';
-import { sql } from 'drizzle-orm';
+import { blogPosts, blogPostTranslations } from '../shared/blog-schema';
+import { sql, eq } from 'drizzle-orm';
 
 interface SitemapUrl {
   loc: string;
@@ -17,6 +18,7 @@ export async function generateSitemap(): Promise<string> {
   const staticPages: SitemapUrl[] = [
     { loc: `${baseUrl}/`, changefreq: 'daily', priority: 1.0 },
     { loc: `${baseUrl}/shop`, changefreq: 'daily', priority: 0.9 },
+    { loc: `${baseUrl}/blog`, changefreq: 'daily', priority: 0.9 },
     { loc: `${baseUrl}/about`, changefreq: 'monthly', priority: 0.8 },
     { loc: `${baseUrl}/contact`, changefreq: 'monthly', priority: 0.8 },
     { loc: `${baseUrl}/services`, changefreq: 'monthly', priority: 0.7 },
@@ -58,6 +60,41 @@ export async function generateSitemap(): Promise<string> {
         });
       }
     });
+
+    // Get all published blog posts with translations
+    const publishedPosts = await db
+      .select({
+        id: blogPosts.id,
+        updatedAt: blogPosts.updatedAt,
+        publishDate: blogPosts.publishDate,
+      })
+      .from(blogPosts)
+      .where(eq(blogPosts.status, 'published'));
+
+    // For each published post, get its translations and add to sitemap
+    for (const post of publishedPosts) {
+      const translations = await db
+        .select({
+          slug: blogPostTranslations.slug,
+          language: blogPostTranslations.language,
+          updatedAt: blogPostTranslations.updatedAt,
+        })
+        .from(blogPostTranslations)
+        .where(eq(blogPostTranslations.postId, post.id));
+
+      translations.forEach((translation: any) => {
+        urls.push({
+          loc: `${baseUrl}/blog/${translation.slug}`,
+          lastmod: translation.updatedAt 
+            ? new Date(translation.updatedAt).toISOString().split('T')[0]
+            : post.publishDate 
+              ? new Date(post.publishDate).toISOString().split('T')[0]
+              : undefined,
+          changefreq: 'weekly',
+          priority: 0.8,
+        });
+      });
+    }
 
   } catch (error) {
     console.error('Error fetching sitemap data:', error);
