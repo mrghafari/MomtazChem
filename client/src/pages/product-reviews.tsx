@@ -9,6 +9,10 @@ import { useMultilingualToast } from '@/hooks/use-multilingual-toast';
 import { apiRequest } from '@/lib/queryClient';
 import ProductRating from '@/components/ProductRating';
 import { useLanguage } from '@/contexts/LanguageContext';
+import ProductSchema from '@/components/seo/ProductSchema';
+import OpenGraphTags from '@/components/seo/OpenGraphTags';
+import CanonicalUrl from '@/components/seo/CanonicalUrl';
+import Breadcrumbs from '@/components/seo/Breadcrumbs';
 
 export default function ProductReviews() {
   const { id } = useParams<{ id: string }>();
@@ -140,19 +144,45 @@ export default function ProductReviews() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8" dir={direction}>
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/shop')}
-            className="mb-4"
-          >
-            <ArrowLeft className={`w-4 h-4 ${direction === 'rtl' ? 'ml-2' : 'mr-2'}`} />
-            {t.backToShop}
-          </Button>
-        </div>
+    <>
+      {/* SEO Components */}
+      <ProductSchema 
+        product={product}
+        rating={productStats}
+      />
+      <OpenGraphTags
+        title={`${product.name} - Momtazchem`}
+        description={product.description || `${product.name} - Premium quality chemical product`}
+        image={product.imageUrl}
+        url={`https://momtazchem.com/product-reviews/${id}`}
+        type="product"
+        price={product.price}
+        currency={product.currency || 'IQD'}
+        availability={product.inStock && (product.stockQuantity || 0) > 0 ? 'instock' : 'outofstock'}
+      />
+      <CanonicalUrl path={`/product-reviews/${id}`} />
+      
+      <div className="container mx-auto px-4 py-8" dir={direction}>
+        <div className="max-w-4xl mx-auto">
+          {/* Breadcrumbs */}
+          <Breadcrumbs 
+            items={[
+              { label: 'Shop', href: '/shop' },
+              { label: product.name }
+            ]}
+          />
+          
+          {/* Header */}
+          <div className="mb-6">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/shop')}
+              className="mb-4"
+            >
+              <ArrowLeft className={`w-4 h-4 ${direction === 'rtl' ? 'ml-2' : 'mr-2'}`} />
+              {t.backToShop}
+            </Button>
+          </div>
 
         {/* Product Info Card */}
         <Card className="mb-6">
@@ -205,5 +235,6 @@ export default function ProductReviews() {
         )}
       </div>
     </div>
+    </>
   );
 }
