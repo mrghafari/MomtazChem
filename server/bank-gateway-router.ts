@@ -14,6 +14,7 @@ export interface PaymentGateway {
 
 export interface BankPaymentRequest {
   orderId: number;
+  orderNumber?: string;
   customerId: number;
   amount: number;
   currency: string;
@@ -339,28 +340,27 @@ export class BankGatewayRouter {
       console.log(`💳 [FIB] Creating payment for amount: ${formattedAmount} IQD, Order: ${request.orderId}`);
       
       const paymentResult = await fibService.createPayment({
-        amount: formattedAmount,
+        amount: formattedAmount.toString(),
         currency: 'IQD',
         orderId: request.orderId,
         customerId: request.customerId,
+        orderNumber: (request as any).orderNumber,
         description: `Order #${request.orderId} payment`,
         callbackUrl: request.returnUrl
-      }, storage);
+      });
       
-      if (!paymentResult.success || !paymentResult.data) {
-        console.error(`❌ [FIB] Payment creation failed: ${paymentResult.message}`);
-        return {
-          success: false,
-          message: paymentResult.message || 'خطا در ایجاد پرداخت FIB'
-        };
-      }
-      
-      console.log(`✅ [FIB] Payment created successfully: ${paymentResult.data.paymentId}`);
+      console.log(`✅ [FIB] Payment created successfully: ${paymentResult.paymentId}`);
       
       return {
         success: true,
         paymentUrl: '',
-        transactionId: paymentResult.data.paymentId,
+        transactionId: paymentResult.paymentId,
+        qrCode: paymentResult.qrCode,
+        readableCode: paymentResult.readableCode,
+        personalAppLink: paymentResult.personalAppLink,
+        businessAppLink: paymentResult.businessAppLink,
+        corporateAppLink: paymentResult.corporateAppLink,
+        validUntil: paymentResult.validUntil,
         message: 'پرداخت FIB ایجاد شد'
       };
       
