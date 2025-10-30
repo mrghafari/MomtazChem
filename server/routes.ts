@@ -3415,7 +3415,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-      }
 
 
   // MSDS upload endpoint
@@ -3455,24 +3454,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false, 
         message: "Failed to upload MSDS file to S3",
         error: error.message
-      });
-    }
-  });
-      }
-
-      const msdsUrl = `/uploads/msds/${req.file.filename}`;
-      res.json({ 
-        success: true, 
-        url: msdsUrl,
-        filename: req.file.filename,
-        originalName: req.file.originalname,
-        size: req.file.size
-      });
-    } catch (error) {
-      console.error('MSDS upload error:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to upload MSDS file" 
       });
     }
   });
