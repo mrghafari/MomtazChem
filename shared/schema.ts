@@ -1557,5 +1557,106 @@ export const insertShopSettingsSchema = createInsertSchema(shopSettings).omit({
 export type InsertShopSettings = z.infer<typeof insertShopSettingsSchema>;
 export type ShopSettings = typeof shopSettings.$inferSelect;
 
+// =============================================================================
+// FIRST IRAQI BANK (FIB) ONLINE PAYMENT SCHEMA
+// =============================================================================
+
+// FIB Payments table for tracking online payments via First Iraqi Bank
+export const fibPayments = pgTable("fib_payments", {
+  id: serial("id").primaryKey(),
+  paymentId: text("payment_id").notNull().unique(), // Unique payment ID from FIB API
+  orderId: integer("order_id"), // Reference to customer order (nullable for pre-order payments)
+  customerId: integer("customer_id"), // Customer who initiated payment
+  orderNumber: text("order_number"), // Order number if linked to an order
+  
+  // Payment amount details
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").notNull().default("IQD"),
+  
+  // Payment codes for customer
+  qrCode: text("qr_code"), // Base64 QR code image
+  readableCode: text("readable_code"), // Human-readable payment code
+  
+  // Payment links for different FIB apps
+  personalAppLink: text("personal_app_link"),
+  businessAppLink: text("business_app_link"),
+  corporateAppLink: text("corporate_app_link"),
+  
+  // Payment status and metadata
+  status: text("status").notNull().default("pending"), // pending, paid, cancelled, expired, refunded
+  description: text("description"), // Payment description (max 50 chars for FIB)
+  validUntil: timestamp("valid_until"), // Payment expiration time from FIB
+  callbackUrl: text("callback_url"), // URL for FIB to send status updates
+  
+  // Timestamps for tracking
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  paidAt: timestamp("paid_at"), // When payment was completed
+  cancelledAt: timestamp("cancelled_at"), // When payment was cancelled
+  refundedAt: timestamp("refunded_at"), // When payment was refunded
+  expiredAt: timestamp("expired_at"), // When payment expired
+  
+  // Additional metadata
+  clientIp: varchar("client_ip", { length: 45 }), // Customer IP address
+  userAgent: text("user_agent"), // Customer browser/device info
+  notes: text("notes"), // Admin notes
+});
+
+// FIB Payment Callbacks table for audit trail of all status updates from FIB
+export const fibPaymentCallbacks = pgTable("fib_payment_callbacks", {
+  id: serial("id").primaryKey(),
+  paymentId: text("payment_id").notNull(), // FIB payment ID
+  fibPaymentRecordId: integer("fib_payment_record_id").references(() => fibPayments.id),
+  status: text("status").notNull(), // Status received from FIB
+  previousStatus: text("previous_status"), // Status before this callback
+  callbackData: json("callback_data").notNull(), // Full callback payload from FIB
+  processedSuccessfully: boolean("processed_successfully").default(false),
+  errorMessage: text("error_message"), // Any error during processing
+  receivedAt: timestamp("received_at").notNull().defaultNow(),
+});
+
+// FIB Settings table for storing FIB API configuration
+export const fibSettings = pgTable("fib_settings", {
+  id: serial("id").primaryKey(),
+  environment: text("environment").notNull().default("stage"), // 'stage' or 'production'
+  clientId: text("client_id"), // Encrypted FIB client ID (from env)
+  clientSecret: text("client_secret"), // Encrypted FIB client secret (from env)
+  isActive: boolean("is_active").default(true),
+  baseUrl: text("base_url"), // FIB API base URL
+  callbackBaseUrl: text("callback_base_url"), // Your server's base URL for callbacks
+  paymentExpiryMinutes: integer("payment_expiry_minutes").default(30), // Default payment validity
+  autoRefreshToken: boolean("auto_refresh_token").default(true),
+  lastTokenRefresh: timestamp("last_token_refresh"),
+  config: json("config"), // Additional configuration
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertFibPaymentSchema = createInsertSchema(fibPayments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertFibPayment = z.infer<typeof insertFibPaymentSchema>;
+export type FibPayment = typeof fibPayments.$inferSelect;
+
+export const insertFibPaymentCallbackSchema = createInsertSchema(fibPaymentCallbacks).omit({
+  id: true,
+  receivedAt: true,
+});
+
+export type InsertFibPaymentCallback = z.infer<typeof insertFibPaymentCallbackSchema>;
+export type FibPaymentCallback = typeof fibPaymentCallbacks.$inferSelect;
+
+export const insertFibSettingsSchema = createInsertSchema(fibSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertFibSettings = z.infer<typeof insertFibSettingsSchema>;
+export type FibSettings = typeof fibSettings.$inferSelect;
+
 // Re-export marketing schema
 export * from './marketing-schema';
