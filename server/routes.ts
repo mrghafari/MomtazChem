@@ -52075,6 +52075,18 @@ momtazchem.com
         });
       }
       
+      // Security: Only allow signed URLs for private file prefixes
+      const allowedPrefixes = ['receipts/', 'documents/'];
+      const isAllowed = allowedPrefixes.some(prefix => key.startsWith(prefix));
+      
+      if (!isAllowed) {
+        console.log(`🚫 [SIGNED URL] Rejected unauthorized key access attempt: ${key}`);
+        return res.status(403).json({
+          success: false,
+          message: 'دسترسی به این فایل مجاز نیست'
+        });
+      }
+      
       // Default expiration: 1 hour (3600 seconds)
       const expiration = expiresIn ? parseInt(expiresIn as string) : 3600;
       
