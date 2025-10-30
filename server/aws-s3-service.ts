@@ -1,4 +1,5 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, HeadBucketCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, HeadBucketCommand, GetObjectCommand as GetObjectCommandType } from '@aws-sdk/client-s3';
+import { getSignedUrl as getS3SignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Upload } from '@aws-sdk/lib-storage';
 import crypto from 'crypto';
 import type { AwsS3Settings } from '../shared/schema';
@@ -224,6 +225,150 @@ export class AwsS3Service {
         success: false,
         message: `خطا در آپلود فایل: ${error.message}`
       };
+    }
+  }
+
+  /**
+   * Upload PUBLIC file to S3 (images, catalogs, MSDS)
+   * These files will be publicly accessible to anyone
+   */
+  async uploadPublicFile(
+    fileBuffer: Buffer,
+    fileName: string,
+    contentType: string,
+    folder: string = 'uploads'
+  ): Promise<{ success: boolean; url?: string; key?: string; message?: string }> {
+    if (!this.client || !this.settings) {
+      return {
+        success: false,
+        message: 'AWS S3 client not initialized'
+      };
+    }
+
+    try {
+      // Generate unique file name
+      const timestamp = Date.now();
+      const randomString = crypto.randomBytes(8).toString('hex');
+      const extension = fileName.split('.').pop();
+      const key = `${folder}/${timestamp}-${randomString}.${extension}`;
+
+      // Upload with public-read ACL for public access
+      const upload = new Upload({
+        client: this.client,
+        params: {
+          Bucket: this.settings.bucketName,
+          Key: key,
+          Body: fileBuffer,
+          ContentType: contentType,
+          ACL: 'public-read', // Make files publicly accessible
+        },
+      });
+
+      await upload.done();
+
+      // Generate public URL
+      let url: string;
+      if (this.settings.publicUrl) {
+        url = `${this.settings.publicUrl}/${key}`;
+      } else {
+        url = `https://${this.settings.bucketName}.s3.${this.settings.region}.amazonaws.com/${key}`;
+      }
+
+      console.log(`✅ PUBLIC file uploaded to S3: ${key}`);
+
+      return {
+        success: true,
+        url,
+        key,
+      };
+    } catch (error: any) {
+      console.error('❌ S3 Upload Error:', error);
+      return {
+        success: false,
+        message: `خطا در آپلود فایل عمومی: ${error.message}`
+      };
+    }
+  }
+
+  /**
+   * Upload PRIVATE file to S3 (receipts, user documents)
+   * These files will require signed URLs to access
+   */
+  async uploadPrivateFile(
+    fileBuffer: Buffer,
+    fileName: string,
+    contentType: string,
+    folder: string = 'private'
+  ): Promise<{ success: boolean; key?: string; message?: string }> {
+    if (!this.client || !this.settings) {
+      return {
+        success: false,
+        message: 'AWS S3 client not initialized'
+      };
+    }
+
+    try {
+      // Generate unique file name
+      const timestamp = Date.now();
+      const randomString = crypto.randomBytes(8).toString('hex');
+      const extension = fileName.split('.').pop();
+      const key = `${folder}/${timestamp}-${randomString}.${extension}`;
+
+      // Upload WITHOUT ACL - file will be private by default
+      const upload = new Upload({
+        client: this.client,
+        params: {
+          Bucket: this.settings.bucketName,
+          Key: key,
+          Body: fileBuffer,
+          ContentType: contentType,
+          // NO ACL - file is private by default
+        },
+      });
+
+      await upload.done();
+
+      console.log(`✅ PRIVATE file uploaded to S3: ${key}`);
+
+      return {
+        success: true,
+        key, // Return only key, not URL - use getSignedUrl to access
+      };
+    } catch (error: any) {
+      console.error('❌ S3 Upload Error:', error);
+      return {
+        success: false,
+        message: `خطا در آپلود فایل خصوصی: ${error.message}`
+      };
+    }
+  }
+
+  /**
+   * Generate a temporary signed URL for accessing private files
+   * @param key - S3 object key
+   * @param expiresIn - URL expiration time in seconds (default: 1 hour)
+   */
+  async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string | null> {
+    if (!this.client || !this.settings) {
+      console.error('AWS S3 client not initialized');
+      return null;
+    }
+
+    try {
+      const command = new GetObjectCommand({
+        Bucket: this.settings.bucketName,
+        Key: key,
+      });
+
+      // Generate signed URL that expires in specified seconds
+      const signedUrl = await getS3SignedUrl(this.client, command, { expiresIn });
+      
+      console.log(`✅ Signed URL generated for: ${key} (expires in ${expiresIn}s)`);
+      
+      return signedUrl;
+    } catch (error: any) {
+      console.error('❌ Error generating signed URL:', error);
+      return null;
     }
   }
 

@@ -3343,7 +3343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const s3Service = getAwsS3Service();
       
       // Upload file to S3
-      const uploadResult = await s3Service.uploadPublicFile(
+      const uploadResult = await s3Service.uploadFile(
         req.file.buffer,
         req.file.originalname,
         req.file.mimetype,
@@ -3386,7 +3386,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const s3Service = getAwsS3Service();
-      const uploadResult = await s3Service.uploadPublicFile(
+      const uploadResult = await s3Service.uploadFile(
         req.file.buffer,
         req.file.originalname,
         req.file.mimetype,
@@ -3428,7 +3428,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const s3Service = getAwsS3Service();
-      const uploadResult = await s3Service.uploadPublicFile(
+      const uploadResult = await s3Service.uploadFile(
         req.file.buffer,
         req.file.originalname,
         req.file.mimetype,
@@ -34849,11 +34849,11 @@ momtazchem.com
 
       // Upload to AWS S3
       const s3Service = getAwsS3Service();
-      const uploadResult = await s3Service.uploadPrivateFile(
+      const uploadResult = await s3Service.uploadFile(
         file.buffer,
         file.originalname,
         file.mimetype,
-        'receipts'
+        'payment-receipts'
       );
 
       if (!uploadResult.success) {
@@ -52054,60 +52054,6 @@ momtazchem.com
       });
     }
   });
-
-  // ============================================================================
-  // AWS S3 SIGNED URLs FOR PRIVATE FILES
-  // ============================================================================
-  
-  /**
-   * Generate temporary signed URL for accessing private files (receipts, documents)
-   * @route GET /api/s3/signed-url
-   * @access Private (requires authentication)
-   */
-  app.get('/api/s3/signed-url', requireAuth, async (req, res) => {
-    try {
-      const { key, expiresIn } = req.query;
-      
-      if (!key || typeof key !== 'string') {
-        return res.status(400).json({
-          success: false,
-          message: 'کلید فایل الزامی است'
-        });
-      }
-      
-      // Default expiration: 1 hour (3600 seconds)
-      const expiration = expiresIn ? parseInt(expiresIn as string) : 3600;
-      
-      const s3Service = getAwsS3Service();
-      const signedUrl = await s3Service.getSignedUrl(key, expiration);
-      
-      if (!signedUrl) {
-        return res.status(500).json({
-          success: false,
-          message: 'خطا در ایجاد لینک موقت'
-        });
-      }
-      
-      console.log(\`✅ [SIGNED URL] Generated for file: \${key}, expires in \${expiration}s\`);
-      
-      res.json({
-        success: true,
-        data: {
-          url: signedUrl,
-          expiresIn: expiration,
-          expiresAt: new Date(Date.now() + expiration * 1000).toISOString()
-        }
-      });
-      
-    } catch (error: any) {
-      console.error('❌ [SIGNED URL] Error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطا در ایجاد لینک موقت فایل'
-      });
-    }
-  });
-
 
   // Catch-all for unmatched API routes - return JSON 404 (must be last)
   app.all('/api/*', (req, res) => {
