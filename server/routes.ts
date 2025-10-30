@@ -31415,7 +31415,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "accounting_management", "finance", "wallet_management", "geography_analytics",
           "ai_settings", "refresh_control", "content_management", "ticketing_system",
           "remote_desktop", "server_config", "company_information", "user_guide",
-          "marketing_module", "aws_s3_settings", "whatsapp_crm"
+          "marketing_module", "aws_s3_settings", "whatsapp_crm", "blog"
         ];
         
         console.log('🔍 [DEBUG] allModules array contains:', allModules.length, 'modules');
