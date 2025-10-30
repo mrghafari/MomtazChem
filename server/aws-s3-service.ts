@@ -197,6 +197,7 @@ export class AwsS3Service {
           Key: key,
           Body: fileBuffer,
           ContentType: contentType,
+          ACL: 'public-read', // Make files publicly accessible
         },
       });
 
