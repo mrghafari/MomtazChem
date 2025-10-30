@@ -85,6 +85,7 @@ export default function Header() {
     { href: '/', label: t.home },
     { href: '/about', label: t.about },
     { href: '/services', label: t.services },
+    { href: '/blog', label: direction === 'rtl' ? 'بلاگ' : 'Blog' },
     { href: '/contact', label: t.contact },
     { href: '/shop', label: t.shop.title },
   ];
