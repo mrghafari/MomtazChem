@@ -52088,7 +52088,7 @@ momtazchem.com
         });
       }
       
-      console.log(\`✅ [SIGNED URL] Generated for file: \${key}, expires in \${expiration}s\`);
+      console.log(`✅ [SIGNED URL] Generated for file: ${key}, expires in ${expiration}s`);
       
       res.json({
         success: true,
