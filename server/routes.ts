@@ -158,6 +158,7 @@ import {
 
 // Import sync service for automatic table synchronization
 import { globalSyncService } from './sync-service';
+import { generateSitemap } from './sitemap';
 
 // Extend session type to include admin user and customer user
 declare module "express-session" {
@@ -633,6 +634,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve test files
   app.get('/test-proforma', (req, res) => {
     res.sendFile(path.join(process.cwd(), 'test-proforma.html'));
+  });
+
+  // Public sitemap.xml endpoint for SEO
+  app.get('/sitemap.xml', async (req, res) => {
+    try {
+      const xml = await generateSitemap();
+      res.header('Content-Type', 'application/xml');
+      res.send(xml);
+    } catch (error) {
+      console.error('Sitemap generation error:', error);
+      res.status(500).send('Error generating sitemap');
+    }
   });
 
   // Data Integrity Test Page
