@@ -1,4 +1,6 @@
 import { pool } from './db';
+import { FIBService } from './fib-service';
+import { storage } from './storage';
 
 export interface PaymentGateway {
   id: number;
@@ -166,6 +168,9 @@ export class BankGatewayRouter {
         case 'iraq_payment_center':
           return await this.createIraqPaymentCenterPayment(gateway, paymentRequest);
         
+        case 'fib':
+          return await this.createFibPayment(gateway, paymentRequest);
+        
         default:
           console.log(`⚠️ [PAYMENT URL] Unknown gateway type: ${gateway.type}`);
           return {
@@ -323,6 +328,49 @@ export class BankGatewayRouter {
       transactionId,
       message: 'لینک پرداخت مرکز پرداخت عراق ایجاد شد'
     };
+  }
+
+  // پیاده‌سازی درگاه FIB (First Iraqi Bank)
+  private async createFibPayment(gateway: PaymentGateway, request: BankPaymentRequest) {
+    try {
+      const fibService = new FIBService();
+      const formattedAmount = Math.round(parseFloat(request.amount.toString()));
+      
+      console.log(`💳 [FIB] Creating payment for amount: ${formattedAmount} IQD, Order: ${request.orderId}`);
+      
+      const paymentResult = await fibService.createPayment({
+        amount: formattedAmount,
+        currency: 'IQD',
+        orderId: request.orderId,
+        customerId: request.customerId,
+        description: `Order #${request.orderId} payment`,
+        callbackUrl: request.returnUrl
+      }, storage);
+      
+      if (!paymentResult.success || !paymentResult.data) {
+        console.error(`❌ [FIB] Payment creation failed: ${paymentResult.message}`);
+        return {
+          success: false,
+          message: paymentResult.message || 'خطا در ایجاد پرداخت FIB'
+        };
+      }
+      
+      console.log(`✅ [FIB] Payment created successfully: ${paymentResult.data.paymentId}`);
+      
+      return {
+        success: true,
+        paymentUrl: '',
+        transactionId: paymentResult.data.paymentId,
+        message: 'پرداخت FIB ایجاد شد'
+      };
+      
+    } catch (error) {
+      console.error(`❌ [FIB] Error creating payment:`, error);
+      return {
+        success: false,
+        message: 'خطا در ایجاد پرداخت FIB'
+      };
+    }
   }
 
   // تأیید پرداخت دریافتی از درگاه

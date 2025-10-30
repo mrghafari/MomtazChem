@@ -245,7 +245,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const { language, direction } = useLanguage();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet' | 'wallet_full' | 'wallet_partial' | 'wallet_combined' | 'bank_transfer_grace' | 'bank_receipt'>('online_payment');
+  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'fib_online' | 'wallet' | 'wallet_full' | 'wallet_partial' | 'wallet_combined' | 'bank_transfer_grace' | 'bank_receipt'>('online_payment');
 
   // Fetch available payment methods from admin settings (public endpoint)
   const { data: availablePaymentMethods = [] } = useQuery({
@@ -1368,7 +1368,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       }
       
       // Handle online_payment method - redirect to bank gateway OR show failure message
-      else if (paymentMethod === 'online_payment') {
+      else if (paymentMethod === 'online_payment' || paymentMethod === 'fib_online') {
         // Check for both paymentUrl (new) and paymentGatewayUrl (legacy) fields
         const gatewayUrl = response.paymentUrl || response.paymentGatewayUrl;
         
@@ -1376,8 +1376,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           console.log('🏦 [ONLINE PAYMENT] Redirecting to bank gateway:', gatewayUrl);
           
           toast({
-            title: "انتقال به درگاه بانکی",
-            description: "در حال انتقال شما به درگاه پرداخت بانکی..."
+            title: paymentMethod === 'fib_online' ? "انتقال به FIB" : "انتقال به درگاه بانکی",
+            description: paymentMethod === 'fib_online' 
+              ? "در حال انتقال شما به سیستم پرداخت FIB..." 
+              : "در حال انتقال شما به درگاه پرداخت بانکی..."
           });
           
           // Redirect to payment gateway
@@ -2078,6 +2080,17 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         <Label htmlFor="online_payment" className="flex items-center gap-2 cursor-pointer">
                           <CreditCard className="w-4 h-4 text-blue-600" />
                           <span className="font-semibold">{method.methodName}</span>
+                        </Label>
+                      </div>
+                    );
+                  }
+                  if (method.methodKey === 'fib_online') {
+                    return (
+                      <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
+                        <RadioGroupItem value="fib_online" id="fib_online" data-testid="radio-fib-online" />
+                        <Label htmlFor="fib_online" className="flex items-center gap-2 cursor-pointer">
+                          <CreditCard className="w-4 h-4 text-green-600" />
+                          <span className="font-semibold">{language === 'ar' ? method.methodName : method.methodNameEn}</span>
                         </Label>
                       </div>
                     );

@@ -16597,7 +16597,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Grace period orders: Only keep with financial approval
       
       // Set payment method and status based on customer choice
-      if (orderData.paymentMethod === 'online_payment') {
+      if (orderData.paymentMethod === 'online_payment' || orderData.paymentMethod === 'fib_online') {
         finalPaymentStatus = "pending";
         finalPaymentMethod = "online_payment";
         walletAmountUsed = 0;
@@ -17260,7 +17260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // 🏦 [FULL_BANK_PAYMENT] Route full amount to bank gateway for all bank payment types
-        if (finalPaymentMethod === 'online_payment' || finalPaymentMethod === 'bank') {
+        if (finalPaymentMethod === 'online_payment' || finalPaymentMethod === 'fib_online' || finalPaymentMethod === 'bank') {
           const fullAmount = Math.round(remainingAmount) > 0 ? Math.round(remainingAmount) : Math.round(totalAmount);
           console.log(`🏦 [BANK_PAYMENT] Routing ${fullAmount} IQD to bank gateway (method: ${finalPaymentMethod})...`);
           
