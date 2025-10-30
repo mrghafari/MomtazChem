@@ -420,6 +420,9 @@ const requireCustomerAuth = (req: Request, res: Response, next: NextFunction) =>
       next();
     } else {
       console.log('❌ [CSV EXPORT] Unauthorized access attempt');
+      res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+  });
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize sync service at startup
   console.log('🔄 [SYNC SERVICE] Initializing automatic table synchronization system...');
