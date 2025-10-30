@@ -31419,8 +31419,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         ];
         
         console.log('🔍 [DEBUG] allModules array contains:', allModules.length, 'modules');
-        console.log('🔍 [DEBUG] whatsapp_crm included?', allModules.includes('whatsapp_crm',
-      'blog'));
+        console.log('🔍 [DEBUG] whatsapp_crm included?', allModules.includes('whatsapp_crm'));
+        console.log('🔍 [DEBUG] blog included?', allModules.includes('blog'));
         console.log('🔍 [DEBUG] ticketing_system included?', allModules.includes('ticketing_system'));
         console.log('🔍 [DEBUG] server_config included?', allModules.includes('server_config'));
 
@@ -31430,24 +31430,23 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         );
         
         console.log(`✓ [PERMISSIONS] Super admin ${legacyUser[0].email} has all modules:`, normalizedModules);
-        console.log(`🔍 [DEBUG] whatsapp_crm in normalizedModules?`, normalizedModules.includes('whatsapp_crm',
-      'blog'));
+        console.log(`🔍 [DEBUG] whatsapp_crm in normalizedModules?`, normalizedModules.includes('whatsapp_crm'));
+        console.log(`🔍 [DEBUG] blog in normalizedModules?`, normalizedModules.includes('blog'));
         console.log(`🔍 [DEBUG] kpi_dashboard in normalizedModules?`, normalizedModules.includes('kpi_dashboard'));
         console.log(`🔍 [DEBUG] management_dashboard in normalizedModules?`, normalizedModules.includes('management_dashboard'));
 
         // Convert technical module IDs to Persian names for super admin
         const persianModules = normalizedModules.map(moduleId => {
           const persianName = convertTechnicalToPersianModule(moduleId);
-          if (moduleId === 'whatsapp_crm',
-      'blog' || moduleId === 'kpi_dashboard' || moduleId === 'management_dashboard') {
+          if (moduleId === 'whatsapp_crm' ||
+              moduleId === 'blog' || moduleId === 'kpi_dashboard' || moduleId === 'management_dashboard') {
             console.log(`🔍 [DEBUG] Converting ${moduleId} → ${persianName}`);
           }
           return persianName;
         });
 
         console.log(`✓ [PERMISSIONS] Super admin Persian modules:`, persianModules);
-        console.log(`🔍 [DEBUG] whatsapp_crm mapping: ${normalizedModules.includes('whatsapp_crm',
-      'blog')} → ${persianModules.includes('مدیریت واتساپ CRM')}`);
+        console.log(`🔍 [DEBUG] whatsapp_crm mapping: ${normalizedModules.includes('whatsapp_crm')} → ${persianModules.includes('مدیریت واتساپ CRM')}`);
         console.log(`🔍 [CRITICAL DEBUG] Complete Persian modules array:`, JSON.stringify(persianModules, null, 2));
         console.log(`🔍 [CRITICAL DEBUG] Looking for: 'مدیریت واتساپ CRM'`);
         console.log(`🔍 [CRITICAL DEBUG] Found modules containing 'واتساپ':`, persianModules.filter(m => m.includes('واتساپ')));
@@ -31508,7 +31507,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           'syncing_shop', 'inquiry_management', 'barcode_management', 'email_management',
           'backup_management', 'crm_management', 'seo_management', 'category_management',
           'sms_management', 'whatsapp_crm',
-      'blog', 'factory_management', 'super_admin', 'user_management',
+          'blog', 'factory_management', 'super_admin', 'user_management',
           'shop_management', 'procedures_management', 'order_management',
           'product_management', 'payment_management', 'wallet_management', 'geography_analytics',
           'ai_management', 'refresh_control',
