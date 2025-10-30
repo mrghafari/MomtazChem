@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Edit2, Trash2, Search, BarChart3, Globe, Link, Settings, Languages, Target, Bot, Wand2, Brain, Lightbulb, Zap, FileText, Loader2, Sparkles, Cpu, Key } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, BarChart3, Globe, Link, Settings, Languages, Target, Bot, Wand2, Brain, Lightbulb, Zap, FileText, Loader2, Sparkles, Cpu, Key, BookOpen, Eye, Clock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -221,6 +221,27 @@ export default function SeoManagement() {
 
   const { data: redirects = [], isLoading: isLoadingRedirects } = useQuery<Redirect[]>({
     queryKey: ["/api/admin/seo/redirects"],
+  });
+
+  // Blog posts query
+  const { data: blogPosts = [], isLoading: isLoadingBlogPosts } = useQuery({
+    queryKey: ["/api/admin/blog"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/blog");
+      if (!res.ok) throw new Error('Failed to fetch blog posts');
+      const data = await res.json();
+      return data.posts || [];
+    },
+  });
+
+  // Blog stats query
+  const { data: blogStats } = useQuery({
+    queryKey: ["/api/admin/blog/stats"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/blog/stats");
+      if (!res.ok) return { total: 0, published: 0, totalViews: 0 };
+      return res.json();
+    },
   });
 
   // Forms
@@ -632,10 +653,14 @@ export default function SeoManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             SEO Settings
+          </TabsTrigger>
+          <TabsTrigger value="blog" className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4" />
+            Blog
           </TabsTrigger>
           <TabsTrigger value="ai-seo" className="flex items-center gap-2">
             <Bot className="h-4 w-4" />
@@ -751,6 +776,127 @@ export default function SeoManagement() {
                       No SEO settings found. Create your first SEO setting to get started.
                     </div>
                   )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="blog" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Total Blog Posts</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{blogStats?.total || 0}</div>
+                <p className="text-xs text-gray-500 mt-1">All blog posts</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Published Posts</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{blogStats?.published || 0}</div>
+                <p className="text-xs text-gray-500 mt-1">Live on website</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Total Views</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">{blogStats?.totalViews || 0}</div>
+                <p className="text-xs text-gray-500 mt-1">Across all posts</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Blog Posts Management</CardTitle>
+                  <CardDescription>
+                    Recent blog posts with quick actions
+                  </CardDescription>
+                </div>
+                <Button asChild>
+                  <a href="/admin/blog-management" className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4" />
+                    Full Blog Management
+                  </a>
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isLoadingBlogPosts ? (
+                <div className="text-center py-8">Loading blog posts...</div>
+              ) : blogPosts.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  No blog posts found. Create your first blog post to get started.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {blogPosts.slice(0, 10).map((post: any) => (
+                    <Card key={post.id} className="border">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold text-lg">{post.titleEn || post.titleAr}</h3>
+                              <Badge variant={post.status === 'published' ? 'default' : 'secondary'}>
+                                {post.status}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                              {post.excerptEn || post.excerptAr}
+                            </p>
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              <span className="flex items-center gap-1">
+                                <Eye className="h-3 w-3" />
+                                {post.views || 0} views
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {new Date(post.createdAt).toLocaleDateString()}
+                              </span>
+                              {post.tagsEn && (
+                                <span className="flex gap-1">
+                                  {post.tagsEn.slice(0, 3).map((tag: string, i: number) => (
+                                    <Badge key={i} variant="outline" className="text-xs">
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              asChild
+                            >
+                              <a href={`/blog/${post.slug}`} target="_blank" rel="noopener noreferrer">
+                                <Eye className="h-4 w-4" />
+                              </a>
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              asChild
+                            >
+                              <a href={`/admin/blog-management?edit=${post.id}`}>
+                                <Edit2 className="h-4 w-4" />
+                              </a>
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               )}
             </CardContent>
