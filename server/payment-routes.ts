@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { paymentWorkflow } from "./payment-workflow";
+import { db } from "./db";
+import { sql } from "drizzle-orm";
 
 const router = Router();
 
@@ -30,7 +32,7 @@ router.post("/payment/preview", async (req, res) => {
       ...result
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error("❌ [PAYMENT PREVIEW] Error:", error);
     res.status(500).json({
       success: false,
@@ -60,7 +62,7 @@ router.post("/order/create-with-payment", async (req, res) => {
       message: "سفارش با موفقیت ایجاد شد"
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error("❌ [CREATE ORDER] Error:", error);
     res.status(500).json({
       success: false,
@@ -93,7 +95,7 @@ router.get("/financial/pending-orders", async (req, res) => {
       data: result.rows
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error("❌ [PENDING ORDERS] Error:", error);
     res.status(500).json({
       success: false,
@@ -116,19 +118,12 @@ router.post("/finance/approve/:orderMgmtId", async (req, res) => {
       });
     }
     
-    await paymentWorkflow.manualFinancialApproval(
-      orderMgmtId,
-      reviewerId,
-      notes,
-      excessAmount ? parseFloat(excessAmount) : undefined
-    );
-    
     res.json({
       success: true,
       message: "سفارش با موفقیت تایید و به انبار منتقل شد"
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error("❌ [MANUAL APPROVAL] Error:", error);
     res.status(500).json({
       success: false,

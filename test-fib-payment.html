@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست درگاه پرداخت FIB - First Iraqi Bank</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+        
+        .payment-info {
+            margin-top: 20px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .info-value {
+            color: #333;
+            font-family: monospace;
+        }
+        
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .qr-code img {
+            max-width: 300px;
+            border: 4px solid white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .app-links {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .app-link {
+            flex: 1;
+            padding: 10px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .app-link:hover {
+            background: #5568d3;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background: #ffeaa7;
+            color: #fdcb6e;
+        }
+        
+        .status-paid {
+            background: #d4edda;
+            color: #28a745;
+        }
+        
+        .status-cancelled {
+            background: #f8d7da;
+            color: #dc3545;
+        }
+        
+        .environment-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #ffeaa7;
+            color: #f39c12;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #667eea;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏦 تست درگاه FIB</h1>
+        <p class="subtitle">First Iraqi Bank Payment Gateway Test</p>
+        
+        <div style="text-align: center;">
+            <span class="environment-badge">⚠️ محیط تست (Stage Environment)</span>
+        </div>
+        
+        <div class="form-group">
+            <label>مبلغ به دینار (IQD)</label>
+            <input type="number" id="amount" value="50000" min="1000" step="1000" placeholder="مبلغ را وارد کنید">
+        </div>
+        
+        <div class="form-group">
+            <label>واحد پول</label>
+            <select id="currency">
+                <option value="IQD">دینار عراق (IQD)</option>
+                <option value="USD">دلار آمریکا (USD)</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>توضیحات (اختیاری)</label>
+            <input type="text" id="description" value="تست پرداخت" maxlength="50" placeholder="حداکثر 50 کاراکتر">
+        </div>
+        
+        <button class="btn" id="createPaymentBtn" onclick="createPayment()">
+            ایجاد پرداخت
+        </button>
+        
+        <div id="loading" class="loading" style="display: none;">
+            در حال ارسال درخواست...
+        </div>
+        
+        <div id="result" class="result">
+            <div id="resultContent"></div>
+        </div>
+    </div>
+    
+    <script>
+        let currentPaymentId = null;
+        
+        async function createPayment() {
+            const amount = document.getElementById('amount').value;
+            const currency = document.getElementById('currency').value;
+            const description = document.getElementById('description').value;
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            const btn = document.getElementById('createPaymentBtn');
+            
+            if (!amount || parseFloat(amount) < 1000) {
+                alert('مبلغ باید حداقل 1000 دینار باشد');
+                return;
+            }
+            
+            btn.disabled = true;
+            loadingDiv.style.display = 'block';
+            resultDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/fib/create-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        amount: amount,
+                        currency: currency,
+                        description: description || 'تست پرداخت',
+                        customerId: 1
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentPaymentId = data.data.paymentId;
+                    displaySuccess(data.data);
+                } else {
+                    displayError(data.message || 'خطا در ایجاد پرداخت');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                displayError('خطا در ارتباط با سرور: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                loadingDiv.style.display = 'none';
+            }
+        }
+        
+        function displaySuccess(payment) {
+            const resultDiv = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            
+            resultDiv.className = 'result success';
+            resultDiv.style.display = 'block';
+            
+            let html = '<h3 style="margin-bottom: 20px;">✅ پرداخت با موفقیت ایجاد شد</h3>';
+            
+            html += '<div class="payment-info">';
+            html += `<div class="info-row">
+                <span class="info-label">شناسه پرداخت:</span>
+                <span class="info-value">${payment.paymentId}</span>
+            </div>`;
+            html += `<div class="info-row">
+                <span class="info-label">کد قابل خواندن:</span>
+                <span class="info-value" style="font-size: 20px; font-weight: bold;">${payment.readableCode}</span>
+            </div>`;
+            html += `<div class="info-row">
+                <span class="info-label">مبلغ:</span>
+                <span class="info-value">${payment.amount} ${payment.currency}</span>
+            </div>`;
+            html += `<div class="info-row">
+                <span class="info-label">وضعیت:</span>
+                <span class="status-badge status-pending">${payment.status}</span>
+            </div>`;
+            if (payment.validUntil) {
+                html += `<div class="info-row">
+                    <span class="info-label">معتبر تا:</span>
+                    <span class="info-value">${new Date(payment.validUntil).toLocaleString('fa-IR')}</span>
+                </div>`;
+            }
+            html += '</div>';
+            
+            if (payment.qrCode) {
+                html += '<div class="qr-code">';
+                html += '<h4 style="margin-bottom: 10px;">کد QR برای پرداخت</h4>';
+                html += `<img src="${payment.qrCode}" alt="QR Code">`;
+                html += '</div>';
+            }
+            
+            html += '<div class="app-links">';
+            if (payment.personalAppLink) {
+                html += `<a href="${payment.personalAppLink}" class="app-link" target="_blank">📱 Personal App</a>`;
+            }
+            if (payment.businessAppLink) {
+                html += `<a href="${payment.businessAppLink}" class="app-link" target="_blank">💼 Business App</a>`;
+            }
+            if (payment.corporateAppLink) {
+                html += `<a href="${payment.corporateAppLink}" class="app-link" target="_blank">🏢 Corporate App</a>`;
+            }
+            html += '</div>';
+            
+            html += '<button class="btn" onclick="checkPaymentStatus()" style="margin-top: 20px;">بررسی وضعیت پرداخت</button>';
+            
+            resultContent.innerHTML = html;
+            
+            // Auto-check status every 5 seconds
+            startStatusPolling();
+        }
+        
+        function displayError(message) {
+            const resultDiv = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            
+            resultDiv.className = 'result error';
+            resultDiv.style.display = 'block';
+            
+            resultContent.innerHTML = `
+                <h3>❌ خطا</h3>
+                <p style="margin-top: 10px;">${message}</p>
+            `;
+        }
+        
+        let statusPollingInterval = null;
+        
+        function startStatusPolling() {
+            if (statusPollingInterval) {
+                clearInterval(statusPollingInterval);
+            }
+            
+            statusPollingInterval = setInterval(() => {
+                checkPaymentStatus(true);
+            }, 5000);
+        }
+        
+        async function checkPaymentStatus(silent = false) {
+            if (!currentPaymentId) {
+                alert('لطفاً ابتدا یک پرداخت ایجاد کنید');
+                return;
+            }
+            
+            if (!silent) {
+                document.getElementById('loading').style.display = 'block';
+            }
+            
+            try {
+                const response = await fetch(`/api/fib/payment-status/${currentPaymentId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    updatePaymentStatus(data.data);
+                    
+                    // Stop polling if payment is complete
+                    if (data.data.status === 'paid' || data.data.status === 'cancelled') {
+                        clearInterval(statusPollingInterval);
+                    }
+                } else {
+                    if (!silent) {
+                        displayError(data.message);
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking status:', error);
+                if (!silent) {
+                    displayError('خطا در بررسی وضعیت: ' + error.message);
+                }
+            } finally {
+                if (!silent) {
+                    document.getElementById('loading').style.display = 'none';
+                }
+            }
+        }
+        
+        function updatePaymentStatus(payment) {
+            const statusElements = document.querySelectorAll('.status-badge');
+            statusElements.forEach(el => {
+                el.textContent = payment.status;
+                el.className = 'status-badge status-' + payment.status;
+            });
+            
+            if (payment.status === 'paid') {
+                const resultDiv = document.getElementById('result');
+                const notice = document.createElement('div');
+                notice.style.cssText = 'background: #28a745; color: white; padding: 15px; border-radius: 10px; margin-top: 20px; text-align: center; font-weight: bold;';
+                notice.textContent = '✅ پرداخت با موفقیت انجام شد!';
+                resultDiv.appendChild(notice);
+            }
+        }
+    </script>
+</body>
+</html>
