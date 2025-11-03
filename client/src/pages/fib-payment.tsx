@@ -33,7 +33,7 @@ export default function FibPaymentPage() {
       description?: string;
     };
   }>({
-    queryKey: ['/api/payment/fib', paymentId],
+    queryKey: [`/api/payment/fib/${paymentId}`],
     enabled: !!paymentId,
     refetchInterval: 5000, // Auto-refresh every 5 seconds
   });
