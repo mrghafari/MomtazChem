@@ -272,5 +272,107 @@ export function registerFibRoutes(app: Express) {
     }
   });
 
+  /**
+   * TEST ENDPOINT - Create FIB payment without authentication (Development Only)
+   * @route POST /api/fib/test-payment
+   * @access Public (for testing only)
+   */
+  app.post("/api/fib/test-payment", async (req, res) => {
+    // Only allow in development
+    if (process.env.NODE_ENV !== 'development') {
+      return res.status(403).json({
+        success: false,
+        message: "This endpoint is only available in development mode",
+      });
+    }
+
+    try {
+      const { amount, currency, description } = req.body;
+
+      if (!amount || parseFloat(amount) <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid amount / المبلغ غير صالح",
+        });
+      }
+
+      const { fibService } = await import('./fib-service');
+      
+      const payment = await fibService.createPayment({
+        amount: parseFloat(amount).toFixed(2),
+        currency: currency || 'IQD',
+        description: description || 'Test Payment',
+        customerId: 1, // Test customer ID
+        orderId: null,
+        orderNumber: null,
+      });
+
+      console.log(`✅ [FIB TEST] Payment created: ${payment.paymentId}`);
+
+      res.json({
+        success: true,
+        data: payment,
+      });
+    } catch (error: any) {
+      console.error("❌ [FIB TEST] Error creating payment:", error);
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to create payment / فشل إنشاء الدفع",
+      });
+    }
+  });
+
+  /**
+   * TEST ENDPOINT - Check payment status without authentication
+   * @route GET /api/fib/test-status/:paymentId
+   * @access Public (for testing only)
+   */
+  app.get("/api/fib/test-status/:paymentId", async (req, res) => {
+    if (process.env.NODE_ENV !== 'development') {
+      return res.status(403).json({
+        success: false,
+        message: "This endpoint is only available in development mode",
+      });
+    }
+
+    try {
+      const { paymentId } = req.params;
+      const payment = await storage.getFibPaymentByPaymentId(paymentId);
+      
+      if (!payment) {
+        return res.status(404).json({
+          success: false,
+          message: "Payment not found / الدفع غير موجود",
+        });
+      }
+
+      const { fibService } = await import('./fib-service');
+      const status = await fibService.checkPaymentStatus(paymentId);
+
+      res.json({
+        success: true,
+        data: {
+          paymentId: payment.paymentId,
+          status: status.status,
+          amount: payment.amount,
+          currency: payment.currency,
+          readableCode: payment.readableCode,
+          qrCode: payment.qrCode,
+          personalAppLink: payment.personalAppLink,
+          businessAppLink: payment.businessAppLink,
+          validUntil: payment.validUntil,
+          createdAt: payment.createdAt,
+          paidAt: payment.paidAt,
+        },
+      });
+    } catch (error: any) {
+      console.error("❌ [FIB TEST] Error checking payment status:", error);
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to check payment status",
+      });
+    }
+  });
+
   console.log('✅ [FIB] Payment routes registered successfully');
 }

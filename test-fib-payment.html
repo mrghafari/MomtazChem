@@ -277,7 +277,7 @@
             resultDiv.style.display = 'none';
             
             try {
-                const response = await fetch('/api/fib/create-payment', {
+                const response = await fetch('/api/fib/test-payment', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -285,8 +285,7 @@
                     body: JSON.stringify({
                         amount: amount,
                         currency: currency,
-                        description: description || 'تست پرداخت',
-                        customerId: 1
+                        description: description || 'تست پرداخت'
                     })
                 });
                 
@@ -404,7 +403,7 @@
             }
             
             try {
-                const response = await fetch(`/api/fib/payment-status/${currentPaymentId}`);
+                const response = await fetch(`/api/fib/test-status/${currentPaymentId}`);
                 const data = await response.json();
                 
                 if (data.success) {
