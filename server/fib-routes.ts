@@ -303,8 +303,8 @@ export function registerFibRoutes(app: Express) {
         currency: currency || 'IQD',
         description: description || 'Test Payment',
         customerId: 1, // Test customer ID
-        orderId: null,
-        orderNumber: null,
+        orderId: undefined,
+        orderNumber: undefined,
       });
 
       console.log(`✅ [FIB TEST] Payment created: ${payment.paymentId}`);
