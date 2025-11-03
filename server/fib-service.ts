@@ -140,7 +140,7 @@ class FIBService {
 
       console.log(`✅ [FIB] Payment created: ${payment.paymentId} for ${params.amount} ${params.currency || 'IQD'}`);
 
-      const paymentInterfaceUrl = `${baseUrl}/api/payment/fib/${payment.paymentId}`;
+      const paymentInterfaceUrl = `${baseUrl}/payment/fib/${payment.paymentId}`;
 
       return {
         paymentId: payment.paymentId,
