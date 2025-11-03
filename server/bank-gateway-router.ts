@@ -353,7 +353,7 @@ export class BankGatewayRouter {
       
       return {
         success: true,
-        paymentUrl: '',
+        paymentUrl: paymentResult.paymentUrl || '',
         transactionId: paymentResult.paymentId,
         qrCode: paymentResult.qrCode,
         readableCode: paymentResult.readableCode,

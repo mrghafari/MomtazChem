@@ -15,6 +15,7 @@ interface CreatePaymentParams {
 
 interface PaymentResponse {
   paymentId: string;
+  paymentUrl?: string;
   readableCode: string;
   qrCode: string;
   personalAppLink?: string;
@@ -139,8 +140,11 @@ class FIBService {
 
       console.log(`✅ [FIB] Payment created: ${payment.paymentId} for ${params.amount} ${params.currency || 'IQD'}`);
 
+      const paymentInterfaceUrl = `${baseUrl}/api/payment/fib/${payment.paymentId}`;
+
       return {
         paymentId: payment.paymentId,
+        paymentUrl: paymentInterfaceUrl,
         readableCode: payment.readableCode,
         qrCode: payment.qrCode,
         personalAppLink: payment.personalAppLink,

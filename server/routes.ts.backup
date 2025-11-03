@@ -1,4 +1,5 @@
 import express, { type Express, Request, Response, NextFunction } from "express";
+import { registerFibRoutes } from "./fib-routes";
 import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
 import multer from "multer";
@@ -30,10 +31,11 @@ import { customerDb, customerPool } from "./customer-db";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema, emailLogs, emailCategories, smtpSettings, emailRecipients, categoryEmailAssignments, insertCategoryEmailAssignmentSchema } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema, paymentGateways, orders as shopOrders, shopProducts } from "@shared/shop-schema";
 import { sendContactEmail } from "./email";
+import { insertBlogPostSchema, insertBlogPostTranslationSchema, blogPosts, blogPostTranslations } from "@shared/blog-schema";
 import TemplateProcessor from "./template-processor";
 import InventoryAlertService from "./inventory-alerts";
 import { db } from "./db";
-import { sql, eq, and, or, isNull, isNotNull, desc, gte, inArray } from "drizzle-orm";
+import { sql, eq, and, or, ne, isNull, isNotNull, desc, gte, inArray } from "drizzle-orm";
 import { findCorruptedOrders, getDataIntegrityStats, validateOrderIntegrity, markCorruptedOrderAsDeleted } from './data-integrity-tools';
 import { z } from "zod";
 import * as schema from "@shared/schema";
@@ -50,6 +52,7 @@ import { AutoInvoiceConverter } from "./auto-invoice-converter";
 import { secureObjectStorageService } from "./secureObjectStorage";
 import { fileSecurityService, productImageSecurityService } from "./fileSecurityService";
 import { ObjectStorageService } from "./objectStorage";
+import { getAwsS3Service } from './aws-s3-service';
 
 import { 
   vehicleTemplates, 
@@ -157,6 +160,7 @@ import {
 
 // Import sync service for automatic table synchronization
 import { globalSyncService } from './sync-service';
+import { generateSitemap } from './sitemap';
 
 // Extend session type to include admin user and customer user
 declare module "express-session" {
@@ -193,27 +197,11 @@ const logosDir = path.join(uploadsDir, 'logos');
   }
 });
 
-// Multer configuration for image uploads
-const imageStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, imagesDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `product-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
+// Multer configuration for image uploads - using memory storage for S3 upload
+const imageStorage = multer.memoryStorage();
 
 // Multer configuration for catalog uploads
-const catalogStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, catalogsDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `catalog-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
+const catalogStorage = multer.memoryStorage();
 
 const uploadImage = multer({
   storage: imageStorage,
@@ -257,15 +245,7 @@ if (!fs.existsSync(msdsDir)) {
   fs.mkdirSync(msdsDir, { recursive: true });
 }
 
-const msdsStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, msdsDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `msds-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
+const msdsStorage = multer.memoryStorage();
 
 const uploadMsds = multer({
   storage: msdsStorage,
@@ -293,15 +273,7 @@ const documentStorage = multer.diskStorage({
 });
 
 // Receipt upload configuration
-const receiptStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, receiptsDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `receipt-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
+const receiptStorage = multer.memoryStorage();
 
 const uploadReceipt = multer({
   storage: receiptStorage,
@@ -451,14 +423,11 @@ const requireCustomerAuth = (req: Request, res: Response, next: NextFunction) =>
       next();
     } else {
       console.log('❌ [CSV EXPORT] Unauthorized access attempt');
-      res.status(401).json({ success: false, message: "احراز هویت مشتری مورد نیاز است" });
+      res.status(401).json({ success: false, message: "Unauthorized" });
     }
   } catch (error) {
-    console.error('Customer authentication middleware error:', error);
-    res.status(500).json({
-      success: false,
-      message: "خطا در احراز هویت مشتری"
-    });
+    console.error('❌ [AUTH] Error in requireCustomerAuth:', error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -667,6 +636,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve test files
   app.get('/test-proforma', (req, res) => {
     res.sendFile(path.join(process.cwd(), 'test-proforma.html'));
+  });
+
+  // Public sitemap.xml endpoint for SEO
+  app.get('/sitemap.xml', async (req, res) => {
+    try {
+      const xml = await generateSitemap();
+      res.header('Content-Type', 'application/xml');
+      res.send(xml);
+    } catch (error) {
+      console.error('Sitemap generation error:', error);
+      res.status(500).send('Error generating sitemap');
+    }
   });
 
   // Data Integrity Test Page
@@ -3363,7 +3344,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  app.post("/api/upload/image", requireAuth, uploadImage.single('image'), (req, res) => {
+
+  app.post("/api/upload/image", requireAuth, uploadImage.single('image'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
@@ -3372,23 +3354,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const imageUrl = `/uploads/images/${req.file.filename}`;
+      // Get S3 service instance
+      const s3Service = getAwsS3Service();
+      
+      // Upload file to S3
+      const uploadResult = await s3Service.uploadPublicFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        'product-images'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload image to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Product image uploaded: ${uploadResult.key}`);
+
       res.json({ 
         success: true, 
-        url: imageUrl,
-        filename: req.file.filename,
+        url: uploadResult.url,
+        key: uploadResult.key,
+        filename: uploadResult.key?.split('/').pop() || req.file.originalname,
         originalName: req.file.originalname,
         size: req.file.size
       });
     } catch (error) {
+      console.error('❌ [S3 UPLOAD] Error uploading product image:', error);
       res.status(500).json({ 
         success: false, 
-        message: "Failed to upload image" 
+        message: "Failed to upload image to S3",
+        error: error.message
       });
     }
   });
-
-  app.post("/api/upload/catalog", requireAuth, uploadCatalog.single('catalog'), (req, res) => {
+  app.post("/api/upload/catalog", requireAuth, uploadCatalog.single('catalog'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
@@ -3397,24 +3400,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const catalogUrl = `/uploads/catalogs/${req.file.filename}`;
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPublicFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        'product-catalogs'
+      );
+
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.message || 'S3 upload failed');
+      }
+
+      console.log(`✅ [S3 UPLOAD] [CATALOG] uploaded: ${uploadResult.key}`);
+
       res.json({ 
         success: true, 
-        url: catalogUrl,
-        filename: req.file.filename,
+        url: uploadResult.url,
+        key: uploadResult.key,
         originalName: req.file.originalname,
         size: req.file.size
       });
     } catch (error) {
+      console.error('❌ [S3 UPLOAD] Catalog upload error:', error);
       res.status(500).json({ 
         success: false, 
-        message: "Failed to upload catalog" 
+        message: "Failed to upload catalog to S3",
+        error: error.message
       });
     }
   });
 
+
   // MSDS upload endpoint
-  app.post("/api/upload/msds", requireAuth, uploadMsds.single('msds'), (req, res) => {
+  app.post("/api/upload/msds", requireAuth, uploadMsds.single('msds'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
@@ -3423,19 +3442,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const msdsUrl = `/uploads/msds/${req.file.filename}`;
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPublicFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        'product-msds'
+      );
+
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.message || 'S3 upload failed');
+      }
+
+      console.log(`✅ [S3 UPLOAD] [MSDS] uploaded: ${uploadResult.key}`);
+
       res.json({ 
         success: true, 
-        url: msdsUrl,
-        filename: req.file.filename,
+        url: uploadResult.url,
+        key: uploadResult.key,
         originalName: req.file.originalname,
         size: req.file.size
       });
     } catch (error) {
-      console.error('MSDS upload error:', error);
+      console.error('❌ [S3 UPLOAD] MSDS upload error:', error);
       res.status(500).json({ 
         success: false, 
-        message: "Failed to upload MSDS file" 
+        message: "Failed to upload MSDS file to S3",
+        error: error.message
       });
     }
   });
@@ -4255,140 +4288,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get random products for category page display based on content management settings
+  // Get random products from a category for recommendation display
   app.get("/api/products/random/:category", async (req, res) => {
     try {
       const { category } = req.params;
-      console.log(`🎲 [RANDOM PRODUCTS] Fetching random products for category: ${category}`);
+      const limit = parseInt(req.query.limit as string) || 2;
       
-      // Get kardex showcase products for this category
-      const kardexProducts = await storage.getProductsByCategory(category);
-      console.log(`📦 [RANDOM PRODUCTS] Found ${kardexProducts.length} kardex products in category ${category}`);
+      console.log(`🎲 [RANDOM PRODUCTS] Fetching ${limit} random products for category: ${category}`);
       
-      // Get assigned shop products for this category from content management
-      const { pool } = await import('./db');
-      let shopProducts = [];
+      // Use the new shopStorage method to get random products
+      const randomProducts = await shopStorage.getRandomProductsByCategory(category, limit);
       
-      try {
-        // Get assigned product IDs for this category
-        const assignmentResult = await db
-          .select()
-          .from(contentItems)
-          .where(and(
-            eq(contentItems.section, 'category_products'),
-            eq(contentItems.key, category),
-            eq(contentItems.isActive, true)
-          ))
-          .limit(1);
-
-        if (assignmentResult.length > 0) {
-          const productIds = JSON.parse(assignmentResult[0].content || '[]');
-          console.log(`🛍️ [RANDOM PRODUCTS] Found assigned shop product IDs:`, productIds);
-          
-          if (productIds.length > 0) {
-            // Get shop products by IDs
-            const shopQuery = `
-              SELECT 
-                id, name, category, description, short_description as "shortDescription",
-                price, price_unit as "priceUnit", stock_quantity as "stockQuantity", 
-                sku, barcode, thumbnail_url as "imageUrl", 
-                is_active as "isActive", visible_in_shop as "visibleInShop"
-              FROM shop_products 
-              WHERE id = ANY($1) AND is_active = true AND visible_in_shop = true
-              ORDER BY name ASC
-            `;
-            
-            const shopResult = await pool.query(shopQuery, [productIds]);
-            shopProducts = shopResult.rows;
-            console.log(`🛒 [RANDOM PRODUCTS] Found ${shopProducts.length} shop products`);
-          }
-        }
-      } catch (shopError) {
-        console.error('Error fetching assigned shop products:', shopError);
-        // Continue with just kardex products if shop products fail
-      }
-
-      // Combine both types of products
-      const allProducts = [...kardexProducts, ...shopProducts];
-      console.log(`📦 [RANDOM PRODUCTS] Total combined products: ${allProducts.length} (${kardexProducts.length} kardex + ${shopProducts.length} shop)`);
-      
-      if (allProducts.length === 0) {
-        return res.json({
-          success: true,
-          data: [],
-          message: "No products found in category"
-        });
-      }
-      
-      // Get content management settings for this category
-      const randomDisplaySetting = await db
-        .select()
-        .from(contentItems)
-        .where(eq(contentItems.key, `random_display_${category}`))
-        .limit(1);
-        
-      const maxDisplaySetting = await db
-        .select()
-        .from(contentItems)
-        .where(eq(contentItems.key, `max_display_${category}`))
-        .limit(1);
-      
-      console.log(`🔍 [RANDOM PRODUCTS] Random display settings:`, {
-        found: randomDisplaySetting.length > 0,
-        setting: randomDisplaySetting[0] || null,
-        isActive: randomDisplaySetting[0]?.isActive,
-        content: randomDisplaySetting[0]?.content
-      });
-      
-      // Check if random display is enabled
-      const isRandomEnabled = randomDisplaySetting.length > 0 && 
-                             randomDisplaySetting[0].isActive && 
-                             randomDisplaySetting[0].content === 'true';
-      
-      if (!isRandomEnabled) {
-        console.log(`❌ [RANDOM PRODUCTS] Random display is disabled for category ${category}`);
-        return res.json({
-          success: true,
-          data: [],
-          message: "Random display is disabled for this category"
-        });
-      }
-      
-      // Get max display count (default: 3)
-      const maxDisplay = maxDisplaySetting.length > 0 ? 
-                        parseInt(maxDisplaySetting[0].content) : 3;
-      
-      console.log(`🎯 [RANDOM PRODUCTS] Random display enabled, max display: ${maxDisplay}`);
-      
-      // Shuffle products and select random ones
-      const shuffledProducts = [...allProducts].sort(() => Math.random() - 0.5);
-      const randomProducts = shuffledProducts.slice(0, Math.min(maxDisplay, allProducts.length));
-      
-      console.log(`✅ [RANDOM PRODUCTS] Returning ${randomProducts.length} random products`);
+      console.log(`✅ [RANDOM PRODUCTS] Returning ${randomProducts.length} random products from category ${category}`);
       
       res.json({
         success: true,
-        data: randomProducts,
-        settings: {
-          category,
-          randomEnabled: isRandomEnabled,
-          maxDisplay,
-          totalProducts: allProducts.length,
-          selectedCount: randomProducts.length,
-          kardexCount: kardexProducts.length,
-          shopCount: shopProducts.length
-        }
+        data: randomProducts
       });
       
     } catch (error) {
-      console.error("Error fetching random products:", error);
+      console.error("❌ [RANDOM PRODUCTS] Error fetching random products:", error);
       res.status(500).json({ 
         success: false, 
-        message: "Internal server error",
+        message: "Failed to fetch random products",
         error: error instanceof Error ? error.message : String(error)
       });
     }
   });
-
   app.get("/api/products/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -6563,6 +6489,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'categories': 'مدیریت دسته‌بندی‌ها',
       'sms': 'مدیریت پیامک',
       'whatsapp_crm': 'مدیریت واتساپ CRM',
+      'blog': 'مدیریت بلاگ',
       'factory': 'مدیریت کارخانه',
       'user_management': 'مدیریت کاربران',
       'shop_management': 'مدیریت فروشگاه',
@@ -6716,6 +6643,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // This should be the SINGLE SOURCE OF TRUTH for all modules
     // Any changes here will automatically sync to User Management
     return [
+      'kpi_dashboard',
+      'management_dashboard',
       'syncing_shop',
       'shop_management', 
       'product_management',
@@ -6734,6 +6663,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'user_management',
       'procedures',
       'payment_management',
+      'accounting_management',
       'finance',
       'wallet_management',
       'geography_analytics',
@@ -6743,9 +6673,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'ticketing_system',
       'remote_desktop',
       'server_config',
-      'kpi_dashboard',
-      'management_dashboard'
-      // Total: 28 modules - automatically synced with Site Management
+      'company_information',
+      'user_guide',
+      'marketing_module',
+      'aws_s3_settings',
+      'whatsapp_crm',
+      'blog'
+      // Total: 36 modules - automatically synced with Site Management
     ];
   };
 
@@ -9018,6 +8952,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'categories': { name: 'مدیریت دسته‌بندی‌ها', description: 'تنظیم دسته‌بندی محصولات', category: 'content' },
         'sms': { name: 'مدیریت پیامک', description: 'ارسال و مدیریت پیامک‌ها', category: 'communication' },
         'whatsapp_crm': { name: 'مدیریت واتساپ CRM', description: 'مدیریت مشتریان و ارسال پیام‌های واتساپ', category: 'communication' },
+        'blog': { name: 'مدیریت بلاگ', description: 'نوشتن و مدیریت پست‌های بلاگ', category: 'content' },
         'factory': { name: 'مدیریت کارخانه', description: 'مدیریت خط تولید', category: 'production' },
         'user_management': { name: 'مدیریت کاربران', description: 'ایجاد و مدیریت کاربران سیستم', category: 'admin' },
         'procedures': { name: 'مدیریت روش‌ها', description: 'مدیریت اسناد و روش‌های کاری', category: 'content' },
@@ -9029,7 +8964,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'ai_settings': { name: 'تنظیمات هوش مصنوعی', description: 'پیکربندی AI و SKU', category: 'system' },
         'refresh_control': { name: 'کنترل تازه‌سازی', description: 'تنظیمات تازه‌سازی خودکار', category: 'system' },
         'content_management': { name: 'مدیریت محتوا', description: 'ویرایش محتوای وبسایت', category: 'content' },
-        'ticketing_system': { name: 'سیستم تیکتینگ', description: 'مدیریت تیکت‌ها و پشتیبانی', category: 'support' }
+        'ticketing_system': { name: 'سیستم تیکتینگ', description: 'مدیریت تیکت‌ها و پشتیبانی', category: 'support' },
+        'remote_desktop': { name: 'دسکتاپ از راه دور', description: 'دسترسی از راه دور به سیستم', category: 'system' },
+        'company_information': { name: 'اطلاعات شرکت', description: 'مدیریت اطلاعات و پروفایل شرکت', category: 'content' },
+        'user_guide': { name: 'راهنمای کاربر', description: 'مستندات و راهنماهای کاربری', category: 'content' },
+        'marketing_module': { name: 'ماژول بازاریابی', description: 'مدیریت کمپین‌های بازاریابی', category: 'marketing' },
+        'aws_s3_settings': { name: 'تنظیمات AWS S3', description: 'پیکربندی ذخیره‌سازی ابری AWS', category: 'system' }
       };
       
       // Build modules array from current active modules
@@ -16657,7 +16597,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Grace period orders: Only keep with financial approval
       
       // Set payment method and status based on customer choice
-      if (orderData.paymentMethod === 'online_payment') {
+      if (orderData.paymentMethod === 'online_payment' || orderData.paymentMethod === 'fib_online') {
         finalPaymentStatus = "pending";
         finalPaymentMethod = "online_payment";
         walletAmountUsed = 0;
@@ -16948,10 +16888,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (finalPaymentStatus === 'grace_period') {
           managementStatus = 'payment_grace_period';
         } else if (finalPaymentStatus === 'paid' && Math.round(remainingAmount) <= 1) {
-          // Pure wallet payment - go directly to warehouse
-          managementStatus = 'warehouse_pending';
-          department = 'warehouse';
-          console.log(`🏪 [PURE WALLET ROUTING] Order ${orderNumber} routed directly to warehouse (paid with wallet)`);
+          // Pure wallet payment - must be approved by financial department
+          managementStatus = 'finance_pending';
+          department = 'financial';
+          console.log(`🏪 [PURE WALLET ROUTING] Order ${orderNumber} routed to financial department (paid with wallet)`);
         }
 
         let orderMgmtData = {
@@ -17025,12 +16965,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // CRITICAL FIX: Check for full wallet payment first (remainingAmount = 0)
       if (finalPaymentStatus === "paid" && Math.round(remainingAmount) <= 1) {
-        console.log(`🏪 [WAREHOUSE DIRECT] Full wallet payment completed - sending order ${orderNumber} directly to warehouse`);
+        console.log(`🏪 [FINANCIAL REVIEW] Full wallet payment completed - sending order ${orderNumber} to financial department`);
         console.log(`💰 [PAYMENT COMPLETE] Wallet: ${walletAmountUsed} IQD, Remaining: ${remainingAmount} IQD`);
         
         return res.json({
           success: true,
-          message: 'سفارش با موفقیت ثبت شد - ارسال به انبار',
+          message: 'سفارش با موفقیت ثبت شد - در انتظار تایید واحد مالی',
           orderId: order.id,
           orderNumber: orderNumber,
           totalAmount: Math.round(totalAmount),
@@ -17138,9 +17078,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         
-        // 🏭 [AUTO WAREHOUSE] Send confirmed wallet payment directly to warehouse
+        // 🏭 [FINANCIAL HOLD] Wallet payment must be reviewed by financial department
         try {
-          await customerStorage.updateOrderStatus(order.id, 'warehouse_pending');
+          await customerStorage.updateOrderStatus(order.id, 'finance_pending');
           
           // Update payment status and method directly in database
           await db
@@ -17152,14 +17092,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             })
             .where(eq(customerOrders.id, order.id));
             
-          console.log(`🏭 [WALLET PAYMENT] Order ${order.orderNumber} sent directly to warehouse`);
+          console.log(`🏭 [WALLET PAYMENT] Order ${order.orderNumber} waiting for financial approval`);
         } catch (error) {
-          console.error('❌ Error sending wallet payment to warehouse:', error);
+          console.error('❌ Error updating wallet payment status:', error);
         }
         
         return res.json({
           success: true,
-          message: "سفارش با کیف پول به طور کامل پرداخت شد و به انبار ارسال شد",
+          message: "سفارش با کیف پول به طور کامل پرداخت شد - در انتظار تایید واحد مالی",
           paymentMethod: 'wallet_full',
           order: {
             id: order.id,
@@ -17196,7 +17136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // 🏭 [AUTO WAREHOUSE] Send confirmed full wallet payment directly to warehouse
           try {
-            await customerStorage.updateOrderStatus(order.id, 'warehouse_pending');
+            await customerStorage.updateOrderStatus(order.id, 'finance_pending');
             
             // Update payment status and method directly in database
             await db
@@ -17208,14 +17148,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               })
               .where(eq(customerOrders.id, order.id));
               
-            console.log(`🏭 [WALLET_FULL] Order ${order.orderNumber} sent directly to warehouse`);
+            console.log(`🏭 [WALLET_FULL] Order ${order.orderNumber} waiting for financial approval`);
           } catch (error) {
-            console.error('❌ Error sending full wallet payment to warehouse:', error);
+            console.error('❌ Error updating full wallet payment status:', error);
           }
           
           return res.json({
             success: true,
-            message: "سفارش با کیف پول به طور کامل پرداخت شد و به انبار ارسال شد",
+            message: "سفارش با کیف پول به طور کامل پرداخت شد - در انتظار تایید واحد مالی",
             paymentMethod: 'wallet_full',
             order: {
               id: order.id,
@@ -17320,7 +17260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // 🏦 [FULL_BANK_PAYMENT] Route full amount to bank gateway for all bank payment types
-        if (finalPaymentMethod === 'online_payment' || finalPaymentMethod === 'bank') {
+        if (finalPaymentMethod === 'online_payment' || finalPaymentMethod === 'fib_online' || finalPaymentMethod === 'bank') {
           const fullAmount = Math.round(remainingAmount) > 0 ? Math.round(remainingAmount) : Math.round(totalAmount);
           console.log(`🏦 [BANK_PAYMENT] Routing ${fullAmount} IQD to bank gateway (method: ${finalPaymentMethod})...`);
           
@@ -31476,11 +31416,12 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "accounting_management", "finance", "wallet_management", "geography_analytics",
           "ai_settings", "refresh_control", "content_management", "ticketing_system",
           "remote_desktop", "server_config", "company_information", "user_guide",
-          "marketing_module", "aws_s3_settings", "whatsapp_crm"
+          "marketing_module", "aws_s3_settings", "whatsapp_crm", "blog"
         ];
         
         console.log('🔍 [DEBUG] allModules array contains:', allModules.length, 'modules');
         console.log('🔍 [DEBUG] whatsapp_crm included?', allModules.includes('whatsapp_crm'));
+        console.log('🔍 [DEBUG] blog included?', allModules.includes('blog'));
         console.log('🔍 [DEBUG] ticketing_system included?', allModules.includes('ticketing_system'));
         console.log('🔍 [DEBUG] server_config included?', allModules.includes('server_config'));
 
@@ -31491,13 +31432,15 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         
         console.log(`✓ [PERMISSIONS] Super admin ${legacyUser[0].email} has all modules:`, normalizedModules);
         console.log(`🔍 [DEBUG] whatsapp_crm in normalizedModules?`, normalizedModules.includes('whatsapp_crm'));
+        console.log(`🔍 [DEBUG] blog in normalizedModules?`, normalizedModules.includes('blog'));
         console.log(`🔍 [DEBUG] kpi_dashboard in normalizedModules?`, normalizedModules.includes('kpi_dashboard'));
         console.log(`🔍 [DEBUG] management_dashboard in normalizedModules?`, normalizedModules.includes('management_dashboard'));
 
         // Convert technical module IDs to Persian names for super admin
         const persianModules = normalizedModules.map(moduleId => {
           const persianName = convertTechnicalToPersianModule(moduleId);
-          if (moduleId === 'whatsapp_crm' || moduleId === 'kpi_dashboard' || moduleId === 'management_dashboard') {
+          if (moduleId === 'whatsapp_crm' ||
+              moduleId === 'blog' || moduleId === 'kpi_dashboard' || moduleId === 'management_dashboard') {
             console.log(`🔍 [DEBUG] Converting ${moduleId} → ${persianName}`);
           }
           return persianName;
@@ -31564,7 +31507,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         const allModules = [
           'syncing_shop', 'inquiry_management', 'barcode_management', 'email_management',
           'backup_management', 'crm_management', 'seo_management', 'category_management',
-          'sms_management', 'whatsapp_crm', 'factory_management', 'super_admin', 'user_management',
+          'sms_management', 'whatsapp_crm',
+          'blog', 'factory_management', 'super_admin', 'user_management',
           'shop_management', 'procedures_management', 'order_management',
           'product_management', 'payment_management', 'wallet_management', 'geography_analytics',
           'ai_management', 'refresh_control',
@@ -34925,8 +34869,22 @@ momtazchem.com
         amountStatus = 'مبلغ فیش دقیقاً برابر با بدهی شما است';
       }
 
-      // ایجاد مسیر نسبی برای ذخیره در دیتابیس
-      const filePath = `/uploads/receipts/${file.filename}`;
+      // Upload to AWS S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPrivateFile(
+        file.buffer,
+        file.originalname,
+        file.mimetype,
+        'receipts'
+      );
+
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.message || 'S3 upload failed');
+      }
+
+      console.log(`✅ [S3 UPLOAD] [RECEIPT] uploaded: ${uploadResult.key}`);
+
+      const filePath = uploadResult.url; // S3 URL instead of local path
 
       // به‌روزرسانی سفارش با مسیر فیش بانکی و مبلغ فیش
       const uploadNote = `فیش بانکی آپلود شد در ${new Date().toLocaleString('fa-IR')} | مبلغ فیش: ${amount.toLocaleString()} دینار | مبلغ سفارش: ${orderAmount.toLocaleString()} دینار${walletCredit > 0 ? ` | مبلغ اضافی ${walletCredit.toLocaleString()} دینار در انتظار تایید واحد مالی` : ''}${walletDeduction > 0 ? ` | کمبود ${walletDeduction.toLocaleString()} دینار از والت کسر شد` : ''}${notes ? ` | توضیحات: ${notes}` : ''}`;
@@ -52119,7 +52077,613 @@ momtazchem.com
     }
   });
 
+  // ============================================================================
+  // AWS S3 SIGNED URLs FOR PRIVATE FILES
+  // ============================================================================
+  
+  /**
+   * Generate temporary signed URL for accessing private files (receipts, documents)
+   * @route GET /api/s3/signed-url
+   * @access Private (requires authentication)
+   */
+  app.get('/api/s3/signed-url', requireAuth, async (req, res) => {
+    try {
+      const { key, expiresIn } = req.query;
+      
+      if (!key || typeof key !== 'string') {
+        return res.status(400).json({
+          success: false,
+          message: 'کلید فایل الزامی است'
+        });
+      }
+      
+      // Security: Only allow signed URLs for private file prefixes
+      const allowedPrefixes = ['receipts/', 'documents/'];
+      const isAllowed = allowedPrefixes.some(prefix => key.startsWith(prefix));
+      
+      if (!isAllowed) {
+        console.log(`🚫 [SIGNED URL] Rejected unauthorized key access attempt: ${key}`);
+        return res.status(403).json({
+          success: false,
+          message: 'دسترسی به این فایل مجاز نیست'
+        });
+      }
+      
+      // Default expiration: 1 hour (3600 seconds)
+      const expiration = expiresIn ? parseInt(expiresIn as string) : 3600;
+      
+      const s3Service = getAwsS3Service();
+      const signedUrl = await s3Service.getSignedUrl(key, expiration);
+      
+      if (!signedUrl) {
+        return res.status(500).json({
+          success: false,
+          message: 'خطا در ایجاد لینک موقت'
+        });
+      }
+      
+      console.log(`✅ [SIGNED URL] Generated for file: ${key}, expires in ${expiration}s`);
+      
+      res.json({
+        success: true,
+        data: {
+          url: signedUrl,
+          expiresIn: expiration,
+          expiresAt: new Date(Date.now() + expiration * 1000).toISOString()
+        }
+      });
+      
+    } catch (error: any) {
+      console.error('❌ [SIGNED URL] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در ایجاد لینک موقت فایل'
+      });
+    }
+  });
+
+
   // Catch-all for unmatched API routes - return JSON 404 (must be last)
+  // ============================================================================
+  // BLOG API ROUTES
+  // ============================================================================
+
+  // ============================================================================
+  // ADMIN BLOG ROUTES (Authenticated)
+  // ============================================================================
+
+  /**
+   * GET /api/admin/blog
+   * List all blog posts with translations
+   * @access Admin only
+   */
+  app.get("/api/admin/blog", requireAdmin, async (req, res) => {
+    try {
+      const posts = await db
+        .select()
+        .from(blogPosts)
+        .orderBy(blogPosts.createdAt);
+
+      const postsWithTranslations = await Promise.all(
+        posts.map(async (post) => {
+          const translations = await db
+            .select()
+            .from(blogPostTranslations)
+            .where(eq(blogPostTranslations.postId, post.id));
+
+          return {
+            ...post,
+            translations,
+          };
+        })
+      );
+
+      res.json({
+        success: true,
+        data: postsWithTranslations,
+      });
+    } catch (error: any) {
+      console.error("Error fetching blog posts:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت مقالات / Error fetching blog posts",
+      });
+    }
+  });
+
+  /**
+   * POST /api/admin/blog
+   * Create new blog post with both English and Arabic translations
+   * @access Admin only
+   */
+  app.post("/api/admin/blog", requireAdmin, async (req, res) => {
+    try {
+      const { post, translations } = req.body;
+
+      // Validate post data
+      const validatedPost = insertBlogPostSchema.parse(post);
+
+      // Validate translations (should have both English and Arabic)
+      if (!translations || translations.length !== 2) {
+        return res.status(400).json({
+          success: false,
+          message: "يجب توفير ترجمتين (إنجليزي وعربي) / Both English and Arabic translations required",
+        });
+      }
+
+      const validatedTranslations = translations.map((t: any) =>
+        insertBlogPostTranslationSchema.parse(t)
+      );
+
+      // Check if English and Arabic are both present
+      const hasEnglish = validatedTranslations.some((t) => t.language === "en");
+      const hasArabic = validatedTranslations.some((t) => t.language === "ar");
+
+      if (!hasEnglish || !hasArabic) {
+        return res.status(400).json({
+          success: false,
+          message: "يجب توفير ترجمة إنجليزية وعربية / Both English and Arabic translations required",
+        });
+      }
+
+      // Create blog post
+      const [newPost] = await db
+        .insert(blogPosts)
+        .values(validatedPost)
+        .returning();
+
+      // Create translations
+      const newTranslations = await db
+        .insert(blogPostTranslations)
+        .values(
+          validatedTranslations.map((t) => ({
+            ...t,
+            postId: newPost.id,
+          }))
+        )
+        .returning();
+
+      res.json({
+        success: true,
+        data: {
+          ...newPost,
+          translations: newTranslations,
+        },
+      });
+    } catch (error: any) {
+      console.error("Error creating blog post:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا في إنشاء المقال / Error creating blog post",
+        error: error.message,
+      });
+    }
+  });
+
+  /**
+   * PUT /api/admin/blog/:id
+   * Update blog post and translations
+   * @access Admin only
+   */
+  app.put("/api/admin/blog/:id", requireAdmin, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const { post, translations } = req.body;
+
+      // Check if post exists
+      const existingPost = await db
+        .select()
+        .from(blogPosts)
+        .where(eq(blogPosts.id, postId))
+        .limit(1);
+
+      if (existingPost.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "المقال غير موجود / Blog post not found",
+        });
+      }
+
+      // Update blog post
+      const [updatedPost] = await db
+        .update(blogPosts)
+        .set({
+          ...post,
+          updatedAt: new Date(),
+        })
+        .where(eq(blogPosts.id, postId))
+        .returning();
+
+      // Update translations if provided
+      let updatedTranslations = [];
+      if (translations && translations.length > 0) {
+        // Delete existing translations
+        await db
+          .delete(blogPostTranslations)
+          .where(eq(blogPostTranslations.postId, postId));
+
+        // Insert new translations
+        updatedTranslations = await db
+          .insert(blogPostTranslations)
+          .values(
+            translations.map((t: any) => ({
+              ...t,
+              postId: postId,
+              updatedAt: new Date(),
+            }))
+          )
+          .returning();
+      }
+
+      res.json({
+        success: true,
+        data: {
+          ...updatedPost,
+          translations: updatedTranslations,
+        },
+      });
+    } catch (error: any) {
+      console.error("Error updating blog post:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا في تحديث المقال / Error updating blog post",
+        error: error.message,
+      });
+    }
+  });
+
+  /**
+   * DELETE /api/admin/blog/:id
+   * Delete blog post (cascade deletes translations)
+   * @access Admin only
+   */
+  app.delete("/api/admin/blog/:id", requireAdmin, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+
+      // Check if post exists
+      const existingPost = await db
+        .select()
+        .from(blogPosts)
+        .where(eq(blogPosts.id, postId))
+        .limit(1);
+
+      if (existingPost.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "المقال غير موجود / Blog post not found",
+        });
+      }
+
+      // Delete blog post (translations will be cascade deleted)
+      await db.delete(blogPosts).where(eq(blogPosts.id, postId));
+
+      res.json({
+        success: true,
+        message: "تم حذف المقال بنجاح / Blog post deleted successfully",
+      });
+    } catch (error: any) {
+      console.error("Error deleting blog post:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا في حذف المقال / Error deleting blog post",
+        error: error.message,
+      });
+    }
+  });
+
+  /**
+   * PATCH /api/admin/blog/:id/publish
+   * Toggle publish status and set publish_date
+   * @access Admin only
+   */
+  app.patch("/api/admin/blog/:id/publish", requireAdmin, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+
+      // Check if post exists
+      const existingPost = await db
+        .select()
+        .from(blogPosts)
+        .where(eq(blogPosts.id, postId))
+        .limit(1);
+
+      if (existingPost.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "المقال غير موجود / Blog post not found",
+        });
+      }
+
+      const currentStatus = existingPost[0].status;
+      const newStatus = currentStatus === "published" ? "draft" : "published";
+      const publishDate = newStatus === "published" ? new Date() : null;
+
+      const [updatedPost] = await db
+        .update(blogPosts)
+        .set({
+          status: newStatus,
+          publishDate: publishDate,
+          updatedAt: new Date(),
+        })
+        .where(eq(blogPosts.id, postId))
+        .returning();
+
+      res.json({
+        success: true,
+        data: updatedPost,
+        message:
+          newStatus === "published"
+            ? "تم نشر المقال بنجاح / Blog post published successfully"
+            : "تم إلغاء نشر المقال / Blog post unpublished",
+      });
+    } catch (error: any) {
+      console.error("Error toggling publish status:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا في تغيير حالة النشر / Error toggling publish status",
+        error: error.message,
+      });
+    }
+  });
+
+  // ============================================================================
+  // PUBLIC BLOG ROUTES (No Authentication)
+  // ============================================================================
+
+  /**
+   * GET /api/blog
+   * List published blog posts with pagination, filtering by tag, language support
+   * @access Public
+   * @query limit - number of posts per page (default: 10)
+   * @query offset - pagination offset (default: 0)
+   * @query tag - filter by tag
+   * @query language - filter by language (en or ar)
+   */
+  app.get("/api/blog", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const tag = req.query.tag as string;
+      const language = (req.query.language as string) || "en";
+
+      // Validate language
+      if (language !== "en" && language !== "ar") {
+        return res.status(400).json({
+          success: false,
+          message: "اللغة غير صالحة / Invalid language parameter",
+        });
+      }
+
+      // Build query for published posts
+      let query = db
+        .select()
+        .from(blogPosts)
+        .where(eq(blogPosts.status, "published"))
+        .orderBy(blogPosts.publishDate)
+        .limit(limit)
+        .offset(offset);
+
+      // Filter by tag if provided
+      if (tag) {
+        query = query.where(sql`${tag} = ANY(${blogPosts.tags})`);
+      }
+
+      const posts = await query;
+
+      // Get translations for each post
+      const postsWithTranslation = await Promise.all(
+        posts.map(async (post) => {
+          const [translation] = await db
+            .select()
+            .from(blogPostTranslations)
+            .where(
+              and(
+                eq(blogPostTranslations.postId, post.id),
+                eq(blogPostTranslations.language, language)
+              )
+            )
+            .limit(1);
+
+          return {
+            ...post,
+            translation,
+          };
+        })
+      );
+
+      res.json({
+        success: true,
+        data: postsWithTranslation,
+        pagination: {
+          limit,
+          offset,
+          total: posts.length,
+        },
+      });
+    } catch (error: any) {
+      console.error("Error fetching published blog posts:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا في دریافت المقالات / Error fetching blog posts",
+      });
+    }
+  });
+
+  /**
+   * GET /api/blog/:slug
+   * Get single blog post by slug with language parameter
+   * @access Public
+   * @query language - en or ar (default: en)
+   */
+  app.get("/api/blog/:slug", async (req, res) => {
+    try {
+      const slug = req.params.slug;
+      const language = (req.query.language as string) || "en";
+
+      // Validate language
+      if (language !== "en" && language !== "ar") {
+        return res.status(400).json({
+          success: false,
+          message: "اللغة غير صالحة / Invalid language parameter",
+        });
+      }
+
+      // Find translation by slug
+      const [translation] = await db
+        .select()
+        .from(blogPostTranslations)
+        .where(
+          and(
+            eq(blogPostTranslations.slug, slug),
+            eq(blogPostTranslations.language, language)
+          )
+        )
+        .limit(1);
+
+      if (!translation) {
+        return res.status(404).json({
+          success: false,
+          message: "المقال غير موجود / Blog post not found",
+        });
+      }
+
+      // Get the blog post
+      const [post] = await db
+        .select()
+        .from(blogPosts)
+        .where(
+          and(
+            eq(blogPosts.id, translation.postId),
+            eq(blogPosts.status, "published")
+          )
+        )
+        .limit(1);
+
+      if (!post) {
+        return res.status(404).json({
+          success: false,
+          message: "المقال غير موجود / Blog post not found",
+        });
+      }
+
+      // Increment view count
+      await db
+        .update(blogPosts)
+        .set({
+          viewCount: (post.viewCount || 0) + 1,
+        })
+        .where(eq(blogPosts.id, post.id));
+
+      res.json({
+        success: true,
+        data: {
+          ...post,
+          viewCount: (post.viewCount || 0) + 1,
+          translation,
+        },
+      });
+    } catch (error: any) {
+      console.error("Error fetching blog post by slug:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا في دریافت المقال / Error fetching blog post",
+      });
+    }
+  });
+
+  /**
+   * GET /api/blog/:id/related
+   * Get related blog posts by tags (same language)
+   * @access Public
+   * @query language - en or ar (default: en)
+   * @query limit - number of related posts (default: 5)
+   */
+  app.get("/api/blog/:id/related", async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const language = (req.query.language as string) || "en";
+      const limit = parseInt(req.query.limit as string) || 5;
+
+      // Validate language
+      if (language !== "en" && language !== "ar") {
+        return res.status(400).json({
+          success: false,
+          message: "اللغة غير صالحة / Invalid language parameter",
+        });
+      }
+
+      // Get the original post
+      const [originalPost] = await db
+        .select()
+        .from(blogPosts)
+        .where(eq(blogPosts.id, postId))
+        .limit(1);
+
+      if (!originalPost) {
+        return res.status(404).json({
+          success: false,
+          message: "المقال غير موجود / Blog post not found",
+        });
+      }
+
+      // If no tags, return empty array
+      if (!originalPost.tags || originalPost.tags.length === 0) {
+        return res.json({
+          success: true,
+          data: [],
+        });
+      }
+
+      // Find related posts with overlapping tags
+      const relatedPosts = await db
+        .select()
+        .from(blogPosts)
+        .where(
+          and(
+            eq(blogPosts.status, "published"),
+            ne(blogPosts.id, postId),
+            sql`${blogPosts.tags} && ${originalPost.tags}`
+          )
+        )
+        .limit(limit);
+
+      // Get translations for related posts
+      const relatedPostsWithTranslation = await Promise.all(
+        relatedPosts.map(async (post) => {
+          const [translation] = await db
+            .select()
+            .from(blogPostTranslations)
+            .where(
+              and(
+                eq(blogPostTranslations.postId, post.id),
+                eq(blogPostTranslations.language, language)
+              )
+            )
+            .limit(1);
+
+          return {
+            ...post,
+            translation,
+          };
+        })
+      );
+
+      res.json({
+        success: true,
+        data: relatedPostsWithTranslation,
+      });
+    } catch (error: any) {
+      console.error("Error fetching related blog posts:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا في دریافت المقالات ذات الصلة / Error fetching related posts",
+      });
+    }
+  });
+
+  // Register FIB payment routes
+  registerFibRoutes(app);
   app.all('/api/*', (req, res) => {
     console.log(`❌ 404 - Unmatched API route: ${req.method} ${req.originalUrl}`);
     res.status(404).json({

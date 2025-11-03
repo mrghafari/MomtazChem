@@ -17042,12 +17042,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             success: true,
             message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
             orderId: order.id,
-            orderNumber: null, // No order number until payment succeeds
+            orderNumber: order.orderNumber,
             totalAmount: Math.round(totalAmount),
             walletAmountUsed: Math.round(walletAmountUsed),
             remainingAmount: formattedRemainingAmount,
             requiresBankPayment: true,
-            paymentUrl: routingResult.paymentUrl
+            paymentUrl: routingResult.paymentUrl,
+            redirectUrl: routingResult.paymentUrl
           });
         } else {
           // 🗑️ DELETE ORDER: Bank routing failed
@@ -17280,11 +17281,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               success: true,
               message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
               orderId: order.id,
-              orderNumber: null, // No order number until payment succeeds
+              orderNumber: order.orderNumber,
               totalAmount: Math.round(totalAmount),
               walletAmountUsed: Math.round(walletAmountUsed),
               requiresBankPayment: true,
-              paymentUrl: routingResult.paymentUrl
+              paymentUrl: routingResult.paymentUrl,
+              redirectUrl: routingResult.paymentUrl
             });
           } else {
             // 🗑️ DELETE ORDER: Bank routing failed
