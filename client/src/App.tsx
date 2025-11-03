@@ -146,6 +146,7 @@ import VehicleHistoryPage from "@/pages/admin/vehicle-history";
 import BlogManagement from "@/pages/admin/blog-management";
 import Blog from "@/pages/blog";
 import BlogPost from "@/pages/blog-post";
+import FibPaymentPage from "@/pages/fib-payment";
 
 import NotFound from "@/pages/not-found";
 
@@ -166,6 +167,7 @@ function Router() {
           <Route path="/blog/:slug" component={BlogPost} />
           <Route path="/payment-options" component={PaymentOptionsPage} />
           <Route path="/checkout" component={() => <Checkout cart={[]} products={[]} onOrderComplete={() => {}} />} />
+          <Route path="/payment/fib/:paymentId" component={FibPaymentPage} />
           <Route path="/payment/:orderId" component={Payment} />
           <Route path="/payment/:orderNumber" component={HybridPayment} />
           <Route path="/payment-callback" component={PaymentCallback} />

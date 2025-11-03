@@ -200,6 +200,51 @@ export function registerFibRoutes(app: Express) {
   });
 
   /**
+   * Get FIB payment details for payment interface (Public - anyone with paymentId can view)
+   * @route GET /api/payment/fib/:paymentId
+   * @access Public (anyone with payment ID)
+   */
+  app.get("/api/payment/fib/:paymentId", async (req, res) => {
+    try {
+      const { paymentId } = req.params;
+      const payment = await storage.getFibPaymentByPaymentId(paymentId);
+      
+      if (!payment) {
+        return res.status(404).json({
+          success: false,
+          message: "Payment not found / الدفع غير موجود",
+        });
+      }
+
+      // Return payment details for display
+      res.json({
+        success: true,
+        data: {
+          paymentId: payment.paymentId,
+          amount: payment.amount,
+          currency: payment.currency,
+          status: payment.status,
+          readableCode: payment.readableCode,
+          qrCode: payment.qrCode,
+          personalAppLink: payment.personalAppLink,
+          businessAppLink: payment.businessAppLink,
+          corporateAppLink: payment.corporateAppLink,
+          validUntil: payment.validUntil,
+          createdAt: payment.createdAt,
+          paidAt: payment.paidAt,
+          description: payment.description,
+        },
+      });
+    } catch (error: any) {
+      console.error("❌ [FIB API] Error fetching payment details:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch payment details / فشل جلب تفاصيل الدفع",
+      });
+    }
+  });
+
+  /**
    * Get customer's FIB payment history
    * @route GET /api/fib/my-payments
    * @access Private (Customer)
