@@ -40,7 +40,7 @@ export default function UnifiedOrderDetailsDialog({
     queryKey: ['/api/admin/orders', orderId || orderNumber],
     queryFn: async () => {
       const url = orderId 
-        ? `/api/admin/orders/${orderId}`
+        ? `/api/admin/orders/${orderId}/details`
         : `/api/customers/orders/${orderNumber}/details`;
       const res = await fetch(url, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch order');
