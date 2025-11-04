@@ -53,7 +53,6 @@ import VehicleTemplateEditor from '@/components/admin/VehicleTemplateEditor';
 import InternationalGeographyTab from '@/components/InternationalGeographyTab';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import UnifiedOrderDetailsDialog from '@/components/UnifiedOrderDetailsDialog';
 import { ArrowLeft, Car, Star, TrendingUp, Calendar as CalendarIcon, Search, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -590,9 +589,6 @@ const LogisticsManagement = () => {
   // States for order details modal
   const [selectedOrder, setSelectedOrder] = useState<LogisticsOrder | null>(null);
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
-  // Unified order details dialog
-  const [unifiedDialogOpen, setUnifiedDialogOpen] = useState(false);
-  const [selectedOrderId, setSelectedOrderId] = useState<number | undefined>(undefined);
   
   // States for vehicle assignment
   const [isVehicleAssignmentOpen, setIsVehicleAssignmentOpen] = useState(false);
@@ -624,12 +620,12 @@ const LogisticsManagement = () => {
   const [selectedVehicleType, setSelectedVehicleType] = useState('');
   const [selectedEditVehicleType, setSelectedEditVehicleType] = useState('');
 
-  // Handle showing order details - Opens unified modal with hidePrice=true
+  // Handle showing order details
   const handleShowOrderDetails = (order: LogisticsOrder) => {
-    console.log('🔍 [LOGISTICS MGMT] Opening unified order details for:', order.orderNumber || order.customerOrderId);
-    // Open unified dialog with order ID (prices will be hidden)
-    setSelectedOrderId(order.customerOrderId);
-    setUnifiedDialogOpen(true);
+    console.log('🔍 [LOGISTICS MGMT] Opening order details for:', order.orderNumber || order.customerOrderId);
+    setSelectedOrderForDetails(order);
+    setIsOrderDetailsDialogOpen(true);
+    setDialogKey(prev => prev + 1); // Force remount
   };
 
   // Handle closing order details with proper cleanup
@@ -6266,14 +6262,6 @@ const LogisticsManagement = () => {
           </DialogContent>
         </Dialog>
       )}
-
-      {/* Unified Order Details Dialog - Hide Price for Logistics */}
-      <UnifiedOrderDetailsDialog
-        open={unifiedDialogOpen}
-        onOpenChange={setUnifiedDialogOpen}
-        orderId={selectedOrderId}
-        hidePrice={true}
-      />
     </div>
   );
 
