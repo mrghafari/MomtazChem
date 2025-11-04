@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, CreditCard, Wallet, ArrowRight, Clock, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 interface PaymentInfo {
   orderNumber: string;
@@ -24,7 +23,6 @@ export default function HybridPayment() {
   const [timeRemaining, setTimeRemaining] = useState(900); // 15 minutes in seconds
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { language } = useLanguage();
 
   // Extract parameters from URL
   useEffect(() => {
@@ -106,8 +104,8 @@ export default function HybridPayment() {
     
     try {
       toast({
-        title: language === 'ar' ? "هدایت به درگاه بانکی" : "Redirecting to Bank Gateway",
-        description: language === 'ar' ? "در حال اتصال به درگاه پرداخت..." : "Connecting to payment gateway...",
+        title: "هدایت به درگاه بانکی",
+        description: "در حال اتصال به درگاه پرداخت...",
       });
       
       // Call backend API to create bank payment
@@ -128,8 +126,8 @@ export default function HybridPayment() {
       
       if (result.success && result.redirectUrl) {
         toast({
-          title: language === 'ar' ? "انتقال به درگاه بانکی" : "Redirecting to Bank Gateway",
-          description: language === 'ar' ? "شما به درگاه پرداخت هدایت می‌شوید..." : "You are being redirected to payment gateway...",
+          title: "انتقال به درگاه بانکی",
+          description: "شما به درگاه پرداخت هدایت می‌شوید...",
         });
         
         // Redirect to actual bank gateway
@@ -141,8 +139,8 @@ export default function HybridPayment() {
     } catch (error) {
       console.error('Payment error:', error);
       toast({
-        title: language === 'ar' ? "خطا در پرداخت" : "Payment Error",
-        description: error instanceof Error ? error.message : (language === 'ar' ? "لطفاً دوباره تلاش کنید" : "Please try again"),
+        title: "خطا در پرداخت",
+        description: error instanceof Error ? error.message : "لطفاً دوباره تلاش کنید",
         variant: "destructive",
       });
       setIsProcessing(false);
@@ -151,8 +149,8 @@ export default function HybridPayment() {
 
   const handleCancelPayment = () => {
     toast({
-      title: language === 'ar' ? "پرداخت لغو شد" : "Payment Cancelled",
-      description: language === 'ar' ? "سفارش شما در انتظار پرداخت باقی ماند" : "Your order is waiting for payment",
+      title: "پرداخت لغو شد",
+      description: "سفارش شما در انتظار پرداخت باقی ماند",
     });
     setLocation('/profile');
   };
@@ -277,9 +275,7 @@ export default function HybridPayment() {
             </div>
 
             <p className="text-xs text-gray-500 text-center">
-              {language === 'ar' 
-                ? 'با کلیک بر روی "پرداخت" به درگاه بانکی امن هدایت خواهید شد'
-                : 'By clicking "Pay" you will be redirected to the secure bank gateway'}
+              با کلیک بر روی "پرداخت" به درگاه بانکی امن هدایت خواهید شد
             </p>
           </CardContent>
         </Card>

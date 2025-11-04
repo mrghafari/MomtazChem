@@ -1093,7 +1093,7 @@ function FinanceOrders() {
 
       {/* Review Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>بررسی سفارش #{selectedOrder?.orderNumber}</DialogTitle>
             {selectedOrder && (
@@ -1113,8 +1113,8 @@ function FinanceOrders() {
           </DialogHeader>
           
           <div className="space-y-4">
-            {/* Order Information */}
-            <div className="p-4 bg-gray-50 rounded-lg border">
+            {/* Order and Wallet Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg border">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <DollarSign className="w-4 h-4 text-blue-600" />
@@ -1122,6 +1122,23 @@ function FinanceOrders() {
                 </div>
                 <div className="text-lg font-bold text-blue-600">
                   {selectedOrder?.totalAmount ? parseFloat(selectedOrder.totalAmount).toLocaleString() : '0'} IQD
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Wallet className="w-4 h-4 text-green-600" />
+                  <Label className="font-semibold text-green-700">موجودی کیف پول</Label>
+                </div>
+                <div className="text-lg font-bold text-green-600">
+                  {walletLoading ? (
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      در حال بارگذاری...
+                    </div>
+                  ) : (
+                    `${walletBalance.toLocaleString()} IQD`
+                  )}
                 </div>
               </div>
             </div>
@@ -1474,6 +1491,19 @@ function FinanceOrders() {
                     </div>
                     <div>
                       <strong>تاریخ:</strong> {formatDateSafe(orderDetails.createdAt)}
+                    </div>
+                  </div>
+                  
+                  {/* Wallet Balance Information */}
+                  <div className="mt-4 pt-4 border-t">
+                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border">
+                      <div className="flex items-center gap-2">
+                        <Wallet className="w-5 h-5 text-green-600" />
+                        <span className="font-semibold text-green-700">موجودی کیف پول مشتری</span>
+                      </div>
+                      <div className="text-lg font-bold text-green-600">
+                        {orderDetailsWalletBalance.toLocaleString()} IQD
+                      </div>
                     </div>
                   </div>
                   

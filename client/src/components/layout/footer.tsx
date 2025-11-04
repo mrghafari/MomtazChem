@@ -267,11 +267,7 @@ const Footer = () => {
             
             {/* Copyright */}
             <div className="text-gray-400 text-xs">
-              {footerSettings?.copyrightText || (
-                language === 'ar' 
-                  ? '© 2025 ممتازكيم. جميع الحقوق محفوظة.'
-                  : '© 2025 Momtazchem. All rights reserved.'
-              )}
+              {footerSettings?.copyrightText || '© 2025 Momtazchem. All rights reserved.'}
             </div>
             
             {/* Legal Links */}
@@ -291,7 +287,7 @@ const Footer = () => {
             <div className="text-gray-400 text-sm text-center md:text-right">
               {footerSettings?.additionalInfo || (
                 <>
-                  {language === 'ar' ? 'التصميم من قبل' : 'Design by'}{" "}
+                  Design by{" "}
                   <a 
                     href="https://wa.me/358411546489" 
                     target="_blank" 

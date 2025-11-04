@@ -195,63 +195,6 @@ export default function FibPaymentPage() {
                 </AlertDescription>
               </Alert>
 
-              {/* Mobile Payment Link - Prominent for mobile users */}
-              {payment.personalAppLink && (
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 p-6 rounded-lg border-2 border-blue-200 dark:border-blue-800">
-                  <div className="text-center space-y-4">
-                    <div className="flex justify-center">
-                      <Smartphone className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100">
-                      {language === 'ar' 
-                        ? 'للدفع عبر الجوال - اضغط هنا' 
-                        : 'For Mobile Payment - Tap Here'}
-                    </h3>
-                    <p className="text-sm text-blue-700 dark:text-blue-300">
-                      {language === 'ar'
-                        ? 'اضغط على الرابط أدناه للدفع مباشرة من تطبيق FIB'
-                        : 'Tap the link below to pay directly from FIB app'}
-                    </p>
-                    <Button
-                      className="w-full h-14 text-lg font-semibold bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
-                      asChild
-                      data-testid="button-mobile-payment-link"
-                    >
-                      <a href={payment.personalAppLink} target="_blank" rel="noopener noreferrer">
-                        <Smartphone className="mr-2 h-5 w-5" />
-                        {language === 'ar' ? 'افتح تطبيق FIB للدفع' : 'Open FIB App to Pay'}
-                        <ExternalLink className="ml-2 h-5 w-5" />
-                      </a>
-                    </Button>
-                    <div className="flex gap-2 items-center">
-                      <div className="flex-1 p-3 bg-white dark:bg-slate-800 rounded text-xs break-all font-mono text-muted-foreground">
-                        {payment.personalAppLink}
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => copyToClipboard(payment.personalAppLink!)}
-                        data-testid="button-copy-payment-link"
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Divider */}
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-background text-muted-foreground">
-                    {language === 'ar' ? 'أو' : 'OR'}
-                  </span>
-                </div>
-              </div>
-
               {/* QR Code */}
               <div className="text-center space-y-4">
                 <h3 className="text-lg font-semibold">
