@@ -66,6 +66,7 @@
     "@uppy/core": "^5.0.1",
     "@uppy/dashboard": "^5.0.1",
     "@uppy/react": "^5.0.2",
+    "axios": "^1.13.1",
     "bcryptjs": "^3.0.2",
     "buffer": "^6.0.3",
     "clamscan": "^2.4.0",

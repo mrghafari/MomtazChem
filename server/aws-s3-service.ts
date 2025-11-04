@@ -198,7 +198,7 @@ export class AwsS3Service {
           Key: key,
           Body: fileBuffer,
           ContentType: contentType,
-          ACL: 'public-read', // Make files publicly accessible
+          // NO ACL - bucket must have policy for public access
         },
       });
 
@@ -252,7 +252,7 @@ export class AwsS3Service {
       const extension = fileName.split('.').pop();
       const key = `${folder}/${timestamp}-${randomString}.${extension}`;
 
-      // Upload with public-read ACL for public access
+      // Upload file for public access (bucket policy must allow public read)
       const upload = new Upload({
         client: this.client,
         params: {
@@ -260,7 +260,7 @@ export class AwsS3Service {
           Key: key,
           Body: fileBuffer,
           ContentType: contentType,
-          ACL: 'public-read', // Make files publicly accessible
+          // NO ACL - bucket must have policy for public access
         },
       });
 
