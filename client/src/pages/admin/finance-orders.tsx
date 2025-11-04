@@ -1093,7 +1093,7 @@ function FinanceOrders() {
 
       {/* Review Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>بررسی سفارش #{selectedOrder?.orderNumber}</DialogTitle>
             {selectedOrder && (
