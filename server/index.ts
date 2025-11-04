@@ -272,9 +272,6 @@ app.use((req, res, next) => {
 
     console.log("🔌 [WebRTC] Routes registered in index.ts");
 
-    // Register routes BEFORE Vite middleware to ensure API routes take precedence
-    const server = await registerRoutes(app);
-    
     // Initialize AWS S3 service from database settings
     try {
       const { initializeAwsS3FromDb } = await import('./aws-s3-service');
@@ -282,6 +279,17 @@ app.use((req, res, next) => {
     } catch (error: any) {
       console.error('⚠️ [AWS S3] Failed to initialize:', error.message);
     }
+
+    // Register S3 image serving routes BEFORE main routes
+    try {
+      const { registerS3ImageRoutes } = await import('./s3-image-routes');
+      registerS3ImageRoutes(app);
+    } catch (error: any) {
+      console.error('⚠️ [S3 ROUTES] Failed to register S3 image routes:', error.message);
+    }
+
+    // Register routes BEFORE Vite middleware to ensure API routes take precedence
+    const server = await registerRoutes(app);
 
     // Multer error handling middleware
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
