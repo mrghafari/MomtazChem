@@ -793,9 +793,9 @@ const WarehouseManagement: React.FC = () => {
   };
 
   const handleViewDetails = (order: Order) => {
-    setSelectedOrder(order);
-    setWarehouseNotes(order.warehouseNotes || '');
-    setShowOrderDetails(true);
+    // Open unified order details dialog
+    setSelectedOrderId(order.id);
+    setUnifiedDialogOpen(true);
   };
 
   const handleViewOrderItems = useCallback(async (order: any) => {
