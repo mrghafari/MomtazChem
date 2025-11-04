@@ -3330,7 +3330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       { name: 'image', maxCount: 1 }
     ]);
 
-    upload(req, res, (err) => {
+    upload(req, res, async (err) => {
       if (err) {
         console.error('Upload error:', err);
         return res.status(400).json({ 
