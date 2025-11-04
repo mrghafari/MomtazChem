@@ -1315,8 +1315,12 @@ const Shop = () => {
                               );
                             } else {
                               return (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                  No Image
+                                <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                                  <img 
+                                    src="/placeholder-product.jpg"
+                                    alt="No product image available"
+                                    className="w-full h-full object-contain p-8 opacity-50"
+                                  />
                                 </div>
                               );
                             }
@@ -1733,8 +1737,12 @@ const Shop = () => {
                               );
                             } else {
                               return (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                  No Image
+                                <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                                  <img 
+                                    src="/placeholder-product.jpg"
+                                    alt="No product image available"
+                                    className="w-full h-full object-contain p-8 opacity-50"
+                                  />
                                 </div>
                               );
                             }
