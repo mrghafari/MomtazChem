@@ -53,6 +53,7 @@ import VehicleTemplateEditor from '@/components/admin/VehicleTemplateEditor';
 import InternationalGeographyTab from '@/components/InternationalGeographyTab';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import UnifiedOrderDetailsDialog from '@/components/UnifiedOrderDetailsDialog';
 import { ArrowLeft, Car, Star, TrendingUp, Calendar as CalendarIcon, Search, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -589,6 +590,9 @@ const LogisticsManagement = () => {
   // States for order details modal
   const [selectedOrder, setSelectedOrder] = useState<LogisticsOrder | null>(null);
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
+  // Unified order details dialog
+  const [unifiedDialogOpen, setUnifiedDialogOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<number | undefined>(undefined);
   
   // States for vehicle assignment
   const [isVehicleAssignmentOpen, setIsVehicleAssignmentOpen] = useState(false);
@@ -6262,6 +6266,14 @@ const LogisticsManagement = () => {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Unified Order Details Dialog - Hide Price for Logistics */}
+      <UnifiedOrderDetailsDialog
+        open={unifiedDialogOpen}
+        onOpenChange={setUnifiedDialogOpen}
+        orderId={selectedOrderId}
+        hidePrice={true}
+      />
     </div>
   );
 
