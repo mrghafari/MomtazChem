@@ -1187,7 +1187,7 @@ const WarehouseManagement: React.FC = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleViewOrderItems(order)}
+                                onClick={() => handleViewDetails(order)}
                                 className="text-blue-600 hover:text-blue-800"
                               >
                                 <Eye className="w-4 h-4 mr-1" />
