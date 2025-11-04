@@ -1376,10 +1376,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           console.log('🏦 [ONLINE PAYMENT] Redirecting to bank gateway:', gatewayUrl);
           
           toast({
-            title: paymentMethod === 'fib_online' ? "انتقال به FIB" : "انتقال به درگاه بانکی",
+            title: paymentMethod === 'fib_online' 
+              ? (language === 'ar' ? "انتقال به FIB" : "Redirecting to FIB")
+              : (language === 'ar' ? "انتقال به درگاه بانکی" : "Redirecting to Bank Gateway"),
             description: paymentMethod === 'fib_online' 
-              ? "در حال انتقال شما به سیستم پرداخت FIB..." 
-              : "در حال انتقال شما به درگاه پرداخت بانکی..."
+              ? (language === 'ar' ? "در حال انتقال شما به سیستم پرداخت FIB..." : "Redirecting you to FIB payment system...")
+              : (language === 'ar' ? "در حال انتقال شما به درگاه پرداخت بانکی..." : "Redirecting you to bank payment gateway...")
           });
           
           // Redirect to payment gateway
@@ -1392,8 +1394,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           console.log('❌ [ONLINE PAYMENT] Bank gateway unavailable - no order created');
           
           toast({
-            title: "پرداخت آنلاین غیرفعال",
-            description: response.message || "درگاه بانکی در حال حاضر در دسترس نیست. لطفاً روش پرداخت دیگری انتخاب کنید.",
+            title: language === 'ar' ? "پرداخت آنلاین غیرفعال" : "Online Payment Unavailable",
+            description: response.message || (language === 'ar' 
+              ? "درگاه بانکی در حال حاضر در دسترس نیست. لطفاً روش پرداخت دیگری انتخاب کنید."
+              : "Bank gateway is currently unavailable. Please select another payment method."),
             variant: "destructive"
           });
           return;
@@ -1415,8 +1419,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         const gatewayUrl = response.paymentUrl || response.paymentGatewayUrl;
         
         toast({
-          title: "انتقال به درگاه پرداخت",
-          description: "در حال انتقال شما به درگاه پرداخت..."
+          title: language === 'ar' ? "انتقال به درگاه پرداخت" : "Redirecting to Payment Gateway",
+          description: language === 'ar' ? "در حال انتقال شما به درگاه پرداخت..." : "Redirecting you to payment gateway..."
         });
         
         // Redirect to payment gateway
@@ -1457,8 +1461,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       // Handle bank transfer - redirect to payment gateway  
       else if (response.paymentMethod === 'bank_transfer' || (paymentMethod !== 'wallet' && paymentMethod !== 'wallet_full' && paymentMethod !== 'wallet_partial' && paymentMethod !== 'online_payment' && paymentMethod !== 'bank_transfer_grace' && paymentMethod !== 'bank_receipt')) {
         toast({
-          title: "انتقال به درگاه بانک",
-          description: "در حال هدایت شما به درگاه پرداخت بانکی..."
+          title: language === 'ar' ? "انتقال به درگاه بانک" : "Redirecting to Bank Gateway",
+          description: language === 'ar' ? "در حال هدایت شما به درگاه پرداخت بانکی..." : "Redirecting you to bank payment gateway..."
         });
         
         // Redirect to bank payment gateway

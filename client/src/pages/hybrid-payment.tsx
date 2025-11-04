@@ -106,8 +106,8 @@ export default function HybridPayment() {
     
     try {
       toast({
-        title: "هدایت به درگاه بانکی",
-        description: "در حال اتصال به درگاه پرداخت...",
+        title: language === 'ar' ? "هدایت به درگاه بانکی" : "Redirecting to Bank Gateway",
+        description: language === 'ar' ? "در حال اتصال به درگاه پرداخت..." : "Connecting to payment gateway...",
       });
       
       // Call backend API to create bank payment
@@ -128,8 +128,8 @@ export default function HybridPayment() {
       
       if (result.success && result.redirectUrl) {
         toast({
-          title: "انتقال به درگاه بانکی",
-          description: "شما به درگاه پرداخت هدایت می‌شوید...",
+          title: language === 'ar' ? "انتقال به درگاه بانکی" : "Redirecting to Bank Gateway",
+          description: language === 'ar' ? "شما به درگاه پرداخت هدایت می‌شوید..." : "You are being redirected to payment gateway...",
         });
         
         // Redirect to actual bank gateway
@@ -141,8 +141,8 @@ export default function HybridPayment() {
     } catch (error) {
       console.error('Payment error:', error);
       toast({
-        title: "خطا در پرداخت",
-        description: error instanceof Error ? error.message : "لطفاً دوباره تلاش کنید",
+        title: language === 'ar' ? "خطا در پرداخت" : "Payment Error",
+        description: error instanceof Error ? error.message : (language === 'ar' ? "لطفاً دوباره تلاش کنید" : "Please try again"),
         variant: "destructive",
       });
       setIsProcessing(false);
@@ -151,8 +151,8 @@ export default function HybridPayment() {
 
   const handleCancelPayment = () => {
     toast({
-      title: "پرداخت لغو شد",
-      description: "سفارش شما در انتظار پرداخت باقی ماند",
+      title: language === 'ar' ? "پرداخت لغو شد" : "Payment Cancelled",
+      description: language === 'ar' ? "سفارش شما در انتظار پرداخت باقی ماند" : "Your order is waiting for payment",
     });
     setLocation('/profile');
   };
