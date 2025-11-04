@@ -328,10 +328,10 @@ function FinanceOrders() {
     });
   }, [refetch, refetchApproved, toast]);
 
-  // Fetch order details function for admin users
+  // Fetch order details function - Opens unified modal
   const fetchOrderDetails = useCallback(async (orderNumber: string) => {
     try {
-      // For admin users, we need to find the order by orderNumber first, then get details by ID
+      // Find the order by orderNumber to get its ID
       const findOrderResponse = await fetch(`/api/admin/orders/find-by-number/${orderNumber}`, {
         credentials: 'include'
       });
@@ -345,47 +345,9 @@ function FinanceOrders() {
         throw new Error(findOrderData.message || 'Order not found');
       }
       
-      // Now get the order details using the customer order ID
-      const detailsResponse = await fetch(`/api/admin/orders/${findOrderData.order.id}/details`, {
-        credentials: 'include'
-      });
-      
-      if (!detailsResponse.ok) {
-        throw new Error('Failed to fetch order details');
-      }
-      
-      const detailsData = await detailsResponse.json();
-      if (detailsData.success) {
-        console.log('📋 [ORDER DETAILS] Order fetched:', detailsData.order.orderNumber);
-        console.log('📋 [ORDER DETAILS] Items count:', detailsData.order.items?.length || 0);
-        console.log('📋 [ORDER DETAILS] Items data:', detailsData.order.items);
-        setOrderDetails(detailsData.order);
-        setOrderDocuments(detailsData.documents || []);
-        
-        // Fetch wallet balance for this customer using customer ID
-        try {
-          if (detailsData.order?.customerId) {
-            const walletResponse = await fetch(`/api/wallet/balance/${detailsData.order.customerId}`, {
-              credentials: 'include'
-            });
-            if (walletResponse.ok) {
-              const walletResult = await walletResponse.json();
-              setOrderDetailsWalletBalance(walletResult.data?.balance || 0);
-            } else {
-              setOrderDetailsWalletBalance(0);
-            }
-          } else {
-            setOrderDetailsWalletBalance(0);
-          }
-        } catch (walletError) {
-          console.error('Error fetching wallet balance for order details:', walletError);
-          setOrderDetailsWalletBalance(0);
-        }
-        
-        setOrderDetailsModalOpen(true);
-      } else {
-        throw new Error(detailsData.message || 'Failed to get order details');
-      }
+      // Open unified order details dialog with the order ID
+      setSelectedOrderId(findOrderData.order.id);
+      setUnifiedDialogOpen(true);
     } catch (error) {
       console.error('Error fetching order details:', error);
       toast({
