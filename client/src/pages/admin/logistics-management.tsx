@@ -624,12 +624,12 @@ const LogisticsManagement = () => {
   const [selectedVehicleType, setSelectedVehicleType] = useState('');
   const [selectedEditVehicleType, setSelectedEditVehicleType] = useState('');
 
-  // Handle showing order details
+  // Handle showing order details - Opens unified modal with hidePrice=true
   const handleShowOrderDetails = (order: LogisticsOrder) => {
-    console.log('🔍 [LOGISTICS MGMT] Opening order details for:', order.orderNumber || order.customerOrderId);
-    setSelectedOrderForDetails(order);
-    setIsOrderDetailsDialogOpen(true);
-    setDialogKey(prev => prev + 1); // Force remount
+    console.log('🔍 [LOGISTICS MGMT] Opening unified order details for:', order.orderNumber || order.customerOrderId);
+    // Open unified dialog with order ID (prices will be hidden)
+    setSelectedOrderId(order.customerOrderId);
+    setUnifiedDialogOpen(true);
   };
 
   // Handle closing order details with proper cleanup
