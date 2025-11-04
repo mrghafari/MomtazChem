@@ -261,16 +261,8 @@ const uploadMsds = multer({
   }
 });
 
-// Multer configuration for document uploads
-const documentStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, documentsDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Multer configuration for document uploads - using memory storage for S3 upload
+const documentStorage = multer.memoryStorage();
 
 // Receipt upload configuration
 const receiptStorage = multer.memoryStorage();
@@ -291,16 +283,8 @@ const uploadReceipt = multer({
   }
 });
 
-// Logo upload configuration
-const logoStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, logosDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `logo-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
+// Logo upload configuration - using memory storage for S3 upload
+const logoStorage = multer.memoryStorage();
 
 const uploadLogo = multer({
   storage: logoStorage,
@@ -1781,7 +1765,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { title, description, category } = req.body;
-      const imageUrl = `/uploads/images/${req.file.filename}`;
+      
+      // Upload to S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPublicFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        'company-images'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload image to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Company image uploaded: ${uploadResult.key}`);
+
+      const imageUrl = uploadResult.url;
+      const filename = uploadResult.key?.split('/').pop() || req.file.originalname;
 
       const [newImage] = await db
         .insert(companyImages)
@@ -1790,7 +1794,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description,
           category,
           imageUrl,
-          filename: req.file.filename,
+          filename,
           fileSize: req.file.size,
           isActive: true,
           createdAt: new Date(),
@@ -1833,7 +1837,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { personName, position, company, notes } = req.body;
-      const imageUrl = `/uploads/images/${req.file.filename}`;
+      
+      // Upload to S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPublicFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        'business-cards'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload business card to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Business card uploaded: ${uploadResult.key}`);
+
+      const imageUrl = uploadResult.url;
+      const filename = uploadResult.key?.split('/').pop() || req.file.originalname;
 
       const [newBusinessCard] = await db
         .insert(businessCards)
@@ -1843,7 +1867,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           company,
           notes,
           imageUrl,
-          filename: req.file.filename,
+          filename,
           fileSize: req.file.size,
           isActive: true,
           createdAt: new Date(),
@@ -3326,11 +3350,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
 
-        const imageUrl = `/uploads/images/${uploadedFile.filename}`;
+        // Upload to S3
+        const s3Service = getAwsS3Service();
+        const folder = uploadedFile.fieldname === 'image' ? 'general-images' : 'general-files';
+        const uploadResult = await s3Service.uploadPublicFile(
+          uploadedFile.buffer,
+          uploadedFile.originalname,
+          uploadedFile.mimetype,
+          folder
+        );
+
+        if (!uploadResult.success) {
+          return res.status(500).json({
+            success: false,
+            message: uploadResult.message || "Failed to upload to S3"
+          });
+        }
+
+        console.log(`✅ [S3 UPLOAD] Flexible upload: ${uploadResult.key}`);
+
         res.json({ 
           success: true, 
-          url: imageUrl,
-          filename: uploadedFile.filename,
+          url: uploadResult.url,
+          filename: uploadResult.key?.split('/').pop() || uploadedFile.originalname,
           originalName: uploadedFile.originalname,
           size: uploadedFile.size
         });
@@ -3474,7 +3516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Company logo upload endpoint
-  app.post("/api/upload/company-logo", requireAuth, uploadLogo.single('file'), (req, res) => {
+  app.post("/api/upload/company-logo", requireAuth, uploadLogo.single('file'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
@@ -3483,11 +3525,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const logoUrl = `/uploads/logos/${req.file.filename}`;
+      // Upload to S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPublicFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        'company-logos'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload logo to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Company logo uploaded: ${uploadResult.key}`);
+
       res.json({ 
         success: true, 
-        url: logoUrl,
-        filename: req.file.filename,
+        url: uploadResult.url,
+        key: uploadResult.key,
+        filename: uploadResult.key?.split('/').pop() || req.file.originalname,
         originalName: req.file.originalname,
         size: req.file.size
       });
@@ -8012,8 +8072,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Save the uploaded file path and update order status back to grace period review
-      const additionalDocumentPath = `/uploads/${uploadedFile.filename}`;
+      // Upload to S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPrivateFile(
+        uploadedFile.buffer,
+        uploadedFile.originalname,
+        uploadedFile.mimetype,
+        'additional-documents'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload document to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Additional document uploaded: ${uploadResult.key}`);
+
+      // Save the uploaded file URL from S3
+      const additionalDocumentPath = uploadResult.url;
       
       await db
         .update(customerOrders)
@@ -12522,6 +12600,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.session.adminId;
       const tagsArray = tags ? tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0) : [];
 
+      // Upload to S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPrivateFile(
+        file.buffer,
+        file.originalname,
+        file.mimetype,
+        'procedure-documents'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload document to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Safety protocol document uploaded: ${uploadResult.key}`);
+
       const { pool } = await import('./db');
       const result = await pool.query(`
         INSERT INTO procedure_documents (
@@ -12534,7 +12630,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title || file.originalname, 
         description || null, 
         file.originalname, 
-        file.path, 
+        uploadResult.url, 
         file.size, 
         file.mimetype, 
         userId, 
@@ -19598,6 +19694,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Process tags
       const tagsArray = tags ? tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0) : [];
       
+      // Upload to S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPrivateFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        'procedure-documents'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload document to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Procedure document (middleware pattern) uploaded: ${uploadResult.key}`);
+
       const { pool } = await import('./db');
       const result = await pool.query(`
         INSERT INTO procedure_documents (
@@ -19613,7 +19727,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title || req.file.originalname, 
         description || null, 
         req.file.originalname, 
-        req.file.path, 
+        uploadResult.url, 
         req.file.size, 
         req.file.mimetype, 
         userId, 
@@ -19691,6 +19805,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: "No file uploaded" });
       }
 
+      // Upload to S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPrivateFile(
+        file.buffer,
+        file.originalname,
+        file.mimetype,
+        'procedure-documents'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload document to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Procedure document uploaded: ${uploadResult.key}`);
+
       const { pool } = await import('./db');
       
       const result = await pool.query(`
@@ -19704,7 +19836,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title || file.originalname,
         description || null,
         file.originalname,
-        file.path,
+        uploadResult.url,
         file.size,
         file.mimetype,
         req.session.adminId
@@ -27916,11 +28048,29 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         return res.status(400).json({ success: false, message: 'فایل رسید الزامی است' });
       }
 
-      // Save payment receipt
+      // Upload to S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPrivateFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        'payment-receipts'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload receipt to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Payment receipt uploaded: ${uploadResult.key}`);
+
+      // Save payment receipt with S3 URL
       const receipt = await orderManagementStorage.uploadPaymentReceipt({
         customerOrderId,
         customerId,
-        receiptUrl: `/uploads/documents/${req.file.filename}`,
+        receiptUrl: uploadResult.url,
         originalFileName: req.file.originalname,
         fileSize: req.file.size,
         mimeType: req.file.mimetype,
@@ -40908,28 +41058,13 @@ momtazchem.com
     }
   });
 
-  // Upload new image asset
+  // Upload new image asset - uses S3
   app.post("/api/admin/content/images/upload", requireAuth, async (req: Request, res: Response) => {
     try {
       const multer = await import("multer");
-      const path = await import("path");
-      const fs = await import("fs");
 
-      // Configure multer for image uploads
-      const storage = multer.default.diskStorage({
-        destination: (req, file, cb) => {
-          const uploadDir = path.join(process.cwd(), 'uploads', 'content');
-          if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-          }
-          cb(null, uploadDir);
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-          const extension = path.extname(file.originalname);
-          cb(null, `content-${uniqueSuffix}${extension}`);
-        }
-      });
+      // Configure multer for memory storage (S3 upload)
+      const storage = multer.default.memoryStorage();
 
       const upload = multer.default({
         storage,
@@ -40961,16 +41096,35 @@ momtazchem.com
         }
 
         try {
+          // Upload to S3
+          const s3Service = getAwsS3Service();
+          const uploadResult = await s3Service.uploadPublicFile(
+            req.file.buffer,
+            req.file.originalname,
+            req.file.mimetype,
+            'content-images'
+          );
+
+          if (!uploadResult.success) {
+            return res.status(500).json({
+              success: false,
+              message: uploadResult.message || "Failed to upload image to S3"
+            });
+          }
+
+          console.log(`✅ [S3 UPLOAD] Content image uploaded: ${uploadResult.key}`);
+
           const { db } = await import("./db");
           const { imageAssets } = await import("../shared/content-schema");
 
           const { section = 'general', alt = '' } = req.body;
-          const imageUrl = `/uploads/content/${req.file.filename}`;
+          const imageUrl = uploadResult.url;
+          const filename = uploadResult.key?.split('/').pop() || req.file.originalname;
 
           const [newImage] = await db
             .insert(imageAssets)
             .values({
-              filename: req.file.filename,
+              filename,
               originalName: req.file.originalname,
               mimeType: req.file.mimetype,
               size: req.file.size,
