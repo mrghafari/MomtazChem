@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, CreditCard, Wallet, ArrowRight, Clock, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface PaymentInfo {
   orderNumber: string;
@@ -23,6 +24,7 @@ export default function HybridPayment() {
   const [timeRemaining, setTimeRemaining] = useState(900); // 15 minutes in seconds
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { language } = useLanguage();
 
   // Extract parameters from URL
   useEffect(() => {
@@ -275,7 +277,9 @@ export default function HybridPayment() {
             </div>
 
             <p className="text-xs text-gray-500 text-center">
-              با کلیک بر روی "پرداخت" به درگاه بانکی امن هدایت خواهید شد
+              {language === 'ar' 
+                ? 'با کلیک بر روی "پرداخت" به درگاه بانکی امن هدایت خواهید شد'
+                : 'By clicking "Pay" you will be redirected to the secure bank gateway'}
             </p>
           </CardContent>
         </Card>
