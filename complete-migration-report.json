@@ -1,0 +1,14 @@
+{
+  "timestamp": "2025-11-04T19:59:26.772Z",
+  "stats": {
+    "totalFiles": 5,
+    "migratedFiles": 3,
+    "failedFiles": 1,
+    "errors": [
+      "Catalog 501: Request failed with status code 404"
+    ]
+  },
+  "errors": [
+    "Catalog 501: Request failed with status code 404"
+  ]
+}

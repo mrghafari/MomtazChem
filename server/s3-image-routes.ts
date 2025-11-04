@@ -114,5 +114,99 @@ export function registerS3ImageRoutes(app: Express) {
     }
   });
   
-  console.log('✅ [S3 ROUTES] S3 image serving routes registered');
+  // Handle MSDS files
+  app.get('/uploads/msds/:fileName', async (req: Request, res: Response, next: NextFunction) => {
+    const localPath = path.join(process.cwd(), 'uploads', 'msds', req.params.fileName);
+    
+    if (fs.existsSync(localPath)) {
+      return next();
+    }
+    
+    try {
+      const settings = await db.select().from(awsS3Settings).where(sql`is_active = true`).limit(1);
+      
+      if (settings.length === 0) {
+        return res.status(404).json({ success: false, message: 'File not found' });
+      }
+      
+      const s3Service = new AwsS3Service(settings[0]);
+      const s3Key = `msds/${req.params.fileName}`;
+      
+      console.log(`📋 [S3 MSDS] Fetching from S3: ${s3Key}`);
+      
+      const fileBuffer = await s3Service.getFile(s3Key);
+      
+      if (!fileBuffer) {
+        return res.status(404).json({ success: false, message: 'File not found' });
+      }
+      
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Cache-Control': 'public, max-age=31536000',
+        'Content-Length': fileBuffer.length
+      });
+      
+      res.send(fileBuffer);
+      
+      console.log(`✅ [S3 MSDS] Successfully served from S3: ${s3Key}`);
+    } catch (error) {
+      console.error('❌ [S3 MSDS] Error:', error);
+      res.status(500).json({ success: false, message: 'Error serving file' });
+    }
+  });
+
+  // Handle payment receipts
+  app.get('/uploads/receipts/:fileName', async (req: Request, res: Response, next: NextFunction) => {
+    const localPath = path.join(process.cwd(), 'uploads', 'receipts', req.params.fileName);
+    
+    if (fs.existsSync(localPath)) {
+      return next();
+    }
+    
+    try {
+      const settings = await db.select().from(awsS3Settings).where(sql`is_active = true`).limit(1);
+      
+      if (settings.length === 0) {
+        return res.status(404).json({ success: false, message: 'File not found' });
+      }
+      
+      const s3Service = new AwsS3Service(settings[0]);
+      const s3Key = `payment-receipts/${req.params.fileName}`;
+      
+      console.log(`💰 [S3 RECEIPT] Fetching from S3: ${s3Key}`);
+      
+      const fileBuffer = await s3Service.getFile(s3Key);
+      
+      if (!fileBuffer) {
+        return res.status(404).json({ success: false, message: 'File not found' });
+      }
+      
+      // Determine content type from file extension
+      const ext = path.extname(req.params.fileName).toLowerCase();
+      const contentTypes: {[key: string]: string} = {
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.pdf': 'application/pdf',
+        '.webp': 'image/webp'
+      };
+      
+      const contentType = contentTypes[ext] || 'application/octet-stream';
+      
+      res.set({
+        'Content-Type': contentType,
+        'Cache-Control': 'private, max-age=3600',
+        'Content-Length': fileBuffer.length
+      });
+      
+      res.send(fileBuffer);
+      
+      console.log(`✅ [S3 RECEIPT] Successfully served from S3: ${s3Key} (${fileBuffer.length} bytes)`);
+    } catch (error) {
+      console.error('❌ [S3 RECEIPT] Error:', error);
+      res.status(500).json({ success: false, message: 'Error serving file' });
+    }
+  });
+  
+  console.log('✅ [S3 ROUTES] S3 file serving routes registered (images, catalogs, msds, receipts)');
 }
