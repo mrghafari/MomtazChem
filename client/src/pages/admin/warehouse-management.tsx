@@ -51,6 +51,7 @@ import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import { apiRequest } from '@/lib/queryClient';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import UnifiedOrderDetailsDialog from '@/components/UnifiedOrderDetailsDialog';
 
 // Safe date formatting function to prevent Invalid Date errors
 const formatDateSafe = (dateString: string | null | undefined, locale = 'en-US', options = {}): string => {
@@ -157,6 +158,9 @@ const WarehouseManagement: React.FC = () => {
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [warehouseNotes, setWarehouseNotes] = useState('');
   const [activeTab, setActiveTab] = useState("orders");
+  // Unified order details dialog
+  const [unifiedDialogOpen, setUnifiedDialogOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<number | undefined>(undefined);
   const [editingProduct, setEditingProduct] = useState<string | null>(null);
   const [editingQuantity, setEditingQuantity] = useState<number>(0);
   const [editingWaste, setEditingWaste] = useState<string | null>(null);
@@ -1836,6 +1840,14 @@ const WarehouseManagement: React.FC = () => {
           </div>
         )}
       </SafeModal>
+
+      {/* Unified Order Details Dialog */}
+      <UnifiedOrderDetailsDialog
+        open={unifiedDialogOpen}
+        onOpenChange={setUnifiedDialogOpen}
+        orderId={selectedOrderId}
+        hidePrice={false}
+      />
     </div>
   );
 };
