@@ -794,7 +794,7 @@ const WarehouseManagement: React.FC = () => {
 
   const handleViewDetails = (order: Order) => {
     // Open unified order details dialog
-    setSelectedOrderId(order.id);
+    setSelectedOrderId(order.customerOrderId);
     setUnifiedDialogOpen(true);
   };
 
