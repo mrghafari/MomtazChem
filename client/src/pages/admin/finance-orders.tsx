@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertTriangle, CheckCircle, Clock, CreditCard, DollarSign, RefreshCw, Timer, ChevronRight, XCircle, FileText, Eye, Download, Truck, MapPin, ZoomIn, ZoomOut, RotateCw, Move, X, Wallet, Calculator } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import UnifiedOrderDetailsDialog from "@/components/UnifiedOrderDetailsDialog";
 
 // OrderManagement interface
 interface OrderManagement {
@@ -131,6 +132,9 @@ function FinanceOrders() {
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [orderDocuments, setOrderDocuments] = useState<any[]>([]);
   const [orderDetailsWalletBalance, setOrderDetailsWalletBalance] = useState<number>(0);
+  // Unified order details dialog
+  const [unifiedDialogOpen, setUnifiedDialogOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<number | undefined>(undefined);
 
   // Check admin authentication - MOVED to top to avoid conditional hooks
   const { data: adminUser, isLoading: isCheckingAuth, error: authError } = useQuery({
@@ -1630,6 +1634,14 @@ function FinanceOrders() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Unified Order Details Dialog */}
+      <UnifiedOrderDetailsDialog
+        open={unifiedDialogOpen}
+        onOpenChange={setUnifiedDialogOpen}
+        orderId={selectedOrderId}
+        hidePrice={false}
+      />
     </div>
   );
 }
