@@ -34,14 +34,22 @@ export function registerS3ImageRoutes(app: Express) {
       }
       
       const s3Service = new AwsS3Service(settings[0]);
-      const s3Key = `images/${req.params.fileName}`;
       
+      // Try product-images folder first (standard location)
+      let s3Key = `product-images/${req.params.fileName}`;
       console.log(`🖼️ [S3 IMAGE] Fetching from S3: ${s3Key}`);
       
-      const fileBuffer = await s3Service.getFile(s3Key);
+      let fileBuffer = await s3Service.getFile(s3Key);
+      
+      // If not found, try general-files folder (fallback for old files)
+      if (!fileBuffer) {
+        console.log(`⚠️ [S3 IMAGE] Not found in product-images, trying general-files fallback...`);
+        s3Key = `general-files/${req.params.fileName}`;
+        fileBuffer = await s3Service.getFile(s3Key);
+      }
       
       if (!fileBuffer) {
-        console.log(`❌ [S3 IMAGE] File not found in S3: ${s3Key}`);
+        console.log(`❌ [S3 IMAGE] File not found in S3: ${req.params.fileName}`);
         return res.status(404).json({ success: false, message: 'Image not found' });
       }
       
