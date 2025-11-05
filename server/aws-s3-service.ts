@@ -301,15 +301,10 @@ export class AwsS3Service {
 
       await upload.done();
 
-      // Generate public URL
-      let url: string;
-      if (this.settings.publicUrl) {
-        url = `${this.settings.publicUrl}/${key}`;
-      } else {
-        url = `https://${this.settings.bucketName}.s3.${this.settings.region}.amazonaws.com/${key}`;
-      }
+      // Generate local proxy URL (NEVER return direct S3 URLs - private bucket design)
+      const url = `/uploads/${key}`;
 
-      console.log(`✅ PUBLIC file uploaded to S3: ${key}`);
+      console.log(`✅ PUBLIC file uploaded to S3: ${key} → ${url}`);
 
       return {
         success: true,
