@@ -6,6 +6,43 @@ import { db } from './db';
 import { awsS3Settings } from '../shared/schema';
 import { sql } from 'drizzle-orm';
 
+// Initialize S3 service from environment variables (not database)
+let s3ServiceInstance: AwsS3Service | null = null;
+
+function getS3Service(): AwsS3Service | null {
+  if (s3ServiceInstance) {
+    return s3ServiceInstance;
+  }
+  
+  // Initialize from environment variables
+  if (process.env.AWS_S3_BUCKET_NAME && process.env.AWS_REGION) {
+    try {
+      s3ServiceInstance = new AwsS3Service({
+        id: 1,
+        bucketName: process.env.AWS_S3_BUCKET_NAME,
+        region: process.env.AWS_REGION,
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        endpoint: null,
+        usePathStyle: null,
+        publicUrl: null,
+        description: null
+      });
+      console.log('✅ [S3 SERVICE] Initialized from environment variables');
+      return s3ServiceInstance;
+    } catch (error) {
+      console.error('❌ [S3 SERVICE] Failed to initialize:', error);
+      return null;
+    }
+  }
+  
+  console.error('❌ [S3 SERVICE] Missing environment variables');
+  return null;
+}
+
 /**
  * Register S3 image serving routes
  * This middleware tries to serve images from S3 if they're not found locally
@@ -25,15 +62,12 @@ export function registerS3ImageRoutes(app: Express) {
     try {
       console.log(`🔍 [S3 IMAGE] File not found locally, trying S3: ${req.params.fileName}`);
       
-      // Get S3 settings from database
-      const settings = await db.select().from(awsS3Settings).where(sql`is_active = true`).limit(1);
+      const s3Service = getS3Service();
       
-      if (settings.length === 0) {
+      if (!s3Service) {
         console.log('❌ [S3 IMAGE] No active S3 settings found');
         return res.status(404).json({ success: false, message: 'Image not found' });
       }
-      
-      const s3Service = new AwsS3Service(settings[0]);
       
       // Try product-images folder first (standard location)
       let s3Key = `product-images/${req.params.fileName}`;
@@ -82,21 +116,20 @@ export function registerS3ImageRoutes(app: Express) {
   });
   
   // Also handle catalog files (product-catalogs folder in S3)
-  app.get('/uploads/catalogs/:fileName', async (req: Request, res: Response, next: NextFunction) => {
-    const localPath = path.join(process.cwd(), 'uploads', 'catalogs', req.params.fileName);
+  app.get('/uploads/product-catalogs/:fileName', async (req: Request, res: Response, next: NextFunction) => {
+    const localPath = path.join(process.cwd(), 'uploads', 'product-catalogs', req.params.fileName);
     
     if (fs.existsSync(localPath)) {
       return next();
     }
     
     try {
-      const settings = await db.select().from(awsS3Settings).where(sql`is_active = true`).limit(1);
+      const s3Service = getS3Service();
       
-      if (settings.length === 0) {
+      if (!s3Service) {
         return res.status(404).json({ success: false, message: 'File not found' });
       }
       
-      const s3Service = new AwsS3Service(settings[0]);
       const s3Key = `product-catalogs/${req.params.fileName}`;
       
       console.log(`📄 [S3 CATALOG] Fetching from S3: ${s3Key}`);
@@ -123,21 +156,20 @@ export function registerS3ImageRoutes(app: Express) {
   });
   
   // Handle MSDS files (product-msds folder in S3)
-  app.get('/uploads/msds/:fileName', async (req: Request, res: Response, next: NextFunction) => {
-    const localPath = path.join(process.cwd(), 'uploads', 'msds', req.params.fileName);
+  app.get('/uploads/product-msds/:fileName', async (req: Request, res: Response, next: NextFunction) => {
+    const localPath = path.join(process.cwd(), 'uploads', 'product-msds', req.params.fileName);
     
     if (fs.existsSync(localPath)) {
       return next();
     }
     
     try {
-      const settings = await db.select().from(awsS3Settings).where(sql`is_active = true`).limit(1);
+      const s3Service = getS3Service();
       
-      if (settings.length === 0) {
+      if (!s3Service) {
         return res.status(404).json({ success: false, message: 'File not found' });
       }
       
-      const s3Service = new AwsS3Service(settings[0]);
       const s3Key = `product-msds/${req.params.fileName}`;
       
       console.log(`📋 [S3 MSDS] Fetching from S3: ${s3Key}`);
@@ -172,13 +204,12 @@ export function registerS3ImageRoutes(app: Express) {
     }
     
     try {
-      const settings = await db.select().from(awsS3Settings).where(sql`is_active = true`).limit(1);
+      const s3Service = getS3Service();
       
-      if (settings.length === 0) {
+      if (!s3Service) {
         return res.status(404).json({ success: false, message: 'File not found' });
       }
       
-      const s3Service = new AwsS3Service(settings[0]);
       const s3Key = `payment-receipts/${req.params.fileName}`;
       
       console.log(`💰 [S3 RECEIPT] Fetching from S3: ${s3Key}`);
@@ -228,14 +259,12 @@ export function registerS3ImageRoutes(app: Express) {
     try {
       console.log(`🔍 [S3 PRODUCT IMAGE] File not found locally, trying S3: ${req.params.fileName}`);
       
-      const settings = await db.select().from(awsS3Settings).where(sql`is_active = true`).limit(1);
+      const s3Service = getS3Service();
       
-      if (settings.length === 0) {
+      if (!s3Service) {
         console.log('❌ [S3 PRODUCT IMAGE] No active S3 settings found');
         return res.status(404).json({ success: false, message: 'Image not found' });
       }
-      
-      const s3Service = new AwsS3Service(settings[0]);
       
       // Try product-images folder first
       let s3Key = `product-images/${req.params.fileName}`;
@@ -295,14 +324,13 @@ export function registerS3ImageRoutes(app: Express) {
     try {
       console.log(`🔍 [S3 FILE] File not found locally, trying S3: ${req.params.fileName}`);
       
-      const settings = await db.select().from(awsS3Settings).where(sql`is_active = true`).limit(1);
+      const s3Service = getS3Service();
       
-      if (settings.length === 0) {
+      if (!s3Service) {
         console.log('❌ [S3 FILE] No active S3 settings found');
         return res.status(404).json({ success: false, message: 'File not found' });
       }
       
-      const s3Service = new AwsS3Service(settings[0]);
       const s3Key = `general-files/${req.params.fileName}`;
       
       console.log(`📦 [S3 FILE] Fetching from S3: ${s3Key}`);
