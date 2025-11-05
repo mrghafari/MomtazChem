@@ -14,6 +14,7 @@ export default function FibPaymentPage() {
   const { toast } = useToast();
   const { language } = useLanguage();
   const [timeRemaining, setTimeRemaining] = useState<string>('');
+  const [enablePolling, setEnablePolling] = useState<boolean>(false);
 
   const { data: paymentData, isLoading, error, refetch } = useQuery<{
     success: boolean;
@@ -35,8 +36,22 @@ export default function FibPaymentPage() {
   }>({
     queryKey: [`/api/payment/fib/${paymentId}`],
     enabled: !!paymentId,
-    refetchInterval: 5000, // Auto-refresh every 5 seconds
+    refetchInterval: enablePolling ? 5000 : false, // Poll every 5 seconds only after 15-second wait
   });
+
+  // FIB Best Practice: Wait 15 seconds for callback, then start polling
+  useEffect(() => {
+    if (!paymentId) return;
+    
+    console.log('🏦 [FIB] Waiting 15 seconds for callback before polling...');
+    
+    const timer = setTimeout(() => {
+      console.log('🔄 [FIB] Starting status polling (every 5 seconds)');
+      setEnablePolling(true);
+    }, 15000); // Wait 15 seconds as per FIB best practices
+
+    return () => clearTimeout(timer);
+  }, [paymentId]);
 
   const payment = paymentData?.data;
 
