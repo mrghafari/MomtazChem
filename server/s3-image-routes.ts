@@ -207,6 +207,66 @@ export function registerS3ImageRoutes(app: Express) {
       res.status(500).json({ success: false, message: 'Error serving file' });
     }
   });
+
+  // Handle general files (product images and documents)
+  app.get('/uploads/general-files/:fileName', async (req: Request, res: Response, next: NextFunction) => {
+    const localPath = path.join(process.cwd(), 'uploads', 'general-files', req.params.fileName);
+    
+    if (fs.existsSync(localPath)) {
+      console.log(`📁 [LOCAL FILE] Serving from local: ${req.params.fileName}`);
+      return next();
+    }
+    
+    try {
+      console.log(`🔍 [S3 FILE] File not found locally, trying S3: ${req.params.fileName}`);
+      
+      const settings = await db.select().from(awsS3Settings).where(sql`is_active = true`).limit(1);
+      
+      if (settings.length === 0) {
+        console.log('❌ [S3 FILE] No active S3 settings found');
+        return res.status(404).json({ success: false, message: 'File not found' });
+      }
+      
+      const s3Service = new AwsS3Service(settings[0]);
+      const s3Key = `general-files/${req.params.fileName}`;
+      
+      console.log(`📦 [S3 FILE] Fetching from S3: ${s3Key}`);
+      
+      const fileBuffer = await s3Service.getFile(s3Key);
+      
+      if (!fileBuffer) {
+        console.log(`❌ [S3 FILE] File not found in S3: ${s3Key}`);
+        return res.status(404).json({ success: false, message: 'File not found' });
+      }
+      
+      // Determine content type from file extension
+      const ext = path.extname(req.params.fileName).toLowerCase();
+      const contentTypes: {[key: string]: string} = {
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp',
+        '.svg': 'image/svg+xml',
+        '.pdf': 'application/pdf'
+      };
+      
+      const contentType = contentTypes[ext] || 'application/octet-stream';
+      
+      res.set({
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=31536000',
+        'Content-Length': fileBuffer.length
+      });
+      
+      res.send(fileBuffer);
+      
+      console.log(`✅ [S3 FILE] Successfully served from S3: ${s3Key} (${fileBuffer.length} bytes)`);
+    } catch (error) {
+      console.error('❌ [S3 FILE] Error serving file from S3:', error);
+      res.status(500).json({ success: false, message: 'Error serving file' });
+    }
+  });
   
-  console.log('✅ [S3 ROUTES] S3 file serving routes registered (images, catalogs, msds, receipts)');
+  console.log('✅ [S3 ROUTES] S3 file serving routes registered (images, catalogs, msds, receipts, general-files)');
 }
