@@ -74,19 +74,23 @@ async function migrateObjectsToS3() {
             else if (fileName.endsWith('.webp')) contentType = 'image/webp';
             else if (fileName.endsWith('.gif')) contentType = 'image/gif';
 
-            // Upload to S3 product-images folder
+            // Upload to S3 product-images folder with ORIGINAL filename preserved
             const uploadResult = await s3Service.uploadPublicFile(
               fileBuffer,
               fileName,
               contentType,
-              'product-images'
+              'product-images',
+              { preserveFileName: true }
             );
 
-            if (uploadResult.success) {
+            if (uploadResult.success && uploadResult.key) {
+              // Extract the actual filename that was uploaded to S3
+              // (may be sanitized differently than original)
+              const actualFileName = uploadResult.key.split('/').pop();
               // Convert S3 URL to local proxy format
-              const newUrl = `/uploads/product-images/${fileName}`;
+              const newUrl = `/uploads/product-images/${actualFileName}`;
               newImageUrls.push(newUrl);
-              console.log(`  ✅ Migrated to: ${newUrl}`);
+              console.log(`  ✅ Migrated to: ${newUrl} (from: ${fileName})`);
               totalMigrated++;
               productChanged = true;
             } else {

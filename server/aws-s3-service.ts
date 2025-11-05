@@ -236,7 +236,8 @@ export class AwsS3Service {
     fileBuffer: Buffer,
     fileName: string,
     contentType: string,
-    folder: string = 'uploads'
+    folder: string = 'uploads',
+    options?: { preserveFileName?: boolean }
   ): Promise<{ success: boolean; url?: string; key?: string; message?: string }> {
     if (!this.client || !this.settings) {
       return {
@@ -246,11 +247,45 @@ export class AwsS3Service {
     }
 
     try {
-      // Generate unique file name
-      const timestamp = Date.now();
-      const randomString = crypto.randomBytes(8).toString('hex');
-      const extension = fileName.split('.').pop();
-      const key = `${folder}/${timestamp}-${randomString}.${extension}`;
+      // Generate file key - preserve original name if requested
+      let key: string;
+      if (options?.preserveFileName) {
+        // Sanitize filename to prevent path traversal and security issues
+        const sanitizedFileName = fileName
+          .replace(/\.\./g, '') // Remove path traversal attempts
+          .replace(/[\/\\]/g, '') // Remove path separators
+          .replace(/[^a-zA-Z0-9\-_.]/g, '_') // Replace special chars with underscore
+          .replace(/_{2,}/g, '_') // Collapse multiple underscores
+          .trim();
+        
+        // Extract basename (before last dot)
+        const lastDotIndex = sanitizedFileName.lastIndexOf('.');
+        const baseName = lastDotIndex > 0 ? sanitizedFileName.substring(0, lastDotIndex) : sanitizedFileName;
+        
+        // Validate file has extension and non-empty basename
+        if (!sanitizedFileName.includes('.') || 
+            sanitizedFileName.split('.').pop()?.length === 0 ||
+            baseName.length === 0 ||
+            !/[a-zA-Z0-9]/.test(baseName)) {
+          console.warn(`⚠️ [S3] Invalid filename without extension: ${fileName}, using randomized name`);
+          const timestamp = Date.now();
+          const randomString = crypto.randomBytes(8).toString('hex');
+          // Sanitize extension to prevent path traversal
+          const rawExtension = fileName.split('.').pop() || 'bin';
+          const extension = rawExtension.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().substring(0, 10);
+          key = `${folder}/${timestamp}-${randomString}.${extension || 'bin'}`;
+        } else {
+          key = `${folder}/${sanitizedFileName}`;
+          console.log(`📝 [S3] Preserving sanitized filename: ${sanitizedFileName}`);
+        }
+      } else {
+        const timestamp = Date.now();
+        const randomString = crypto.randomBytes(8).toString('hex');
+        // Sanitize extension to prevent path traversal
+        const rawExtension = fileName.split('.').pop() || 'bin';
+        const extension = rawExtension.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().substring(0, 10);
+        key = `${folder}/${timestamp}-${randomString}.${extension || 'bin'}`;
+      }
 
       // Upload file for public access (bucket policy must allow public read)
       const upload = new Upload({
