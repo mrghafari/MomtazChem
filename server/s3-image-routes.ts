@@ -73,7 +73,7 @@ export function registerS3ImageRoutes(app: Express) {
     }
   });
   
-  // Also handle catalog files
+  // Also handle catalog files (product-catalogs folder in S3)
   app.get('/uploads/catalogs/:fileName', async (req: Request, res: Response, next: NextFunction) => {
     const localPath = path.join(process.cwd(), 'uploads', 'catalogs', req.params.fileName);
     
@@ -89,7 +89,7 @@ export function registerS3ImageRoutes(app: Express) {
       }
       
       const s3Service = new AwsS3Service(settings[0]);
-      const s3Key = `catalogs/${req.params.fileName}`;
+      const s3Key = `product-catalogs/${req.params.fileName}`;
       
       console.log(`📄 [S3 CATALOG] Fetching from S3: ${s3Key}`);
       
@@ -114,7 +114,7 @@ export function registerS3ImageRoutes(app: Express) {
     }
   });
   
-  // Handle MSDS files
+  // Handle MSDS files (product-msds folder in S3)
   app.get('/uploads/msds/:fileName', async (req: Request, res: Response, next: NextFunction) => {
     const localPath = path.join(process.cwd(), 'uploads', 'msds', req.params.fileName);
     
@@ -130,7 +130,7 @@ export function registerS3ImageRoutes(app: Express) {
       }
       
       const s3Service = new AwsS3Service(settings[0]);
-      const s3Key = `msds/${req.params.fileName}`;
+      const s3Key = `product-msds/${req.params.fileName}`;
       
       console.log(`📋 [S3 MSDS] Fetching from S3: ${s3Key}`);
       
@@ -208,7 +208,74 @@ export function registerS3ImageRoutes(app: Express) {
     }
   });
 
-  // Handle general files (product images and documents)
+  // Handle product images (product-images folder in S3 with fallback to general-files)
+  app.get('/uploads/product-images/:fileName', async (req: Request, res: Response, next: NextFunction) => {
+    const localPath = path.join(process.cwd(), 'uploads', 'product-images', req.params.fileName);
+    
+    if (fs.existsSync(localPath)) {
+      console.log(`📁 [LOCAL PRODUCT IMAGE] Serving from local: ${req.params.fileName}`);
+      return next();
+    }
+    
+    try {
+      console.log(`🔍 [S3 PRODUCT IMAGE] File not found locally, trying S3: ${req.params.fileName}`);
+      
+      const settings = await db.select().from(awsS3Settings).where(sql`is_active = true`).limit(1);
+      
+      if (settings.length === 0) {
+        console.log('❌ [S3 PRODUCT IMAGE] No active S3 settings found');
+        return res.status(404).json({ success: false, message: 'Image not found' });
+      }
+      
+      const s3Service = new AwsS3Service(settings[0]);
+      
+      // Try product-images folder first
+      let s3Key = `product-images/${req.params.fileName}`;
+      console.log(`🖼️ [S3 PRODUCT IMAGE] Fetching from S3: ${s3Key}`);
+      
+      let fileBuffer = await s3Service.getFile(s3Key);
+      
+      // If not found, try general-files folder (fallback for old files)
+      if (!fileBuffer) {
+        console.log(`⚠️ [S3 PRODUCT IMAGE] Not found in product-images, trying general-files fallback...`);
+        s3Key = `general-files/${req.params.fileName}`;
+        fileBuffer = await s3Service.getFile(s3Key);
+      }
+      
+      if (!fileBuffer) {
+        console.log(`❌ [S3 PRODUCT IMAGE] File not found in S3: ${req.params.fileName}`);
+        return res.status(404).json({ success: false, message: 'Image not found' });
+      }
+      
+      // Determine content type from file extension
+      const ext = path.extname(req.params.fileName).toLowerCase();
+      const contentTypes: {[key: string]: string} = {
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp',
+        '.svg': 'image/svg+xml'
+      };
+      
+      const contentType = contentTypes[ext] || 'application/octet-stream';
+      
+      res.set({
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=31536000',
+        'Content-Length': fileBuffer.length
+      });
+      
+      res.send(fileBuffer);
+      
+      console.log(`✅ [S3 PRODUCT IMAGE] Successfully served from S3: ${s3Key} (${fileBuffer.length} bytes)`);
+    } catch (error) {
+      console.error('❌ [S3 PRODUCT IMAGE] Error serving image from S3:', error);
+      res.status(500).json({ success: false, message: 'Error serving image' });
+    }
+  });
+
+  // Handle general files (documents and other files)
   app.get('/uploads/general-files/:fileName', async (req: Request, res: Response, next: NextFunction) => {
     const localPath = path.join(process.cwd(), 'uploads', 'general-files', req.params.fileName);
     
@@ -268,5 +335,5 @@ export function registerS3ImageRoutes(app: Express) {
     }
   });
   
-  console.log('✅ [S3 ROUTES] S3 file serving routes registered (images, catalogs, msds, receipts, general-files)');
+  console.log('✅ [S3 ROUTES] S3 file serving routes registered (images, product-images, product-catalogs, product-msds, payment-receipts, general-files)');
 }

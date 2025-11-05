@@ -3352,7 +3352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Upload to S3
         const s3Service = getAwsS3Service();
-        const folder = uploadedFile.fieldname === 'image' ? 'general-images' : 'general-files';
+        const folder = uploadedFile.fieldname === 'image' ? 'product-images' : 'general-files';
         const uploadResult = await s3Service.uploadPublicFile(
           uploadedFile.buffer,
           uploadedFile.originalname,
