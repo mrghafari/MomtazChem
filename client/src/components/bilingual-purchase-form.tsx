@@ -84,6 +84,7 @@ const translations = {
     insufficientWallet: "Insufficient wallet balance",
     discountApplied: "Discount Applied",
     bankTransferGrace: "Bank Transfer with Grace Period",
+    bankTransferWithDays: "Bank Transfer with {days}-day Grace Period",
     
     // Shipping options
     deliveryMethod: "Delivery Method",
@@ -209,6 +210,8 @@ const translations = {
     remainingAmount: "المبلغ المتبقي",
     insufficientWallet: "رصيد المحفظة غير كافي",
     discountApplied: "تم تطبيق الخصم",
+    bankTransferGrace: "حوالة بنكية مع مهلة",
+    bankTransferWithDays: "حوالة بنكية مع مهلة {days} يوم",
     
     // Shipping options
     deliveryMethod: "طريقة التوصيل",
@@ -2208,7 +2211,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         <Label htmlFor="bank_transfer_grace" className="flex items-center gap-2 cursor-pointer">
                           <Clock className="w-4 h-4 text-amber-600" />
                           <div className="flex flex-col">
-                            <span className="font-semibold">پرداخت به روش حواله با مهلت {proformaDeadlineDays} روزه</span>
+                            <span className="font-semibold">{t.bankTransferWithDays.replace('{days}', proformaDeadlineDays.toString())}</span>
                           </div>
                         </Label>
                       </div>
