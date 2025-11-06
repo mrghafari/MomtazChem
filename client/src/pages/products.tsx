@@ -169,6 +169,8 @@ export default function ProductsPage() {
   const [deletingProduct, setDeletingProduct] = useState<ShowcaseProduct | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [availableBatches, setAvailableBatches] = useState<Array<{id: number; batchNumber: string; stockQuantity: number}>>([]);
+  const [selectedBatchId, setSelectedBatchId] = useState<number | 'new'>('new');
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { t, language, direction } = useLanguage();
@@ -997,12 +999,30 @@ export default function ProductsPage() {
     setDialogOpen(true);
   };
 
-  const openEditDialog = (product: ShowcaseProduct) => {
+  const openEditDialog = async (product: ShowcaseProduct) => {
     setEditingProduct(product);
     setValidationErrors({}); // Clear validation errors
     setManualBarcodeEntered(false); // Reset manual barcode flag
     setCatalogPreview(product.pdfCatalogUrl || null);
     setMsdsPreview(product.msdsUrl || null);
+    
+    // Fetch all batches for this product by barcode
+    if (product.barcode) {
+      try {
+        const response = await fetch(`/api/batches/${product.barcode}`);
+        if (response.ok) {
+          const batches = await response.json();
+          setAvailableBatches(batches);
+          setSelectedBatchId(product.id); // Set current product as selected batch
+        }
+      } catch (error) {
+        console.error('Error fetching batches:', error);
+        setAvailableBatches([]);
+      }
+    } else {
+      setAvailableBatches([]);
+      setSelectedBatchId('new');
+    }
     
     // Calculate total stock quantity across all batches for this product
     const totalStockQuantity = products && product.barcode 
@@ -1070,6 +1090,25 @@ export default function ProductsPage() {
     }
     
     setDialogOpen(true);
+  };
+
+  // Handle batch selection change
+  const handleBatchChange = async (batchIdOrNew: string) => {
+    if (batchIdOrNew === 'new') {
+      setSelectedBatchId('new');
+      // Reset form for new batch creation
+      return;
+    }
+
+    const batchId = parseInt(batchIdOrNew);
+    setSelectedBatchId(batchId);
+
+    // Find and load the selected batch product
+    const selectedBatch = products?.find(p => p.id === batchId);
+    if (selectedBatch) {
+      // Load the batch product data into the form
+      openEditDialog(selectedBatch);
+    }
   };
 
   // Get consolidated products by barcode
@@ -1822,6 +1861,26 @@ export default function ProductsPage() {
                     )}
                   />
                 </div>
+
+                {/* Batch Selection Dropdown (only when editing) */}
+                {editingProduct && availableBatches.length > 0 && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <label className="text-sm font-medium text-blue-700 mb-2 block">انتخاب دسته (Batch) برای ویرایش</label>
+                    <Select value={selectedBatchId.toString()} onValueChange={handleBatchChange}>
+                      <SelectTrigger className="w-full bg-white">
+                        <SelectValue placeholder="انتخاب دسته..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableBatches.map((batch) => (
+                          <SelectItem key={batch.id} value={batch.id.toString()}>
+                            دسته {batch.batchNumber} - موجودی: {batch.stockQuantity}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="new">➕ بچ جدید</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 {/* اطلاعات پایه محصول */}
                 <div className={`p-4 rounded-lg border ${form.watch('isNonChemical') ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200'}`}>
