@@ -104,6 +104,7 @@ const translations = {
     recipientMobileInstruction: "If recipient is different person, enter their mobile number",
     crmAddressDisabled: "Default Address (Disabled)",
     crmPhoneDisabled: "Default Phone (Disabled)",
+    defaultDeliveryAddress: "Default Delivery Address",
     
     // Toast messages for payment redirect
     redirectingToFIB: "Redirecting to FIB",
@@ -226,8 +227,9 @@ const translations = {
     removeRecipientMobile: "حذف شماره گیرنده",
     recipientMobilePlaceholder: "شماره موبایل گیرنده برای تأیید تحویل (مثل: 0791XXXXXXX)",
     recipientMobileInstruction: "اگر گیرنده کالا شخص دیگری است، شماره موبایل ایشان را وارد کنید",
-    crmAddressDisabled: "آدرس پیش‌فرض (غیرفعال)",
-    crmPhoneDisabled: "شماره پیش‌فرض (غیرفعال)",
+    crmAddressDisabled: "العنوان الافتراضي (معطل)",
+    crmPhoneDisabled: "الهاتف الافتراضي (معطل)",
+    defaultDeliveryAddress: "عنوان التسليم الافتراضي",
     
     // Toast messages for payment redirect
     redirectingToFIB: "الانتقال إلى FIB",
@@ -2376,7 +2378,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       <h4 className={`font-medium ${
                         isPrimaryAddressDisabled ? 'text-gray-500' : 'text-green-800'
                       }`}>
-                        📍 {isPrimaryAddressDisabled ? 'آدرس پیش‌فرض (غیرفعال)' : 'آدرس پیش‌فرض تحویل'}
+                        📍 {isPrimaryAddressDisabled ? t.crmAddressDisabled : t.defaultDeliveryAddress}
                         {isPrimaryAddressDisabled && (
                           <span className="text-orange-500 mr-2">⚠️</span>
                         )}
