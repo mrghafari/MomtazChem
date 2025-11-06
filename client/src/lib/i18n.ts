@@ -987,6 +987,30 @@ export interface Translation {
     clickToSelectMSDS: string;
     catalogDownloadable: string;
     msdsDownloadable: string;
+    inStock: string;
+    lowStock: string;
+    outOfStock: string;
+    activeFilters: string;
+    statusLabel: string;
+    categoryLabel: string;
+    visibilityLabel: string;
+    hiddenProducts: string;
+    visibleProducts: string;
+    searchLabel: string;
+    clearAll: string;
+    cacheCleared: string;
+    dataRefreshed: string;
+    forceRefresh: string;
+    totalProducts: string;
+    fileTooLarge: string;
+    fileTooLargeDesc: string;
+    invalidFormat: string;
+    invalidImageFormat: string;
+    invalidPDFFormat: string;
+    uploadError: string;
+    uploadFailed: string;
+    success: string;
+    imageUploadedSuccess: string;
   };
   addProduct: string;
   editProduct: string;
@@ -1881,6 +1905,21 @@ export const translations: Record<Language, Translation> = {
       clickToSelectMSDS: 'Click to select MSDS PDF',
       catalogDownloadable: 'Catalog downloadable in shop',
       msdsDownloadable: 'MSDS downloadable in shop',
+      inStock: 'In Stock',
+      lowStock: 'Low Stock',
+      outOfStock: 'Out of Stock',
+      activeFilters: 'Active Filters:',
+      statusLabel: 'Status',
+      categoryLabel: 'Category',
+      visibilityLabel: 'Visibility',
+      hiddenProducts: 'Hidden Products',
+      visibleProducts: 'Visible Products',
+      searchLabel: 'Search',
+      clearAll: 'Clear All',
+      cacheCleared: 'Cache Cleared',
+      dataRefreshed: 'Data refreshed successfully',
+      forceRefresh: 'Force Refresh',
+      totalProducts: 'Total Products',
     },
     
     // Batch Management
@@ -3202,6 +3241,21 @@ export const translations: Record<Language, Translation> = {
       clickToSelectMSDS: 'انقر لاختيار ملف PDF لـ MSDS',
       catalogDownloadable: 'الكتالوج قابل للتنزيل في المتجر',
       msdsDownloadable: 'MSDS قابل للتنزيل في المتجر',
+      inStock: 'متوفر في المخزون',
+      lowStock: 'المخزون منخفض',
+      outOfStock: 'نفذ من المخزون',
+      activeFilters: 'الفلاتر النشطة:',
+      statusLabel: 'الحالة',
+      categoryLabel: 'الفئة',
+      visibilityLabel: 'الرؤية',
+      hiddenProducts: 'المنتجات المخفية',
+      visibleProducts: 'المنتجات الظاهرة',
+      searchLabel: 'البحث',
+      clearAll: 'مسح الكل',
+      cacheCleared: 'تم مسح ذاكرة التخزين المؤقت',
+      dataRefreshed: 'تم تحديث البيانات بنجاح',
+      forceRefresh: 'تحديث إجباري',
+      totalProducts: 'إجمالي المنتجات',
     },
     
     // Batch Management

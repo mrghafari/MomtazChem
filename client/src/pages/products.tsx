@@ -121,20 +121,7 @@ const getActualInventoryStatus = (stockQuantity: number | null | undefined, minS
   return 'in_stock';
 };
 
-const getInventoryStatusLabel = (status: string) => {
-  switch (status) {
-    case 'in_stock':
-      return 'In Stock';
-    case 'low_stock':
-      return 'Low Stock';
-    case 'out_of_stock':
-      return 'Out of Stock';
-    case 'discontinued':
-      return 'Discontinued';
-    default:
-      return 'Unknown';
-  }
-};
+// Removed - now defined inside component to access translation context
 
 const getStockLevelIndicator = (current: number, min: number, max: number) => {
   const percentage = (current / max) * 100;
@@ -151,6 +138,24 @@ const getStockLevelIndicator = (current: number, min: number, max: number) => {
 };
 
 export default function ProductsPage() {
+  const { language, t, direction } = useLanguage();
+  
+  // Inventory status label helper - uses translation context
+  const getInventoryStatusLabel = (status: string) => {
+    switch (status) {
+      case 'in_stock':
+        return t.productManagement.inStock;
+      case 'low_stock':
+        return t.productManagement.lowStock;
+      case 'out_of_stock':
+        return t.productManagement.outOfStock;
+      case 'discontinued':
+        return language === 'ar' ? 'متوقف' : 'Discontinued';
+      default:
+        return language === 'ar' ? 'غير معروف' : 'Unknown';
+    }
+  };
+  
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedInventoryStatus, setSelectedInventoryStatus] = useState<string>("all");
   const [selectedVisibilityFilter, setSelectedVisibilityFilter] = useState<string>("all");
@@ -173,7 +178,6 @@ export default function ProductsPage() {
   const [selectedBatchId, setSelectedBatchId] = useState<number | 'new'>('new');
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
-  const { t, language, direction } = useLanguage();
   const { toast } = useToast();
   const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -1295,28 +1299,28 @@ export default function ProductsPage() {
         {/* Active Filters */}
         {(selectedInventoryStatus !== "all" || selectedCategory !== "all" || selectedVisibilityFilter !== "all" || searchQuery) && (
           <div className="mb-4 flex flex-wrap gap-2">
-            <span className="text-sm font-medium text-gray-700">Active Filters:</span>
+            <span className="text-sm font-medium text-gray-700">{t.productManagement.activeFilters}</span>
             {selectedInventoryStatus !== "all" && (
               <Badge variant="secondary" className="cursor-pointer hover:bg-gray-300" onClick={() => setSelectedInventoryStatus("all")}>
-                Status: {getInventoryStatusLabel(selectedInventoryStatus)}
+                {t.productManagement.statusLabel}: {getInventoryStatusLabel(selectedInventoryStatus)}
                 <X className="w-3 h-3 ml-1" />
               </Badge>
             )}
             {selectedCategory !== "all" && (
               <Badge variant="secondary" className="cursor-pointer hover:bg-gray-300" onClick={() => setSelectedCategory("all")}>
-                Category: {categories.find(c => c.value === selectedCategory)?.label || selectedCategory}
+                {t.productManagement.categoryLabel}: {categories.find(c => c.value === selectedCategory)?.label || selectedCategory}
                 <X className="w-3 h-3 ml-1" />
               </Badge>
             )}
             {selectedVisibilityFilter !== "all" && (
               <Badge variant="secondary" className="cursor-pointer hover:bg-gray-300" onClick={() => setSelectedVisibilityFilter("all")}>
-                Visibility: {selectedVisibilityFilter === "hidden" ? "Hidden Products" : "Visible Products"}
+                {t.productManagement.visibilityLabel}: {selectedVisibilityFilter === "hidden" ? t.productManagement.hiddenProducts : t.productManagement.visibleProducts}
                 <X className="w-3 h-3 ml-1" />
               </Badge>
             )}
             {searchQuery && (
               <Badge variant="secondary" className="cursor-pointer hover:bg-gray-300" onClick={() => setSearchQuery("")}>
-                Search: {searchQuery}
+                {t.productManagement.searchLabel}: {searchQuery}
                 <X className="w-3 h-3 ml-1" />
               </Badge>
             )}
@@ -1331,7 +1335,7 @@ export default function ProductsPage() {
               }}
               className="h-6 text-xs"
             >
-              Clear All
+              {t.productManagement.clearAll}
             </Button>
           </div>
         )}
@@ -1349,15 +1353,15 @@ export default function ProductsPage() {
               queryClient.removeQueries({ queryKey: ["/api/products"] });
               refetch();
               toast({
-                title: "Cache Cleared",
-                description: "Data refreshed successfully",
+                title: t.productManagement.cacheCleared,
+                description: t.productManagement.dataRefreshed,
               });
             }}
             variant="outline" 
             className="h-12 text-sm"
           >
             <Database className="w-4 h-4 mr-2" />
-            Force Refresh
+            {t.productManagement.forceRefresh}
           </Button>
         </div>
       </div>
@@ -1369,7 +1373,7 @@ export default function ProductsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-600">In Stock</p>
+                  <p className="text-sm font-medium text-green-600">{t.productManagement.inStock}</p>
                   <p className="text-2xl font-bold text-green-800">
                     {products.filter(p => getActualInventoryStatus(p.stockQuantity, p.minStockLevel) === 'in_stock').length}
                   </p>
@@ -1383,7 +1387,7 @@ export default function ProductsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-yellow-600">Low Stock</p>
+                  <p className="text-sm font-medium text-yellow-600">{t.productManagement.lowStock}</p>
                   <p className="text-2xl font-bold text-yellow-800">
                     {products.filter(p => getActualInventoryStatus(p.stockQuantity, p.minStockLevel) === 'low_stock').length}
                   </p>
@@ -1397,7 +1401,7 @@ export default function ProductsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-red-600">Out of Stock</p>
+                  <p className="text-sm font-medium text-red-600">{t.productManagement.outOfStock}</p>
                   <p className="text-2xl font-bold text-red-800">
                     {products.filter(p => getActualInventoryStatus(p.stockQuantity, p.minStockLevel) === 'out_of_stock').length}
                   </p>
@@ -1411,7 +1415,7 @@ export default function ProductsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Hidden Products</p>
+                  <p className="text-sm font-medium text-gray-600">{t.productManagement.hiddenProducts}</p>
                   <p className="text-2xl font-bold text-gray-800">
                     {products.filter(p => !p.syncWithShop).length}
                   </p>
@@ -1425,7 +1429,7 @@ export default function ProductsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-600">Total Products</p>
+                  <p className="text-sm font-medium text-blue-600">{t.productManagement.totalProducts}</p>
                   <p className="text-2xl font-bold text-blue-800">{products.length}</p>
                 </div>
                 <Package className="w-8 h-8 text-blue-600" />
