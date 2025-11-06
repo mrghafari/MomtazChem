@@ -179,7 +179,7 @@ export default function Header() {
       {/* Admin Status Indicator */}
       {isAdminAuthenticated && (
         <div className="text-white text-center py-1 text-sm font-medium bg-[#28c70e]">
-          🔐 وضعیت مدیریت فعال - Admin Mode Active
+          🔐 Admin Mode Active
         </div>
       )}
       <div className="container mx-auto px-4">
