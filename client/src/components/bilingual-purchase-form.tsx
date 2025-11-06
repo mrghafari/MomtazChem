@@ -137,6 +137,9 @@ const translations = {
     smartShippingCost: "Smart Shipping Cost",
     useWallet: "Use Wallet (Maximum",
     amountFromWallet: "Amount from Wallet (Maximum",
+    walletPaymentAmount: "Wallet Payment Amount",
+    walletLimit: "Wallet Limit",
+    bankCardPayment: "Bank Card Payment",
     selfPickup: "Self Pickup - Free",
     selfPickupLabel: "Self Pickup:",
     free: "Free",
@@ -264,6 +267,9 @@ const translations = {
     smartShippingCost: "تكلفة الشحن الذكي",
     useWallet: "استخدام المحفظة (الحد الأقصى",
     amountFromWallet: "المبلغ من المحفظة (الحد الأقصى",
+    walletPaymentAmount: "مبلغ الدفع من المحفظة",
+    walletLimit: "حد المحفظة",
+    bankCardPayment: "الدفع ببطاقة البنك",
     selfPickup: "الاستلام الذاتي - مجاناً",
     selfPickupLabel: "الاستلام الذاتي:",
     free: "مجاناً",
@@ -2268,15 +2274,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           
                           {/* Wallet Payment Row */}
                           <tr className="border-b">
-                            <td className="px-4 py-3 text-right">مبلغ پرداخت از کیف پول</td>
+                            <td className="px-4 py-3 text-right">{t.walletPaymentAmount}</td>
                             <td className="px-4 py-3 text-center font-medium">{formatIQDAmount(walletAmount)}</td>
-                            <td className="px-4 py-3 text-right font-medium bg-blue-50">محدودیت کیف پول</td>
+                            <td className="px-4 py-3 text-right font-medium bg-blue-50">{t.walletLimit}</td>
                             <td className="px-4 py-3 text-center font-medium bg-blue-50 text-blue-700">{formatIQDAmount(walletBalance)}</td>
                           </tr>
                           
                           {/* Bank Payment Row */}
                           <tr>
-                            <td className="px-4 py-3 text-right">پرداخت کارت بانکی</td>
+                            <td className="px-4 py-3 text-right">{t.bankCardPayment}</td>
                             <td className="px-4 py-3 text-center font-medium text-orange-600">{formatIQDAmount(totalAmount - walletAmount)}</td>
                             <td className="px-4 py-3 bg-gray-50"></td>
                             <td className="px-4 py-3 bg-gray-50"></td>
