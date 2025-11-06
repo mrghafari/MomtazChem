@@ -4,6 +4,16 @@
 The Momtazchem Chemical Solutions Platform is a comprehensive, multilingual system integrating a public showcase website, e-commerce, and administrative tools for a chemical company. Its primary purpose is to optimize CRM, inventory, sales, logistics, and financial management while expanding market reach. Key capabilities include multi-language support (English, Arabic, Kurdish, Turkish), unified site management, advanced e-commerce, GPS tracking, real-time analytics, email automation, barcode and Kardex-synced inventory, and financial management. The project aims to establish Momtazchem as a digital leader in the chemical industry.
 
 ## Recent Changes (November 2025)
+- **OAuth Authentication Integration (Nov 6, 2025)**:
+  - Integrated Google and Facebook OAuth login for customer accounts using Passport.js
+  - Added database fields: google_id, facebook_id, oauth_provider, profile_completed, avatar_url to customers table
+  - Created modular authentication system with dedicated server/auth-routes.ts module mounted at /api/auth
+  - Built complete profile completion flow: OAuth → /complete-profile → /customer-dashboard
+  - Implemented bilingual OAuth buttons (English/Arabic) on login page with LanguageContext integration
+  - OAuth users must complete phone, country, province, city, and address before accessing customer portal
+  - All redirect paths properly route to /customer/login for failed authentication and /customer-dashboard for successful login
+  - Session-based authentication with automatic user creation/update on first OAuth login
+  - **Setup Required**: Administrators need Google Cloud Console credentials (Client ID/Secret) and Facebook App credentials to activate OAuth login
 - **Batch Management Multilingual Support (Nov 6, 2025)**:
   - Implemented full multilingual support for batch management page using LanguageContext
   - Added comprehensive translations to i18n.ts for English and Arabic
