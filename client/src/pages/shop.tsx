@@ -122,6 +122,7 @@ const Shop = () => {
   const [currentImageIndexes, setCurrentImageIndexes] = useState<{ [key: number]: number }>({});
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 12;
+  const [selected3DModel, setSelected3DModel] = useState<{ key: string; name: string } | null>(null);
 
   // Helper function to get images array (without artificial expansion)
   const getImages = (product: any) => {
@@ -1225,11 +1226,20 @@ const Shop = () => {
                       <>
                         <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden relative group cursor-pointer">
                           {product.displayMode === '3d_model' && product.model3dKey ? (
-                            <ProductModel3DViewer 
-                              model3dKey={product.model3dKey}
-                              productName={product.name}
-                              className="w-full h-full"
-                            />
+                            <div 
+                              className="relative w-full h-full"
+                              onClick={() => setSelected3DModel({ key: product.model3dKey, name: product.name })}
+                            >
+                              <ProductModel3DViewer 
+                                model3dKey={product.model3dKey}
+                                productName={product.name}
+                                className="w-full h-full"
+                              />
+                              <div className="absolute top-2 right-2 bg-black/60 text-white px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5">
+                                <ZoomIn className="w-4 h-4" />
+                                <span className="text-sm">{direction === 'rtl' ? 'تكبير 3D' : 'Zoom 3D'}</span>
+                              </div>
+                            </div>
                           ) : (
                             (() => {
                               // Use expanded images (minimum 3 images)
@@ -1657,11 +1667,20 @@ const Shop = () => {
                       <div className="flex">
                         <div className="w-48 h-48 bg-gray-100 flex-shrink-0 relative group cursor-pointer">
                           {product.displayMode === '3d_model' && product.model3dKey ? (
-                            <ProductModel3DViewer 
-                              model3dKey={product.model3dKey}
-                              productName={product.name}
-                              className="w-full h-full"
-                            />
+                            <div 
+                              className="relative w-full h-full"
+                              onClick={() => setSelected3DModel({ key: product.model3dKey, name: product.name })}
+                            >
+                              <ProductModel3DViewer 
+                                model3dKey={product.model3dKey}
+                                productName={product.name}
+                                className="w-full h-full"
+                              />
+                              <div className="absolute top-2 right-2 bg-black/60 text-white px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5">
+                                <ZoomIn className="w-4 h-4" />
+                                <span className="text-sm">{direction === 'rtl' ? 'تكبير 3D' : 'Zoom 3D'}</span>
+                              </div>
+                            </div>
                           ) : (
                             (() => {
                               // Use expanded images (minimum 3 images)
@@ -2396,6 +2415,29 @@ const Shop = () => {
           </div>
         </div>
       )}
+
+      {/* 3D Model Fullscreen Dialog */}
+      <Dialog open={!!selected3DModel} onOpenChange={() => setSelected3DModel(null)}>
+        <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0">
+          <DialogHeader className="p-6 pb-4">
+            <DialogTitle className="text-2xl font-bold" dir={direction}>
+              {selected3DModel?.name}
+            </DialogTitle>
+            <DialogDescription dir={direction}>
+              {direction === 'rtl' ? 'استخدم الماوس للتدوير والتكبير' : 'Use your mouse to rotate and zoom the 3D model'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 p-6 pt-0">
+            {selected3DModel && (
+              <ProductModel3DViewer
+                model3dKey={selected3DModel.key}
+                productName={selected3DModel.name}
+                className="w-full h-full min-h-[600px]"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Auth Dialog */}
       <CustomerAuth 
