@@ -2484,7 +2484,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                     >
                                       <FormControl>
                                         <SelectTrigger className="text-sm">
-                                          <SelectValue placeholder={selectedSecondaryProvinceId ? "Select City" : "Select Province First"} />
+                                          <SelectValue placeholder={selectedSecondaryProvinceId ? t.checkout_page.selectCity : t.checkout_page.selectProvinceFirst} />
                                         </SelectTrigger>
                                       </FormControl>
                                       <SelectContent>
@@ -2501,7 +2501,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             </div>
                             <div>
                               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Postal Code (Optional)
+                                {t.checkout_page.postalCodeOptional}
                               </label>
                               <FormField
                                 control={form.control}
@@ -2523,7 +2523,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     {/* Recipient Mobile */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Recipient Mobile Number</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.checkout_page.recipientMobileLabel}</span>
                         <Button
                           type="button"
                           size="sm"
@@ -2539,7 +2539,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
                           <div>
                             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                              Recipient Mobile Number
+                              {t.checkout_page.recipientMobileLabel}
                             </label>
                             <FormField
                               control={form.control}
@@ -2559,7 +2559,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             />
                           </div>
                           <div className="mt-2 text-xs text-gray-500">
-                            This number will be used for SMS delivery confirmation
+                            {t.checkout_page.smsDeliveryConfirmation}
                           </div>
                         </div>
                       )}
