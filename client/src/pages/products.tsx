@@ -1551,9 +1551,9 @@ export default function ProductsPage() {
                           size="sm"
                           onClick={() => toggleSync({ id: product.id, syncWithShop: !product.syncWithShop })}
                           className={`h-8 w-16 p-0 text-xs font-medium ${product.syncWithShop ? 'hover:bg-red-50 hover:text-red-600 bg-green-50 text-green-700' : 'hover:bg-green-50 hover:text-green-600 bg-gray-50 text-gray-700'}`}
-                          title={product.syncWithShop ? 'مخفی کردن از فروشگاه' : 'نمایش در فروشگاه'}
+                          title={product.syncWithShop ? t.productManagement.hideFromShop : t.productManagement.showInShop}
                         >
-                          {product.syncWithShop ? 'مخفی کردن' : 'نمایش'}
+                          {product.syncWithShop ? t.productManagement.hidden : t.productManagement.showInShop}
                         </Button>
                         <Button
                           variant="ghost"
@@ -1572,7 +1572,7 @@ export default function ProductsPage() {
                               setLocation(`/admin/batch-management?barcode=${product.barcode}`);
                             }}
                             className="h-8 w-8 p-0 hover:bg-purple-50 hover:text-purple-600"
-                            title="مدیریت بچ‌ها"
+                            title={t.productManagement.manageBatches}
                           >
                             <Package className="w-4 h-4" />
                           </Button>
@@ -1606,13 +1606,13 @@ export default function ProductsPage() {
                       {!productGroup.mainProduct.isNonChemical && productGroup.currentSellingBatch && (
                         <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                           <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium text-green-700">بچ فعال (در حال فروش):</span>
+                            <span className="text-sm font-medium text-green-700">{t.productManagement.activeBatch}</span>
                             <Badge variant="default" className="bg-green-600 text-white">
                               {productGroup.currentSellingBatch}
                             </Badge>
                           </div>
                           <div className="text-xs text-green-600 mt-1">
-                            سیستم FIFO - قدیمی‌ترین بچ با موجودی
+                            {t.productManagement.fifoSystem}
                           </div>
                         </div>
                       )}
@@ -1621,27 +1621,27 @@ export default function ProductsPage() {
                       {!productGroup.mainProduct.isNonChemical && productGroup.batches.length >= 1 && (
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium">همه بچ‌ها ({productGroup.batches.length}):</span>
-                            <span className="text-sm text-gray-600">کل موجودی: {productGroup.totalStock}</span>
+                            <span className="text-sm font-medium">{t.productManagement.allBatchesCount.replace('{count}', productGroup.batches.length.toString())}</span>
+                            <span className="text-sm text-gray-600">{t.productManagement.totalStockLabel.replace('{stock}', productGroup.totalStock.toString())}</span>
                           </div>
                           <div className="space-y-1">
                             {productGroup.batches
-                              .filter(batch => batch.stockQuantity > 0) // فقط batch های با موجودی
+                              .filter(batch => batch.stockQuantity > 0)
                               .map((batch, index) => (
                               <div key={index} className={`flex justify-between items-center p-2 rounded text-xs ${
                                 batch.isActive ? 'bg-green-100 border border-green-300' : 'bg-gray-50'
                               }`}>
-                                <span className="font-medium">بچ {batch.batchNumber}</span>
+                                <span className="font-medium">{t.productManagement.batchNum.replace('{number}', batch.batchNumber)}</span>
                                 <div className="flex items-center gap-2">
-                                  <span>{batch.stockQuantity} واحد</span>
+                                  <span>{batch.stockQuantity} {t.productManagement.units}</span>
                                   {batch.isActive && (
                                     <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
-                                      در حال فروش
+                                      {t.productManagement.sellingNow}
                                     </Badge>
                                   )}
                                   {!batch.isActive && batch.stockQuantity > 0 && (
                                     <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-                                      در نوبت
+                                      {t.productManagement.inQueue}
                                     </Badge>
                                   )}
                                   <Button
@@ -1649,7 +1649,7 @@ export default function ProductsPage() {
                                     size="sm"
                                     className="h-6 w-6 p-0 text-xs"
                                     onClick={() => handleDeleteBatch(batch.id, batch.batchNumber)}
-                                    title="حذف batch"
+                                    title={t.productManagement.deleteBatch}
                                   >
                                     <X className="h-3 w-3" />
                                   </Button>
@@ -1666,19 +1666,19 @@ export default function ProductsPage() {
                         <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                           {product.netWeight && Number(product.netWeight) > 0 && (
                             <div className="flex items-center gap-1">
-                              <span className="font-medium">وزن خالص:</span>
+                              <span className="font-medium">{t.productManagement.netWeightLabel}</span>
                               <span>{Number(product.netWeight).toFixed(1)} {product.weightUnit || 'kg'}</span>
                             </div>
                           )}
                           {product.grossWeight && Number(product.grossWeight) > 0 && (
                             <div className="flex items-center gap-1">
-                              <span className="font-medium">وزن ناخالص:</span>
+                              <span className="font-medium">{t.productManagement.grossWeightLabel}</span>
                               <span>{Number(product.grossWeight).toFixed(1)} {product.weightUnit || 'kg'}</span>
                             </div>
                           )}
                           {!product.netWeight && !product.grossWeight && product.weight && parseFloat(product.weight) > 0 && (
                             <div className="flex items-center gap-1">
-                              <span className="font-medium">وزن:</span>
+                              <span className="font-medium">{t.productManagement.weightLabel}</span>
                               <span>{parseFloat(product.weight).toFixed(1)} {product.weightUnit || 'kg'}</span>
                             </div>
                           )}
@@ -1762,7 +1762,7 @@ export default function ProductsPage() {
                           {product.showCatalogToCustomers && product.pdfCatalogUrl && (
                             <div 
                               className="bg-green-500 rounded-full p-1.5 shadow-lg border-2 border-white cursor-pointer hover:bg-green-600 transition-colors" 
-                              title="کلیک برای باز کردن کاتالوگ"
+                              title={t.productManagement.clickToOpenCatalog}
                               onClick={() => product.pdfCatalogUrl && window.open(product.pdfCatalogUrl, '_blank')}
                             >
                               <Eye className="w-3 h-3 text-white" />
@@ -1773,7 +1773,7 @@ export default function ProductsPage() {
                           {product.showMsdsToCustomers && product.msdsUrl && (
                             <div 
                               className="bg-blue-500 rounded-full p-1.5 shadow-lg border-2 border-white cursor-pointer hover:bg-blue-600 transition-colors" 
-                              title="کلیک برای باز کردن MSDS"
+                              title={t.productManagement.clickToOpenMSDS}
                               onClick={() => product.msdsUrl && window.open(product.msdsUrl, '_blank')}
                             >
                               <FileText className="w-3 h-3 text-white" />
@@ -1797,10 +1797,10 @@ export default function ProductsPage() {
           <DialogHeader className="pb-4 border-b">
             <DialogTitle className="text-2xl font-bold text-center text-blue-700 flex items-center justify-center gap-2">
               <Package className="h-6 w-6" />
-{editingProduct ? t.editProduct : t.addProduct}
+              {editingProduct ? t.productManagement.editProduct : t.productManagement.addNewProduct}
             </DialogTitle>
             <DialogDescription className="text-center text-gray-600">
-              {editingProduct ? "ویرایش اطلاعات محصول موجود" : "افزودن محصول جدید به کاردکس"}
+              {editingProduct ? t.productManagement.editProduct : t.productManagement.addNewProduct}
             </DialogDescription>
           </DialogHeader>
           
@@ -1810,7 +1810,6 @@ export default function ProductsPage() {
                 console.log('❌ [DEBUG] Form validation failed:', errors);
               })} className="space-y-4">
                 
-                {/* چک‌باکس کالای غیر شیمیایی و آتش‌زا */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <FormField
                     control={form.control}
@@ -1818,8 +1817,8 @@ export default function ProductsPage() {
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 bg-amber-50 border-amber-200">
                         <div className="space-y-0.5">
-                          <FormLabel className="text-sm font-medium text-amber-700">کالای غیر شیمیایی</FormLabel>
-                          <div className="text-xs text-amber-500">محصول غیر شیمیایی</div>
+                          <FormLabel className="text-sm font-medium text-amber-700">{t.productManagement.nonChemicalProduct}</FormLabel>
+                          <div className="text-xs text-amber-500">{t.productManagement.nonChemicalDesc}</div>
                         </div>
                         <FormControl>
                           <Checkbox
@@ -1840,9 +1839,9 @@ export default function ProductsPage() {
                         <div className="space-y-0.5">
                           <FormLabel className="text-sm font-medium text-orange-700 flex items-center gap-1">
                             <Flame className="w-3 h-3" />
-                            محصول آتش‌زا
+                            {t.productManagement.flammableProduct}
                           </FormLabel>
-                          <div className="text-xs text-orange-500">محصول آتش‌زا</div>
+                          <div className="text-xs text-orange-500">{t.productManagement.flammableDesc}</div>
                         </div>
                         <FormControl>
                           <Checkbox
@@ -1856,33 +1855,31 @@ export default function ProductsPage() {
                   />
                 </div>
 
-                {/* اطلاعات پایه محصول */}
                 <div className={`p-4 rounded-lg border ${form.watch('isNonChemical') ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200'}`}>
                   <h3 className={`text-lg font-semibold mb-3 flex items-center gap-2 ${form.watch('isNonChemical') ? 'text-green-800' : 'text-blue-800'}`}>
                     <Package className="h-5 w-5" />
-{t.basicInfo}
+                    {t.productManagement.baseInfo}
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
-                    {/* نام محصول اصلی */}
                     <FormField
                       control={form.control}
                       name="name"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
-نام محصول *
+                            {t.productManagement.productName}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>نام اصلی محصول را وارد کنید</p>
+                                <p>{t.productManagement.productNameHelp}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
                           <FormControl>
                             <Input 
-                              placeholder="نام محصول را وارد کنید" 
+                              placeholder={t.productManagement.productNamePlaceholder} 
                               className="h-9"
                               {...field} 
                             />
@@ -1898,20 +1895,20 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
-{t.productCategory} *
+                            {t.productManagement.categoryLabel}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>دسته‌بندی محصول برای طبقه‌بندی و جستجوی بهتر</p>
+                                <p>{t.productManagement.categoryHelp}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger className="h-9">
-                                <SelectValue placeholder="دسته‌بندی را انتخاب کنید" />
+                                <SelectValue placeholder={t.productManagement.categoryPlaceholder} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -1931,7 +1928,6 @@ export default function ProductsPage() {
                     />
                   </div>
 
-                  {/* بخش نام فنی / گرید - دو قسمت در یک خط */}
                   <div className="mt-3">
                     <FormField
                       control={form.control}
@@ -1939,19 +1935,19 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
-نام فنی / گرید
+                            {t.productManagement.technicalName}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>نام فنی یا گرید محصول برای نمایش در کارت فروش</p>
+                                <p>{t.productManagement.technicalNameHelp}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
                           <FormControl>
                             <Input 
-                              placeholder="نام فنی یا گرید محصول" 
+                              placeholder={t.productManagement.technicalNamePlaceholder} 
                               className="h-9"
                               {...field} 
                             />
@@ -1969,19 +1965,19 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
-{t.productDescription}
+                            {t.productManagement.description}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>توضیحات کامل درباره محصول، کاربرد و ویژگی‌های آن</p>
+                                <p>{t.productManagement.descriptionHelp}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
                           <FormControl>
                             <Textarea 
-                              placeholder="توضیحات محصول..." 
+                              placeholder={t.productManagement.descriptionPlaceholder} 
                               className="min-h-[80px] resize-none"
                               {...field} 
                             />
@@ -1993,11 +1989,10 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                {/* شناسایی و قیمت‌گذاری */}
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
                   <h3 className="text-lg font-semibold text-green-800 mb-3 flex items-center gap-2">
                     <QrCode className="h-5 w-5" />
-{t.pricingInventory}
+                    {t.productManagement.identificationPricing}
                   </h3>
                   <div className="grid grid-cols-3 gap-3">
                     <FormField
@@ -2013,14 +2008,14 @@ export default function ProductsPage() {
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>{editingProduct ? 'کد یکتای محصول قابل تغییر نیست' : 'کد یکتای محصول برای شناسایی در سیستم'}</p>
+                                <p>{editingProduct ? t.productManagement.skuHelpView : t.productManagement.skuHelp}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
                           <FormControl>
                             <div className="flex gap-2">
                               <Input 
-                                placeholder={editingProduct ? "کد محصول (فقط نمایش)" : "کد محصول یا از AI استفاده کنید"} 
+                                placeholder={editingProduct ? t.productManagement.skuPlaceholderView : t.productManagement.skuPlaceholder} 
                                 className={`h-9 ${editingProduct ? "bg-gray-50 text-gray-500" : ""} ${validationErrors.sku ? "border-red-500 focus:border-red-500" : ""}`}
                                 {...field}
                                 value={field.value || ""}
@@ -2038,8 +2033,8 @@ export default function ProductsPage() {
                                     
                                     if (!productName || !category) {
                                       toast({
-                                        title: "⚠️ اطلاعات ناقص",
-                                        description: "لطفاً ابتدا نام محصول و دسته‌بندی را وارد کنید",
+                                        title: t.productManagement.incompleteInfo,
+                                        description: t.productManagement.enterNameCategoryFirst,
                                         variant: "destructive",
                                       });
                                       return;
@@ -2239,10 +2234,10 @@ export default function ProductsPage() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="IQD">دینار عراقی (IQD)</SelectItem>
-                              <SelectItem value="USD">دلار آمریکا (USD)</SelectItem>
-                              <SelectItem value="EUR">یورو (EUR)</SelectItem>
-                              <SelectItem value="TRY">لیر ترکیه (TRY)</SelectItem>
+                              <SelectItem value="IQD">{t.productManagement.currencyIQD}</SelectItem>
+                              <SelectItem value="USD">{t.productManagement.currencyUSD}</SelectItem>
+                              <SelectItem value="EUR">{t.productManagement.currencyEUR}</SelectItem>
+                              <SelectItem value="TRY">{t.productManagement.currencyTRY}</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -2252,14 +2247,12 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                {/* مدیریت موجودی و وزن */}
                 <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-4 rounded-lg border border-orange-200">
                   <h3 className="text-lg font-semibold text-orange-800 mb-3 flex items-center gap-2">
                     <BarChart3 className="h-5 w-5" />
-{t.weightsAndBatch}
+                    {t.productManagement.stockManagement}
                   </h3>
                   
-                  {/* ردیف موجودی */}
                   <div className="grid grid-cols-3 gap-3 mb-3">
                     <FormField
                       control={form.control}
@@ -2267,14 +2260,14 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.stockQuantity ? 'text-red-600' : ''}`}>
-                            موجودی فعلی
+                            {t.productManagement.currentStock}
                             <Lock className="h-3 w-3 text-gray-400" />
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>موجودی فعلی محصول در انبار (غیر قابل تغییر مستقیم)</p>
+                                <p>{t.productManagement.stockNotEditable}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
@@ -2302,10 +2295,10 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
-                            افزودن موجودی
+                            {t.productManagement.addStock}
                             {editingProduct && (
                               <Badge variant="secondary" className="text-xs">
-                                فقط برای ویرایش
+                                {t.productManagement.onlyForEdit}
                               </Badge>
                             )}
                             <Tooltip>
@@ -2313,14 +2306,14 @@ export default function ProductsPage() {
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>مقدار موجودی که می‌خواهید به انبار اضافه کنید (فقط در ویرایش محصول موجود)</p>
+                                <p>{t.productManagement.stockAdditionHelp}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
-                              placeholder={editingProduct ? "0" : "فقط در ویرایش محصول موجود"}
+                              placeholder={editingProduct ? "0" : t.productManagement.editOnlyPlaceholder}
                               className={`h-9 ${!editingProduct ? "bg-gray-100 text-gray-400" : ""}`}
                               {...field}
                               value={field.value || ''}
@@ -2333,19 +2326,17 @@ export default function ProductsPage() {
                       )}
                     />
 
-                    {/* فیلد شماره بچ جدید - فقط برای محصولات شیمیایی */}
                     {!form.watch('isNonChemical') && (
                       <>
-                        {/* Batch Selection Dropdown - Only when editing */}
                         {editingProduct && (
                           <div className="col-span-3 mb-3 bg-orange-50 p-3 rounded-lg border border-orange-200">
                             <FormLabel className="text-sm font-semibold text-orange-800 mb-2 flex items-center gap-2">
                               <Package className="w-4 h-4" />
-                              انتخاب دسته (Batch) برای ویرایش
+                              {t.productManagement.selectBatchForEdit}
                             </FormLabel>
                             <Select value={selectedBatchId.toString()} onValueChange={handleBatchChange}>
                               <SelectTrigger className="w-full h-9 bg-white border-orange-300 hover:border-orange-400">
-                                <SelectValue placeholder="انتخاب دسته..." />
+                                <SelectValue placeholder={t.productManagement.selectBatchPlaceholderText} />
                               </SelectTrigger>
                               <SelectContent>
                                 {availableBatches.length > 0 ? (
@@ -3221,7 +3212,6 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                {/* دکمه‌های عمل */}
                 <div className="flex justify-end gap-3 pt-4 border-t">
                   <Button
                     type="button"
@@ -3233,7 +3223,7 @@ export default function ProductsPage() {
                     }}
                     className="px-6"
                   >
-                    انصراف
+                    {t.productManagement.cancel}
                   </Button>
                   <Button 
                     type="submit" 
@@ -3241,7 +3231,7 @@ export default function ProductsPage() {
                     className="px-6 bg-blue-600 hover:bg-blue-700"
                   >
                     {isSubmitting && <RefreshCw className="mr-2 h-4 w-4 animate-spin" />}
-                    {editingProduct ? "به‌روزرسانی محصول" : "افزودن محصول"}
+                    {editingProduct ? t.productManagement.updateProduct : t.productManagement.addProduct}
                   </Button>
                 </div>
               </form>
@@ -3254,25 +3244,25 @@ export default function ProductsPage() {
       <AlertDialog open={!!deletingProduct} onOpenChange={() => setDeletingProduct(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>تأیید حذف محصول</AlertDialogTitle>
+            <AlertDialogTitle>{t.productManagement.confirmDelete}</AlertDialogTitle>
             <AlertDialogDescription>
-              آیا مطمئن هستید که می‌خواهید محصول "{deletingProduct?.name}" را حذف کنید؟
+              {t.productManagement.confirmDeleteDesc.replace('{name}', deletingProduct?.name || '')}
               <br />
               <span className="text-red-600 font-medium">
-                این عمل غیرقابل بازگشت است و محصول از هر دو سیستم کاردکس و فروشگاه حذف خواهد شد.
+                {t.productManagement.confirmDeleteWarning}
               </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setDeletingProduct(null)}>
-              انصراف
+              {t.productManagement.cancel}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteProduct}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              حذف محصول
+              {t.productManagement.deleteProduct}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

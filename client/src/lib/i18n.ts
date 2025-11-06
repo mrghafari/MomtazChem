@@ -761,7 +761,145 @@ export interface Translation {
   reachComplianceDesc: string;
   
   // Product Form
-  productManagement: string;
+  productManagement: {
+    categoryRequired: string;
+    barcodeRequired: string;
+    unitPriceRequired: string;
+    stockRequired: string;
+    minStockRequired: string;
+    maxStockRequired: string;
+    netWeightRequired: string;
+    grossWeightRequired: string;
+    grossWeightMinError: string;
+    minMaxStockError: string;
+    newBatchNumberRequired: string;
+    batchDeleted: string;
+    batchDeletedDesc: string;
+    batchDeleteError: string;
+    batchDeleteErrorDesc: string;
+    productUpdated: string;
+    productUpdateError: string;
+    duplicateSKU: string;
+    productDeleted: string;
+    productDeleteError: string;
+    enterNameCategory: string;
+    imageUploaded: string;
+    imageUploadError: string;
+    barcodeGenerated: string;
+    barcodeGeneratedDesc: string;
+    confirmBatchDelete: string;
+    editProduct: string;
+    addNewProduct: string;
+    nonChemicalProduct: string;
+    nonChemicalDesc: string;
+    flammableProduct: string;
+    flammableDesc: string;
+    baseInfo: string;
+    productName: string;
+    productNamePlaceholder: string;
+    productNameHelp: string;
+    categoryLabel: string;
+    categoryPlaceholder: string;
+    categoryHelp: string;
+    technicalName: string;
+    technicalNamePlaceholder: string;
+    technicalNameHelp: string;
+    description: string;
+    descriptionPlaceholder: string;
+    descriptionHelp: string;
+    identificationPricing: string;
+    sku: string;
+    skuPlaceholder: string;
+    skuPlaceholderView: string;
+    skuHelp: string;
+    skuHelpView: string;
+    barcode: string;
+    barcodePlaceholder: string;
+    barcodeHelp: string;
+    unitPrice: string;
+    unitPricePlaceholder: string;
+    unitPriceHelp: string;
+    stock: string;
+    stockPlaceholder: string;
+    stockPlaceholderEdit: string;
+    stockHelp: string;
+    inventoryAddition: string;
+    inventoryAdditionPlaceholder: string;
+    batchSelection: string;
+    batchSelectionPlaceholder: string;
+    batchOption: string;
+    addNewBatch: string;
+    batchesAvailable: string;
+    selectNewBatch: string;
+    currentBatchNumber: string;
+    newBatchNumber: string;
+    batchNumberPlaceholder: string;
+    batchNumberHelp: string;
+    batchNumberHelpCurrent: string;
+    stockWillBeAdded: string;
+    minStock: string;
+    minStockPlaceholder: string;
+    minStockHelp: string;
+    maxStock: string;
+    maxStockPlaceholder: string;
+    maxStockHelp: string;
+    weightRow: string;
+    netWeight: string;
+    netWeightPlaceholder: string;
+    netWeightHelp: string;
+    netWeightHelpView: string;
+    grossWeight: string;
+    grossWeightPlaceholder: string;
+    grossWeightHelp: string;
+    grossWeightHelpView: string;
+    weightUnit: string;
+    syncWithShop: string;
+    showWhenOutOfStock: string;
+    productImages: string;
+    productImagesFromMain: string;
+    imagesHelp: string;
+    imagesHelpBatch: string;
+    selectPrimaryImage: string;
+    selectPrimaryImageHelp: string;
+    selectPrimaryImageHelpDB: string;
+    imageNumber: string;
+    imagePreview: string;
+    setPrimaryImage: string;
+    selectImage: string;
+    imageUrlPlaceholder: string;
+    productCatalog: string;
+    catalogHelp: string;
+    catalogFile: string;
+    selectCatalog: string;
+    catalogName: string;
+    catalogNamePlaceholder: string;
+    showToCustomers: string;
+    catalogURL: string;
+    catalogURLPlaceholder: string;
+    msds: string;
+    msdsHelp: string;
+    msdsFile: string;
+    selectMSDS: string;
+    msdsName: string;
+    msdsNamePlaceholder: string;
+    msdsURL: string;
+    msdsURLPlaceholder: string;
+    updateProduct: string;
+    addProduct: string;
+    confirmDelete: string;
+    confirmDeleteDesc: string;
+    confirmDeleteWarning: string;
+    cancel: string;
+    deleteProduct: string;
+    activeBatch: string;
+    fifoSystem: string;
+    totalStock: string;
+    onlyBatchesWithStock: string;
+    deleteBatch: string;
+    netWeightLabel: string;
+    grossWeightLabel: string;
+    weightLabel: string;
+  };
   addProduct: string;
   editProduct: string;
   productName: string;
@@ -1567,6 +1705,78 @@ export const translations: Record<Language, Translation> = {
       netWeightLabel: 'Net weight:',
       grossWeightLabel: 'Gross weight:',
       weightLabel: 'Weight:',
+      
+      // Additional UI elements
+      hideFromShop: 'Hide from shop',
+      showInShop: 'Show in shop',
+      manageBatches: 'Manage Batches',
+      sellingNow: 'Selling',
+      inQueue: 'In queue',
+      clickToOpenCatalog: 'Click to open catalog',
+      clickToOpenMSDS: 'Click to open MSDS',
+      manualMode: 'Manual',
+      currencyIQD: 'Iraqi Dinar (IQD)',
+      currencyUSD: 'US Dollar (USD)',
+      currencyEUR: 'Euro (EUR)',
+      currencyTRY: 'Turkish Lira (TRY)',
+      currentStock: 'Current Stock',
+      addStock: 'Add Stock',
+      onlyForEdit: 'Edit only',
+      editOnly: 'Only in existing product edit',
+      editOnlyPlaceholder: 'Only in existing product edit',
+      fileManagement: 'File & Document Management',
+      uploadingFile: 'Uploading...',
+      viewCatalog: 'View Catalog',
+      uploadCatalog: 'Upload Catalog',
+      viewMSDS: 'View MSDS',
+      uploadMSDS: 'Upload MSDS',
+      imageUrlsLabel: 'Image URLs',
+      primaryImageLabel: 'Primary',
+      productImagesMain: 'Product Images (from main product)',
+      editableIfNeeded: 'Editable if needed',
+      imagesFetchedFromMain: 'Images fetched from main product. You can change them if needed.',
+      imagesFetchedHelp: 'Max 3 product images for display in catalog and shop. Supports JPG, PNG, GIF - Max 2MB',
+      imagesFetchedFromDB: 'Images fetched from database and editable (Primary image: {index})',
+      clickCircleButton: 'Click the circle button at bottom left of each image (Selected image: {index})',
+      uploadImage: 'Uploading...',
+      clickToSelectPDF: 'Click to select {type} PDF',
+      onlyPDF: 'PDF files only',
+      incompleteInfo: '⚠️ Incomplete Information',
+      enterNameCategoryFirst: 'Please enter product name and category first',
+      standard13Barcode: '13-digit standard barcode',
+      manualInputPreventsAuto: 'Manual entry prevents auto-generation',
+      barcode13Placeholder: '13-digit barcode',
+      pricePerUnit: 'Price per unit in selected currency',
+      stockManagement: 'Stock & Weight Management',
+      stockRow: 'Stock row',
+      stockNotEditable: 'Current product stock in warehouse (not directly editable)',
+      stockAdditionHelp: 'Stock quantity you want to add to warehouse (only in existing product edit)',
+      chemical: 'Chemical',
+      allBatches: 'All Batches',
+      unit: 'unit',
+      units: 'units',
+      editable: 'Editable',
+      imagesUploadSection: 'Image upload',
+      selectPrimaryImageTitle: 'Select primary image',
+      imageFromMain: 'Product images (from main product)',
+      maxThreeImages: 'Max 3 images',
+      catalogActionsButtons: 'Catalog action buttons',
+      msdsSection: 'MSDS section',
+      msdsActionsButtons: 'MSDS action buttons',
+      msdsSettings: 'MSDS settings',
+      catalogSettings: 'Catalog settings',
+      showToCustomersLabel: 'Show to customers',
+      showToCustomersHelp: '{type} downloadable in shop',
+      hidden: 'Hidden',
+      forChemicalOnly: 'For chemical products only',
+      newBatchField: 'New batch number field',
+      selectBatchForEdit: 'Select Batch for editing',
+      selectBatchPlaceholderText: 'Select batch...',
+      allBatchesCount: 'All Batches ({count}):',
+      totalStockLabel: 'Total stock: {stock}',
+      onlyWithStock: 'Only batches with stock',
+      batch: 'Batch',
+      batchNum: 'Batch {number}',
     },
     
     // Batch Management
@@ -2018,7 +2228,6 @@ export const translations: Record<Language, Translation> = {
     reachComplianceDesc: 'European Chemicals Regulation',
     
     // Product Form
-    productManagement: 'Product Management',
     addProduct: 'Add Product',
     editProduct: 'Edit Product',
     productName: 'Product Name',
@@ -2801,6 +3010,78 @@ export const translations: Record<Language, Translation> = {
       netWeightLabel: 'الوزن الصافي:',
       grossWeightLabel: 'الوزن الإجمالي:',
       weightLabel: 'الوزن:',
+      
+      // Additional UI elements
+      hideFromShop: 'إخفاء من المتجر',
+      showInShop: 'عرض في المتجر',
+      manageBatches: 'إدارة الدفعات',
+      sellingNow: 'قيد البيع',
+      inQueue: 'في الانتظار',
+      clickToOpenCatalog: 'انقر لفتح الكتالوج',
+      clickToOpenMSDS: 'انقر لفتح MSDS',
+      manualMode: 'يدوي',
+      currencyIQD: 'دينار عراقي (IQD)',
+      currencyUSD: 'دولار أمريكي (USD)',
+      currencyEUR: 'يورو (EUR)',
+      currencyTRY: 'ليرة تركية (TRY)',
+      currentStock: 'المخزون الحالي',
+      addStock: 'إضافة مخزون',
+      onlyForEdit: 'تحرير فقط',
+      editOnly: 'فقط في تحرير المنتج الموجود',
+      editOnlyPlaceholder: 'فقط في تحرير المنتج الموجود',
+      fileManagement: 'إدارة الملفات والوثائق',
+      uploadingFile: 'جاري الرفع...',
+      viewCatalog: 'عرض الكتالوج',
+      uploadCatalog: 'رفع الكتالوج',
+      viewMSDS: 'عرض MSDS',
+      uploadMSDS: 'رفع MSDS',
+      imageUrlsLabel: 'روابط الصور',
+      primaryImageLabel: 'رئيسية',
+      productImagesMain: 'صور المنتج (من المنتج الرئيسي)',
+      editableIfNeeded: 'قابل للتغيير عند الحاجة',
+      imagesFetchedFromMain: 'تم جلب الصور من المنتج الرئيسي. يمكنك تغييرها إذا لزم الأمر.',
+      imagesFetchedHelp: 'حد أقصى 3 صور للمنتج للعرض في الكتالوج والمتجر. يدعم JPG, PNG, GIF - بحد أقصى 2MB',
+      imagesFetchedFromDB: 'تم جلب الصور من قاعدة البيانات وقابلة للتعديل (الصورة الرئيسية: {index})',
+      clickCircleButton: 'انقر على زر الدائرة في أسفل يسار كل صورة (الصورة المحددة: {index})',
+      uploadImage: 'جاري الرفع...',
+      clickToSelectPDF: 'انقر لاختيار {type} PDF',
+      onlyPDF: 'ملفات PDF فقط',
+      incompleteInfo: '⚠️ معلومات ناقصة',
+      enterNameCategoryFirst: 'الرجاء إدخال اسم المنتج والفئة أولاً',
+      standard13Barcode: 'باركود قياسي 13 رقم',
+      manualInputPreventsAuto: 'الإدخال اليدوي يمنع التوليد التلقائي',
+      barcode13Placeholder: 'باركود 13 رقم',
+      pricePerUnit: 'السعر لكل وحدة بالعملة المختارة',
+      stockManagement: 'إدارة المخزون والوزن',
+      stockRow: 'صف المخزون',
+      stockNotEditable: 'مخزون المنتج الحالي في المستودع (غير قابل للتغيير مباشرة)',
+      stockAdditionHelp: 'كمية المخزون التي تريد إضافتها إلى المستودع (فقط في تحرير المنتج الموجود)',
+      chemical: 'كيميائي',
+      allBatches: 'جميع الدفعات',
+      unit: 'وحدة',
+      units: 'وحدات',
+      editable: 'قابل للتعديل',
+      imagesUploadSection: 'رفع الصور',
+      selectPrimaryImageTitle: 'اختر الصورة الرئيسية',
+      imageFromMain: 'صور المنتج (من المنتج الرئيسي)',
+      maxThreeImages: 'بحد أقصى 3 صور',
+      catalogActionsButtons: 'أزرار عمل الكتالوج',
+      msdsSection: 'قسم MSDS',
+      msdsActionsButtons: 'أزرار عمل MSDS',
+      msdsSettings: 'إعدادات MSDS',
+      catalogSettings: 'إعدادات الكتالوج',
+      showToCustomersLabel: 'عرض للعملاء',
+      showToCustomersHelp: '{type} قابل للتنزيل في المتجر',
+      hidden: 'مخفي',
+      forChemicalOnly: 'للمنتجات الكيميائية فقط',
+      newBatchField: 'حقل رقم الدفعة الجديدة',
+      selectBatchForEdit: 'اختر الدفعة للتحرير',
+      selectBatchPlaceholderText: 'اختر الدفعة...',
+      allBatchesCount: 'جميع الدفعات ({count}):',
+      totalStockLabel: 'إجمالي المخزون: {stock}',
+      onlyWithStock: 'فقط الدفعات مع المخزون',
+      batch: 'دفعة',
+      batchNum: 'دفعة {number}',
     },
     
     // Batch Management
@@ -3292,7 +3573,6 @@ export const translations: Record<Language, Translation> = {
     reachComplianceDesc: 'لائحة المواد الكيميائية الأوروبية',
     
     // Product Form
-    productManagement: 'إدارة المنتجات',
     addProduct: 'إضافة منتج',
     editProduct: 'تحرير منتج',
     productName: 'اسم المنتج',
