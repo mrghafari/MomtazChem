@@ -1006,19 +1006,17 @@ export default function ProductsPage() {
     setCatalogPreview(product.pdfCatalogUrl || null);
     setMsdsPreview(product.msdsUrl || null);
     
-    // Fetch all batches for this product by barcode
-    if (product.barcode) {
-      try {
-        const response = await fetch(`/api/batches/${product.barcode}`);
-        if (response.ok) {
-          const batches = await response.json();
-          setAvailableBatches(batches);
-          setSelectedBatchId(product.id); // Set current product as selected batch
-        }
-      } catch (error) {
-        console.error('Error fetching batches:', error);
-        setAvailableBatches([]);
-      }
+    // Fetch all products with same barcode (different batches)
+    if (product.barcode && products) {
+      const sameBarcodeProducts = products.filter(p => p.barcode === product.barcode);
+      const batchList = sameBarcodeProducts.map(p => ({
+        id: p.id,
+        batchNumber: p.batchNumber || `ID-${p.id}`,
+        stockQuantity: p.stockQuantity || 0
+      }));
+      setAvailableBatches(batchList);
+      setSelectedBatchId(product.id);
+      console.log(`📦 Found ${batchList.length} batches for barcode ${product.barcode}`);
     } else {
       setAvailableBatches([]);
       setSelectedBatchId('new');
@@ -1863,22 +1861,40 @@ export default function ProductsPage() {
                 </div>
 
                 {/* Batch Selection Dropdown (only when editing) */}
-                {editingProduct && availableBatches.length > 0 && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <label className="text-sm font-medium text-blue-700 mb-2 block">انتخاب دسته (Batch) برای ویرایش</label>
+                {editingProduct && (
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-300 rounded-lg p-4 shadow-sm">
+                    <label className="text-sm font-semibold text-blue-800 mb-3 block flex items-center gap-2">
+                      <Package className="w-4 h-4" />
+                      انتخاب دسته (Batch) برای ویرایش
+                    </label>
                     <Select value={selectedBatchId.toString()} onValueChange={handleBatchChange}>
-                      <SelectTrigger className="w-full bg-white">
+                      <SelectTrigger className="w-full bg-white border-blue-300 hover:border-blue-400 transition-colors">
                         <SelectValue placeholder="انتخاب دسته..." />
                       </SelectTrigger>
                       <SelectContent>
-                        {availableBatches.map((batch) => (
-                          <SelectItem key={batch.id} value={batch.id.toString()}>
-                            دسته {batch.batchNumber} - موجودی: {batch.stockQuantity}
-                          </SelectItem>
-                        ))}
-                        <SelectItem value="new">➕ بچ جدید</SelectItem>
+                        {availableBatches.length > 0 ? (
+                          <>
+                            {availableBatches.map((batch) => (
+                              <SelectItem key={batch.id} value={batch.id.toString()}>
+                                <span className="flex items-center gap-2">
+                                  📦 دسته: {batch.batchNumber} - موجودی: <span className="font-semibold text-green-600">{batch.stockQuantity}</span>
+                                </span>
+                              </SelectItem>
+                            ))}
+                            <SelectItem value="new" className="bg-green-50 font-medium">
+                              ➕ افزودن بچ جدید
+                            </SelectItem>
+                          </>
+                        ) : (
+                          <SelectItem value="new">➕ افزودن بچ جدید</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-blue-600 mt-2">
+                      {availableBatches.length > 1 
+                        ? `${availableBatches.length} دسته برای این محصول موجود است` 
+                        : 'برای افزودن دسته جدید، "افزودن بچ جدید" را انتخاب کنید'}
+                    </p>
                   </div>
                 )}
 
