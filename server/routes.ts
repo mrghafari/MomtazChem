@@ -454,6 +454,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
   console.log("🚀 REGISTERING ROUTES - Vehicle optimization endpoints loading...");
   
+  // Mount OAuth routes
+  const authRoutes = (await import('./auth-routes')).default;
+  app.use('/api/auth', authRoutes);
+  console.log('✅ [OAUTH] Authentication routes registered at /api/auth');
+  
   // Import department auth functions
   const { attachUserDepartments, requireDepartment } = await import("./department-auth");
   

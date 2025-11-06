@@ -57,6 +57,13 @@ export const customers = pgTable("customers", {
   internalNotes: text("internal_notes"),
   publicNotes: text("public_notes"), // Notes visible to customer
   
+  // OAuth fields for social login
+  googleId: text("google_id").unique(),
+  facebookId: text("facebook_id").unique(),
+  oauthProvider: text("oauth_provider"), // 'google', 'facebook', null
+  profileCompleted: boolean("profile_completed").default(false), // Has user completed profile after OAuth login?
+  avatarUrl: text("avatar_url"), // Profile picture from OAuth provider
+  
   // System fields
   isActive: boolean("is_active").default(true),
   emailVerified: boolean("email_verified").default(false),

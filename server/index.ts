@@ -9,6 +9,7 @@ import { abandonedCartCleanup } from "./abandoned-cart-cleanup";
 import { bankReceiptReminderService } from "./bank-receipt-reminder";
 import { incompletePaymentCleaner } from "./incomplete-payment-cleaner";
 import { setupVite, serveStatic, log } from "./vite";
+import passport from "./passport-config";
 
 // Global error handlers to prevent server crashes
 process.on('uncaughtException', (err) => {
@@ -131,6 +132,10 @@ const unifiedSessionMiddleware = session({
 });
 
 app.use(unifiedSessionMiddleware);
+
+// Initialize Passport for OAuth authentication
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use((req, res, next) => {
   const start = Date.now();
