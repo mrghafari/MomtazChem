@@ -1962,7 +1962,7 @@ export default function ProductsPage() {
                     />
                   </div>
 
-                  <div className="mt-3">
+                  <div className="mt-3 space-y-3">
                     <FormField
                       control={form.control}
                       name="description"
@@ -1984,6 +1984,93 @@ export default function ProductsPage() {
                               placeholder={t.productManagement.descriptionPlaceholder} 
                               className="min-h-[80px] resize-none"
                               {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="specifications"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                            {t.productManagement.technicalSpecifications}
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{t.productManagement.technicalSpecificationsHelp}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder={t.productManagement.technicalSpecificationsPlaceholder} 
+                              className="min-h-[80px] resize-none font-mono text-xs"
+                              {...field}
+                              value={typeof field.value === 'string' ? field.value : (field.value ? JSON.stringify(field.value, null, 2) : '')}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="features"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                            {t.productManagement.productFeatures}
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{t.productManagement.productFeaturesHelp}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder={t.productManagement.productFeaturesPlaceholder} 
+                              className="min-h-[80px] resize-none"
+                              {...field}
+                              value={typeof field.value === 'string' ? field.value : (Array.isArray(field.value) ? (field.value as string[]).join('\n') : '')}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="applications"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                            {t.productManagement.productApplications}
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{t.productManagement.productApplicationsHelp}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder={t.productManagement.productApplicationsPlaceholder} 
+                              className="min-h-[80px] resize-none"
+                              {...field}
+                              value={typeof field.value === 'string' ? field.value : (Array.isArray(field.value) ? (field.value as string[]).join('\n') : '')}
                             />
                           </FormControl>
                           <FormMessage />
@@ -2490,8 +2577,8 @@ export default function ProductsPage() {
                       control={form.control}
                       name="netWeight"
                       render={({ field }) => {
-                        const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
-                        const isDisabled = form.watch('isNonChemical') || isBatchAddition || editingProduct;
+                        const isBatchAddition = !!((form.watch('inventoryAddition') || 0) > 0 && form.watch('newBatchNumber')?.trim());
+                        const isDisabled = !!form.watch('isNonChemical') || isBatchAddition || !!editingProduct;
                         const originalNetWeight = editingProduct?.netWeight || 0;
                         const weightUnit = editingProduct?.weightUnit || 'kg';
                         return (
@@ -2538,8 +2625,8 @@ export default function ProductsPage() {
                       control={form.control}
                       name="grossWeight"
                       render={({ field }) => {
-                        const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
-                        const isDisabled = form.watch('isNonChemical') || isBatchAddition || editingProduct;
+                        const isBatchAddition = !!((form.watch('inventoryAddition') || 0) > 0 && form.watch('newBatchNumber')?.trim());
+                        const isDisabled = !!form.watch('isNonChemical') || isBatchAddition || !!editingProduct;
                         const originalGrossWeight = editingProduct?.grossWeight || 0;
                         const weightUnit = editingProduct?.weightUnit || 'kg';
                         return (
@@ -2703,7 +2790,7 @@ export default function ProductsPage() {
                       <FormLabel className="text-sm font-medium flex items-center gap-2">
                         <Image className="h-4 w-4" />
                         {(() => {
-                          const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
+                          const isBatchAddition = (form.watch('inventoryAddition') || 0) > 0 && form.watch('newBatchNumber')?.trim();
                           return isBatchAddition ? t.productManagement.productImagesMain : t.productManagement.productImages;
                         })()}
                       </FormLabel>
@@ -2717,13 +2804,13 @@ export default function ProductsPage() {
                             </div>
                             <span className="font-medium">
                               {(() => {
-                                const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
+                                const isBatchAddition = (form.watch('inventoryAddition') || 0) > 0 && form.watch('newBatchNumber')?.trim();
                                 return isBatchAddition ? t.productManagement.imageFromMain + ':' : t.productManagement.selectPrimaryImageTitle + ':';
                               })()}
                             </span>
                             <span>
                               {(() => {
-                                const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
+                                const isBatchAddition = (form.watch('inventoryAddition') || 0) > 0 && form.watch('newBatchNumber')?.trim();
                                 return isBatchAddition 
                                   ? t.productManagement.imagesFetchedFromDB.replace('{index}', (primaryImageIndex + 1).toString())
                                   : t.productManagement.clickCircleButton.replace('{index}', (primaryImageIndex + 1).toString());
@@ -2739,7 +2826,7 @@ export default function ProductsPage() {
                                 {(editingProduct ? displayImagePreviews[index] : imagePreviews[index]) ? (
                                   <div className="relative w-full aspect-square">
                                     <img 
-                                      src={editingProduct ? displayImagePreviews[index] : imagePreviews[index]} 
+                                      src={(editingProduct ? displayImagePreviews[index] : imagePreviews[index]) || ''} 
                                       alt={t.productManagement.imagePreview.replace('{index}', (index + 1).toString())} 
                                       className={`w-full h-full object-cover rounded-lg transition-all ${
                                         (editingProduct ? displayPrimaryImageIndex : primaryImageIndex) === index ? 'ring-2 ring-blue-500 ring-offset-2' : ''

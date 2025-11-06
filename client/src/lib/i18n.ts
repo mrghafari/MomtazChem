@@ -992,7 +992,6 @@ export interface Translation {
     outOfStock: string;
     activeFilters: string;
     statusLabel: string;
-    categoryLabel: string;
     visibilityLabel: string;
     hiddenProducts: string;
     visibleProducts: string;
@@ -1011,6 +1010,15 @@ export interface Translation {
     uploadFailed: string;
     success: string;
     imageUploadedSuccess: string;
+    technicalSpecifications: string;
+    technicalSpecificationsPlaceholder: string;
+    technicalSpecificationsHelp: string;
+    productFeatures: string;
+    productFeaturesPlaceholder: string;
+    productFeaturesHelp: string;
+    productApplications: string;
+    productApplicationsPlaceholder: string;
+    productApplicationsHelp: string;
   };
   addProduct: string;
   editProduct: string;
@@ -1920,6 +1928,24 @@ export const translations: Record<Language, Translation> = {
       dataRefreshed: 'Data refreshed successfully',
       forceRefresh: 'Force Refresh',
       totalProducts: 'Total Products',
+      fileTooLarge: 'File Too Large',
+      fileTooLargeDesc: 'File must be less than 2MB. Please compress or resize the file.',
+      invalidFormat: 'Invalid Format',
+      invalidImageFormat: 'Only JPEG, PNG, and WebP images are allowed for optimal customer display.',
+      invalidPDFFormat: 'Only PDF files are allowed for documents.',
+      uploadError: 'Upload Error',
+      uploadFailed: 'Failed to upload file',
+      success: 'Success',
+      imageUploadedSuccess: 'Image uploaded successfully - optimized for customer display',
+      technicalSpecifications: 'Technical Specifications',
+      technicalSpecificationsPlaceholder: 'Enter technical specifications as JSON or text...',
+      technicalSpecificationsHelp: 'Product technical details visible to customers in shop',
+      productFeatures: 'Product Features',
+      productFeaturesPlaceholder: 'Enter product features (one per line)',
+      productFeaturesHelp: 'Key features visible to customers - one per line',
+      productApplications: 'Product Applications',
+      productApplicationsPlaceholder: 'Enter product applications (one per line)',
+      productApplicationsHelp: 'Common uses and applications - one per line',
     },
     
     // Batch Management
@@ -3256,6 +3282,24 @@ export const translations: Record<Language, Translation> = {
       dataRefreshed: 'تم تحديث البيانات بنجاح',
       forceRefresh: 'تحديث إجباري',
       totalProducts: 'إجمالي المنتجات',
+      fileTooLarge: 'حجم الملف كبير جداً',
+      fileTooLargeDesc: 'يجب أن يكون حجم الملف أقل من 2 ميجابايت. يرجى ضغط الملف أو تصغير حجمه.',
+      invalidFormat: 'تنسيق غير صحيح',
+      invalidImageFormat: 'فقط صور JPEG و PNG و WebP مسموح بها للعرض الأمثل للعملاء.',
+      invalidPDFFormat: 'فقط ملفات PDF مسموح بها للمستندات.',
+      uploadError: 'خطأ في الرفع',
+      uploadFailed: 'فشل رفع الملف',
+      success: 'نجح',
+      imageUploadedSuccess: 'تم رفع الصورة بنجاح - محسّنة لعرض العملاء',
+      technicalSpecifications: 'المواصفات الفنية',
+      technicalSpecificationsPlaceholder: 'أدخل المواصفات الفنية كـ JSON أو نص...',
+      technicalSpecificationsHelp: 'التفاصيل الفنية للمنتج المرئية للعملاء في المتجر',
+      productFeatures: 'ميزات المنتج',
+      productFeaturesPlaceholder: 'أدخل ميزات المنتج (واحدة في كل سطر)',
+      productFeaturesHelp: 'الميزات الرئيسية المرئية للعملاء - واحدة في كل سطر',
+      productApplications: 'تطبيقات المنتج',
+      productApplicationsPlaceholder: 'أدخل تطبيقات المنتج (واحدة في كل سطر)',
+      productApplicationsHelp: 'الاستخدامات والتطبيقات الشائعة - واحدة في كل سطر',
     },
     
     // Batch Management
