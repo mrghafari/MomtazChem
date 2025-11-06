@@ -2676,13 +2676,13 @@ export default function ProductsPage() {
                           {[0, 1, 2].map((index) => (
                             <div key={index} className="space-y-2">
                               <div className="text-xs text-gray-500 text-center font-medium">تصویر {index + 1}</div>
-                              <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-3 text-center min-h-[140px] flex flex-col justify-center">
+                              <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-3 text-center flex flex-col justify-center">
                                 {(editingProduct ? displayImagePreviews[index] : imagePreviews[index]) ? (
-                                  <div className="relative">
+                                  <div className="relative w-full aspect-square">
                                     <img 
                                       src={editingProduct ? displayImagePreviews[index] : imagePreviews[index]} 
                                       alt={`پیش‌نمای تصویر ${index + 1}`} 
-                                      className={`w-full h-20 object-cover rounded-lg transition-all ${
+                                      className={`w-full h-full object-cover rounded-lg transition-all ${
                                         (editingProduct ? displayPrimaryImageIndex : primaryImageIndex) === index ? 'ring-2 ring-blue-500 ring-offset-2' : ''
                                       }`}
                                     />
