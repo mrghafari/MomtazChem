@@ -1489,7 +1489,7 @@ export default function ProductsPage() {
               {filteredProducts.map((productGroup) => {
                 const product = productGroup.mainProduct;
                 return (
-                  <Card key={`${product.barcode || product.id}-${refreshKey}`} className="hover:shadow-lg transition-shadow duration-200 border border-gray-200 dark:border-gray-700">
+                  <Card key={`${product.barcode || product.id}`} className="hover:shadow-lg transition-shadow duration-200 border border-gray-200 dark:border-gray-700">
                   <CardHeader className="pb-3">
                     <div className="flex items-start gap-3">
                       {/* Product Thumbnail */}
