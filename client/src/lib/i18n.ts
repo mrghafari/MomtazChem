@@ -393,6 +393,72 @@ export interface Translation {
     freeShippingEligible: string;
     fullyPaidByWallet: string;
   };
+
+  // Address Selector Component
+  address_selector: {
+    // Page titles
+    deliveryAddressTitle: string;
+    selectAddressDescription: string;
+    
+    // Buttons
+    addNewAddress: string;
+    addFirstAddress: string;
+    updateButton: string;
+    cancelButton: string;
+    setAsDefault: string;
+    getLocationButton: string;
+    gettingLocation: string;
+    
+    // Dialog titles
+    editAddressTitle: string;
+    addAddressTitle: string;
+    enterAddressInfo: string;
+    
+    // Form labels
+    addressTitle: string;
+    addressTitlePlaceholder: string;
+    recipientNameLabel: string;
+    recipientNamePlaceholder: string;
+    recipientNameNote: string;
+    fullAddressLabel: string;
+    fullAddressPlaceholder: string;
+    cityLabel: string;
+    postalCodeLabel: string;
+    postalCodePlaceholder: string;
+    gpsLocationLabel: string;
+    latitudeLabel: string;
+    longitudeLabel: string;
+    accuracyLabel: string;
+    metersUnit: string;
+    
+    // Status messages
+    defaultBadge: string;
+    recipientLabel: string;
+    noAddressFound: string;
+    loadingAddresses: string;
+    
+    // Toast messages
+    locationReceived: string;
+    locationReceivedDesc: string;
+    locationError: string;
+    locationPermissionDenied: string;
+    locationUnavailable: string;
+    locationTimeout: string;
+    browserNotSupported: string;
+    addressCreated: string;
+    addressCreateError: string;
+    addressUpdated: string;
+    addressUpdateError: string;
+    addressDeleted: string;
+    addressDeleteError: string;
+    defaultAddressSet: string;
+    defaultAddressError: string;
+    fetchAddressesError: string;
+    fetchCustomerInfoError: string;
+    
+    // Countries
+    defaultCountry: string;
+  };
   
   // Common actions
   login: string;
@@ -1775,6 +1841,72 @@ export const translations: Record<Language, Translation> = {
       freeShippingEligible: '🎉 You qualify for free shipping!',
       fullyPaidByWallet: '💳 This order will be fully paid with your wallet',
     },
+
+    // Address Selector Component
+    address_selector: {
+      // Page titles
+      deliveryAddressTitle: 'Delivery Address',
+      selectAddressDescription: 'Select the address for order delivery',
+      
+      // Buttons
+      addNewAddress: 'Add New Address',
+      addFirstAddress: 'Add First Address',
+      updateButton: 'Update',
+      cancelButton: 'Cancel',
+      setAsDefault: 'Set as Default',
+      getLocationButton: 'Get Current Location',
+      gettingLocation: 'Getting location...',
+      
+      // Dialog titles
+      editAddressTitle: 'Edit Address',
+      addAddressTitle: 'Add New Address',
+      enterAddressInfo: 'Enter address information',
+      
+      // Form labels
+      addressTitle: 'Address Title',
+      addressTitlePlaceholder: 'e.g., Home, Office',
+      recipientNameLabel: 'Recipient Name',
+      recipientNamePlaceholder: 'Full recipient name',
+      recipientNameNote: 'Name is pre-filled from your account',
+      fullAddressLabel: 'Full Address',
+      fullAddressPlaceholder: 'Enter your full address',
+      cityLabel: 'City',
+      postalCodeLabel: 'Postal Code',
+      postalCodePlaceholder: 'Optional',
+      gpsLocationLabel: 'GPS Location',
+      latitudeLabel: 'Latitude:',
+      longitudeLabel: 'Longitude:',
+      accuracyLabel: 'Accuracy:',
+      metersUnit: 'meters',
+      
+      // Status messages
+      defaultBadge: 'Default',
+      recipientLabel: 'Recipient:',
+      noAddressFound: 'No addresses found',
+      loadingAddresses: 'Loading...',
+      
+      // Toast messages
+      locationReceived: 'Location Received',
+      locationReceivedDesc: 'Your current location has been recorded with {accuracy} meters accuracy',
+      locationError: 'Location Error',
+      locationPermissionDenied: 'Location access denied. Please enable access in browser settings',
+      locationUnavailable: 'Location unavailable',
+      locationTimeout: 'Location request timed out',
+      browserNotSupported: 'Your browser does not support geolocation',
+      addressCreated: 'New address added successfully',
+      addressCreateError: 'Error creating address',
+      addressUpdated: 'Address updated successfully',
+      addressUpdateError: 'Error updating address',
+      addressDeleted: 'Address deleted successfully',
+      addressDeleteError: 'Error deleting address',
+      defaultAddressSet: 'Default address set',
+      defaultAddressError: 'Error setting default address',
+      fetchAddressesError: 'Error fetching addresses',
+      fetchCustomerInfoError: 'Error fetching customer information',
+      
+      // Countries
+      defaultCountry: 'Iraq',
+    },
     
     // Common actions
     login: 'Login',
@@ -3148,6 +3280,72 @@ export const translations: Record<Language, Translation> = {
       totalPayable: 'إجمالي المبلغ المستحق:',
       freeShippingEligible: '🎉 أنت مؤهل للشحن المجاني!',
       fullyPaidByWallet: '💳 سيتم دفع هذا الطلب بالكامل من محفظتك',
+    },
+
+    // Address Selector Component
+    address_selector: {
+      // Page titles
+      deliveryAddressTitle: 'عنوان التسليم',
+      selectAddressDescription: 'اختر العنوان لتسليم الطلب',
+      
+      // Buttons
+      addNewAddress: 'إضافة عنوان جديد',
+      addFirstAddress: 'إضافة العنوان الأول',
+      updateButton: 'تحديث',
+      cancelButton: 'إلغاء',
+      setAsDefault: 'تعيين كافتراضي',
+      getLocationButton: 'الحصول على الموقع الحالي',
+      gettingLocation: 'جاري الحصول على الموقع...',
+      
+      // Dialog titles
+      editAddressTitle: 'تعديل العنوان',
+      addAddressTitle: 'إضافة عنوان جديد',
+      enterAddressInfo: 'أدخل معلومات العنوان',
+      
+      // Form labels
+      addressTitle: 'عنوان العنوان',
+      addressTitlePlaceholder: 'مثال: المنزل، المكتب',
+      recipientNameLabel: 'اسم المستلم',
+      recipientNamePlaceholder: 'الاسم الكامل للمستلم',
+      recipientNameNote: 'الاسم معبأ مسبقاً من حسابك',
+      fullAddressLabel: 'العنوان الكامل',
+      fullAddressPlaceholder: 'أدخل عنوانك الكامل',
+      cityLabel: 'المدينة',
+      postalCodeLabel: 'الرمز البريدي',
+      postalCodePlaceholder: 'اختياري',
+      gpsLocationLabel: 'موقع GPS',
+      latitudeLabel: 'خط العرض:',
+      longitudeLabel: 'خط الطول:',
+      accuracyLabel: 'الدقة:',
+      metersUnit: 'متر',
+      
+      // Status messages
+      defaultBadge: 'افتراضي',
+      recipientLabel: 'المستلم:',
+      noAddressFound: 'لم يتم العثور على عناوين',
+      loadingAddresses: 'جاري التحميل...',
+      
+      // Toast messages
+      locationReceived: 'تم استلام الموقع',
+      locationReceivedDesc: 'تم تسجيل موقعك الحالي بدقة {accuracy} متر',
+      locationError: 'خطأ في الموقع',
+      locationPermissionDenied: 'تم رفض الوصول إلى الموقع. يرجى تمكين الوصول في إعدادات المتصفح',
+      locationUnavailable: 'الموقع غير متاح',
+      locationTimeout: 'انتهت مهلة طلب الموقع',
+      browserNotSupported: 'متصفحك لا يدعم تحديد الموقع الجغرافي',
+      addressCreated: 'تمت إضافة عنوان جديد بنجاح',
+      addressCreateError: 'خطأ في إنشاء العنوان',
+      addressUpdated: 'تم تحديث العنوان بنجاح',
+      addressUpdateError: 'خطأ في تحديث العنوان',
+      addressDeleted: 'تم حذف العنوان بنجاح',
+      addressDeleteError: 'خطأ في حذف العنوان',
+      defaultAddressSet: 'تم تعيين العنوان الافتراضي',
+      defaultAddressError: 'خطأ في تعيين العنوان الافتراضي',
+      fetchAddressesError: 'خطأ في جلب العناوين',
+      fetchCustomerInfoError: 'خطأ في جلب معلومات العميل',
+      
+      // Countries
+      defaultCountry: 'العراق',
     },
     
     // Common actions

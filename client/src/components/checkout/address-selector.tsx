@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, MapPin, Check, Navigation } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CustomerAddress {
   id: number;
@@ -51,6 +52,7 @@ interface AddressSelectorProps {
 }
 
 export default function AddressSelector({ selectedAddressId, onAddressSelect }: AddressSelectorProps) {
+  const { t, direction } = useLanguage();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -61,7 +63,7 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
     recipientName: '',
     company: '',
     phone: '',
-    country: 'ایران',
+    country: t.address_selector.defaultCountry,
     state: '',
     city: '',
     address: '',
@@ -78,7 +80,7 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
       const response = await fetch('/api/customers/addresses', {
         credentials: 'include'
       });
-      if (!response.ok) throw new Error('خطا در دریافت آدرس‌ها');
+      if (!response.ok) throw new Error(t.address_selector.fetchAddressesError);
       return response.json();
     }
   });
@@ -90,7 +92,7 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
       const response = await fetch('/api/customers/profile', {
         credentials: 'include'
       });
-      if (!response.ok) throw new Error('خطا در دریافت اطلاعات مشتری');
+      if (!response.ok) throw new Error(t.address_selector.fetchCustomerInfoError);
       return response.json();
     }
   });
@@ -101,8 +103,8 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
       toast({
-        title: 'خطا',
-        description: 'مرورگر شما از موقعیت‌یابی پشتیبانی نمی‌کند',
+        title: t.address_selector.locationError,
+        description: t.address_selector.browserNotSupported,
         variant: 'destructive'
       });
       return;
@@ -119,23 +121,23 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
           locationAccuracy: accuracy
         }));
         toast({
-          title: 'موقعیت دریافت شد',
-          description: `موقعیت فعلی شما با دقت ${Math.round(accuracy)} متر ثبت شد`
+          title: t.address_selector.locationReceived,
+          description: t.address_selector.locationReceivedDesc.replace('{accuracy}', Math.round(accuracy).toString())
         });
         setIsGettingLocation(false);
       },
       (error) => {
-        let errorMessage = 'خطا در دریافت موقعیت';
+        let errorMessage = t.address_selector.locationError;
         if (error.code === error.PERMISSION_DENIED) {
-          errorMessage = 'دسترسی به موقعیت رد شد. لطفاً دسترسی را در تنظیمات مرورگر فعال کنید';
+          errorMessage = t.address_selector.locationPermissionDenied;
         } else if (error.code === error.POSITION_UNAVAILABLE) {
-          errorMessage = 'موقعیت در دسترس نیست';
+          errorMessage = t.address_selector.locationUnavailable;
         } else if (error.code === error.TIMEOUT) {
-          errorMessage = 'زمان دریافت موقعیت به پایان رسید';
+          errorMessage = t.address_selector.locationTimeout;
         }
         
         toast({
-          title: 'خطا در دریافت موقعیت',
+          title: t.address_selector.locationError,
           description: errorMessage,
           variant: 'destructive'
         });
@@ -158,7 +160,7 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
           ...prev,
           recipientName: defaultRecipientName,
           phone: customerInfo.phone || '',
-          country: customerInfo.country || 'ایران',
+          country: customerInfo.country || t.address_selector.defaultCountry,
           city: customerInfo.city || '',
         }));
       }
@@ -174,17 +176,17 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
         credentials: 'include',
         body: JSON.stringify(data)
       });
-      if (!response.ok) throw new Error('خطا در ایجاد آدرس');
+      if (!response.ok) throw new Error(t.address_selector.addressCreateError);
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/customers/addresses'] });
       setIsDialogOpen(false);
       resetForm();
-      toast({ title: 'آدرس جدید با موفقیت اضافه شد' });
+      toast({ title: t.address_selector.addressCreated });
     },
     onError: () => {
-      toast({ title: 'خطا در ایجاد آدرس', variant: 'destructive' });
+      toast({ title: t.address_selector.addressCreateError, variant: 'destructive' });
     }
   });
 
@@ -197,7 +199,7 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
         credentials: 'include',
         body: JSON.stringify(data)
       });
-      if (!response.ok) throw new Error('خطا در بروزرسانی آدرس');
+      if (!response.ok) throw new Error(t.address_selector.addressUpdateError);
       return response.json();
     },
     onSuccess: () => {
@@ -205,10 +207,10 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
       setIsDialogOpen(false);
       setEditingAddress(null);
       resetForm();
-      toast({ title: 'آدرس با موفقیت بروزرسانی شد' });
+      toast({ title: t.address_selector.addressUpdated });
     },
     onError: () => {
-      toast({ title: 'خطا در بروزرسانی آدرس', variant: 'destructive' });
+      toast({ title: t.address_selector.addressUpdateError, variant: 'destructive' });
     }
   });
 
@@ -219,15 +221,15 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
         method: 'DELETE',
         credentials: 'include'
       });
-      if (!response.ok) throw new Error('خطا در حذف آدرس');
+      if (!response.ok) throw new Error(t.address_selector.addressDeleteError);
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/customers/addresses'] });
-      toast({ title: 'آدرس با موفقیت حذف شد' });
+      toast({ title: t.address_selector.addressDeleted });
     },
     onError: () => {
-      toast({ title: 'خطا در حذف آدرس', variant: 'destructive' });
+      toast({ title: t.address_selector.addressDeleteError, variant: 'destructive' });
     }
   });
 
@@ -238,15 +240,15 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
         method: 'POST',
         credentials: 'include'
       });
-      if (!response.ok) throw new Error('خطا در تنظیم آدرس پیش‌فرض');
+      if (!response.ok) throw new Error(t.address_selector.defaultAddressError);
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/customers/addresses'] });
-      toast({ title: 'آدرس پیش‌فرض تنظیم شد' });
+      toast({ title: t.address_selector.defaultAddressSet });
     },
     onError: () => {
-      toast({ title: 'خطا در تنظیم آدرس پیش‌فرض', variant: 'destructive' });
+      toast({ title: t.address_selector.defaultAddressError, variant: 'destructive' });
     }
   });
 
@@ -256,7 +258,7 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
       recipientName: '',
       company: '',
       phone: '',
-      country: 'ایران',
+      country: t.address_selector.defaultCountry,
       state: '',
       city: '',
       address: '',
@@ -309,10 +311,10 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
     return (
       <Card>
         <CardHeader>
-          <CardTitle>آدرس تحویل</CardTitle>
+          <CardTitle>{t.address_selector.deliveryAddressTitle}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-4">در حال بارگذاری...</div>
+          <div className="text-center py-4">{t.address_selector.loadingAddresses}</div>
         </CardContent>
       </Card>
     );
@@ -322,55 +324,55 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>آدرس تحویل</CardTitle>
-          <CardDescription>آدرس مورد نظر برای ارسال سفارش را انتخاب کنید</CardDescription>
+          <CardTitle>{t.address_selector.deliveryAddressTitle}</CardTitle>
+          <CardDescription>{t.address_selector.selectAddressDescription}</CardDescription>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" onClick={() => { setEditingAddress(null); resetForm(); }}>
               <Plus className="h-4 w-4 mr-2" />
-              افزودن آدرس جدید
+              {t.address_selector.addNewAddress}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{editingAddress ? 'ویرایش آدرس' : 'افزودن آدرس جدید'}</DialogTitle>
+              <DialogTitle>{editingAddress ? t.address_selector.editAddressTitle : t.address_selector.addAddressTitle}</DialogTitle>
               <DialogDescription>
-                اطلاعات آدرس را وارد کنید
+                {t.address_selector.enterAddressInfo}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="title">عنوان آدرس</Label>
+                <Label htmlFor="title">{t.address_selector.addressTitle}</Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="مثل: منزل، محل کار"
+                  placeholder={t.address_selector.addressTitlePlaceholder}
                   required
                 />
               </div>
 
               <div>
-                <Label htmlFor="recipientName">نام تحویل‌گیرنده</Label>
+                <Label htmlFor="recipientName">{t.address_selector.recipientNameLabel}</Label>
                 <Input
                   id="recipientName"
                   value={formData.recipientName}
                   onChange={(e) => setFormData({ ...formData, recipientName: e.target.value })}
-                  placeholder="نام کامل تحویل‌گیرنده"
+                  placeholder={t.address_selector.recipientNamePlaceholder}
                   required
                   disabled
                 />
-                <p className="text-xs text-muted-foreground mt-1">نام از حساب کاربری شما پر می‌شود</p>
+                <p className="text-xs text-muted-foreground mt-1">{t.address_selector.recipientNameNote}</p>
               </div>
 
               <div>
-                <Label htmlFor="address">آدرس کامل</Label>
+                <Label htmlFor="address">{t.address_selector.fullAddressLabel}</Label>
                 <Textarea
                   id="address"
                   value={formData.address}
                   onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, address: e.target.value })}
-                  placeholder="آدرس کامل خود را وارد کنید"
+                  placeholder={t.address_selector.fullAddressPlaceholder}
                   rows={3}
                   required
                 />
@@ -378,7 +380,7 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="city">شهر</Label>
+                  <Label htmlFor="city">{t.address_selector.cityLabel}</Label>
                   <Input
                     id="city"
                     value={formData.city}
@@ -387,12 +389,12 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
                   />
                 </div>
                 <div>
-                  <Label htmlFor="postalCode">کد پستی</Label>
+                  <Label htmlFor="postalCode">{t.address_selector.postalCodeLabel}</Label>
                   <Input
                     id="postalCode"
                     value={formData.postalCode}
                     onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                    placeholder="اختیاری"
+                    placeholder={t.address_selector.postalCodePlaceholder}
                   />
                 </div>
               </div>
@@ -400,7 +402,7 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
               {/* GPS Location Button */}
               <div className="border-t pt-4">
                 <div className="flex items-center justify-between mb-2">
-                  <Label>موقعیت جغرافیایی (GPS)</Label>
+                  <Label>{t.address_selector.gpsLocationLabel}</Label>
                   <Button
                     type="button"
                     variant="outline"
@@ -409,21 +411,21 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
                     disabled={isGettingLocation}
                   >
                     {isGettingLocation ? (
-                      <>در حال دریافت...</>
+                      <>{t.address_selector.gettingLocation}</>
                     ) : (
                       <>
                         <Navigation className="h-4 w-4 mr-2" />
-                        دریافت موقعیت فعلی
+                        {t.address_selector.getLocationButton}
                       </>
                     )}
                   </Button>
                 </div>
                 {formData.latitude && formData.longitude && (
                   <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
-                    <div>عرض جغرافیایی: {formData.latitude.toFixed(6)}</div>
-                    <div>طول جغرافیایی: {formData.longitude.toFixed(6)}</div>
+                    <div>{t.address_selector.latitudeLabel} {formData.latitude.toFixed(6)}</div>
+                    <div>{t.address_selector.longitudeLabel} {formData.longitude.toFixed(6)}</div>
                     {formData.locationAccuracy && (
-                      <div>دقت: {Math.round(formData.locationAccuracy)} متر</div>
+                      <div>{t.address_selector.accuracyLabel} {Math.round(formData.locationAccuracy)} {t.address_selector.metersUnit}</div>
                     )}
                   </div>
                 )}
@@ -434,10 +436,10 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
                   type="submit" 
                   disabled={createAddressMutation.isPending || updateAddressMutation.isPending}
                 >
-                  {editingAddress ? 'بروزرسانی' : 'افزودن'}
+                  {editingAddress ? t.address_selector.updateButton : t.address_selector.addNewAddress}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  انصراف
+                  {t.address_selector.cancelButton}
                 </Button>
               </div>
             </form>
@@ -448,10 +450,10 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
         {addresses.length === 0 ? (
           <div className="text-center py-8">
             <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground mb-4">هیچ آدرسی ثبت نشده است</p>
+            <p className="text-muted-foreground mb-4">{t.address_selector.noAddressFound}</p>
             <Button onClick={() => setIsDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              افزودن اولین آدرس
+              {t.address_selector.addFirstAddress}
             </Button>
           </div>
         ) : (
@@ -472,7 +474,7 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
                           {address.isDefault && (
                             <Badge variant="secondary" className="text-xs">
                               <Check className="h-3 w-3 mr-1" />
-                              پیش‌فرض
+                              {t.address_selector.defaultBadge}
                             </Badge>
                           )}
                         </div>
@@ -506,13 +508,13 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
                                 setDefaultMutation.mutate(address.id);
                               }}
                             >
-                              تنظیم به عنوان پیش‌فرض
+                              {t.address_selector.setAsDefault}
                             </Button>
                           )}
                         </div>
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        <div className="font-medium text-foreground">تحویل گیرنده: {address.recipientName}</div>
+                        <div className="font-medium text-foreground">{t.address_selector.recipientLabel} {address.recipientName}</div>
                         <div>{address.firstName} {address.lastName}</div>
                         {address.company && <div>{address.company}</div>}
                         <div>{address.city}، {address.country}</div>
