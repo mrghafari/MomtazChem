@@ -30,8 +30,13 @@ const translations = {
     customerName: "Customer Name",
     deliveryPhone: "Delivery Phone Number",
     deliveryAddress: "Delivery Address",
+    province: "Province",
     city: "City",
     postalCode: "Postal Code (Optional)",
+    selectProvince: "Select Province",
+    selectCity: "Select City",
+    selectProvinceFirst: "Select province first",
+    cityNotRegistered: "City not registered",
     gpsLocation: "GPS Location",
     findLocation: "Find My Location",
     orderNotes: "Order Notes",
@@ -160,8 +165,13 @@ const translations = {
     customerName: "اسم العميل",
     deliveryPhone: "رقم هاتف التوصيل",
     deliveryAddress: "عنوان التوصيل",
+    province: "المحافظة",
     city: "المدينة",
     postalCode: "الرمز البريدي (اختياري)",
+    selectProvince: "اختر المحافظة",
+    selectCity: "اختر المدينة",
+    selectProvinceFirst: "اختر المحافظة أولاً",
+    cityNotRegistered: "المدينة غير مسجلة",
     gpsLocation: "الموقع الجغرافي",
     findLocation: "العثور على موقعي",
     orderNotes: "ملاحظات الطلب",
@@ -2415,13 +2425,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           <p className={`text-xs ${
                             isPrimaryAddressDisabled ? 'text-gray-500' : 'text-green-600'
                           }`}>
-                            🏙️ {crmCustomerData?.cityRegion || crmCustomerData?.city || crmCustomerData?.province || 'شهر ثبت نشده'}
+                            🏙️ {crmCustomerData?.cityRegion || crmCustomerData?.city || crmCustomerData?.province || t.cityNotRegistered}
                           </p>
                           {crmCustomerData?.province && crmCustomerData?.province !== crmCustomerData?.cityRegion && (
                             <p className={`text-xs ${
                               isPrimaryAddressDisabled ? 'text-gray-500' : 'text-green-600'
                             }`}>
-                              🏛️ استان: {crmCustomerData.province}
+                              🏛️ {t.province}: {crmCustomerData.province}
                             </p>
                           )}
                         </div>
@@ -2490,7 +2500,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           {/* Province Dropdown */}
                           <div>
                             <label className={`block text-sm font-medium mb-1 ${isRTL ? 'text-right' : 'text-left'}`}>
-                              {language === 'ar' ? 'استان' : 'Province'}
+                              {t.province}
                             </label>
                             <Select 
                               onValueChange={(value) => {
@@ -2525,8 +2535,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                               <SelectTrigger>
                                 <SelectValue placeholder={
                                   isLoadingProvinces 
-                                    ? (language === 'ar' ? 'در حال بارگذاری...' : 'Loading...')
-                                    : (language === 'ar' ? 'انتخاب استان' : 'Select Province')
+                                    ? t.loading
+                                    : t.selectProvince
                                 } />
                               </SelectTrigger>
                               <SelectContent>
@@ -2542,7 +2552,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           {/* City Dropdown */}
                           <div>
                             <label className={`block text-sm font-medium mb-1 ${isRTL ? 'text-right' : 'text-left'}`}>
-                              {language === 'ar' ? 'شهر' : 'City'}
+                              {t.city}
                             </label>
                             <Select 
                               onValueChange={(value) => {
@@ -2572,10 +2582,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                               <SelectTrigger>
                                 <SelectValue placeholder={
                                   !selectedSecondaryProvinceId 
-                                    ? (language === 'ar' ? 'ابتدا استان را انتخاب کنید' : 'Select province first')
+                                    ? t.selectProvinceFirst
                                     : isLoadingSecondaryCities
-                                    ? (language === 'ar' ? 'در حال بارگذاری...' : 'Loading...')
-                                    : (language === 'ar' ? 'انتخاب شهر' : 'Select City')
+                                    ? t.loading
+                                    : t.selectCity
                                 } />
                               </SelectTrigger>
                               <SelectContent>
@@ -2591,7 +2601,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           {/* Postal Code */}
                           <div>
                             <label className={`block text-sm font-medium mb-1 ${isRTL ? 'text-right' : 'text-left'}`}>
-                              {language === 'ar' ? 'کد پستی' : 'Postal Code'}
+                              {t.postalCode}
                             </label>
                             <Input 
                               value={secondPostalCode}
