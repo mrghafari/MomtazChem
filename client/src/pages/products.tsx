@@ -25,9 +25,10 @@ import JsBarcode from "jsbarcode";
 import VisualBarcode from "@/components/ui/visual-barcode";
 import FIFOBatchDisplay from "@/components/ui/fifo-batch-display";
 
-// Custom form schema that handles numeric inputs properly
+// Custom form schema that handles numeric inputs properly  
+// Note: Validation messages will be handled in the form, not in schema
 const formSchema = insertShowcaseProductSchema.extend({
-  category: z.string().min(1, "دسته‌بندی محصول اجباری است"),
+  category: z.string().min(1),
   unitPrice: z.coerce.number().min(0),
   stockQuantity: z.coerce.number().min(0),
   minStockLevel: z.coerce.number().min(0),
