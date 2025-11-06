@@ -2145,7 +2145,7 @@ export default function ProductsPage() {
                               <rect x="117" y="0" width="3" height="24" fill="#333"/>
                             </svg>
                             {manualBarcodeEntered && (
-                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-md">دستی</span>
+                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-md">{t.productManagement.manualMode}</span>
                             )}
                             {(editingProduct || field.value) && <Lock className="h-3 w-3 text-gray-400" />}
                             <Tooltip>
@@ -2153,14 +2153,14 @@ export default function ProductsPage() {
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>بارکد استاندارد 13 رقمی محصول. وارد کردن دستی از تولید خودکار جلوگیری می‌کند</p>
+                                <p>{t.productManagement.standard13Barcode}. {t.productManagement.manualInputPreventsAuto}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
                           
                           <FormControl>
                             <Input 
-                              placeholder="بارکد 13 رقمی" 
+                              placeholder={t.productManagement.barcode13Placeholder} 
                               className={`h-9 ${(editingProduct || field.value) ? "bg-gray-50 text-gray-500" : ""} ${validationErrors.barcode ? "border-red-500 focus:border-red-500" : ""}`}
                               {...field}
                               value={field.value || ""}
@@ -2198,7 +2198,7 @@ export default function ProductsPage() {
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>قیمت هر واحد محصول به واحد پولی انتخابی</p>
+                                <p>{t.productManagement.pricePerUnit}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
@@ -2343,22 +2343,22 @@ export default function ProductsPage() {
                                   <>
                                     {availableBatches.map((batch) => (
                                       <SelectItem key={batch.id} value={batch.id.toString()}>
-                                        📦 دسته: {batch.batchNumber} - موجودی: <span className="font-semibold text-green-600">{batch.stockQuantity}</span>
+                                        {t.productManagement.batchOption.replace('{batchNumber}', batch.batchNumber).replace('{stock}', batch.stockQuantity.toString())}
                                       </SelectItem>
                                     ))}
                                     <SelectItem value="new" className="bg-green-50 font-medium">
-                                      ➕ افزودن بچ جدید
+                                      {t.productManagement.addNewBatch}
                                     </SelectItem>
                                   </>
                                 ) : (
-                                  <SelectItem value="new">➕ افزودن بچ جدید</SelectItem>
+                                  <SelectItem value="new">{t.productManagement.addNewBatch}</SelectItem>
                                 )}
                               </SelectContent>
                             </Select>
                             <p className="text-xs text-orange-600 mt-1.5">
                               {availableBatches.length > 1 
-                                ? `${availableBatches.length} دسته برای بارکد ${editingProduct?.barcode || ''} موجود است` 
-                                : 'برای افزودن دسته جدید، "➕ افزودن بچ جدید" را انتخاب کنید'}
+                                ? t.productManagement.batchesAvailable.replace('{count}', availableBatches.length.toString()).replace('{barcode}', editingProduct?.barcode || '')
+                                : t.productManagement.selectNewBatch}
                             </p>
                           </div>
                         )}
@@ -2374,20 +2374,20 @@ export default function ProductsPage() {
                             return (
                             <FormItem>
                               <FormLabel className="text-sm font-medium flex items-center gap-2">
-                                {isAddingNewBatch ? 'شماره دسته جدید' : 'شماره دسته فعلی'}
+                                {isAddingNewBatch ? t.productManagement.newBatchNumber : t.productManagement.currentBatchNumber}
                                 {!isAddingNewBatch && <Lock className="h-3 w-3 text-gray-400" />}
                                 <Tooltip>
                                   <TooltipTrigger>
                                     <HelpCircle className="h-3 w-3 text-gray-400" />
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>{isAddingNewBatch ? 'شماره دسته جدید برای کاردکس' : 'شماره دسته فعلی - موجودی به این دسته اضافه می‌شود'}</p>
+                                    <p>{isAddingNewBatch ? t.productManagement.batchNumberHelp : t.productManagement.batchNumberHelpCurrent}</p>
                                   </TooltipContent>
                                 </Tooltip>
                               </FormLabel>
                               <FormControl>
                                 <Input 
-                                  placeholder={isAddingNewBatch ? "BATCH-2025-NEW" : currentBatchNumber}
+                                  placeholder={isAddingNewBatch ? t.productManagement.batchNumberPlaceholder : currentBatchNumber}
                                   className={`h-9 ${!isAddingNewBatch ? "bg-gray-100 text-gray-600" : ""} ${validationErrors.newBatchNumber ? "border-red-500 focus:border-red-500" : ""}`}
                                   {...field}
                                   value={isAddingNewBatch ? (field.value || '') : currentBatchNumber}
@@ -2401,7 +2401,7 @@ export default function ProductsPage() {
                               )}
                               {!isAddingNewBatch && (
                                 <p className="text-xs text-orange-600 mt-1">
-                                  ✅ موجودی به این دسته اضافه خواهد شد
+                                  {t.productManagement.stockWillBeAdded}
                                 </p>
                               )}
                             </FormItem>
@@ -2423,7 +2423,7 @@ export default function ProductsPage() {
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>حداقل موجودی برای هشدار کمبود</p>
+                                <p>{t.productManagement.minStockHelp}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
@@ -2457,7 +2457,7 @@ export default function ProductsPage() {
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>حداکثر ظرفیت نگهداری محصول در انبار</p>
+                                <p>{t.productManagement.maxStockHelp}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
@@ -2480,7 +2480,7 @@ export default function ProductsPage() {
                     />
                   </div>
 
-                  {/* ردیف وزن */}
+                  {/* Weight row */}
                   <div className="grid grid-cols-3 gap-3">
                     <FormField
                       control={form.control}
@@ -2496,7 +2496,7 @@ export default function ProductsPage() {
 {t.netWeight}
                             {(isBatchAddition || editingProduct) && (
                               <Badge variant="secondary" className="text-xs">
-                                {isBatchAddition ? `${originalNetWeight} ${weightUnit}` : 'مقدار ثابت اولیه'}
+                                {isBatchAddition ? `${originalNetWeight} ${weightUnit}` : t.productManagement.initialFixedValue}
                               </Badge>
                             )}
                             <Tooltip>
@@ -2504,7 +2504,7 @@ export default function ProductsPage() {
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>{isDisabled ? 'وزن فقط در ایجاد محصول جدید قابل تغییر است' : 'وزن خالص محصول بدون بسته‌بندی'}</p>
+                                <p>{isDisabled ? t.productManagement.netWeightHelpView : t.productManagement.netWeightHelp}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
@@ -2512,7 +2512,7 @@ export default function ProductsPage() {
                             <Input 
                               type="number" 
                               step="0.01"
-                              placeholder={isDisabled ? (isBatchAddition ? `${originalNetWeight} ${weightUnit}` : "مقدار ثابت") : "0.00"} 
+                              placeholder={isDisabled ? (isBatchAddition ? `${originalNetWeight} ${weightUnit}` : t.productManagement.fixedValue) : t.productManagement.netWeightPlaceholder} 
                               className={`h-9 ${validationErrors.netWeight ? "border-red-500 focus:border-red-500" : ""} ${isDisabled ? 'bg-gray-100 text-gray-400' : ''}`}
                               {...field}
                               value={isBatchAddition ? originalNetWeight : (field.value || '')}
@@ -2544,7 +2544,7 @@ export default function ProductsPage() {
 {t.grossWeight}
                             {(isBatchAddition || editingProduct) && (
                               <Badge variant="secondary" className="text-xs">
-                                {isBatchAddition ? `${originalGrossWeight} ${weightUnit}` : 'مقدار ثابت اولیه'}
+                                {isBatchAddition ? `${originalGrossWeight} ${weightUnit}` : t.productManagement.initialFixedValue}
                               </Badge>
                             )}
                             <Tooltip>
@@ -2552,7 +2552,7 @@ export default function ProductsPage() {
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>{isDisabled ? 'وزن فقط در ایجاد محصول جدید قابل تغییر است' : 'وزن کل محصول همراه با بسته‌بندی (برای حمل و نقل)'}</p>
+                                <p>{isDisabled ? t.productManagement.grossWeightHelpView : t.productManagement.grossWeightHelp}</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
@@ -2560,7 +2560,7 @@ export default function ProductsPage() {
                             <Input 
                               type="number" 
                               step="0.01"
-                              placeholder={isDisabled ? (isBatchAddition ? `${originalGrossWeight} ${weightUnit}` : "مقدار ثابت") : "0.00"} 
+                              placeholder={isDisabled ? (isBatchAddition ? `${originalGrossWeight} ${weightUnit}` : t.productManagement.fixedValue) : t.productManagement.grossWeightPlaceholder} 
                               className={`h-9 ${validationErrors.grossWeight ? "border-red-500 focus:border-red-500" : ""} ${isDisabled ? 'bg-gray-100 text-gray-400' : ''}`}
                               {...field}
                               value={isBatchAddition ? originalGrossWeight : (field.value || '')}
@@ -2587,15 +2587,15 @@ export default function ProductsPage() {
                           <Select onValueChange={field.onChange} defaultValue={field.value || "kg"}>
                             <FormControl>
                               <SelectTrigger className="h-9">
-                                <SelectValue placeholder="انتخاب واحد" />
+                                <SelectValue placeholder={t.productManagement.selectWeightUnit} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="kg">کیلوگرم (kg)</SelectItem>
-                              <SelectItem value="g">گرم (g)</SelectItem>
-                              <SelectItem value="lb">پوند (lb)</SelectItem>
-                              <SelectItem value="oz">اونس (oz)</SelectItem>
-                              <SelectItem value="t">تن (t)</SelectItem>
+                              <SelectItem value="kg">{t.productManagement.weightUnitKg}</SelectItem>
+                              <SelectItem value="g">{t.productManagement.weightUnitG}</SelectItem>
+                              <SelectItem value="lb">{t.productManagement.weightUnitLb}</SelectItem>
+                              <SelectItem value="oz">{t.productManagement.weightUnitOz}</SelectItem>
+                              <SelectItem value="t">{t.productManagement.weightUnitT}</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -2605,7 +2605,7 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                {/* برچسب‌ها و تنظیمات اضافی */}
+                {/* Tags and additional settings */}
                 <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200">
                   <h3 className="text-lg font-semibold text-purple-800 mb-3 flex items-center gap-2">
                     <Tag className="h-5 w-5" />
@@ -2624,13 +2624,13 @@ export default function ProductsPage() {
                               <HelpCircle className="h-3 w-3 text-gray-400" />
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>برچسب‌ها را با کاما از هم جدا کنید. این برچسب‌ها در فروشگاه نمایش داده می‌شوند</p>
+                              <p>{t.productManagement.tagsHelp}</p>
                             </TooltipContent>
                           </Tooltip>
                         </FormLabel>
                         <FormControl>
                           <Input 
-                            placeholder="مثال: شیمیایی, صنعتی, پاک‌کننده" 
+                            placeholder={t.productManagement.tagsPlaceholder} 
                             className="h-9"
                             {...field}
                             value={field.value || ''}
@@ -2653,7 +2653,7 @@ export default function ProductsPage() {
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                           <div className="space-y-0.5">
                             <FormLabel className="text-sm font-medium">{t.syncWithShop}</FormLabel>
-                            <div className="text-xs text-gray-500">محصول در فروشگاه آنلاین نمایش داده شود</div>
+                            <div className="text-xs text-gray-500">{t.productManagement.showInShop}</div>
                           </div>
                           <FormControl>
                             <Checkbox
@@ -2671,8 +2671,8 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                           <div className="space-y-0.5">
-                            <FormLabel className="text-sm font-medium">نمایش در زمان اتمام</FormLabel>
-                            <div className="text-xs text-gray-500">حتی در صورت تمام شدن موجودی نمایش داده شود</div>
+                            <FormLabel className="text-sm font-medium">{t.showWhenOutOfStock}</FormLabel>
+                            <div className="text-xs text-gray-500">{t.productManagement.showWhenOutOfStockDesc}</div>
                           </div>
                           <FormControl>
                             <Checkbox
@@ -2686,47 +2686,26 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                {/* مدیریت فایل‌ها و اسناد */}
+                {/* File and document management */}
                 <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-4 rounded-lg border border-indigo-200">
                   <h3 className="text-lg font-semibold text-indigo-800 mb-3 flex items-center gap-2">
                     <FileText className="h-5 w-5" />
-                    مدیریت فایل‌ها و اسناد
+                    {t.productManagement.fileManagement}
                   </h3>
                   
-                  {/* آپلود تصاویر محصول (حداکثر 3 تصویر) */}
+                  {/* Product images upload (max 3 images) */}
                   <div className="space-y-4">
                     <div className="space-y-3">
                       <FormLabel className="text-sm font-medium flex items-center gap-2">
                         <Image className="h-4 w-4" />
                         {(() => {
                           const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
-                          return isBatchAddition ? 'تصاویر محصول (از محصول اصلی)' : 'تصاویر محصول (حداکثر 3 تصویر)';
+                          return isBatchAddition ? t.productManagement.productImagesMain : t.productManagement.productImages;
                         })()}
-                        {(() => {
-                          const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
-                          return isBatchAddition && (
-                            <Badge variant="secondary" className="text-xs">
-                              قابل تغییر در صورت نیاز
-                            </Badge>
-                          );
-                        })()}
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-3 w-3 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{(() => {
-                              const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
-                              return isBatchAddition 
-                                ? 'تصاویر از محصول اصلی فراخوانی شده‌اند. در صورت نیاز می‌توانید تغییر دهید.'
-                                : 'حداکثر 3 تصویر از محصول برای نمایش در کاردکس و فروشگاه. پشتیبانی از JPG, PNG, GIF - حداکثر 2MB';
-                            })()}</p>
-                          </TooltipContent>
-                        </Tooltip>
                       </FormLabel>
                       
                       <div className="space-y-4">
-                        {/* آپلود تصاویر */}
+                        {/* Image upload section */}
                         <div className="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
                           <div className="flex items-center gap-2 text-sm text-blue-700">
                             <div className="w-4 h-4 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
@@ -2735,15 +2714,15 @@ export default function ProductsPage() {
                             <span className="font-medium">
                               {(() => {
                                 const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
-                                return isBatchAddition ? 'تصاویر محصول اصلی:' : 'انتخاب تصویر اصلی:';
+                                return isBatchAddition ? t.productManagement.imageFromMain + ':' : t.productManagement.selectPrimaryImageTitle + ':';
                               })()}
                             </span>
                             <span>
                               {(() => {
                                 const isBatchAddition = form.watch('inventoryAddition') > 0 && form.watch('newBatchNumber')?.trim();
                                 return isBatchAddition 
-                                  ? 'تصاویر از دیتابیس فراخوانی شده‌اند و قابل تغییر هستند (تصویر اصلی: ' + (primaryImageIndex + 1) + ')'
-                                  : 'روی دکمه دایره‌ای گوشه پایین چپ هر تصویر کلیک کنید (تصویر انتخاب شده: ' + (primaryImageIndex + 1) + ')';
+                                  ? t.productManagement.imagesFetchedFromDB.replace('{index}', (primaryImageIndex + 1).toString())
+                                  : t.productManagement.clickCircleButton.replace('{index}', (primaryImageIndex + 1).toString());
                               })()}
                             </span>
                           </div>
@@ -2751,13 +2730,13 @@ export default function ProductsPage() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           {[0, 1, 2].map((index) => (
                             <div key={index} className="space-y-2">
-                              <div className="text-xs text-gray-500 text-center font-medium">تصویر {index + 1}</div>
+                              <div className="text-xs text-gray-500 text-center font-medium">{t.productManagement.imageNumber.replace('{index}', (index + 1).toString())}</div>
                               <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-3 text-center flex flex-col justify-center">
                                 {(editingProduct ? displayImagePreviews[index] : imagePreviews[index]) ? (
                                   <div className="relative w-full aspect-square">
                                     <img 
                                       src={editingProduct ? displayImagePreviews[index] : imagePreviews[index]} 
-                                      alt={`پیش‌نمای تصویر ${index + 1}`} 
+                                      alt={t.productManagement.imagePreview.replace('{index}', (index + 1).toString())} 
                                       className={`w-full h-full object-cover rounded-lg transition-all ${
                                         (editingProduct ? displayPrimaryImageIndex : primaryImageIndex) === index ? 'ring-2 ring-blue-500 ring-offset-2' : ''
                                       }`}
@@ -2765,7 +2744,7 @@ export default function ProductsPage() {
                                     {/* Primary image indicator */}
                                     {(editingProduct ? displayPrimaryImageIndex : primaryImageIndex) === index && (
                                       <div className="absolute -top-1 -left-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded-full text-[10px] font-bold">
-                                        اصلی
+                                        {t.productManagement.primaryImageLabel}
                                       </div>
                                     )}
                                     {/* Primary image selection radio button */}
@@ -2789,7 +2768,7 @@ export default function ProductsPage() {
                                             ? 'bg-blue-500 border-blue-500 shadow-lg' 
                                             : 'bg-white border-gray-400 hover:border-blue-400 shadow-md'
                                         }`}
-                                        title={`انتخاب به عنوان تصویر اصلی ${primaryImageIndex === index ? '(انتخاب شده)' : ''}`}
+                                        title={t.productManagement.setPrimaryImage.replace('{selected}', primaryImageIndex === index ? '(Selected)' : '')}
                                       >
                                         {primaryImageIndex === index && (
                                           <div className="w-2 h-2 bg-white rounded-full"></div>
@@ -2837,7 +2816,7 @@ export default function ProductsPage() {
                                 ) : (
                                   <div className="py-2">
                                     <Image className="mx-auto h-8 w-8 text-gray-400" />
-                                    <p className="mt-1 text-xs text-gray-600">انتخاب تصویر</p>
+                                    <p className="mt-1 text-xs text-gray-600">{t.productManagement.selectImage}</p>
                                     <p className="text-xs text-gray-500">JPG, PNG, GIF</p>
                                   </div>
                                 )}
@@ -2854,27 +2833,27 @@ export default function ProductsPage() {
                               {uploadingImages[index] && (
                                 <div className="flex items-center justify-center text-xs text-blue-600">
                                   <RefreshCw className="h-3 w-3 animate-spin mr-1" />
-                                  آپلود...
+                                  {t.productManagement.uploadImage}
                                 </div>
                               )}
                             </div>
                           ))}
                         </div>
 
-                        {/* نمایش URLs تصاویر */}
+                        {/* Display image URLs */}
                         <div className="space-y-2">
                           <FormField
                             control={form.control}
                             name="imageUrls"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-sm text-gray-600">URLs تصاویر</FormLabel>
+                                <FormLabel className="text-sm text-gray-600">{t.productManagement.imageUrlsLabel}</FormLabel>
                                 <FormControl>
                                   <div className="space-y-1">
                                     {(field.value || []).map((url: string, index: number) => (
                                       <Input 
                                         key={index}
-                                        placeholder={`URL تصویر ${index + 1}`}
+                                        placeholder={t.productManagement.imageUrlPlaceholder.replace('{index}', (index + 1).toString())}
                                         className="h-8 text-xs"
                                         value={url || ''}
                                         readOnly
@@ -2902,23 +2881,23 @@ export default function ProductsPage() {
                       </div>
                     </div>
 
-                    {/* آپلود کاتالوگ PDF */}
+                    {/* Catalog PDF upload */}
                     <div className="space-y-3 border-t pt-4">
                       <FormLabel className="text-sm font-medium flex items-center gap-2">
                         <Eye className="h-4 w-4" />
-                        کاتالوگ محصول (PDF)
+                        {t.productCatalog}
                         <Tooltip>
                           <TooltipTrigger>
                             <HelpCircle className="h-3 w-3 text-gray-400" />
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>کاتالوگ یا بروشور محصول به فرمت PDF برای ارائه اطلاعات تکمیلی</p>
+                            <p>{t.productManagement.catalogHelp}</p>
                           </TooltipContent>
                         </Tooltip>
                       </FormLabel>
                       
                       <div className="grid grid-cols-2 gap-4">
-                        {/* آپلود کاتالوگ */}
+                        {/* Catalog upload */}
                         <div className="space-y-2">
                           <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                             {catalogPreview ? (
@@ -2945,8 +2924,8 @@ export default function ProductsPage() {
                             ) : (
                               <div className="py-4">
                                 <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                                <p className="mt-2 text-sm text-gray-600">کلیک کنید تا کاتالوگ PDF انتخاب کنید</p>
-                                <p className="text-xs text-gray-500">فقط فایل‌های PDF</p>
+                                <p className="mt-2 text-sm text-gray-600">{t.productManagement.clickToSelectCatalog}</p>
+                                <p className="text-xs text-gray-500">{t.productManagement.onlyPDF}</p>
                               </div>
                             )}
                             <input
@@ -2962,12 +2941,12 @@ export default function ProductsPage() {
                           {uploadingCatalog && (
                             <div className="flex items-center justify-center text-sm text-blue-600">
                               <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                              در حال آپلود...
+                              {t.productManagement.uploadingFile}
                             </div>
                           )}
                         </div>
 
-                        {/* تنظیمات کاتالوگ */}
+                        {/* Catalog settings */}
                         <div className="space-y-3">
                           <FormField
                             control={form.control}
@@ -2975,8 +2954,8 @@ export default function ProductsPage() {
                             render={({ field }) => (
                               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                                 <div className="space-y-0.5">
-                                  <FormLabel className="text-sm font-medium">نمایش به مشتریان</FormLabel>
-                                  <div className="text-xs text-gray-500">کاتالوگ در فروشگاه قابل دانلود باشد</div>
+                                  <FormLabel className="text-sm font-medium">{t.productManagement.showToCustomersLabel}</FormLabel>
+                                  <div className="text-xs text-gray-500">{t.productManagement.catalogDownloadable}</div>
                                 </div>
                                 <FormControl>
                                   <Checkbox
@@ -2993,7 +2972,7 @@ export default function ProductsPage() {
                             name="pdfCatalogUrl"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-sm text-gray-600">URL کاتالوگ</FormLabel>
+                                <FormLabel className="text-sm text-gray-600">{t.productManagement.catalogURL}</FormLabel>
                                 <FormControl>
                                   <Input 
                                     placeholder="https://..." 
@@ -3007,7 +2986,7 @@ export default function ProductsPage() {
                             )}
                           />
 
-                          {/* دکمه‌های عمل کاتالوگ */}
+                          {/* Catalog action buttons */}
                           <div className="flex items-center gap-2">
                             {form.watch('pdfCatalogUrl') && (
                               <Button
@@ -3018,7 +2997,7 @@ export default function ProductsPage() {
                                 onClick={() => window.open(form.getValues('pdfCatalogUrl'), '_blank')}
                               >
                                 <Eye className="w-4 h-4 mr-1" />
-                                مشاهده کاتالوگ
+                                {t.productManagement.viewCatalog}
                               </Button>
                             )}
                             
@@ -3034,7 +3013,7 @@ export default function ProductsPage() {
                                 }}
                               >
                                 <Upload className="w-4 h-4 mr-1" />
-                                آپلود کاتالوگ
+                                {t.productManagement.uploadCatalog}
                               </Button>
                               <input
                                 id="catalog-upload-btn"
@@ -3055,24 +3034,24 @@ export default function ProductsPage() {
                       </div>
                     </div>
 
-                    {/* آپلود MSDS - مخفی برای کالای غیر شیمیایی */}
+                    {/* MSDS upload - hidden for non-chemical products */}
                     {!form.watch('isNonChemical') && (
                     <div className="space-y-3 border-t pt-4">
                       <FormLabel className="text-sm font-medium flex items-center gap-2">
                         <FileText className="h-4 w-4" />
-                        برگه اطلاعات ایمنی (MSDS)
+                        {t.msdsDocument}
                         <Tooltip>
                           <TooltipTrigger>
                             <HelpCircle className="h-3 w-3 text-gray-400" />
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>برگه اطلاعات ایمنی محصول (Material Safety Data Sheet) برای اطلاعات ایمنی</p>
+                            <p>{t.productManagement.msdsHelp}</p>
                           </TooltipContent>
                         </Tooltip>
                       </FormLabel>
                       
                       <div className="grid grid-cols-2 gap-4">
-                        {/* آپلود MSDS */}
+                        {/* MSDS upload */}
                         <div className="space-y-2">
                           <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                             {msdsPreview ? (
@@ -3099,8 +3078,8 @@ export default function ProductsPage() {
                             ) : (
                               <div className="py-4">
                                 <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                                <p className="mt-2 text-sm text-gray-600">کلیک کنید تا فایل MSDS انتخاب کنید</p>
-                                <p className="text-xs text-gray-500">فقط فایل‌های PDF</p>
+                                <p className="mt-2 text-sm text-gray-600">{t.productManagement.clickToSelectMSDS}</p>
+                                <p className="text-xs text-gray-500">{t.productManagement.onlyPDF}</p>
                               </div>
                             )}
                             <input
@@ -3116,12 +3095,12 @@ export default function ProductsPage() {
                           {uploadingMsds && (
                             <div className="flex items-center justify-center text-sm text-blue-600">
                               <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                              در حال آپلود...
+                              {t.productManagement.uploadingFile}
                             </div>
                           )}
                         </div>
 
-                        {/* تنظیمات MSDS */}
+                        {/* MSDS settings */}
                         <div className="space-y-3">
                           <FormField
                             control={form.control}
@@ -3129,8 +3108,8 @@ export default function ProductsPage() {
                             render={({ field }) => (
                               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                                 <div className="space-y-0.5">
-                                  <FormLabel className="text-sm font-medium">نمایش به مشتریان</FormLabel>
-                                  <div className="text-xs text-gray-500">MSDS در فروشگاه قابل دانلود باشد</div>
+                                  <FormLabel className="text-sm font-medium">{t.productManagement.showToCustomersLabel}</FormLabel>
+                                  <div className="text-xs text-gray-500">{t.productManagement.msdsDownloadable}</div>
                                 </div>
                                 <FormControl>
                                   <Checkbox
@@ -3147,7 +3126,7 @@ export default function ProductsPage() {
                             name="msdsUrl"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-sm text-gray-600">URL فایل MSDS</FormLabel>
+                                <FormLabel className="text-sm text-gray-600">{t.productManagement.msdsURL}</FormLabel>
                                 <FormControl>
                                   <Input 
                                     placeholder="https://..." 
@@ -3161,7 +3140,7 @@ export default function ProductsPage() {
                             )}
                           />
 
-                          {/* دکمه‌های عمل MSDS */}
+                          {/* MSDS action buttons */}
                           <div className="flex items-center gap-2">
                             {form.watch('msdsUrl') && (
                               <Button
@@ -3172,7 +3151,7 @@ export default function ProductsPage() {
                                 onClick={() => window.open(form.getValues('msdsUrl'), '_blank')}
                               >
                                 <Eye className="w-4 h-4 mr-1" />
-                                مشاهده MSDS
+                                {t.productManagement.viewMSDS}
                               </Button>
                             )}
                             
@@ -3188,7 +3167,7 @@ export default function ProductsPage() {
                                 }}
                               >
                                 <FileText className="w-4 h-4 mr-1" />
-                                آپلود MSDS
+                                {t.productManagement.uploadMSDS}
                               </Button>
                               <input
                                 id="msds-upload-btn"

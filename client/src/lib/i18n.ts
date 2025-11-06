@@ -899,6 +899,94 @@ export interface Translation {
     netWeightLabel: string;
     grossWeightLabel: string;
     weightLabel: string;
+    
+    // Additional UI elements (must match the ones added in translations)
+    hideFromShop: string;
+    showInShop: string;
+    manageBatches: string;
+    sellingNow: string;
+    inQueue: string;
+    clickToOpenCatalog: string;
+    clickToOpenMSDS: string;
+    manualMode: string;
+    currencyIQD: string;
+    currencyUSD: string;
+    currencyEUR: string;
+    currencyTRY: string;
+    currentStock: string;
+    addStock: string;
+    onlyForEdit: string;
+    editOnly: string;
+    editOnlyPlaceholder: string;
+    fileManagement: string;
+    uploadingFile: string;
+    viewCatalog: string;
+    uploadCatalog: string;
+    viewMSDS: string;
+    uploadMSDS: string;
+    imageUrlsLabel: string;
+    primaryImageLabel: string;
+    productImagesMain: string;
+    editableIfNeeded: string;
+    imagesFetchedFromMain: string;
+    imagesFetchedHelp: string;
+    imagesFetchedFromDB: string;
+    clickCircleButton: string;
+    uploadImage: string;
+    clickToSelectPDF: string;
+    onlyPDF: string;
+    incompleteInfo: string;
+    enterNameCategoryFirst: string;
+    standard13Barcode: string;
+    manualInputPreventsAuto: string;
+    barcode13Placeholder: string;
+    pricePerUnit: string;
+    stockManagement: string;
+    stockRow: string;
+    stockNotEditable: string;
+    stockAdditionHelp: string;
+    chemical: string;
+    allBatches: string;
+    unit: string;
+    units: string;
+    editable: string;
+    imagesUploadSection: string;
+    selectPrimaryImageTitle: string;
+    imageFromMain: string;
+    maxThreeImages: string;
+    catalogActionsButtons: string;
+    msdsSection: string;
+    msdsActionsButtons: string;
+    msdsSettings: string;
+    catalogSettings: string;
+    showToCustomersLabel: string;
+    showToCustomersHelp: string;
+    hidden: string;
+    forChemicalOnly: string;
+    newBatchField: string;
+    selectBatchForEdit: string;
+    selectBatchPlaceholderText: string;
+    allBatchesCount: string;
+    totalStockLabel: string;
+    onlyWithStock: string;
+    batch: string;
+    batchNum: string;
+    initialFixedValue: string;
+    fixedValue: string;
+    selectWeightUnit: string;
+    weightUnitKg: string;
+    weightUnitG: string;
+    weightUnitLb: string;
+    weightUnitOz: string;
+    weightUnitT: string;
+    tagsLabel: string;
+    tagsHelp: string;
+    tagsPlaceholder: string;
+    showWhenOutOfStockDesc: string;
+    clickToSelectCatalog: string;
+    clickToSelectMSDS: string;
+    catalogDownloadable: string;
+    msdsDownloadable: string;
   };
   addProduct: string;
   editProduct: string;
@@ -1777,6 +1865,22 @@ export const translations: Record<Language, Translation> = {
       onlyWithStock: 'Only batches with stock',
       batch: 'Batch',
       batchNum: 'Batch {number}',
+      initialFixedValue: 'Initial fixed value',
+      fixedValue: 'Fixed value',
+      selectWeightUnit: 'Select unit',
+      weightUnitKg: 'Kilogram (kg)',
+      weightUnitG: 'Gram (g)',
+      weightUnitLb: 'Pound (lb)',
+      weightUnitOz: 'Ounce (oz)',
+      weightUnitT: 'Ton (t)',
+      tagsLabel: 'Product Tags',
+      tagsHelp: 'Separate tags with commas. These tags will be displayed in the shop',
+      tagsPlaceholder: 'Example: chemical, industrial, cleaner',
+      showWhenOutOfStockDesc: 'Show product even when out of stock',
+      clickToSelectCatalog: 'Click to select catalog PDF',
+      clickToSelectMSDS: 'Click to select MSDS PDF',
+      catalogDownloadable: 'Catalog downloadable in shop',
+      msdsDownloadable: 'MSDS downloadable in shop',
     },
     
     // Batch Management
@@ -3082,6 +3186,22 @@ export const translations: Record<Language, Translation> = {
       onlyWithStock: 'فقط الدفعات مع المخزون',
       batch: 'دفعة',
       batchNum: 'دفعة {number}',
+      initialFixedValue: 'قيمة ثابتة أولية',
+      fixedValue: 'قيمة ثابتة',
+      selectWeightUnit: 'اختر الوحدة',
+      weightUnitKg: 'كيلوغرام (kg)',
+      weightUnitG: 'غرام (g)',
+      weightUnitLb: 'باوند (lb)',
+      weightUnitOz: 'أونصة (oz)',
+      weightUnitT: 'طن (t)',
+      tagsLabel: 'علامات المنتج',
+      tagsHelp: 'افصل العلامات بفاصلة. هذه العلامات ستظهر في المتجر',
+      tagsPlaceholder: 'مثال: كيميائي, صناعي, منظف',
+      showWhenOutOfStockDesc: 'عرض المنتج حتى عند نفاد الكمية',
+      clickToSelectCatalog: 'انقر لاختيار ملف PDF للكتالوج',
+      clickToSelectMSDS: 'انقر لاختيار ملف PDF لـ MSDS',
+      catalogDownloadable: 'الكتالوج قابل للتنزيل في المتجر',
+      msdsDownloadable: 'MSDS قابل للتنزيل في المتجر',
     },
     
     // Batch Management
