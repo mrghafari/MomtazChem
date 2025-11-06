@@ -109,12 +109,9 @@ export default function ProductModel3DViewer({ model3dKey, productName, classNam
             onError={handleError}
           />
           
-          {/* Controls Hint */}
-          <div className={`absolute bottom-4 ${direction === 'rtl' ? 'left-4' : 'right-4'} bg-black/70 text-white text-xs px-3 py-2 rounded-lg backdrop-blur-sm`}>
-            <div className="space-y-1">
-              <div>{t.productManagement.rotate3dModel}</div>
-              <div>{t.productManagement.zoom3dModel}</div>
-            </div>
+          {/* 3D Badge */}
+          <div className="absolute top-3 left-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-bold px-3 py-1.5 rounded-lg shadow-lg">
+            3D
           </div>
         </div>
       )}
