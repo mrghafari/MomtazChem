@@ -1094,7 +1094,8 @@ export default function ProductsPage() {
   const handleBatchChange = async (batchIdOrNew: string) => {
     if (batchIdOrNew === 'new') {
       setSelectedBatchId('new');
-      // Reset form for new batch creation
+      // Reset form for new batch creation - clear the batch number field
+      form.setValue('newBatchNumber', '');
       return;
     }
 
@@ -1106,6 +1107,8 @@ export default function ProductsPage() {
     if (selectedBatch) {
       // Load the batch product data into the form
       openEditDialog(selectedBatch);
+      // Set the batch number to the selected batch's number
+      form.setValue('newBatchNumber', selectedBatch.batchNumber || `ID-${selectedBatch.id}`);
     }
   };
 
@@ -2379,33 +2382,41 @@ export default function ProductsPage() {
                         <FormField
                           control={form.control}
                           name="newBatchNumber"
-                          render={({ field }) => (
+                          render={({ field }) => {
+                            const isAddingNewBatch = selectedBatchId === 'new';
+                            const currentBatchNumber = availableBatches.find(b => b.id === selectedBatchId)?.batchNumber || '';
+                            
+                            return (
                             <FormItem>
                               <FormLabel className="text-sm font-medium flex items-center gap-2">
-                                شماره دسته جدید
+                                {isAddingNewBatch ? 'شماره دسته جدید' : 'شماره دسته فعلی'}
+                                {!isAddingNewBatch && <Lock className="h-3 w-3 text-gray-400" />}
                                 <Tooltip>
                                   <TooltipTrigger>
                                     <HelpCircle className="h-3 w-3 text-gray-400" />
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>شماره دسته برای کاردکس - برای محصولات جدید و موجود</p>
+                                    <p>{isAddingNewBatch ? 'شماره دسته برای کاردکس - برای محصولات جدید و موجود' : 'شماره دسته فعلی (فقط نمایش)'}</p>
                                   </TooltipContent>
                                 </Tooltip>
                               </FormLabel>
                               <FormControl>
                                 <Input 
-                                  placeholder="BATCH-2025-NEW"
-                                  className={`h-9 ${validationErrors.newBatchNumber ? "border-red-500 focus:border-red-500" : ""}`}
+                                  placeholder={isAddingNewBatch ? "BATCH-2025-NEW" : currentBatchNumber}
+                                  className={`h-9 ${!isAddingNewBatch ? "bg-gray-100 text-gray-600" : ""} ${validationErrors.newBatchNumber ? "border-red-500 focus:border-red-500" : ""}`}
                                   {...field}
-                                  value={field.value || ''}
+                                  value={isAddingNewBatch ? (field.value || '') : currentBatchNumber}
+                                  readOnly={!isAddingNewBatch}
+                                  disabled={!isAddingNewBatch}
                                 />
                               </FormControl>
                               <FormMessage />
-                              {validationErrors.newBatchNumber && (
+                              {validationErrors.newBatchNumber && isAddingNewBatch && (
                                 <p className="text-sm text-red-600 mt-1">{validationErrors.newBatchNumber}</p>
                               )}
                             </FormItem>
-                          )}
+                            );
+                          }}
                         />
                       </>
                     )}
