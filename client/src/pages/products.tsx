@@ -1860,44 +1860,6 @@ export default function ProductsPage() {
                   />
                 </div>
 
-                {/* Batch Selection Dropdown (only when editing) */}
-                {editingProduct && (
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-300 rounded-lg p-4 shadow-sm">
-                    <label className="text-sm font-semibold text-blue-800 mb-3 block flex items-center gap-2">
-                      <Package className="w-4 h-4" />
-                      انتخاب دسته (Batch) برای ویرایش
-                    </label>
-                    <Select value={selectedBatchId.toString()} onValueChange={handleBatchChange}>
-                      <SelectTrigger className="w-full bg-white border-blue-300 hover:border-blue-400 transition-colors">
-                        <SelectValue placeholder="انتخاب دسته..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableBatches.length > 0 ? (
-                          <>
-                            {availableBatches.map((batch) => (
-                              <SelectItem key={batch.id} value={batch.id.toString()}>
-                                <span className="flex items-center gap-2">
-                                  📦 دسته: {batch.batchNumber} - موجودی: <span className="font-semibold text-green-600">{batch.stockQuantity}</span>
-                                </span>
-                              </SelectItem>
-                            ))}
-                            <SelectItem value="new" className="bg-green-50 font-medium">
-                              ➕ افزودن بچ جدید
-                            </SelectItem>
-                          </>
-                        ) : (
-                          <SelectItem value="new">➕ افزودن بچ جدید</SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-blue-600 mt-2">
-                      {availableBatches.length > 1 
-                        ? `${availableBatches.length} دسته برای این محصول موجود است` 
-                        : 'برای افزودن دسته جدید، "افزودن بچ جدید" را انتخاب کنید'}
-                    </p>
-                  </div>
-                )}
-
                 {/* اطلاعات پایه محصول */}
                 <div className={`p-4 rounded-lg border ${form.watch('isNonChemical') ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200'}`}>
                   <h3 className={`text-lg font-semibold mb-3 flex items-center gap-2 ${form.watch('isNonChemical') ? 'text-green-800' : 'text-blue-800'}`}>
@@ -2377,37 +2339,75 @@ export default function ProductsPage() {
 
                     {/* فیلد شماره بچ جدید - فقط برای محصولات شیمیایی */}
                     {!form.watch('isNonChemical') && (
-                    <FormField
-                      control={form.control}
-                      name="newBatchNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium flex items-center gap-2">
-                            شماره دسته جدید
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <HelpCircle className="h-3 w-3 text-gray-400" />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>شماره دسته برای کاردکس - برای محصولات جدید و موجود</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </FormLabel>
-                          <FormControl>
-                            <Input 
-                              placeholder="BATCH-2025-NEW"
-                              className={`h-9 ${validationErrors.newBatchNumber ? "border-red-500 focus:border-red-500" : ""}`}
-                              {...field}
-                              value={field.value || ''}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                          {validationErrors.newBatchNumber && (
-                            <p className="text-sm text-red-600 mt-1">{validationErrors.newBatchNumber}</p>
+                      <>
+                        {/* Batch Selection Dropdown - Only when editing */}
+                        {editingProduct && (
+                          <div className="col-span-3 mb-3 bg-orange-50 p-3 rounded-lg border border-orange-200">
+                            <FormLabel className="text-sm font-semibold text-orange-800 mb-2 flex items-center gap-2">
+                              <Package className="w-4 h-4" />
+                              انتخاب دسته (Batch) برای ویرایش
+                            </FormLabel>
+                            <Select value={selectedBatchId.toString()} onValueChange={handleBatchChange}>
+                              <SelectTrigger className="w-full h-9 bg-white border-orange-300 hover:border-orange-400">
+                                <SelectValue placeholder="انتخاب دسته..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {availableBatches.length > 0 ? (
+                                  <>
+                                    {availableBatches.map((batch) => (
+                                      <SelectItem key={batch.id} value={batch.id.toString()}>
+                                        📦 دسته: {batch.batchNumber} - موجودی: <span className="font-semibold text-green-600">{batch.stockQuantity}</span>
+                                      </SelectItem>
+                                    ))}
+                                    <SelectItem value="new" className="bg-green-50 font-medium">
+                                      ➕ افزودن بچ جدید
+                                    </SelectItem>
+                                  </>
+                                ) : (
+                                  <SelectItem value="new">➕ افزودن بچ جدید</SelectItem>
+                                )}
+                              </SelectContent>
+                            </Select>
+                            <p className="text-xs text-orange-600 mt-1.5">
+                              {availableBatches.length > 1 
+                                ? `${availableBatches.length} دسته برای بارکد ${editingProduct?.barcode || ''} موجود است` 
+                                : 'برای افزودن دسته جدید، "➕ افزودن بچ جدید" را انتخاب کنید'}
+                            </p>
+                          </div>
+                        )}
+                        
+                        <FormField
+                          control={form.control}
+                          name="newBatchNumber"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm font-medium flex items-center gap-2">
+                                شماره دسته جدید
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <HelpCircle className="h-3 w-3 text-gray-400" />
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>شماره دسته برای کاردکس - برای محصولات جدید و موجود</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="BATCH-2025-NEW"
+                                  className={`h-9 ${validationErrors.newBatchNumber ? "border-red-500 focus:border-red-500" : ""}`}
+                                  {...field}
+                                  value={field.value || ''}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                              {validationErrors.newBatchNumber && (
+                                <p className="text-sm text-red-600 mt-1">{validationErrors.newBatchNumber}</p>
+                              )}
+                            </FormItem>
                           )}
-                        </FormItem>
-                      )}
-                    />
+                        />
+                      </>
                     )}
 
                     <FormField
