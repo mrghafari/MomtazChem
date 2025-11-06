@@ -2121,7 +2121,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       // Handle smart vehicle cost
                       if (selectedRate && (selectedRate.deliveryMethod === 'smart_vehicle' || selectedRate.delivery_method === 'smart_vehicle')) {
                         if (smartDeliveryLoading) {
-                          return <span className="text-emerald-600">در حال محاسبه...</span>;
+                          return <span className="text-emerald-600">{t.calculating}</span>;
                         }
                         if (finalShippingCost > 0) {
                           return <span className="text-emerald-600 font-bold">{formatCurrency(finalShippingCost)}</span>;
