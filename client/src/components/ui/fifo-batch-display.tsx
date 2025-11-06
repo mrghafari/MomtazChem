@@ -42,10 +42,14 @@ export default function FIFOBatchDisplay({
     allBatches: []
   };
 
-  // Format date for Persian display
+  // Format date for Gregorian display
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('fa-IR');
+    return date.toLocaleDateString('en-GB', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
   };
 
   // Loading state
