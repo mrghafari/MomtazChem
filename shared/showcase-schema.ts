@@ -86,6 +86,11 @@ export const showcaseProducts = pgTable("showcase_products", {
   parentProductId: integer("parent_product_id"), // Reference to parent product if this is a variant
   variantType: text("variant_type"), // packaging, size, concentration, quantity, weight, volume
   variantValue: text("variant_value"), // 1kg, 5L, 25kg bag, 80% concentration, etc.
+  // 3D Model Fields - For interactive 3D product viewing
+  displayMode: text("display_mode").default("images"), // 'images' or '3d_model' - Controls what customers see in shop
+  model3dKey: text("model3d_key"), // S3 key for 3D model file (GLB/GLTF format)
+  model3dFileName: text("model3d_file_name"), // Original filename for display
+  model3dUploadDate: timestamp("model3d_upload_date"), // When 3D model was uploaded
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

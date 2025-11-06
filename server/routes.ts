@@ -261,6 +261,34 @@ const uploadMsds = multer({
   }
 });
 
+// 3D Model upload configuration
+const model3dStorage = multer.memoryStorage();
+
+const uploadModel3d = multer({
+  storage: model3dStorage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit for 3D model files
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept GLB and GLTF files
+    const allowedMimeTypes = [
+      'model/gltf-binary',
+      'model/gltf+json',
+      'application/octet-stream'
+    ];
+    
+    // Also validate file extension
+    const ext = path.extname(file.originalname).toLowerCase();
+    const allowedExtensions = ['.glb', '.gltf'];
+    
+    if (allowedMimeTypes.includes(file.mimetype) && allowedExtensions.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only GLB and GLTF files are allowed for 3D model uploads'));
+    }
+  }
+});
+
 // Multer configuration for document uploads - using memory storage for S3 upload
 const documentStorage = multer.memoryStorage();
 
@@ -3300,6 +3328,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Proxy route to serve 3D models from S3
+  app.get('/uploads/3d-models/:key', async (req, res) => {
+    try {
+      const key = `3d-models/${req.params.key}`;
+      const s3Service = getAwsS3Service();
+      
+      const fileBuffer = await s3Service.getFile(key);
+      
+      if (!fileBuffer) {
+        return res.status(404).json({ 
+          success: false,
+          message: '3D model file not found' 
+        });
+      }
+
+      // Determine content type based on file extension
+      const ext = path.extname(req.params.key).toLowerCase();
+      let contentType = 'application/octet-stream'; // default
+      
+      if (ext === '.glb') {
+        contentType = 'model/gltf-binary';
+      } else if (ext === '.gltf') {
+        contentType = 'model/gltf+json';
+      }
+
+      // Set proper headers for 3D model files
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.send(fileBuffer);
+      
+      console.log(`✅ [S3 PROXY] Served 3D model: ${key}`);
+    } catch (error) {
+      console.error('❌ [S3 PROXY] Error serving 3D model:', error);
+      res.status(500).json({ 
+        success: false,
+        message: 'Failed to retrieve 3D model file',
+        error: error.message
+      });
+    }
+  });
+
   // File upload endpoints
   // Generic upload route (for images) - accepts both 'file' and 'image' field names
   const uploadFlexible = multer({
@@ -3515,6 +3585,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+  // 3D Model upload endpoint
+  app.post("/api/upload/model3d", requireAuth, uploadModel3d.single('model3d'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "No 3D model file uploaded" 
+        });
+      }
+
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPublicFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        '3d-models'
+      );
+
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.message || 'S3 upload failed');
+      }
+
+      console.log(`✅ [S3 UPLOAD] [3D MODEL] uploaded: ${uploadResult.key}`);
+
+      res.json({ 
+        success: true, 
+        url: uploadResult.url,
+        key: uploadResult.key,
+        originalName: req.file.originalname,
+        size: req.file.size
+      });
+    } catch (error) {
+      console.error('❌ [S3 UPLOAD] 3D Model upload error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to upload 3D model file to S3",
+        error: error.message
+      });
+    }
+  });
   // Company logo upload endpoint
   app.post("/api/upload/company-logo", requireAuth, uploadLogo.single('file'), async (req, res) => {
     try {
@@ -3620,7 +3731,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data: {
           msdsUrl: product.msdsUrl,
           msdsFileName: product.msdsFileName || 'MSDS.pdf',
-          msdsUploadDate: product.msdsUploadDate
+          msdsUploadDate: product.msdsUploadDate,
+              displayMode: product.displayMode,
+              model3dKey: product.model3dKey,
+              model3dFileName: product.model3dFileName,
+              model3dUploadDate: product.model3dUploadDate
         }
       });
     } catch (error) {
@@ -4890,7 +5005,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               catalogFileName: product.catalogFileName,
               msdsFileName: product.msdsFileName,
               catalogUploadDate: product.catalogUploadDate,
-              msdsUploadDate: product.msdsUploadDate
+              msdsUploadDate: product.msdsUploadDate,
+              displayMode: product.displayMode,
+              model3dKey: product.model3dKey,
+              model3dFileName: product.model3dFileName,
+              model3dUploadDate: product.model3dUploadDate
             };
             
             await shopStorage.createShopProduct(shopProductData);
@@ -4936,7 +5055,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               catalogFileName: product.catalogFileName || existingShopProduct.catalogFileName,
               msdsFileName: product.msdsFileName || existingShopProduct.msdsFileName,
               catalogUploadDate: product.catalogUploadDate || existingShopProduct.catalogUploadDate,
-              msdsUploadDate: product.msdsUploadDate || existingShopProduct.msdsUploadDate
+              msdsUploadDate: product.msdsUploadDate || existingShopProduct.msdsUploadDate,
+              displayMode: product.displayMode || existingShopProduct.displayMode,
+              model3dKey: product.model3dKey || existingShopProduct.model3dKey,
+              model3dFileName: product.model3dFileName || existingShopProduct.model3dFileName,
+              model3dUploadDate: product.model3dUploadDate || existingShopProduct.model3dUploadDate
             };
             
             await shopStorage.updateShopProduct(existingShopProduct.id, updateData);
@@ -22173,7 +22296,11 @@ Momtaz Chemical Technical Team`,
           isActive: true,
           isFeatured: false,
           metaTitle: showcaseProduct.name,
-          metaDescription: showcaseProduct.description
+          metaDescription: showcaseProduct.description,
+          displayMode: showcaseProduct.displayMode,
+          model3dKey: showcaseProduct.model3dKey,
+          model3dFileName: showcaseProduct.model3dFileName,
+          model3dUploadDate: showcaseProduct.model3dUploadDate
         };
         
         await shopStorage.createShopProduct(shopProductData);

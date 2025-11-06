@@ -261,16 +261,36 @@ const uploadMsds = multer({
   }
 });
 
-// Multer configuration for document uploads
-const documentStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, documentsDir);
+// 3D Model upload configuration
+const model3dStorage = multer.memoryStorage();
+
+const uploadModel3d = multer({
+  storage: model3dStorage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit for 3D model files
   },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  fileFilter: (req, file, cb) => {
+    // Accept GLB and GLTF files
+    const allowedMimeTypes = [
+      'model/gltf-binary',
+      'model/gltf+json',
+      'application/octet-stream'
+    ];
+    
+    // Also validate file extension
+    const ext = path.extname(file.originalname).toLowerCase();
+    const allowedExtensions = ['.glb', '.gltf'];
+    
+    if (allowedMimeTypes.includes(file.mimetype) && allowedExtensions.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only GLB and GLTF files are allowed for 3D model uploads'));
+    }
   }
 });
+
+// Multer configuration for document uploads - using memory storage for S3 upload
+const documentStorage = multer.memoryStorage();
 
 // Receipt upload configuration
 const receiptStorage = multer.memoryStorage();
@@ -291,16 +311,8 @@ const uploadReceipt = multer({
   }
 });
 
-// Logo upload configuration
-const logoStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, logosDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `logo-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
+// Logo upload configuration - using memory storage for S3 upload
+const logoStorage = multer.memoryStorage();
 
 const uploadLogo = multer({
   storage: logoStorage,
@@ -1781,7 +1793,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { title, description, category } = req.body;
-      const imageUrl = `/uploads/images/${req.file.filename}`;
+      
+      // Upload to S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPublicFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        'company-images'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload image to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Company image uploaded: ${uploadResult.key}`);
+
+      const imageUrl = uploadResult.url;
+      const filename = uploadResult.key?.split('/').pop() || req.file.originalname;
 
       const [newImage] = await db
         .insert(companyImages)
@@ -1790,7 +1822,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description,
           category,
           imageUrl,
-          filename: req.file.filename,
+          filename,
           fileSize: req.file.size,
           isActive: true,
           createdAt: new Date(),
@@ -1833,7 +1865,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { personName, position, company, notes } = req.body;
-      const imageUrl = `/uploads/images/${req.file.filename}`;
+      
+      // Upload to S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPublicFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        'business-cards'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload business card to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Business card uploaded: ${uploadResult.key}`);
+
+      const imageUrl = uploadResult.url;
+      const filename = uploadResult.key?.split('/').pop() || req.file.originalname;
 
       const [newBusinessCard] = await db
         .insert(businessCards)
@@ -1843,7 +1895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           company,
           notes,
           imageUrl,
-          filename: req.file.filename,
+          filename,
           fileSize: req.file.size,
           isActive: true,
           createdAt: new Date(),
@@ -3276,6 +3328,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Proxy route to serve 3D models from S3
+  app.get('/uploads/3d-models/:key', async (req, res) => {
+    try {
+      const key = `3d-models/${req.params.key}`;
+      const s3Service = getAwsS3Service();
+      
+      const fileBuffer = await s3Service.getFile(key);
+      
+      if (!fileBuffer) {
+        return res.status(404).json({ 
+          success: false,
+          message: '3D model file not found' 
+        });
+      }
+
+      // Determine content type based on file extension
+      const ext = path.extname(req.params.key).toLowerCase();
+      let contentType = 'application/octet-stream'; // default
+      
+      if (ext === '.glb') {
+        contentType = 'model/gltf-binary';
+      } else if (ext === '.gltf') {
+        contentType = 'model/gltf+json';
+      }
+
+      // Set proper headers for 3D model files
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.send(fileBuffer);
+      
+      console.log(`✅ [S3 PROXY] Served 3D model: ${key}`);
+    } catch (error) {
+      console.error('❌ [S3 PROXY] Error serving 3D model:', error);
+      res.status(500).json({ 
+        success: false,
+        message: 'Failed to retrieve 3D model file',
+        error: error.message
+      });
+    }
+  });
+
   // File upload endpoints
   // Generic upload route (for images) - accepts both 'file' and 'image' field names
   const uploadFlexible = multer({
@@ -3306,7 +3400,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       { name: 'image', maxCount: 1 }
     ]);
 
-    upload(req, res, (err) => {
+    upload(req, res, async (err) => {
       if (err) {
         console.error('Upload error:', err);
         return res.status(400).json({ 
@@ -3326,11 +3420,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
 
-        const imageUrl = `/uploads/images/${uploadedFile.filename}`;
+        // Upload to S3
+        const s3Service = getAwsS3Service();
+        const folder = uploadedFile.fieldname === 'image' ? 'product-images' : 'general-files';
+        const uploadResult = await s3Service.uploadPublicFile(
+          uploadedFile.buffer,
+          uploadedFile.originalname,
+          uploadedFile.mimetype,
+          folder
+        );
+
+        if (!uploadResult.success) {
+          return res.status(500).json({
+            success: false,
+            message: uploadResult.message || "Failed to upload to S3"
+          });
+        }
+
+        console.log(`✅ [S3 UPLOAD] Flexible upload: ${uploadResult.key}`);
+
         res.json({ 
           success: true, 
-          url: imageUrl,
-          filename: uploadedFile.filename,
+          url: uploadResult.url,
+          filename: uploadResult.key?.split('/').pop() || uploadedFile.originalname,
           originalName: uploadedFile.originalname,
           size: uploadedFile.size
         });
@@ -3473,8 +3585,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+  // 3D Model upload endpoint
+  app.post("/api/upload/model3d", requireAuth, uploadModel3d.single('model3d'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "No 3D model file uploaded" 
+        });
+      }
+
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPublicFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        '3d-models'
+      );
+
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.message || 'S3 upload failed');
+      }
+
+      console.log(`✅ [S3 UPLOAD] [3D MODEL] uploaded: ${uploadResult.key}`);
+
+      res.json({ 
+        success: true, 
+        url: uploadResult.url,
+        key: uploadResult.key,
+        originalName: req.file.originalname,
+        size: req.file.size
+      });
+    } catch (error) {
+      console.error('❌ [S3 UPLOAD] 3D Model upload error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to upload 3D model file to S3",
+        error: error.message
+      });
+    }
+  });
   // Company logo upload endpoint
-  app.post("/api/upload/company-logo", requireAuth, uploadLogo.single('file'), (req, res) => {
+  app.post("/api/upload/company-logo", requireAuth, uploadLogo.single('file'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
@@ -3483,11 +3636,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const logoUrl = `/uploads/logos/${req.file.filename}`;
+      // Upload to S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPublicFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        'company-logos'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload logo to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Company logo uploaded: ${uploadResult.key}`);
+
       res.json({ 
         success: true, 
-        url: logoUrl,
-        filename: req.file.filename,
+        url: uploadResult.url,
+        key: uploadResult.key,
+        filename: uploadResult.key?.split('/').pop() || req.file.originalname,
         originalName: req.file.originalname,
         size: req.file.size
       });
@@ -8012,8 +8183,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Save the uploaded file path and update order status back to grace period review
-      const additionalDocumentPath = `/uploads/${uploadedFile.filename}`;
+      // Upload to S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPrivateFile(
+        uploadedFile.buffer,
+        uploadedFile.originalname,
+        uploadedFile.mimetype,
+        'additional-documents'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload document to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Additional document uploaded: ${uploadResult.key}`);
+
+      // Save the uploaded file URL from S3
+      const additionalDocumentPath = uploadResult.url;
       
       await db
         .update(customerOrders)
@@ -12522,6 +12711,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.session.adminId;
       const tagsArray = tags ? tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0) : [];
 
+      // Upload to S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPrivateFile(
+        file.buffer,
+        file.originalname,
+        file.mimetype,
+        'procedure-documents'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload document to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Safety protocol document uploaded: ${uploadResult.key}`);
+
       const { pool } = await import('./db');
       const result = await pool.query(`
         INSERT INTO procedure_documents (
@@ -12534,7 +12741,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title || file.originalname, 
         description || null, 
         file.originalname, 
-        file.path, 
+        uploadResult.url, 
         file.size, 
         file.mimetype, 
         userId, 
@@ -17042,12 +17249,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             success: true,
             message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
             orderId: order.id,
-            orderNumber: null, // No order number until payment succeeds
+            orderNumber: order.orderNumber,
             totalAmount: Math.round(totalAmount),
             walletAmountUsed: Math.round(walletAmountUsed),
             remainingAmount: formattedRemainingAmount,
             requiresBankPayment: true,
-            paymentUrl: routingResult.paymentUrl
+            paymentUrl: routingResult.paymentUrl,
+            redirectUrl: routingResult.paymentUrl
           });
         } else {
           // 🗑️ DELETE ORDER: Bank routing failed
@@ -17280,11 +17488,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               success: true,
               message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
               orderId: order.id,
-              orderNumber: null, // No order number until payment succeeds
+              orderNumber: order.orderNumber,
               totalAmount: Math.round(totalAmount),
               walletAmountUsed: Math.round(walletAmountUsed),
               requiresBankPayment: true,
-              paymentUrl: routingResult.paymentUrl
+              paymentUrl: routingResult.paymentUrl,
+              redirectUrl: routingResult.paymentUrl
             });
           } else {
             // 🗑️ DELETE ORDER: Bank routing failed
@@ -19596,6 +19805,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Process tags
       const tagsArray = tags ? tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0) : [];
       
+      // Upload to S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPrivateFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        'procedure-documents'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload document to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Procedure document (middleware pattern) uploaded: ${uploadResult.key}`);
+
       const { pool } = await import('./db');
       const result = await pool.query(`
         INSERT INTO procedure_documents (
@@ -19611,7 +19838,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title || req.file.originalname, 
         description || null, 
         req.file.originalname, 
-        req.file.path, 
+        uploadResult.url, 
         req.file.size, 
         req.file.mimetype, 
         userId, 
@@ -19689,6 +19916,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: "No file uploaded" });
       }
 
+      // Upload to S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPrivateFile(
+        file.buffer,
+        file.originalname,
+        file.mimetype,
+        'procedure-documents'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload document to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Procedure document uploaded: ${uploadResult.key}`);
+
       const { pool } = await import('./db');
       
       const result = await pool.query(`
@@ -19702,7 +19947,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title || file.originalname,
         description || null,
         file.originalname,
-        file.path,
+        uploadResult.url,
         file.size,
         file.mimetype,
         req.session.adminId
@@ -27914,11 +28159,29 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         return res.status(400).json({ success: false, message: 'فایل رسید الزامی است' });
       }
 
-      // Save payment receipt
+      // Upload to S3
+      const s3Service = getAwsS3Service();
+      const uploadResult = await s3Service.uploadPrivateFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        'payment-receipts'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: uploadResult.message || "Failed to upload receipt to S3"
+        });
+      }
+
+      console.log(`✅ [S3 UPLOAD] Payment receipt uploaded: ${uploadResult.key}`);
+
+      // Save payment receipt with S3 URL
       const receipt = await orderManagementStorage.uploadPaymentReceipt({
         customerOrderId,
         customerId,
-        receiptUrl: `/uploads/documents/${req.file.filename}`,
+        receiptUrl: uploadResult.url,
         originalFileName: req.file.originalname,
         fileSize: req.file.size,
         mimeType: req.file.mimetype,
@@ -40906,28 +41169,13 @@ momtazchem.com
     }
   });
 
-  // Upload new image asset
+  // Upload new image asset - uses S3
   app.post("/api/admin/content/images/upload", requireAuth, async (req: Request, res: Response) => {
     try {
       const multer = await import("multer");
-      const path = await import("path");
-      const fs = await import("fs");
 
-      // Configure multer for image uploads
-      const storage = multer.default.diskStorage({
-        destination: (req, file, cb) => {
-          const uploadDir = path.join(process.cwd(), 'uploads', 'content');
-          if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-          }
-          cb(null, uploadDir);
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-          const extension = path.extname(file.originalname);
-          cb(null, `content-${uniqueSuffix}${extension}`);
-        }
-      });
+      // Configure multer for memory storage (S3 upload)
+      const storage = multer.default.memoryStorage();
 
       const upload = multer.default({
         storage,
@@ -40959,16 +41207,35 @@ momtazchem.com
         }
 
         try {
+          // Upload to S3
+          const s3Service = getAwsS3Service();
+          const uploadResult = await s3Service.uploadPublicFile(
+            req.file.buffer,
+            req.file.originalname,
+            req.file.mimetype,
+            'content-images'
+          );
+
+          if (!uploadResult.success) {
+            return res.status(500).json({
+              success: false,
+              message: uploadResult.message || "Failed to upload image to S3"
+            });
+          }
+
+          console.log(`✅ [S3 UPLOAD] Content image uploaded: ${uploadResult.key}`);
+
           const { db } = await import("./db");
           const { imageAssets } = await import("../shared/content-schema");
 
           const { section = 'general', alt = '' } = req.body;
-          const imageUrl = `/uploads/content/${req.file.filename}`;
+          const imageUrl = uploadResult.url;
+          const filename = uploadResult.key?.split('/').pop() || req.file.originalname;
 
           const [newImage] = await db
             .insert(imageAssets)
             .values({
-              filename: req.file.filename,
+              filename,
               originalName: req.file.originalname,
               mimeType: req.file.mimetype,
               size: req.file.size,
@@ -52697,3 +52964,5 @@ momtazchem.com
   return httpServer;
 }
 
+
+  // Temporary endpoint to list S3 files

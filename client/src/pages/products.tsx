@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
@@ -73,6 +74,11 @@ const formSchema = insertShowcaseProductSchema.extend({
   isNonChemical: z.boolean().default(false),
   // Flammable product flag
   isFlammable: z.boolean().default(false),
+  // Display Mode fields
+  displayMode: z.enum(['images', '3d_model']).default('images'),
+  model3dKey: z.string().optional(),
+  model3dFileName: z.string().optional(),
+  model3dUploadDate: z.string().optional(),
 });
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
@@ -166,10 +172,12 @@ export default function ProductsPage() {
   const [primaryImageIndex, setPrimaryImageIndex] = useState<number>(0); // Track which image is primary
   const [catalogPreview, setCatalogPreview] = useState<string | null>(null);
   const [msdsPreview, setMsdsPreview] = useState<string | null>(null);
+  const [model3dPreview, setModel3dPreview] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false); // Legacy single image upload
   const [uploadingImages, setUploadingImages] = useState<boolean[]>([false, false, false]); // Multiple image uploads
   const [uploadingCatalog, setUploadingCatalog] = useState(false);
   const [uploadingMsds, setUploadingMsds] = useState(false);
+  const [uploadingModel3d, setUploadingModel3d] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [deletingProduct, setDeletingProduct] = useState<ShowcaseProduct | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -606,6 +614,11 @@ export default function ProductsPage() {
       isNonChemical: false,
       // Flammable product flag
       isFlammable: false,
+      // Display Mode fields
+      displayMode: "images" as const,
+      model3dKey: "",
+      model3dFileName: "",
+      model3dUploadDate: "",
       // New inventory addition fields
       inventoryAddition: 0,
       newBatchNumber: "",
@@ -980,6 +993,67 @@ export default function ProductsPage() {
     }
   };
 
+  const handleModel3dUpload = async (file: File) => {
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['model/gltf-binary', 'model/gltf+json', 'application/octet-stream'];
+    const validExtensions = ['.glb', '.gltf'];
+    const fileExtension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+    
+    if (!validExtensions.includes(fileExtension)) {
+      toast({
+        title: t.productManagement.invalidFormat,
+        description: t.productManagement.invalidModel3dFormat,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: t.productManagement.fileTooLarge,
+        description: t.productManagement.model3dTooLarge,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploadingModel3d(true);
+    const formData = new FormData();
+    formData.append('model3d', file);
+
+    try {
+      const response = await fetch('/api/upload/model3d', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('3D model upload failed');
+      }
+
+      const { key, originalName } = await response.json();
+      form.setValue('model3dKey', key);
+      form.setValue('model3dFileName', originalName);
+      setModel3dPreview(key);
+      
+      toast({
+        title: t.productManagement.success,
+        description: t.productManagement.model3dUploaded,
+      });
+    } catch (error) {
+      toast({
+        title: t.productManagement.uploadError,
+        description: t.productManagement.uploadFailed,
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingModel3d(false);
+    }
+  };
+
 
 
   const openCreateDialog = () => {
@@ -989,6 +1063,7 @@ export default function ProductsPage() {
     setPrimaryImageIndex(0); // Reset primary image to first
     setCatalogPreview(null);
     setMsdsPreview(null);
+    setModel3dPreview(null);
     setManualBarcodeEntered(false); // Reset manual barcode flag
     form.reset();
     setDialogOpen(true);
@@ -1000,6 +1075,15 @@ export default function ProductsPage() {
     setManualBarcodeEntered(false); // Reset manual barcode flag
     setCatalogPreview(product.pdfCatalogUrl || null);
     setMsdsPreview(product.msdsUrl || null);
+    
+    // Auto-fix legacy URL values in model3dKey (should be key only, not full URL)
+    let model3dKeyValue = product.model3dKey || null;
+    if (model3dKeyValue && (model3dKeyValue.startsWith('http') || model3dKeyValue.includes('/uploads/3d-models/'))) {
+      // Extract just the filename from URL
+      const parts = model3dKeyValue.split('/');
+      model3dKeyValue = parts[parts.length - 1];
+    }
+    setModel3dPreview(model3dKeyValue);
     
     // Fetch all products with same barcode (different batches)
     if (product.barcode && products) {
@@ -1057,6 +1141,9 @@ export default function ProductsPage() {
       showMsdsToCustomers: product.showMsdsToCustomers || false,
       catalogFileName: (product as any).catalogFileName || "",
       showCatalogToCustomers: product.showCatalogToCustomers || false,
+      displayMode: product.displayMode || "images",
+      model3dKey: model3dKeyValue || "",
+      model3dFileName: product.model3dFileName || "",
       syncWithShop: product.syncWithShop !== null && product.syncWithShop !== undefined ? product.syncWithShop : true,
       showWhenOutOfStock: product.showWhenOutOfStock ?? false,
       isNonChemical: product.isNonChemical ?? false,
@@ -2784,7 +2871,58 @@ export default function ProductsPage() {
                     {t.productManagement.fileManagement}
                   </h3>
                   
-                  {/* Product images upload (max 3 images) */}
+                  {/* Display Mode Selection */}
+                  <div className="mb-6 p-4 bg-white rounded-lg border border-indigo-300 shadow-sm">
+                    <FormField
+                      control={form.control}
+                      name="displayMode"
+                      render={({ field }) => (
+                        <FormItem className="space-y-3">
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                            <Image className="h-4 w-4" />
+                            {t.productManagement.displayMode}
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{t.productManagement.displayModeHelp}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
+                          <FormControl>
+                            <RadioGroup
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              className="flex flex-col space-y-1"
+                              dir={direction}
+                            >
+                              <FormItem className="flex items-center space-x-3 space-y-0">
+                                <FormControl>
+                                  <RadioGroupItem value="images" />
+                                </FormControl>
+                                <FormLabel className="font-normal cursor-pointer">
+                                  {t.productManagement.displayModeImages}
+                                </FormLabel>
+                              </FormItem>
+                              <FormItem className="flex items-center space-x-3 space-y-0">
+                                <FormControl>
+                                  <RadioGroupItem value="3d_model" />
+                                </FormControl>
+                                <FormLabel className="font-normal cursor-pointer">
+                                  {t.productManagement.displayMode3D}
+                                </FormLabel>
+                              </FormItem>
+                            </RadioGroup>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  {/* Product images upload (max 3 images) - Conditional rendering based on displayMode */}
+                  {form.watch('displayMode') === 'images' && (
                   <div className="space-y-4">
                     <div className="space-y-3">
                       <FormLabel className="text-sm font-medium flex items-center gap-2">
@@ -2971,7 +3109,164 @@ export default function ProductsPage() {
                         </div>
                       </div>
                     </div>
+                  </div>
+                  )}
 
+                  {/* 3D Model upload section - Conditional rendering based on displayMode */}
+                  {form.watch('displayMode') === '3d_model' && (
+                    <div className="space-y-4">
+                      <div className="space-y-3">
+                        <FormLabel className="text-sm font-medium flex items-center gap-2">
+                          <Package className="h-4 w-4" />
+                          {t.productManagement.model3dFile}
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <HelpCircle className="h-3 w-3 text-gray-400" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{t.productManagement.model3dHelp}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </FormLabel>
+                        
+                        <div className="space-y-4">
+                          {/* 3D Model file drop zone */}
+                          <div className="space-y-2">
+                            <div className="relative border-2 border-dashed border-purple-300 rounded-lg p-4 text-center bg-purple-50">
+                              {model3dPreview ? (
+                                <div className="relative">
+                                  <div className="bg-purple-100 p-4 rounded-lg">
+                                    <Package className="mx-auto h-12 w-12 text-purple-600" />
+                                    <p className="mt-2 text-sm text-gray-700">{form.getValues('model3dFileName') || 'model.glb'}</p>
+                                  </div>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="absolute top-2 right-2 h-6 w-6 p-0"
+                                    onClick={() => {
+                                      setModel3dPreview(null);
+                                      form.setValue('model3dKey', '');
+                                      form.setValue('model3dFileName', '');
+                                    }}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="py-4">
+                                  <Package className="mx-auto h-12 w-12 text-purple-400" />
+                                  <p className="mt-2 text-sm text-gray-600">{t.productManagement.uploadModel3d}</p>
+                                  <p className="text-xs text-gray-500">.glb / .gltf files only</p>
+                                </div>
+                              )}
+                              <input
+                                type="file"
+                                accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) handleModel3dUpload(file);
+                                }}
+                              />
+                            </div>
+                            {uploadingModel3d && (
+                              <div className="flex items-center justify-center text-sm text-purple-600">
+                                <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                                {t.productManagement.uploadingFile}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* 3D Model settings */}
+                          <div className="space-y-3">
+                            <FormField
+                              control={form.control}
+                              name="model3dKey"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-sm text-gray-600">{t.productManagement.model3dFile}</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="https://..." 
+                                      className="h-9 text-sm"
+                                      {...field}
+                                      value={field.value || ''}
+                                      readOnly
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+
+                            {/* 3D Model action buttons */}
+                            <div className="flex items-center gap-2">
+                              {form.watch('model3dKey') && (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                                  onClick={() => window.open(form.getValues('model3dKey'), '_blank')}
+                                >
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  {t.productManagement.viewModel3d || 'View 3D Model'}
+                                </Button>
+                              )}
+                              
+                              <div className="relative">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                                  onClick={() => {
+                                    const fileInput = document.querySelector('#model3d-upload-btn') as HTMLInputElement;
+                                    fileInput?.click();
+                                  }}
+                                >
+                                  <Upload className="w-4 h-4 mr-1" />
+                                  {t.productManagement.uploadModel3d}
+                                </Button>
+                                <input
+                                  id="model3d-upload-btn"
+                                  type="file"
+                                  accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      handleModel3dUpload(file);
+                                      e.target.value = ''; // Reset input
+                                    }
+                                  }}
+                                />
+                              </div>
+                              
+                              {form.watch('model3dKey') && (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-red-600 border-red-300 hover:bg-red-50"
+                                  onClick={() => {
+                                    setModel3dPreview(null);
+                                    form.setValue('model3dKey', '');
+                                    form.setValue('model3dFileName', '');
+                                  }}
+                                >
+                                  <X className="w-4 h-4 mr-1" />
+                                  {t.productManagement.deleteModel3d || 'Delete 3D Model'}
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-4">
                     {/* Catalog PDF upload */}
                     <div className="space-y-3 border-t pt-4">
                       <FormLabel className="text-sm font-medium flex items-center gap-2">

@@ -32,6 +32,7 @@ import { ProductSpecsModal } from "@/components/ProductSpecsModal";
 import { formatIQDAmount } from "@/lib/currency-utils";
 import OpenGraphTags from "@/components/seo/OpenGraphTags";
 import CanonicalUrl from "@/components/seo/CanonicalUrl";
+import ProductModel3DViewer from "@/components/ProductModel3DViewer";
 
 const Shop = () => {
   const { toast } = useMultilingualToast();
@@ -1223,108 +1224,116 @@ const Shop = () => {
                     {viewMode === "grid" ? (
                       <>
                         <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden relative group cursor-pointer">
-                          {(() => {
-                            // Use expanded images (minimum 3 images)
-                            const images = getImages(product);
-                            
-
-                            
-                            if (images.length > 0) {
-                              const currentIndex = currentImageIndexes[product.id] || 0;
-                              const currentImage = images[currentIndex] || images[0];
+                          {product.displayMode === '3d_model' && product.model3dKey ? (
+                            <ProductModel3DViewer 
+                              model3dKey={product.model3dKey}
+                              productName={product.name}
+                              className="w-full h-full"
+                            />
+                          ) : (
+                            (() => {
+                              // Use expanded images (minimum 3 images)
+                              const images = getImages(product);
                               
-                              return (
-                                <div 
-                                  className="relative w-full h-full cursor-pointer"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
 
-                                    setSelectedImageForZoom(currentImage);
-                                    setSelectedProductForZoom(product);
-                                    setZoomedImageIndex(currentIndex);
-                                  }}
-                                >
-                                  <img 
-                                    src={currentImage} 
-                                    alt={product.name}
-                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
-                                  />
-                                  {/* Multiple images carousel controls */}
-                                  {images.length > 1 && (
-                                    <>
-                                      {/* Previous/Next buttons */}
-                                      <button
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          e.stopPropagation();
-                                          const newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
-                                          setCurrentImageIndexes(prev => ({
-                                            ...prev,
-                                            [product.id]: newIndex
-                                          }));
-                                        }}
-                                        className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                      >
-                                        ‹
-                                      </button>
-                                      <button
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          e.stopPropagation();
-                                          const newIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
-                                          setCurrentImageIndexes(prev => ({
-                                            ...prev,
-                                            [product.id]: newIndex
-                                          }));
-                                        }}
-                                        className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                      >
-                                        ›
-                                      </button>
-                                      {/* Image counter */}
-                                      <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-full">
-                                        {currentIndex + 1}/{images.length}
-                                      </div>
-                                      {/* Image indicators */}
-                                      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        {images.map((_, index) => (
-                                          <button
-                                            key={index}
-                                            onClick={(e) => {
-                                              e.preventDefault();
-                                              e.stopPropagation();
-                                              setCurrentImageIndexes(prev => ({
-                                                ...prev,
-                                                [product.id]: index
-                                              }));
-                                            }}
-                                            className={`w-2 h-2 rounded-full transition-colors ${
-                                              index === currentIndex ? 'bg-white' : 'bg-white/50'
-                                            }`}
-                                          />
-                                        ))}
-                                      </div>
-                                    </>
-                                  )}
-                                  {/* Zoom overlay on hover */}
-                                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
-                                    <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                              
+                              if (images.length > 0) {
+                                const currentIndex = currentImageIndexes[product.id] || 0;
+                                const currentImage = images[currentIndex] || images[0];
+                                
+                                return (
+                                  <div 
+                                    className="relative w-full h-full cursor-pointer"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+
+                                      setSelectedImageForZoom(currentImage);
+                                      setSelectedProductForZoom(product);
+                                      setZoomedImageIndex(currentIndex);
+                                    }}
+                                  >
+                                    <img 
+                                      src={currentImage} 
+                                      alt={product.name}
+                                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
+                                    />
+                                    {/* Multiple images carousel controls */}
+                                    {images.length > 1 && (
+                                      <>
+                                        {/* Previous/Next buttons */}
+                                        <button
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            const newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
+                                            setCurrentImageIndexes(prev => ({
+                                              ...prev,
+                                              [product.id]: newIndex
+                                            }));
+                                          }}
+                                          className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                          ‹
+                                        </button>
+                                        <button
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            const newIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
+                                            setCurrentImageIndexes(prev => ({
+                                              ...prev,
+                                              [product.id]: newIndex
+                                            }));
+                                          }}
+                                          className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                          ›
+                                        </button>
+                                        {/* Image counter */}
+                                        <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-full">
+                                          {currentIndex + 1}/{images.length}
+                                        </div>
+                                        {/* Image indicators */}
+                                        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                          {images.map((_, index) => (
+                                            <button
+                                              key={index}
+                                              onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setCurrentImageIndexes(prev => ({
+                                                  ...prev,
+                                                  [product.id]: index
+                                                }));
+                                              }}
+                                              className={`w-2 h-2 rounded-full transition-colors ${
+                                                index === currentIndex ? 'bg-white' : 'bg-white/50'
+                                              }`}
+                                            />
+                                          ))}
+                                        </div>
+                                      </>
+                                    )}
+                                    {/* Zoom overlay on hover */}
+                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
+                                      <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    </div>
                                   </div>
-                                </div>
-                              );
-                            } else {
-                              return (
-                                <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                                  <img 
-                                    src="/placeholder-product.jpg"
-                                    alt="No product image available"
-                                    className="w-full h-full object-contain p-8 opacity-50"
-                                  />
-                                </div>
-                              );
-                            }
-                          })()}
+                                );
+                              } else {
+                                return (
+                                  <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                                    <img 
+                                      src="/placeholder-product.jpg"
+                                      alt="No product image available"
+                                      className="w-full h-full object-contain p-8 opacity-50"
+                                    />
+                                  </div>
+                                );
+                              }
+                            })()
+                          )}
                           
                           {/* Star Rating Display - Bottom Left Corner - Grid View - Always Show */}
                           <div className="absolute bottom-2 left-2">
@@ -1647,106 +1656,114 @@ const Shop = () => {
                     ) : (
                       <div className="flex">
                         <div className="w-48 h-48 bg-gray-100 flex-shrink-0 relative group cursor-pointer">
-                          {(() => {
-                            // Use expanded images (minimum 3 images)
-                            const images = getImages(product);
-                            
-                            if (images.length > 0) {
-                              const currentIndex = currentImageIndexes[product.id] || 0;
-                              const currentImage = images[currentIndex] || images[0];
+                          {product.displayMode === '3d_model' && product.model3dKey ? (
+                            <ProductModel3DViewer 
+                              model3dKey={product.model3dKey}
+                              productName={product.name}
+                              className="w-full h-full"
+                            />
+                          ) : (
+                            (() => {
+                              // Use expanded images (minimum 3 images)
+                              const images = getImages(product);
                               
-                              return (
-                                <div 
-                                  className="relative w-full h-full overflow-hidden cursor-pointer"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
+                              if (images.length > 0) {
+                                const currentIndex = currentImageIndexes[product.id] || 0;
+                                const currentImage = images[currentIndex] || images[0];
+                                
+                                return (
+                                  <div 
+                                    className="relative w-full h-full overflow-hidden cursor-pointer"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
 
-                                    setSelectedImageForZoom(currentImage);
-                                    setSelectedProductForZoom(product);
-                                    setZoomedImageIndex(currentIndex);
-                                  }}
-                                >
-                                  <img 
-                                    src={currentImage} 
-                                    alt={product.name}
-                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
-                                  />
-                                  {/* Multiple images carousel controls */}
-                                  {images.length > 1 && (
-                                    <>
-                                      {/* Previous/Next buttons */}
-                                      <button
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          e.stopPropagation();
-                                          const newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
-                                          setCurrentImageIndexes(prev => ({
-                                            ...prev,
-                                            [product.id]: newIndex
-                                          }));
-                                        }}
-                                        className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                      >
-                                        ‹
-                                      </button>
-                                      <button
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          e.stopPropagation();
-                                          const newIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
-                                          setCurrentImageIndexes(prev => ({
-                                            ...prev,
-                                            [product.id]: newIndex
-                                          }));
-                                        }}
-                                        className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                      >
-                                        ›
-                                      </button>
-                                      {/* Image counter */}
-                                      <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-full">
-                                        {currentIndex + 1}/{images.length}
-                                      </div>
-                                      {/* Image indicators */}
-                                      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        {images.map((_, index) => (
-                                          <button
-                                            key={index}
-                                            onClick={(e) => {
-                                              e.preventDefault();
-                                              e.stopPropagation();
-                                              setCurrentImageIndexes(prev => ({
-                                                ...prev,
-                                                [product.id]: index
-                                              }));
-                                            }}
-                                            className={`w-2 h-2 rounded-full transition-colors ${
-                                              index === currentIndex ? 'bg-white' : 'bg-white/50'
-                                            }`}
-                                          />
-                                        ))}
-                                      </div>
-                                    </>
-                                  )}
-                                  {/* Zoom overlay on hover */}
-                                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
-                                    <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                      setSelectedImageForZoom(currentImage);
+                                      setSelectedProductForZoom(product);
+                                      setZoomedImageIndex(currentIndex);
+                                    }}
+                                  >
+                                    <img 
+                                      src={currentImage} 
+                                      alt={product.name}
+                                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
+                                    />
+                                    {/* Multiple images carousel controls */}
+                                    {images.length > 1 && (
+                                      <>
+                                        {/* Previous/Next buttons */}
+                                        <button
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            const newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
+                                            setCurrentImageIndexes(prev => ({
+                                              ...prev,
+                                              [product.id]: newIndex
+                                            }));
+                                          }}
+                                          className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                          ‹
+                                        </button>
+                                        <button
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            const newIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
+                                            setCurrentImageIndexes(prev => ({
+                                              ...prev,
+                                              [product.id]: newIndex
+                                            }));
+                                          }}
+                                          className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                          ›
+                                        </button>
+                                        {/* Image counter */}
+                                        <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-full">
+                                          {currentIndex + 1}/{images.length}
+                                        </div>
+                                        {/* Image indicators */}
+                                        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                          {images.map((_, index) => (
+                                            <button
+                                              key={index}
+                                              onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setCurrentImageIndexes(prev => ({
+                                                  ...prev,
+                                                  [product.id]: index
+                                                }));
+                                              }}
+                                              className={`w-2 h-2 rounded-full transition-colors ${
+                                                index === currentIndex ? 'bg-white' : 'bg-white/50'
+                                              }`}
+                                            />
+                                          ))}
+                                        </div>
+                                      </>
+                                    )}
+                                    {/* Zoom overlay on hover */}
+                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
+                                      <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    </div>
                                   </div>
-                                </div>
-                              );
-                            } else {
-                              return (
-                                <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                                  <img 
-                                    src="/placeholder-product.jpg"
-                                    alt="No product image available"
-                                    className="w-full h-full object-contain p-8 opacity-50"
-                                  />
-                                </div>
-                              );
-                            }
-                          })()}
+                                );
+                              } else {
+                                return (
+                                  <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                                    <img 
+                                      src="/placeholder-product.jpg"
+                                      alt="No product image available"
+                                      className="w-full h-full object-contain p-8 opacity-50"
+                                    />
+                                  </div>
+                                );
+                              }
+                            })()
+                          )}
                           
                           {/* Star Rating - Bottom Left Corner - List View - Always Show */}
                           <div className="absolute bottom-2 left-2">

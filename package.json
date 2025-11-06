@@ -16,6 +16,7 @@
     "@aws-sdk/s3-request-presigner": "^3.920.0",
     "@first-iraqi-bank/sdk": "^0.1.4",
     "@google-cloud/storage": "^7.17.0",
+    "@google/model-viewer": "^4.1.0",
     "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^3.10.0",
     "@jitsi/react-sdk": "^1.4.4",

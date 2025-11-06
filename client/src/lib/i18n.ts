@@ -1020,7 +1020,136 @@ export interface Translation {
     productApplicationsPlaceholder: string;
     productApplicationsHelp: string;
     batchInfoNotAvailable: string;
+    displayMode: string;
+    displayModeHelp: string;
+    displayModeImages: string;
+    displayMode3D: string;
+    model3dFile: string;
+    uploadModel3d: string;
+    viewModel3d: string;
+    deleteModel3d: string;
+    model3dHelp: string;
+    model3dFormats: string;
+    model3dUploaded: string;
+    model3dDeleted: string;
+    invalidModel3dFormat: string;
+    model3dTooLarge: string;
+    rotate3dModel: string;
+    zoom3dModel: string;
+    loading3dModel: string;
+    error3dModel: string;
   };
+  
+  // Auth & Login
+  auth: {
+    login: string;
+    register: string;
+    password: string;
+    confirmPassword: string;
+    forgotPassword: string;
+    loggingIn: string;
+    registering: string;
+    welcome: string;
+    loginSuccess: string;
+    invalidCredentials: string;
+    loginError: string;
+    serverError: string;
+    networkError: string;
+    networkErrorDesc: string;
+    enterEmail: string;
+    enterPassword: string;
+    switchToLogin: string;
+    customerLogin: string;
+    signInOrRegister: string;
+    verifyMobileNumber: string;
+    verificationCodeDescription: string;
+    smsVerification: string;
+    verificationCodeSent: string;
+    codeSentTo: string;
+    enterVerificationCode: string;
+    enterCodePlaceholder: string;
+    enter4DigitCode: string;
+    fourDigitCode: string;
+    sixDigitCode: string;
+    verifying: string;
+    verifyCode: string;
+    verifyCodes: string;
+    resend: string;
+    back: string;
+    basicInformation: string;
+    contactInformation: string;
+    addressInformation: string;
+    additionalInformation: string;
+    mobileNumber: string;
+    whatsappNumber: string;
+    whatsappDefault: string;
+    whatsappOptional: string;
+    leaveEmptyIfSame: string;
+    alternatePhone: string;
+    province: string;
+    selectProvince: string;
+    selectCity: string;
+    selectCountry: string;
+    fullAddress: string;
+    secondaryAddress: string;
+    postalCode: string;
+    industry: string;
+    businessType: string;
+    companySize: string;
+    manufacturer: string;
+    distributor: string;
+    retailer: string;
+    endUser: string;
+    small: string;
+    medium: string;
+    large: string;
+    enterprise: string;
+    communicationPreference: string;
+    preferredLanguage: string;
+    english: string;
+    arabic: string;
+    persian: string;
+    marketingConsent: string;
+    requiredField: string;
+    verificationCodesSent: string;
+    verificationCodesError: string;
+    registrationSuccessful: string;
+    accountCreated: string;
+    registrationError: string;
+    invalidCodes: string;
+    verificationError: string;
+    smsCodeLabel: string;
+    emailCodeLabel: string;
+    sentTo: string;
+    and: string;
+    verify: string;
+    emailAlreadyRegistered: string;
+    emailAlreadyRegisteredDesc: string;
+    emailAlreadyRegisteredMessage: string;
+    creatingAccount: string;
+    createAccount: string;
+    dualVerification: string;
+    verificationCodesSentTo: string;
+    profileUpdated: string;
+    profileUpdatedDesc: string;
+    updateError: string;
+    updateFailed: string;
+    registrationVerificationSent: string;
+    verificationSentDesc: string;
+    validation: {
+      invalidEmail: string;
+      passwordMin6: string;
+      firstNameMin2: string;
+      lastNameMin2: string;
+      phoneMin10: string;
+      countryRequired: string;
+      provinceRequired: string;
+      cityRequired: string;
+      addressMin5: string;
+      passwordsMustMatch: string;
+    };
+  };
+  
   addProduct: string;
   editProduct: string;
   productName: string;
@@ -1919,7 +2048,6 @@ export const translations: Record<Language, Translation> = {
       outOfStock: 'Out of Stock',
       activeFilters: 'Active Filters:',
       statusLabel: 'Status',
-      categoryLabel: 'Category',
       visibilityLabel: 'Visibility',
       hiddenProducts: 'Hidden Products',
       visibleProducts: 'Visible Products',
@@ -1948,6 +2076,24 @@ export const translations: Record<Language, Translation> = {
       productApplicationsPlaceholder: 'Enter product applications (one per line)',
       productApplicationsHelp: 'Common uses and applications - one per line',
       batchInfoNotAvailable: 'Batch information not available',
+      displayMode: 'Product Display Mode',
+      displayModeHelp: 'Choose how customers will view this product in the shop',
+      displayModeImages: 'Image Gallery (3 photos)',
+      displayMode3D: '3D Interactive Model',
+      model3dFile: '3D Model File',
+      uploadModel3d: 'Upload 3D Model',
+      viewModel3d: 'View 3D Model',
+      deleteModel3d: 'Delete 3D Model',
+      model3dHelp: 'Upload GLB or GLTF file for interactive 3D product viewing (Max 10MB)',
+      model3dFormats: 'Supported formats: GLB, GLTF',
+      model3dUploaded: '3D model uploaded successfully',
+      model3dDeleted: '3D model deleted successfully',
+      invalidModel3dFormat: 'Only GLB and GLTF files are allowed for 3D models',
+      model3dTooLarge: '3D model file must be less than 10MB',
+      rotate3dModel: 'Drag to rotate',
+      zoom3dModel: 'Scroll to zoom',
+      loading3dModel: 'Loading 3D model...',
+      error3dModel: 'Error loading 3D model',
     },
     
     // Batch Management
@@ -3274,7 +3420,6 @@ export const translations: Record<Language, Translation> = {
       outOfStock: 'نفذ من المخزون',
       activeFilters: 'الفلاتر النشطة:',
       statusLabel: 'الحالة',
-      categoryLabel: 'الفئة',
       visibilityLabel: 'الرؤية',
       hiddenProducts: 'المنتجات المخفية',
       visibleProducts: 'المنتجات الظاهرة',
@@ -3303,6 +3448,24 @@ export const translations: Record<Language, Translation> = {
       productApplicationsPlaceholder: 'أدخل تطبيقات المنتج (واحدة في كل سطر)',
       productApplicationsHelp: 'الاستخدامات والتطبيقات الشائعة - واحدة في كل سطر',
       batchInfoNotAvailable: 'معلومات الدفعة غير متاحة',
+      displayMode: 'وضع عرض المنتج',
+      displayModeHelp: 'اختر كيف سيشاهد العملاء هذا المنتج في المتجر',
+      displayModeImages: 'معرض الصور (3 صور)',
+      displayMode3D: 'نموذج ثلاثي الأبعاد تفاعلي',
+      model3dFile: 'ملف النموذج ثلاثي الأبعاد',
+      uploadModel3d: 'رفع نموذج ثلاثي الأبعاد',
+      viewModel3d: 'عرض النموذج ثلاثي الأبعاد',
+      deleteModel3d: 'حذف النموذج ثلاثي الأبعاد',
+      model3dHelp: 'ارفع ملف GLB أو GLTF لعرض المنتج بشكل تفاعلي ثلاثي الأبعاد (أقصى حجم 10 ميجابايت)',
+      model3dFormats: 'التنسيقات المدعومة: GLB, GLTF',
+      model3dUploaded: 'تم رفع النموذج ثلاثي الأبعاد بنجاح',
+      model3dDeleted: 'تم حذف النموذج ثلاثي الأبعاد بنجاح',
+      invalidModel3dFormat: 'يُسمح فقط بملفات GLB و GLTF للنماذج ثلاثية الأبعاد',
+      model3dTooLarge: 'يجب أن يكون حجم ملف النموذج ثلاثي الأبعاد أقل من 10 ميجابايت',
+      rotate3dModel: 'اسحب للتدوير',
+      zoom3dModel: 'قم بالتمرير للتكبير',
+      loading3dModel: 'جاري تحميل النموذج ثلاثي الأبعاد...',
+      error3dModel: 'خطأ في تحميل النموذج ثلاثي الأبعاد',
     },
     
     // Batch Management
