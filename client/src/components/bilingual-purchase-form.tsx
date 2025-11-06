@@ -121,6 +121,31 @@ const translations = {
     orderAndReceiptRegistered: "✅ Order and Bank Receipt Registered",
     orderReceiptSuccess: "Your order with bank receipt has been successfully registered",
     pleaseUploadReceipt: "Please upload your bank transfer receipt",
+    
+    // Shipping and vehicle selection
+    shipmentWeight: "Shipment Weight:",
+    kilogram: "kg",
+    subtotalWithoutShipping: "Subtotal (Without Shipping)",
+    smartVehicleSelection: "Smart Vehicle Selection - Automatic Best Option Calculation",
+    smartVehicleLabel: "Smart Vehicle Selection:",
+    smartVehicleDescription: "System selects the best vehicle based on weight, destination, and lowest cost",
+    selectedVehicle: "Selected Vehicle:",
+    basePrice: "Base Price:",
+    distanceCost: "Distance Cost:",
+    smartShippingCost: "Smart Shipping Cost",
+    useWallet: "Use Wallet (Maximum",
+    amountFromWallet: "Amount from Wallet (Maximum",
+    selfPickup: "Self Pickup - Free",
+    selfPickupLabel: "Self Pickup:",
+    free: "Free",
+    calculating: "Calculating...",
+    waitingForAddress: "Waiting for destination address...",
+    selfPickupDescription: "You will pick up the goods yourself from the company location - no shipping costs",
+    vehicles: "vehicles",
+    vehicleBreakdown: "Breakdown of selected vehicles:",
+    vehicle: "Vehicle",
+    totalLoadWeight: "Total load weight:",
+    totalCost: "Total cost:",
 
   },
   ar: {
@@ -220,6 +245,31 @@ const translations = {
     orderAndReceiptRegistered: "✅ تم تسجيل الطلب والإيصال البنكي",
     orderReceiptSuccess: "تم تسجيل طلبك مع الإيصال البنكي بنجاح",
     pleaseUploadReceipt: "يرجى تحميل إيصال التحويل البنكي",
+    
+    // Shipping and vehicle selection
+    shipmentWeight: "وزن الشحنة:",
+    kilogram: "كجم",
+    subtotalWithoutShipping: "المجموع (بدون تكلفة الشحن)",
+    smartVehicleSelection: "اختيار المركبة الذكي - حساب تلقائي لأفضل خيار",
+    smartVehicleLabel: "اختيار المركبة الذكي:",
+    smartVehicleDescription: "يختار النظام أفضل مركبة بناءً على الوزن والوجهة وأقل تكلفة",
+    selectedVehicle: "المركبة المختارة:",
+    basePrice: "السعر الأساسي:",
+    distanceCost: "تكلفة المسافة:",
+    smartShippingCost: "تكلفة الشحن الذكي",
+    useWallet: "استخدام المحفظة (الحد الأقصى",
+    amountFromWallet: "المبلغ من المحفظة (الحد الأقصى",
+    selfPickup: "الاستلام الذاتي - مجاناً",
+    selfPickupLabel: "الاستلام الذاتي:",
+    free: "مجاناً",
+    calculating: "جارٍ الحساب...",
+    waitingForAddress: "في انتظار عنوان الوجهة...",
+    selfPickupDescription: "ستستلم البضائع بنفسك من موقع الشركة - بدون تكاليف شحن",
+    vehicles: "مركبات",
+    vehicleBreakdown: "تفصيل المركبات المختارة:",
+    vehicle: "مركبة",
+    totalLoadWeight: "إجمالي وزن الحمولة:",
+    totalCost: "التكلفة الإجمالية:",
   }
 };
 
@@ -1844,7 +1894,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               
               {/* Total (without shipping) */}
               <div className="flex justify-between font-semibold text-base border-t pt-2">
-                <span>مجموع (بدون هزینه حمل)</span>
+                <span>{t.subtotalWithoutShipping}</span>
                 <span className="text-primary">{formatCurrency(subtotalAmount + totalTaxAmount)}</span>
               </div>
               
@@ -1853,7 +1903,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 <div className="flex justify-between items-center">
                   <label className="text-sm font-medium">{t.deliveryMethod} *</label>
                   <div className="text-sm text-muted-foreground bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md border">
-                    ⚖️ وزن محموله: <span className="font-semibold text-gray-700 dark:text-gray-300">{totalWeight.toFixed(2)} کیلوگرم</span>
+                    ⚖️ {t.shipmentWeight} <span className="font-semibold text-gray-700 dark:text-gray-300">{totalWeight.toFixed(2)} {t.kilogram}</span>
                   </div>
                 </div>
                 {isLoadingShippingRates ? (
@@ -1879,7 +1929,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         if (rate.deliveryMethod === 'smart_vehicle' || rate.delivery_method === 'smart_vehicle') {
                           return (
                             <option key={rate.id} value={rate.id} style={{backgroundColor: '#d1fae5', color: '#047857'}}>
-                              🚚 انتخاب هوشمند خودرو - محاسبه خودکار بهترین گزینه
+                              🚚 {t.smartVehicleSelection}
                             </option>
                           );
                         }
@@ -1888,7 +1938,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         if (rate.deliveryMethod === 'self_pickup' || rate.delivery_method === 'self_pickup') {
                           return (
                             <option key={rate.id} value={rate.id} style={{backgroundColor: '#dbeafe', color: '#1d4ed8'}}>
-                              🚶‍♂️ حمل توسط خودم - رایگان
+                              🚶‍♂️ {t.selfPickup}
                             </option>
                           );
                         }
@@ -1917,63 +1967,63 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                             return (
                               <div className="space-y-2">
                                 <div className="flex justify-between items-center text-sm">
-                                  <span className="text-emerald-700 font-medium">🚚 انتخاب هوشمند خودرو:</span>
+                                  <span className="text-emerald-700 font-medium">🚚 {t.smartVehicleLabel}</span>
                                   <div className="text-right">
                                     {optimalVehicle ? (
                                       <div>
                                         <div className="font-bold text-emerald-800">
                                           {optimalVehicle.vehicleType === 'multiple' 
-                                            ? `${optimalVehicle.totalVehicles} خودرو` 
+                                            ? `${optimalVehicle.totalVehicles} ${t.vehicles}` 
                                             : optimalVehicle.vehicleName}
                                         </div>
                                         <div className="text-xs text-emerald-600">{formatCurrency(optimalVehicle.totalCost)}</div>
                                       </div>
                                     ) : smartDeliveryLoading ? (
-                                      <span className="font-bold text-emerald-800">در حال محاسبه...</span>
+                                      <span className="font-bold text-emerald-800">{t.calculating}</span>
                                     ) : (
-                                      <span className="font-bold text-orange-600">در انتظار آدرس مقصد...</span>
+                                      <span className="font-bold text-orange-600">{t.waitingForAddress}</span>
                                     )}
                                   </div>
                                 </div>
                                 <div className="text-xs text-emerald-600 bg-emerald-50 p-2 rounded border border-emerald-200">
-                                  ✓ سیستم بهترین خودرو را بر اساس وزن، مقصد و کمترین هزینه انتخاب می‌کند
+                                  ✓ {t.smartVehicleDescription}
                                   {optimalVehicle && (
                                     <div className="mt-1 font-medium">
                                       {optimalVehicle.summary?.vehicles?.length > 1 ? (
                                         <div>
                                           <div className="font-semibold text-emerald-700 mb-2">
-                                            🚚 تفکیک {optimalVehicle.summary.totalVehicles} خودرو انتخاب شده:
+                                            🚚 {t.vehicleBreakdown.replace(':', '')} ({optimalVehicle.summary.totalVehicles})
                                           </div>
                                           <div className="text-xs space-y-2 bg-white p-2 rounded border">
                                             {optimalVehicle.summary.vehicles.map((vehicle: any, index: number) => (
                                               <div key={index} className="flex justify-between items-center border-b pb-1">
                                                 <div className="flex-1">
-                                                  <span className="font-medium text-blue-700">خودرو {index + 1}:</span>
+                                                  <span className="font-medium text-blue-700">{t.vehicle} {index + 1}:</span>
                                                   <span className="ml-2 text-gray-700">{vehicle.vehicleName}</span>
                                                 </div>
                                                 <div className="text-right">
-                                                  <div className="font-bold text-orange-600">{vehicle.loadWeight} کیلو</div>
+                                                  <div className="font-bold text-orange-600">{vehicle.loadWeight} {t.kilogram}</div>
                                                   <div className="text-xs text-gray-500">{formatCurrency(vehicle.totalCost)}</div>
                                                 </div>
                                               </div>
                                             ))}
                                             <div className="mt-2 pt-2 border-t flex justify-between font-bold">
-                                              <span>کل وزن بار:</span>
-                                              <span className="text-green-700">{optimalVehicle.summary.totalWeight} کیلو</span>
+                                              <span>{t.totalLoadWeight}</span>
+                                              <span className="text-green-700">{optimalVehicle.summary.totalWeight} {t.kilogram}</span>
                                             </div>
                                             <div className="flex justify-between font-bold">
-                                              <span>کل هزینه:</span>
+                                              <span>{t.totalCost}</span>
                                               <span className="text-red-600">{formatCurrency(optimalVehicle.summary.totalCost)}</span>
                                             </div>
                                           </div>
                                         </div>
                                       ) : (
                                         <div>
-                                          <span className="text-blue-700">خودرو انتخابی: {optimalVehicle.vehicleName}</span>
+                                          <span className="text-blue-700">{t.selectedVehicle} {optimalVehicle.vehicleName}</span>
                                           {optimalVehicle.basePrice && (
                                             <div className="text-xs text-gray-600 mt-1">
-                                              قیمت پایه: {formatCurrency(optimalVehicle.basePrice)} | 
-                                              هزینه مسافت: {formatCurrency(optimalVehicle.distanceCost || 0)}
+                                              {t.basePrice} {formatCurrency(optimalVehicle.basePrice)} | 
+                                              {t.distanceCost} {formatCurrency(optimalVehicle.distanceCost || 0)}
                                             </div>
                                           )}
                                         </div>
@@ -1990,11 +2040,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                             return (
                               <div className="space-y-2">
                                 <div className="flex justify-between items-center text-sm">
-                                  <span className="text-blue-700 font-medium">🚶‍♂️ حمل توسط خودم:</span>
-                                  <span className="font-bold text-blue-800">رایگان</span>
+                                  <span className="text-blue-700 font-medium">🚶‍♂️ {t.selfPickupLabel}</span>
+                                  <span className="font-bold text-blue-800">{t.free}</span>
                                 </div>
                                 <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded border border-blue-200">
-                                  ✓ شما خودتان کالا را از محل شرکت تحویل خواهید گرفت - بدون هزینه حمل
+                                  ✓ {t.selfPickupDescription}
                                 </div>
                               </div>
                             );
@@ -2042,12 +2092,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       
                       // Handle smart vehicle display
                       if (selectedRate && (selectedRate.deliveryMethod === 'smart_vehicle' || selectedRate.delivery_method === 'smart_vehicle')) {
-                        return '🚚 هزینه ارسال هوشمند';
+                        return `🚚 ${t.smartShippingCost}`;
                       }
                       
                       // Handle self pickup display  
                       if (selectedRate && (selectedRate.deliveryMethod === 'self_pickup' || selectedRate.delivery_method === 'self_pickup')) {
-                        return '🚶‍♂️ حمل توسط خودم';
+                        return `🚶‍♂️ ${t.selfPickupLabel.replace(':', '')}`;
                       }
                       
                       return selectedRate?.name || t.deliveryMethod;
@@ -2138,7 +2188,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     <RadioGroupItem value="wallet_combined" id="wallet_combined" />
                     <Label htmlFor="wallet_combined" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="w-4 h-4 text-green-600" />
-                      <span className="font-semibold">استفاده از کیف پول (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} IQD)</span>
+                      <span className="font-semibold">{t.useWallet} {formatIQDAmount(Math.min(walletBalance, totalAmount))} IQD)</span>
                     </Label>
                   </div>
                 )}
@@ -2182,7 +2232,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               {paymentMethod === 'wallet_combined' && (
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} IQD)</Label>
+                    <Label htmlFor="walletAmount">{t.amountFromWallet} {formatIQDAmount(Math.min(walletBalance, totalAmount))} IQD)</Label>
                     <Input
                       id="walletAmount"
                       type="number"
