@@ -732,7 +732,7 @@ export default function ProductsPage() {
         : [],
       tags: typeof data.tags === 'string' && data.tags.trim()
         ? data.tags.split(',').map(t => t.trim()).filter(t => t.length > 0)
-        : ["شیمیایی"],
+        : [language === 'ar' ? 'كيميائي' : 'chemical'],
       // Handle specifications - try to parse as JSON if possible, otherwise keep as string
       specifications: (() => {
         if (!data.specifications || typeof data.specifications !== 'string') return {};
