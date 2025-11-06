@@ -104,6 +104,23 @@ const translations = {
     recipientMobileInstruction: "If recipient is different person, enter their mobile number",
     crmAddressDisabled: "Default Address (Disabled)",
     crmPhoneDisabled: "Default Phone (Disabled)",
+    
+    // Toast messages for payment redirect
+    redirectingToFIB: "Redirecting to FIB",
+    redirectingToFIBDesc: "Redirecting you to FIB payment system...",
+    redirectingToBank: "Redirecting to Bank Gateway",
+    redirectingToBankDesc: "Redirecting you to bank payment gateway...",
+    orderRegistered: "Order Registered",
+    orderFullyPaidWallet: "Your order has been successfully registered and fully paid from your wallet. Order number:",
+    walletPaymentSuccess: "✅ Wallet Payment Successful",
+    orderFullyPaidAmount: "Your order for the amount of {amount} has been fully paid from your wallet",
+    onlinePaymentDisabled: "Online Payment Disabled",
+    bankGatewayUnavailable: "Bank gateway is currently unavailable. Please choose another payment method.",
+    redirectingToPaymentGateway: "Redirecting to Payment Gateway",
+    redirectingToPaymentDesc: "Redirecting you to payment gateway...",
+    orderAndReceiptRegistered: "✅ Order and Bank Receipt Registered",
+    orderReceiptSuccess: "Your order with bank receipt has been successfully registered",
+    pleaseUploadReceipt: "Please upload your bank transfer receipt",
 
   },
   ar: {
@@ -186,6 +203,23 @@ const translations = {
     recipientMobileInstruction: "اگر گیرنده کالا شخص دیگری است، شماره موبایل ایشان را وارد کنید",
     crmAddressDisabled: "آدرس پیش‌فرض (غیرفعال)",
     crmPhoneDisabled: "شماره پیش‌فرض (غیرفعال)",
+    
+    // Toast messages for payment redirect
+    redirectingToFIB: "الانتقال إلى FIB",
+    redirectingToFIBDesc: "جارٍ نقلك إلى نظام الدفع FIB...",
+    redirectingToBank: "الانتقال إلى بوابة البنك",
+    redirectingToBankDesc: "جارٍ نقلك إلى بوابة الدفع البنكية...",
+    orderRegistered: "تم تسجيل الطلب",
+    orderFullyPaidWallet: "تم تسجيل طلبك بنجاح ودفعه بالكامل من محفظتك الرقمية. رقم الطلب:",
+    walletPaymentSuccess: "✅ الدفع من المحفظة ناجح",
+    orderFullyPaidAmount: "تم دفع طلبك بمبلغ {amount} بالكامل من محفظتك الرقمية",
+    onlinePaymentDisabled: "الدفع عبر الإنترنت معطل",
+    bankGatewayUnavailable: "بوابة البنك غير متاحة حاليًا. يرجى اختيار طريقة دفع أخرى.",
+    redirectingToPaymentGateway: "الانتقال إلى بوابة الدفع",
+    redirectingToPaymentDesc: "جارٍ نقلك إلى بوابة الدفع...",
+    orderAndReceiptRegistered: "✅ تم تسجيل الطلب والإيصال البنكي",
+    orderReceiptSuccess: "تم تسجيل طلبك مع الإيصال البنكي بنجاح",
+    pleaseUploadReceipt: "يرجى تحميل إيصال التحويل البنكي",
   }
 };
 
@@ -1355,8 +1389,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         console.log('✅ [FULL WALLET PAYMENT] Order fully paid by wallet - completing without bank gateway');
         
         toast({
-          title: "سفارش ثبت شد",
-          description: `سفارش شما با موفقیت ثبت شد و کاملاً از کیف پول پرداخت شد. شماره سفارش: ${response.orderNumber || response.order?.orderNumber || 'N/A'}`,
+          title: t.orderRegistered,
+          description: `${t.orderFullyPaidWallet} ${response.orderNumber || response.order?.orderNumber || 'N/A'}`,
         });
         
         // Complete the order without bank gateway
@@ -1376,10 +1410,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           console.log('🏦 [ONLINE PAYMENT] Redirecting to bank gateway:', gatewayUrl);
           
           toast({
-            title: paymentMethod === 'fib_online' ? "انتقال به FIB" : "انتقال به درگاه بانکی",
+            title: paymentMethod === 'fib_online' ? t.redirectingToFIB : t.redirectingToBank,
             description: paymentMethod === 'fib_online' 
-              ? "در حال انتقال شما به سیستم پرداخت FIB..." 
-              : "در حال انتقال شما به درگاه پرداخت بانکی..."
+              ? t.redirectingToFIBDesc
+              : t.redirectingToBankDesc
           });
           
           // Redirect to payment gateway
@@ -1392,8 +1426,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           console.log('❌ [ONLINE PAYMENT] Bank gateway unavailable - no order created');
           
           toast({
-            title: "پرداخت آنلاین غیرفعال",
-            description: response.message || "درگاه بانکی در حال حاضر در دسترس نیست. لطفاً روش پرداخت دیگری انتخاب کنید.",
+            title: t.onlinePaymentDisabled,
+            description: response.message || t.bankGatewayUnavailable,
             variant: "destructive"
           });
           return;
@@ -1405,8 +1439,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           (response.order?.paymentMethod === 'wallet_full') ||
           (response.order?.paymentStatus === 'paid' && response.order?.walletAmountUsed > 0)) {
         toast({
-          title: "✅ پرداخت با کیف پول موفق",
-          description: `سفارش شما به مبلغ ${formatCurrency(totalAmount)} به طور کامل با کیف پول پرداخت شد`
+          title: t.walletPaymentSuccess,
+          description: t.orderFullyPaidAmount.replace('{amount}', formatCurrency(totalAmount))
         });
         onOrderComplete();
       }
@@ -1415,8 +1449,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         const gatewayUrl = response.paymentUrl || response.paymentGatewayUrl;
         
         toast({
-          title: "انتقال به درگاه پرداخت",
-          description: "در حال انتقال شما به درگاه پرداخت..."
+          title: t.redirectingToPaymentGateway,
+          description: t.redirectingToPaymentDesc
         });
         
         // Redirect to payment gateway
@@ -1429,13 +1463,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       else if (paymentMethod === 'bank_receipt') {
         if (selectedReceiptFile) {
           toast({
-            title: "✅ سفارش و فیش بانکی ثبت شد",
-            description: "سفارش شما با فیش بانکی با موفقیت ثبت شد"
+            title: t.orderAndReceiptRegistered,
+            description: t.orderReceiptSuccess
           });
         } else {
           toast({
-            title: "سفارش ثبت شد",
-            description: "لطفاً فیش واریزی خود را آپلود کنید"
+            title: t.orderRegistered,
+            description: t.pleaseUploadReceipt
           });
           
           // Redirect to bank receipt upload page only if no file was uploaded
