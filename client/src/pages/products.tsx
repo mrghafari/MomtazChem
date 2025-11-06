@@ -25,6 +25,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import JsBarcode from "jsbarcode";
 import VisualBarcode from "@/components/ui/visual-barcode";
 import FIFOBatchDisplay from "@/components/ui/fifo-batch-display";
+import ProductModel3DViewer from "@/components/ProductModel3DViewer";
 
 // Custom form schema that handles numeric inputs properly  
 // Note: Validation messages will be handled in the form, not in schema
@@ -1141,7 +1142,7 @@ export default function ProductsPage() {
       showMsdsToCustomers: product.showMsdsToCustomers || false,
       catalogFileName: (product as any).catalogFileName || "",
       showCatalogToCustomers: product.showCatalogToCustomers || false,
-      displayMode: product.displayMode || "images",
+      displayMode: (product.displayMode as "images" | "3d_model") || "images",
       model3dKey: model3dKeyValue || "",
       model3dFileName: product.model3dFileName || "",
       syncWithShop: product.syncWithShop !== null && product.syncWithShop !== undefined ? product.syncWithShop : true,
@@ -3135,22 +3136,23 @@ export default function ProductsPage() {
                             <div className="relative border-2 border-dashed border-purple-300 rounded-lg p-4 text-center bg-purple-50">
                               {model3dPreview ? (
                                 <div className="relative">
-                                  <div className="bg-purple-100 p-4 rounded-lg">
-                                    <Package className="mx-auto h-12 w-12 text-purple-600" />
-                                    <p className="mt-2 text-sm text-gray-700">{form.getValues('model3dFileName') || 'model.glb'}</p>
-                                  </div>
+                                  <ProductModel3DViewer
+                                    model3dKey={model3dPreview}
+                                    productName={form.getValues('name') || '3D Model Preview'}
+                                    className="w-full h-[300px]"
+                                  />
                                   <Button
                                     type="button"
                                     variant="outline"
                                     size="sm"
-                                    className="absolute top-2 right-2 h-6 w-6 p-0"
+                                    className="absolute top-2 right-2 h-8 w-8 p-0 bg-white/90 hover:bg-white"
                                     onClick={() => {
                                       setModel3dPreview(null);
                                       form.setValue('model3dKey', '');
                                       form.setValue('model3dFileName', '');
                                     }}
                                   >
-                                    <X className="h-3 w-3" />
+                                    <X className="h-4 w-4" />
                                   </Button>
                                 </div>
                               ) : (
