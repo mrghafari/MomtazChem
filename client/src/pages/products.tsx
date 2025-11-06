@@ -658,10 +658,10 @@ export default function ProductsPage() {
       if (!data.netWeight || Number(data.netWeight) <= 0) errors.netWeight = "وزن خالص اجباری است";
     }
     
-    // For chemical products, if there's inventory addition, batch number is required
-    if (!data.isNonChemical && data.inventoryAddition && Number(data.inventoryAddition) > 0) {
+    // For chemical products, if there's inventory addition AND creating NEW batch, batch number is required
+    if (!data.isNonChemical && data.inventoryAddition && Number(data.inventoryAddition) > 0 && selectedBatchId === 'new') {
       if (!data.newBatchNumber?.trim()) {
-        errors.newBatchNumber = "برای محصولات شیمیایی با افزایش موجودی، شماره بچ اجباری است";
+        errors.newBatchNumber = "برای ایجاد دسته جدید، شماره بچ اجباری است";
       }
     }
     
@@ -689,7 +689,8 @@ export default function ProductsPage() {
     console.log('🔍 [DEBUG] editingProduct state:', editingProduct?.id);
 
     // Check if this is a batch addition for processing
-    const isBatchAddition = data.inventoryAddition && Number(data.inventoryAddition) > 0 && data.newBatchNumber?.trim();
+    // Only consider it a new batch if selectedBatchId is 'new'
+    const isBatchAddition = data.inventoryAddition && Number(data.inventoryAddition) > 0 && selectedBatchId === 'new' && data.newBatchNumber?.trim();
 
     // Complete validation for both create and update operations
     const errors = validateRequiredFields(data);
@@ -719,7 +720,8 @@ export default function ProductsPage() {
       batchNumber: data.newBatchNumber?.trim() || null,
       // New inventory addition fields
       inventoryAddition: Number(data.inventoryAddition) || 0,
-      newBatchNumber: data.newBatchNumber?.trim() || null,
+      // CRITICAL: Only send newBatchNumber if creating a NEW batch, not updating existing one
+      newBatchNumber: (selectedBatchId === 'new' && data.newBatchNumber?.trim()) ? data.newBatchNumber.trim() : null,
       // Convert string fields to arrays for backend compatibility
       features: typeof data.features === 'string' && data.features.trim() 
         ? data.features.split('\n').map(f => f.trim()).filter(f => f.length > 0)
@@ -1084,6 +1086,7 @@ export default function ProductsPage() {
       setSelectedBatchId('new');
       // Reset form for new batch creation - clear the batch number field
       form.setValue('newBatchNumber', '');
+      form.setValue('inventoryAddition', 0);
       return;
     }
 
@@ -1095,8 +1098,10 @@ export default function ProductsPage() {
     if (selectedBatch) {
       // Load the batch product data into the form
       openEditDialog(selectedBatch);
-      // Set the batch number to the selected batch's number
-      form.setValue('newBatchNumber', selectedBatch.batchNumber || `ID-${selectedBatch.id}`);
+      // For existing batch, show batch number but don't set newBatchNumber
+      // This way backend knows to add to existing stock instead of creating new batch
+      form.setValue('newBatchNumber', ''); // Clear this so backend adds to existing
+      form.setValue('inventoryAddition', 0); // Reset addition field
     }
   };
 
@@ -2371,7 +2376,8 @@ export default function ProductsPage() {
                           name="newBatchNumber"
                           render={({ field }) => {
                             const isAddingNewBatch = selectedBatchId === 'new';
-                            const currentBatchNumber = availableBatches.find(b => b.id === selectedBatchId)?.batchNumber || '';
+                            const currentProduct = editingProduct;
+                            const currentBatchNumber = currentProduct?.batchNumber || `ID-${currentProduct?.id || ''}`;
                             
                             return (
                             <FormItem>
@@ -2383,7 +2389,7 @@ export default function ProductsPage() {
                                     <HelpCircle className="h-3 w-3 text-gray-400" />
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>{isAddingNewBatch ? 'شماره دسته برای کاردکس - برای محصولات جدید و موجود' : 'شماره دسته فعلی (فقط نمایش)'}</p>
+                                    <p>{isAddingNewBatch ? 'شماره دسته جدید برای کاردکس' : 'شماره دسته فعلی - موجودی به این دسته اضافه می‌شود'}</p>
                                   </TooltipContent>
                                 </Tooltip>
                               </FormLabel>
@@ -2400,6 +2406,11 @@ export default function ProductsPage() {
                               <FormMessage />
                               {validationErrors.newBatchNumber && isAddingNewBatch && (
                                 <p className="text-sm text-red-600 mt-1">{validationErrors.newBatchNumber}</p>
+                              )}
+                              {!isAddingNewBatch && (
+                                <p className="text-xs text-orange-600 mt-1">
+                                  ✅ موجودی به این دسته اضافه خواهد شد
+                                </p>
                               )}
                             </FormItem>
                             );
