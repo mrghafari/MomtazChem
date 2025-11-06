@@ -165,7 +165,6 @@ export default function ProductsPage() {
   const [uploadingCatalog, setUploadingCatalog] = useState(false);
   const [uploadingMsds, setUploadingMsds] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [refreshKey, setRefreshKey] = useState(0);
   const [deletingProduct, setDeletingProduct] = useState<ShowcaseProduct | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -362,7 +361,6 @@ export default function ProductsPage() {
     onSuccess: async () => {
       setIsSubmitting(false);
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      setRefreshKey(prev => prev + 1); // Force component re-render
       setDialogOpen(false);
       setImagePreview(null);
       setImagePreviews([null, null, null]); // Reset multiple image previews
@@ -375,8 +373,6 @@ export default function ProductsPage() {
       });
       // Immediate kardex sync after product creation
       await triggerKardexSync();
-      // Immediate refresh to show changes
-      window.location.reload();
     },
     onError: (error: any) => {
       setIsSubmitting(false);
@@ -420,8 +416,6 @@ export default function ProductsPage() {
       });
       // Immediate kardex sync after product update
       await triggerKardexSync();
-      // Immediate refresh to show changes
-      window.location.reload();
     },
     onError: (error: any) => {
       console.error('❌ [DEBUG] Update mutation failed:', error);
@@ -451,7 +445,6 @@ export default function ProductsPage() {
     onSuccess: async () => {
       console.log(`✅ [DELETE] Product deleted successfully`);
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      setRefreshKey(prev => prev + 1); // Force component re-render
       setDeletingProduct(null); // Close the confirmation dialog
       toast({
         title: "موفقیت",
@@ -459,8 +452,6 @@ export default function ProductsPage() {
       });
       // Immediate kardex sync after product deletion
       await triggerKardexSync();
-      // Immediate refresh to show changes
-      window.location.reload();
     },
     onError: (error: any) => {
       console.error(`❌ [DELETE] Delete failed:`, error);
@@ -498,13 +489,10 @@ export default function ProductsPage() {
     onSuccess: (result) => {
       console.log('✅ [DEBUG] Toggle sync successful:', result);
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      setRefreshKey(prev => prev + 1);
       toast({
         title: "به‌روزرسانی موفقیت‌آمیز",
         description: "وضعیت نمایش در فروشگاه به‌روزرسانی شد",
       });
-      // Immediate refresh to show changes
-      window.location.reload();
     },
     onError: (error: any) => {
       console.error('❌ [DEBUG] Toggle sync failed:', error);
@@ -1354,7 +1342,6 @@ export default function ProductsPage() {
               queryClient.clear();
               queryClient.removeQueries({ queryKey: ["/api/products"] });
               refetch();
-              setRefreshKey(prev => prev + 1);
               toast({
                 title: "Cache Cleared",
                 description: "Data refreshed successfully",
