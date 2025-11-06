@@ -1867,12 +1867,17 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   .filter((setting: any) => setting.enabled)
                                   .sort((a: any, b: any) => (b.priority || 0) - (a.priority || 0))
                                   .map((setting: any) => {
+                                    // Get localized method name
+                                    const methodName = language === 'en' 
+                                      ? (setting.methodNameEn || setting.methodName)
+                                      : (setting.methodNameAr || setting.methodName);
+                                    
                                     // Special handling for wallet payment
                                     if (setting.methodKey === 'wallet') {
                                       if (!isUserLoggedIn || walletBalance <= 0) return null;
                                       return (
                                         <SelectItem key={setting.methodKey} value="wallet_combined">
-                                          {setting.methodName} - {t.checkout_page.walletBalance} {walletBalance.toLocaleString()} IQD
+                                          {methodName} - {t.checkout_page.walletBalance} {walletBalance.toLocaleString()} IQD
                                         </SelectItem>
                                       );
                                     }
@@ -1880,7 +1885,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                     // Regular payment methods
                                     return (
                                       <SelectItem key={setting.methodKey} value={setting.methodKey}>
-                                        {setting.methodName}
+                                        {methodName}
                                       </SelectItem>
                                     );
                                   })}
@@ -1955,12 +1960,17 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   .filter((setting: any) => setting.enabled)
                                   .sort((a: any, b: any) => (b.priority || 0) - (a.priority || 0))
                                   .map((setting: any) => {
+                                    // Get localized method name
+                                    const methodName = language === 'en' 
+                                      ? (setting.methodNameEn || setting.methodName)
+                                      : (setting.methodNameAr || setting.methodName);
+                                    
                                     // Special handling for wallet payment
                                     if (setting.methodKey === 'wallet') {
                                       if (!isUserLoggedIn || walletBalance <= 0) return null;
                                       return (
                                         <SelectItem key={setting.methodKey} value="wallet_combined">
-                                          {setting.methodName} - {t.checkout_page.walletBalance} {walletBalance.toLocaleString()} IQD
+                                          {methodName} - {t.checkout_page.walletBalance} {walletBalance.toLocaleString()} IQD
                                         </SelectItem>
                                       );
                                     }
@@ -1968,7 +1978,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                     // Regular payment methods
                                     return (
                                       <SelectItem key={setting.methodKey} value={setting.methodKey}>
-                                        {setting.methodName}
+                                        {methodName}
                                       </SelectItem>
                                     );
                                   })}

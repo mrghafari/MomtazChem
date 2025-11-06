@@ -1506,8 +1506,9 @@ export type ReviewHelpfulness = typeof reviewHelpfulness.$inferSelect;
 export const paymentMethodSettings = pgTable("payment_method_settings", {
   id: serial("id").primaryKey(),
   methodKey: text("method_key").notNull().unique(), // 'online_payment', 'wallet', 'bank_receipt', 'bank_transfer_grace'
-  methodName: text("method_name").notNull(), // Display name in Persian/Arabic
+  methodName: text("method_name").notNull(), // Display name (legacy, kept for backward compatibility)
   methodNameEn: text("method_name_en"), // Display name in English
+  methodNameAr: text("method_name_ar"), // Display name in Arabic
   enabled: boolean("enabled").default(true), // Whether this payment method is available
   priority: integer("priority").default(0), // Display order (higher = first)
   description: text("description"), // Description for admin panel
