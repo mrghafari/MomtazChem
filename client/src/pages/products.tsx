@@ -638,15 +638,15 @@ export default function ProductsPage() {
     const errors: Record<string, string> = {};
     
     // Validate category - MUST be selected
-    if (!data.category?.trim()) errors.category = "دسته‌بندی محصول اجباری است";
+    if (!data.category?.trim()) errors.category = t.productManagement.categoryRequired;
     
     // Validate Pricing & Inventory section
-    if (!data.sku?.trim()) errors.sku = "فیلد SKU اجباری است";
-    if (!data.barcode?.trim()) errors.barcode = "فیلد بارکد اجباری است";
-    if (!data.unitPrice || Number(data.unitPrice) <= 0) errors.unitPrice = "قیمت واحد اجباری است";
-    if (data.stockQuantity === undefined || data.stockQuantity === null || Number(data.stockQuantity) < 0) errors.stockQuantity = "موجودی اجباری است";
-    if (data.minStockLevel === undefined || data.minStockLevel === null || Number(data.minStockLevel) < 0) errors.minStockLevel = "حداقل موجودی اجباری است";
-    if (data.maxStockLevel === undefined || data.maxStockLevel === null || Number(data.maxStockLevel) < 0) errors.maxStockLevel = "حداکثر موجودی اجباری است";
+    if (!data.sku?.trim()) errors.sku = t.productManagement.barcodeRequired;
+    if (!data.barcode?.trim()) errors.barcode = t.productManagement.barcodeRequired;
+    if (!data.unitPrice || Number(data.unitPrice) <= 0) errors.unitPrice = t.productManagement.unitPriceRequired;
+    if (data.stockQuantity === undefined || data.stockQuantity === null || Number(data.stockQuantity) < 0) errors.stockQuantity = t.productManagement.stockRequired;
+    if (data.minStockLevel === undefined || data.minStockLevel === null || Number(data.minStockLevel) < 0) errors.minStockLevel = t.productManagement.minStockRequired;
+    if (data.maxStockLevel === undefined || data.maxStockLevel === null || Number(data.maxStockLevel) < 0) errors.maxStockLevel = t.productManagement.maxStockRequired;
     
     // Check if this is a batch addition
     const isBatchAddition = data.inventoryAddition && Number(data.inventoryAddition) > 0 && data.newBatchNumber?.trim();
@@ -656,28 +656,28 @@ export default function ProductsPage() {
     
     // Validate Weights & Batch section - only for NEW products, skip for non-chemical products, batch additions, and existing product edits
     if (!data.isNonChemical && !isBatchAddition && !isEditingExistingProduct) {
-      if (!data.netWeight || Number(data.netWeight) <= 0) errors.netWeight = "وزن خالص اجباری است";
+      if (!data.netWeight || Number(data.netWeight) <= 0) errors.netWeight = t.productManagement.netWeightRequired;
     }
     
     // For chemical products, if there's inventory addition AND creating NEW batch, batch number is required
     if (!data.isNonChemical && data.inventoryAddition && Number(data.inventoryAddition) > 0 && selectedBatchId === 'new') {
       if (!data.newBatchNumber?.trim()) {
-        errors.newBatchNumber = "برای ایجاد دسته جدید، شماره بچ اجباری است";
+        errors.newBatchNumber = t.productManagement.newBatchNumberRequired;
       }
     }
     
     // Gross weight is required for NEW products only - skip batch additions and existing product edits
     if (!isBatchAddition && !isEditingExistingProduct && (!data.grossWeight || Number(data.grossWeight) <= 0)) {
-      errors.grossWeight = "وزن ناخالص اجباری است";
+      errors.grossWeight = t.productManagement.grossWeightRequired;
     }
     
     // Logical consistency validation (only if both weights exist)
     if (data.grossWeight && data.netWeight && Number(data.grossWeight) < Number(data.netWeight)) {
-      errors.grossWeight = "وزن ناخالص باید بیشتر یا مساوی وزن خالص باشد";
+      errors.grossWeight = t.productManagement.grossWeightMinError;
     }
     
     if (data.minStockLevel && data.maxStockLevel && Number(data.minStockLevel) > Number(data.maxStockLevel)) {
-      errors.minStockLevel = "حداقل موجودی نمی‌تواند بیشتر از حداکثر موجودی باشد";
+      errors.minStockLevel = t.productManagement.minMaxStockError;
     }
     
     return errors;
