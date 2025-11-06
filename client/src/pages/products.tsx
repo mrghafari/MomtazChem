@@ -325,7 +325,7 @@ export default function ProductsPage() {
 
   // Delete batch function
   const handleDeleteBatch = async (batchId: number, batchNumber: string) => {
-    if (!confirm(`آیا مطمئن هستید که می‌خواهید batch "${batchNumber}" را حذف کنید؟`)) {
+    if (!confirm(t.productManagement.confirmBatchDelete.replace('{batchNumber}', batchNumber))) {
       return;
     }
 
@@ -337,8 +337,8 @@ export default function ProductsPage() {
       });
       
       toast({
-        title: "✅ batch حذف شد",
-        description: `batch "${batchNumber}" با موفقیت حذف شد`,
+        title: t.productManagement.batchDeleted,
+        description: t.productManagement.batchDeletedDesc.replace('{batchNumber}', batchNumber),
       });
 
       // Refresh products list
@@ -347,8 +347,8 @@ export default function ProductsPage() {
     } catch (error: any) {
       console.error("❌ [DELETE-BATCH] Error deleting batch:", error);
       toast({
-        title: "❌ خطا در حذف batch",
-        description: error?.message || "امکان حذف batch وجود ندارد",
+        title: t.productManagement.batchDeleteError,
+        description: error?.message || t.productManagement.batchDeleteErrorDesc,
         variant: "destructive",
       });
     }
@@ -369,8 +369,8 @@ export default function ProductsPage() {
       setMsdsPreview(null);
       form.reset();
       toast({
-        title: "Success",
-        description: "Product created successfully",
+        title: t.productManagement.productUpdated,
+        description: t.productManagement.productUpdated,
       });
       // Immediate kardex sync after product creation
       await triggerKardexSync();
@@ -378,8 +378,8 @@ export default function ProductsPage() {
     onError: (error: any) => {
       setIsSubmitting(false);
       toast({
-        title: "Error",
-        description: error.message || "Failed to create product",
+        title: t.productManagement.productUpdateError,
+        description: error.message || t.productManagement.productUpdateError,
         variant: "destructive",
       });
     },
@@ -412,8 +412,8 @@ export default function ProductsPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       
       toast({
-        title: "موفقیت",
-        description: "محصول با موفقیت بروزرسانی شد",
+        title: t.productManagement.productUpdated,
+        description: t.productManagement.productUpdated,
       });
       // Immediate kardex sync after product update
       await triggerKardexSync();
@@ -423,15 +423,15 @@ export default function ProductsPage() {
       setIsSubmitting(false);
       
       // Show user-friendly error message
-      let errorMessage = "بروزرسانی محصول ناموفق بود";
+      let errorMessage = t.productManagement.productUpdateError;
       if (error.message?.includes("already exists")) {
-        errorMessage = "کد SKU تکراری است، لطفاً کد جدید وارد کنید";
+        errorMessage = t.productManagement.duplicateSKU;
       } else if (error.message?.includes("authentication") || error.message?.includes("احراز هویت")) {
-        errorMessage = "لطفاً مجدداً وارد شوید";
+        errorMessage = t.productManagement.productUpdateError;
       }
       
       toast({
-        title: "خطا",
+        title: t.productManagement.productUpdateError,
         description: errorMessage,
         variant: "destructive",
       });
@@ -448,8 +448,8 @@ export default function ProductsPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       setDeletingProduct(null); // Close the confirmation dialog
       toast({
-        title: "موفقیت",
-        description: "محصول با موفقیت حذف شد و از فروشگاه نیز حذف شد",
+        title: t.productManagement.productDeleted,
+        description: t.productManagement.productDeleted,
       });
       // Immediate kardex sync after product deletion
       await triggerKardexSync();
@@ -458,8 +458,8 @@ export default function ProductsPage() {
       console.error(`❌ [DELETE] Delete failed:`, error);
       setDeletingProduct(null); // Close the confirmation dialog
       toast({
-        title: "خطا",
-        description: error.message || "حذف محصول ناموفق بود",
+        title: t.productManagement.productDeleteError,
+        description: error.message || t.productManagement.productDeleteError,
         variant: "destructive",
       });
     },
@@ -491,15 +491,15 @@ export default function ProductsPage() {
       console.log('✅ [DEBUG] Toggle sync successful:', result);
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       toast({
-        title: "به‌روزرسانی موفقیت‌آمیز",
-        description: "وضعیت نمایش در فروشگاه به‌روزرسانی شد",
+        title: t.productManagement.productUpdated,
+        description: t.productManagement.productUpdated,
       });
     },
     onError: (error: any) => {
       console.error('❌ [DEBUG] Toggle sync failed:', error);
       toast({
-        title: "خطا",
-        description: error.message || "خطا در به‌روزرسانی وضعیت نمایش",
+        title: t.productManagement.productUpdateError,
+        description: error.message || t.productManagement.productUpdateError,
         variant: "destructive",
       });
     },
@@ -511,14 +511,14 @@ export default function ProductsPage() {
     onSuccess: (result) => {
       form.setValue("sku", result.data.sku);
       toast({
-        title: "SKU تولید شد",
-        description: `SKU هوشمند تولید شد: ${result.data.sku}`,
+        title: t.productManagement.productUpdated,
+        description: `SKU: ${result.data.sku}`,
       });
     },
     onError: (error: any) => {
       toast({
-        title: "خطا در تولید SKU",
-        description: error.message || "امکان تولید SKU هوشمند وجود ندارد",
+        title: t.productManagement.productUpdateError,
+        description: error.message || t.productManagement.productUpdateError,
         variant: "destructive",
       });
     },
@@ -542,8 +542,8 @@ export default function ProductsPage() {
 
     if (!productData.name || !productData.category) {
       toast({
-        title: "اطلاعات ناکافی",
-        description: "لطفاً نام و دسته‌بندی محصول را وارد کنید",
+        title: t.productManagement.enterNameCategory,
+        description: t.productManagement.enterNameCategory,
         variant: "destructive",
       });
       return;
@@ -699,8 +699,8 @@ export default function ProductsPage() {
     
     if (Object.keys(errors).length > 0) {
       toast({
-        title: "❌ لطفاً فیلدهای قرمز را تکمیل کنید",
-        description: "تمام فیلدهای اجباری باید پر شوند",
+        title: t.productManagement.enterNameCategory,
+        description: t.productManagement.enterNameCategory,
         variant: "destructive",
       });
       return;
@@ -885,13 +885,13 @@ export default function ProductsPage() {
       }
       
       toast({
-        title: "موفقیت",
-        description: `تصویر ${index + 1} با موفقیت آپلود شد`,
+        title: t.productManagement.imageUploaded.replace('{index}', String(index + 1)),
+        description: t.productManagement.imageUploaded.replace('{index}', String(index + 1)),
       });
     } catch (error) {
       toast({
-        title: "خطای آپلود",
-        description: error instanceof Error ? error.message : "آپلود تصویر ناموفق بود",
+        title: t.productManagement.imageUploadError,
+        description: error instanceof Error ? error.message : t.productManagement.imageUploadError,
         variant: "destructive",
       });
     } finally {
@@ -925,13 +925,13 @@ export default function ProductsPage() {
       setCatalogPreview(url);
       
       toast({
-        title: "موفقیت",
-        description: "کاتالوگ با موفقیت آپلود شد",
+        title: t.productManagement.productUpdated,
+        description: t.productManagement.productUpdated,
       });
     } catch (error) {
       toast({
-        title: "خطا",
-        description: "آپلود کاتالوگ با مشکل مواجه شد",
+        title: t.productManagement.productUpdateError,
+        description: t.productManagement.productUpdateError,
         variant: "destructive",
       });
     } finally {
@@ -962,13 +962,13 @@ export default function ProductsPage() {
       setMsdsPreview(url);
       
       toast({
-        title: "موفقیت",
-        description: "فایل MSDS با موفقیت آپلود شد",
+        title: t.productManagement.productUpdated,
+        description: t.productManagement.productUpdated,
       });
     } catch (error) {
       toast({
-        title: "خطا",
-        description: "آپلود فایل MSDS با مشکل مواجه شد",
+        title: t.productManagement.productUpdateError,
+        description: t.productManagement.productUpdateError,
         variant: "destructive",
       });
     } finally {
@@ -1151,8 +1151,8 @@ export default function ProductsPage() {
           form.setValue("barcode", generatedBarcode);
           
           toast({
-            title: "بارکد خودکار تولید شد",
-            description: `بارکد EAN-13 تولید شد: ${generatedBarcode}`,
+            title: t.productManagement.barcodeGenerated,
+            description: t.productManagement.barcodeGeneratedDesc.replace('{barcode}', generatedBarcode),
             variant: "default"
           });
         } catch (error) {
@@ -2079,29 +2079,29 @@ export default function ProductsPage() {
                                           form.setValue('barcode', barcodeResult.data.barcode);
                                           
                                           toast({
-                                            title: "✨ SKU و بارکد تولید شدند",
-                                            description: `کد محصول: ${result.data.sku} | بارکد: ${barcodeResult.data.barcode}`,
+                                            title: t.productManagement.productUpdated,
+                                            description: `SKU: ${result.data.sku} | ${t.productManagement.barcode}: ${barcodeResult.data.barcode}`,
                                           });
                                         } else {
                                           form.setValue('barcode', '');
                                           toast({
-                                            title: "✨ SKU تولید شد",
-                                            description: `کد محصول: ${result.data.sku} (بارکد دستی وارد کنید)`,
+                                            title: t.productManagement.productUpdated,
+                                            description: `SKU: ${result.data.sku}`,
                                           });
                                         }
                                       } catch (barcodeError) {
                                         console.error('Error generating barcode:', barcodeError);
                                         form.setValue('barcode', '');
                                         toast({
-                                          title: "✨ SKU تولید شد",
-                                          description: `کد محصول: ${result.data.sku} (بارکد دستی وارد کنید)`,
+                                          title: t.productManagement.productUpdated,
+                                          description: `SKU: ${result.data.sku}`,
                                         });
                                       }
                                     } catch (error) {
                                       console.error('Error generating SKU:', error);
                                       toast({
-                                        title: "❌ خطا در تولید SKU",
-                                        description: "امکان تولید خودکار SKU وجود ندارد",
+                                        title: t.productManagement.productUpdateError,
+                                        description: t.productManagement.productUpdateError,
                                         variant: "destructive",
                                       });
                                     }
