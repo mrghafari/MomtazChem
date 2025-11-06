@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +32,7 @@ export default function BatchManagement() {
   const [searchBarcode, setSearchBarcode] = useState("");
   const [selectedBarcode, setSelectedBarcode] = useState<string | null>(null);
   const { user } = useAuth();
+  const { t, direction } = useLanguage();
 
   // Check for barcode in URL query parameters
   useEffect(() => {
@@ -86,20 +88,20 @@ export default function BatchManagement() {
 
   const getBatchStatus = (batch: Batch, isCurrentSelling: boolean) => {
     if (batch.stock_quantity === 0) {
-      return { text: 'تمام شده', color: 'bg-gray-500' };
+      return { text: t.batchManagement.soldOut, color: 'bg-gray-500' };
     }
     if (isCurrentSelling) {
-      return { text: 'در حال فروش', color: 'bg-green-500' };
+      return { text: t.batchManagement.selling, color: 'bg-green-500' };
     }
-    return { text: 'در انتظار', color: 'bg-blue-500' };
+    return { text: t.batchManagement.waiting, color: 'bg-blue-500' };
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6" dir={direction}>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">مدیریت بچ‌ها (FIFO)</h1>
-          <p className="text-gray-600 mt-1">مدیریت بچ‌های محصولات با سیستم FIFO</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t.batchManagement.pageTitle}</h1>
+          <p className="text-gray-600 mt-1">{t.batchManagement.pageSubtitle}</p>
         </div>
         <div className="flex items-center gap-2 text-gray-600">
           <span className="text-sm">{user?.username}</span>
@@ -111,21 +113,21 @@ export default function BatchManagement() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="w-5 h-5" />
-            جستجوی بچ‌ها
+            {t.batchManagement.searchBatches}
           </CardTitle>
           <CardDescription>
-            بارکد محصول را وارد کنید تا تمام بچ‌های آن را مشاهده کنید
+            {t.batchManagement.searchDescription}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex gap-3">
             <div className="flex-1">
-              <Label htmlFor="barcode">بارکد محصول</Label>
+              <Label htmlFor="barcode">{t.batchManagement.barcodeLabel}</Label>
               <Input
                 id="barcode"
                 value={searchBarcode}
                 onChange={(e) => setSearchBarcode(e.target.value)}
-                placeholder="مثال: 8649677123456"
+                placeholder={t.batchManagement.barcodePlaceholder}
                 className="mt-1"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -136,7 +138,7 @@ export default function BatchManagement() {
             </div>
             <div className="flex items-end">
               <Button onClick={handleSearch} className="bg-blue-600 hover:bg-blue-700">
-                جستجو
+                {t.batchManagement.searchButton}
               </Button>
             </div>
           </div>
@@ -149,10 +151,10 @@ export default function BatchManagement() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-green-800">
               <TrendingUp className="w-5 h-5" />
-              بچ فعال در حال فروش (LIFO)
+              {t.batchManagement.currentSellingBatch}
             </CardTitle>
             <CardDescription className="text-green-700">
-              این بچ در حال حاضر برای فروش انتخاب می‌شود
+              {t.batchManagement.currentSellingDescription}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -160,26 +162,26 @@ export default function BatchManagement() {
               <div className="flex items-center gap-2">
                 <Hash className="w-4 h-4 text-green-600" />
                 <div>
-                  <p className="text-sm text-green-700">شماره بچ</p>
+                  <p className="text-sm text-green-700">{t.batchManagement.batchNumber}</p>
                   <p className="font-medium">{currentBatch.currentBatch.batchNumber}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <Package className="w-4 h-4 text-green-600" />
                 <div>
-                  <p className="text-sm text-green-700">موجودی</p>
-                  <p className="font-medium">{currentBatch.currentBatch.stockQuantity} واحد</p>
+                  <p className="text-sm text-green-700">{t.batchManagement.stock}</p>
+                  <p className="font-medium">{currentBatch.currentBatch.stockQuantity} {t.batchManagement.stockUnits}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-green-600" />
                 <div>
-                  <p className="text-sm text-green-700">تاریخ تولید</p>
+                  <p className="text-sm text-green-700">{t.batchManagement.productionDate}</p>
                   <p className="font-medium">{formatDate(currentBatch.currentBatch.createdAt)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge className="bg-green-600 text-white">فعال</Badge>
+                <Badge className="bg-green-600 text-white">{t.batchManagement.activeStatus}</Badge>
               </div>
             </div>
           </CardContent>
@@ -194,7 +196,7 @@ export default function BatchManagement() {
               <div className="flex items-center gap-2">
                 <Package className="w-5 h-5 text-blue-600" />
                 <div>
-                  <p className="text-sm text-gray-600">تعداد بچ‌ها</p>
+                  <p className="text-sm text-gray-600">{t.batchManagement.totalBatches}</p>
                   <p className="text-2xl font-bold">{batchData.totalBatches}</p>
                 </div>
               </div>
@@ -205,7 +207,7 @@ export default function BatchManagement() {
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-green-600" />
                 <div>
-                  <p className="text-sm text-gray-600">کل موجودی</p>
+                  <p className="text-sm text-gray-600">{t.batchManagement.totalStock}</p>
                   <p className="text-2xl font-bold">{batchData.totalStock}</p>
                 </div>
               </div>
@@ -216,7 +218,7 @@ export default function BatchManagement() {
               <div className="flex items-center gap-2">
                 <Hash className="w-5 h-5 text-purple-600" />
                 <div>
-                  <p className="text-sm text-gray-600">بارکد</p>
+                  <p className="text-sm text-gray-600">{t.batchManagement.barcode}</p>
                   <p className="text-lg font-mono">{batchData.barcode}</p>
                 </div>
               </div>
@@ -227,7 +229,7 @@ export default function BatchManagement() {
               <div className="flex items-center gap-2">
                 <TrendingDown className="w-5 h-5 text-orange-600" />
                 <div>
-                  <p className="text-sm text-gray-600">بچ‌های خالی</p>
+                  <p className="text-sm text-gray-600">{t.batchManagement.emptyBatches}</p>
                   <p className="text-2xl font-bold">
                     {batchData.batches.filter(b => b.stock_quantity === 0).length}
                   </p>
@@ -244,10 +246,10 @@ export default function BatchManagement() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Package className="w-5 h-5" />
-              لیست بچ‌ها به روش (FIFO)
+              {t.batchManagement.batchList}
             </CardTitle>
             <CardDescription>
-              بچ‌های قدیمی‌تر اول فروخته می‌شوند (First In, First Out)
+              {t.batchManagement.batchListDescription}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -275,24 +277,24 @@ export default function BatchManagement() {
                         </div>
                         <div>
                           <p className="font-medium">{batch.name}</p>
-                          <p className="text-sm text-gray-600">بچ: {batch.batch_number}</p>
+                          <p className="text-sm text-gray-600">{t.batchManagement.batchNumber}: {batch.batch_number}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-6">
                         <div className="text-center">
-                          <p className="text-sm text-gray-600">موجودی</p>
+                          <p className="text-sm text-gray-600">{t.batchManagement.stock}</p>
                           <p className="font-bold">{batch.stock_quantity}</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-sm text-gray-600">قیمت</p>
+                          <p className="text-sm text-gray-600">{t.batchManagement.price}</p>
                           <p className="font-medium">{batch.unit_price?.toLocaleString()} IQD</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-sm text-gray-600">وزن خالص</p>
+                          <p className="text-sm text-gray-600">{t.batchManagement.netWeight}</p>
                           <p className="font-medium">{batch.net_weight} kg</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-sm text-gray-600">تاریخ تولید</p>
+                          <p className="text-sm text-gray-600">{t.batchManagement.productionDate}</p>
                           <p className="font-medium">{formatDate(batch.created_at)}</p>
                         </div>
                       </div>
@@ -310,7 +312,7 @@ export default function BatchManagement() {
         <Card>
           <CardContent className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">در حال بارگذاری اطلاعات بچ‌ها...</p>
+            <p className="text-gray-600">{t.batchManagement.loadingBatches}</p>
           </CardContent>
         </Card>
       )}
@@ -320,9 +322,9 @@ export default function BatchManagement() {
         <Card>
           <CardContent className="p-8 text-center">
             <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">بچی یافت نشد</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{t.batchManagement.batchNotFound}</h3>
             <p className="text-gray-600">
-              برای بارکد {selectedBarcode} هیچ بچی در سیستم ثبت نشده است
+              {t.batchManagement.noBatchesMessage} {selectedBarcode}
             </p>
           </CardContent>
         </Card>

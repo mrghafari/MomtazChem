@@ -431,6 +431,38 @@ export interface Translation {
   wallet: string;
   orderHistory: string;
   
+  // Batch Management
+  batchManagement: {
+    pageTitle: string;
+    pageSubtitle: string;
+    searchBatches: string;
+    searchDescription: string;
+    barcodeLabel: string;
+    barcodePlaceholder: string;
+    searchButton: string;
+    currentSellingBatch: string;
+    currentSellingDescription: string;
+    batchNumber: string;
+    stock: string;
+    stockUnits: string;
+    productionDate: string;
+    activeStatus: string;
+    totalBatches: string;
+    totalStock: string;
+    barcode: string;
+    emptyBatches: string;
+    batchList: string;
+    batchListDescription: string;
+    soldOut: string;
+    selling: string;
+    waiting: string;
+    price: string;
+    netWeight: string;
+    batchNotFound: string;
+    noBatchesMessage: string;
+    loadingBatches: string;
+  };
+  
   // Wallet specific
   walletTitle: string;
   walletSubtitle: string;
@@ -1390,6 +1422,38 @@ export const translations: Record<Language, Translation> = {
     profile: 'Profile',
     wallet: 'Wallet',
     orderHistory: 'Order History',
+    
+    // Batch Management
+    batchManagement: {
+      pageTitle: 'Batch Management (FIFO)',
+      pageSubtitle: 'Manage product batches with FIFO system',
+      searchBatches: 'Search Batches',
+      searchDescription: 'Enter product barcode to view all batches',
+      barcodeLabel: 'Product Barcode',
+      barcodePlaceholder: 'Example: 8649677123456',
+      searchButton: 'Search',
+      currentSellingBatch: 'Active Selling Batch (LIFO)',
+      currentSellingDescription: 'This batch is currently selected for sales',
+      batchNumber: 'Batch Number',
+      stock: 'Stock',
+      stockUnits: 'units',
+      productionDate: 'Production Date',
+      activeStatus: 'Active',
+      totalBatches: 'Total Batches',
+      totalStock: 'Total Stock',
+      barcode: 'Barcode',
+      emptyBatches: 'Empty Batches',
+      batchList: 'Batch List (FIFO)',
+      batchListDescription: 'Older batches are sold first (First In, First Out)',
+      soldOut: 'Sold Out',
+      selling: 'Selling',
+      waiting: 'Waiting',
+      price: 'Price',
+      netWeight: 'Net Weight',
+      batchNotFound: 'Batch Not Found',
+      noBatchesMessage: 'No batches registered for barcode',
+      loadingBatches: 'Loading batch information...',
+    },
     
     // Wallet specific
     walletTitle: 'Customer Wallet',
@@ -2446,6 +2510,38 @@ export const translations: Record<Language, Translation> = {
     profile: 'الملف الشخصي',
     wallet: 'المحفظة',
     orderHistory: 'تاريخ الطلبات',
+    
+    // Batch Management
+    batchManagement: {
+      pageTitle: 'إدارة الدفعات (FIFO)',
+      pageSubtitle: 'إدارة دفعات المنتجات بنظام FIFO',
+      searchBatches: 'البحث عن الدفعات',
+      searchDescription: 'أدخل الباركود لعرض جميع الدفعات',
+      barcodeLabel: 'باركود المنتج',
+      barcodePlaceholder: 'مثال: 8649677123456',
+      searchButton: 'بحث',
+      currentSellingBatch: 'الدفعة النشطة للبيع (LIFO)',
+      currentSellingDescription: 'هذه الدفعة مختارة حالياً للبيع',
+      batchNumber: 'رقم الدفعة',
+      stock: 'المخزون',
+      stockUnits: 'وحدة',
+      productionDate: 'تاريخ الإنتاج',
+      activeStatus: 'نشط',
+      totalBatches: 'عدد الدفعات',
+      totalStock: 'إجمالي المخزون',
+      barcode: 'الباركود',
+      emptyBatches: 'الدفعات الفارغة',
+      batchList: 'قائمة الدفعات (FIFO)',
+      batchListDescription: 'تُباع الدفعات القديمة أولاً (First In, First Out)',
+      soldOut: 'نفذت الكمية',
+      selling: 'قيد البيع',
+      waiting: 'في الانتظار',
+      price: 'السعر',
+      netWeight: 'الوزن الصافي',
+      batchNotFound: 'لم يتم العثور على دفعة',
+      noBatchesMessage: 'لا توجد دفعات مسجلة للباركود',
+      loadingBatches: 'جاري تحميل معلومات الدفعات...',
+    },
     
     // Wallet specific
     walletTitle: 'محفظة العميل',

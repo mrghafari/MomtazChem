@@ -3,7 +3,13 @@
 ## Overview
 The Momtazchem Chemical Solutions Platform is a comprehensive, multilingual system integrating a public showcase website, e-commerce, and administrative tools for a chemical company. Its primary purpose is to optimize CRM, inventory, sales, logistics, and financial management while expanding market reach. Key capabilities include multi-language support (English, Arabic, Kurdish, Turkish), unified site management, advanced e-commerce, GPS tracking, real-time analytics, email automation, barcode and Kardex-synced inventory, and financial management. The project aims to establish Momtazchem as a digital leader in the chemical industry.
 
-## Recent Changes (October 2025)
+## Recent Changes (November 2025)
+- **Batch Management Multilingual Support (Nov 6, 2025)**:
+  - Implemented full multilingual support for batch management page using LanguageContext
+  - Added comprehensive translations to i18n.ts for English and Arabic
+  - All batch-related UI elements now support both languages with proper RTL/LTR directionality
+  - Translations include: page titles, search functionality, batch status indicators, production dates, and all data labels
+  - Batch management page properly displays in the user's selected language with correct text direction
 - **First Iraqi Bank (FIB) Online Payment Integration (Oct 30, 2025)**:
   - Integrated FIB payment gateway SDK (@first-iraqi-bank/sdk) for instant mobile app payments
   - Created comprehensive database schema (fib_payments, fib_payment_callbacks, fib_payment_settings tables)
