@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Calendar, Package2, Clock, ArrowLeft, TrendingUp, Layers, Sparkles } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface FIFOBatchDisplayProps {
   productName: string;
@@ -26,6 +27,7 @@ export default function FIFOBatchDisplay({
   showDetails = false,
   compact = false 
 }: FIFOBatchDisplayProps) {
+  const { t } = useLanguage();
   
   // Fetch FIFO batch data
   const { data: batchData, isLoading, error } = useQuery({
@@ -69,7 +71,7 @@ export default function FIFOBatchDisplay({
   if (error || !batchInfo.oldestBatch) {
     return (
       <div className={`text-sm text-gray-500 ${className}`}>
-        <span>اطلاعات بچ در دسترس نیست</span>
+        <span>{t.productManagement.batchInfoNotAvailable}</span>
       </div>
     );
   }

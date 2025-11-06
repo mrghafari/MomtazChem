@@ -1019,6 +1019,7 @@ export interface Translation {
     productApplications: string;
     productApplicationsPlaceholder: string;
     productApplicationsHelp: string;
+    batchInfoNotAvailable: string;
   };
   addProduct: string;
   editProduct: string;
@@ -1946,6 +1947,7 @@ export const translations: Record<Language, Translation> = {
       productApplications: 'Product Applications',
       productApplicationsPlaceholder: 'Enter product applications (one per line)',
       productApplicationsHelp: 'Common uses and applications - one per line',
+      batchInfoNotAvailable: 'Batch information not available',
     },
     
     // Batch Management
@@ -3300,6 +3302,7 @@ export const translations: Record<Language, Translation> = {
       productApplications: 'تطبيقات المنتج',
       productApplicationsPlaceholder: 'أدخل تطبيقات المنتج (واحدة في كل سطر)',
       productApplicationsHelp: 'الاستخدامات والتطبيقات الشائعة - واحدة في كل سطر',
+      batchInfoNotAvailable: 'معلومات الدفعة غير متاحة',
     },
     
     // Batch Management
