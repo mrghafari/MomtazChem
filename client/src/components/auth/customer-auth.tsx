@@ -462,93 +462,22 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
     setDuplicateEmail("");
   };
 
-  // Handle dual verification
-  const onDualVerification = async () => {
-    setIsLoading(true);
-    setDualVerificationError("");
+  // OTP verification handler
+  const onVerifyOtp = async () => {
+    if (!registrationData || otpCode.length !== 4) return;
     
-    try {
-      const response = await fetch('/api/customer/verify-dual-codes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: registrationData?.email,
-          phone: registrationData?.phone,
-          smsCode: smsCode,
-          emailCode: emailCode,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success && result.verified.complete) {
-        // Complete customer registration after verification
-        const fullRegistrationData = {
-          ...registrationData,
-          customerType: 'retail',
-          customerSource: 'website',
-          communicationPreference: registrationData.communicationPreference || 'email',
-          preferredLanguage: registrationData.preferredLanguage || 'en',
-          marketingConsent: registrationData.marketingConsent || false,
-        };
-        
-        const registerResponse = await fetch('/api/customers/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify(fullRegistrationData),
-        });
-
-        const registerResult = await registerResponse.json();
-
-        if (registerResult.success) {
-          toast({
-            title: t.auth.registrationSuccessful,
-            description: t.auth.accountCreated,
-          });
-          
-          // Auto-login after successful registration
-          onLoginSuccess(registerResult.customer);
-          onOpenChange(false);
-          
-          // Reset all forms
-          registerForm.reset();
-          setShowDualVerification(false);
-          setSmsCode("");
-          setEmailCode("");
-          setRegistrationData(null);
-        } else {
-          setDualVerificationError(registerResult.message || t.auth.registrationError);
-        }
-      } else {
-        setDualVerificationError(result.message || t.auth.invalidCodes);
-      }
-    } catch (error) {
-      console.error("Dual verification error:", error);
-      setDualVerificationError(t.auth.verificationError);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const onVerifyCode = async () => {
-    if (!verificationCode || verificationCode.length !== 4) {
-      setVerificationError("Please enter a 4-digit verification code");
-      return;
-    }
-
     setIsLoading(true);
-    setVerificationError("");
+    setOtpError("");
 
     try {
-      const response = await fetch('/api/customer/verify-sms', {
+      const response = await fetch('/api/customers/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
+          email: registrationData.email,
           phone: registrationData.phone,
-          verificationCode: verificationCode
+          code: otpCode,
         }),
       });
 
@@ -556,8 +485,8 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
 
       if (result.success) {
         toast({
-          title: "Verification Successful",
-          description: "Your account has been verified and you're now logged in",
+          title: t.auth.registrationSuccess || "Registration Successful",
+          description: t.auth.accountCreatedMessage || "Your account has been created",
         });
         
         // Complete registration process
@@ -569,33 +498,36 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
         
         onOpenChange(false);
         registerForm.reset();
-        setShowVerificationForm(false);
-        setVerificationCode("");
+        setShowOtpVerification(false);
+        setOtpCode("");
+        setOtpError("");
         setRegistrationData(null);
         
-        // Navigate to customer profile
-        window.location.href = '/customer/profile';
+        // Navigate to customer dashboard
+        window.location.href = '/customer-dashboard';
       } else {
-        setVerificationError(result.message || "Invalid verification code");
+        setOtpError(result.message || t.auth.invalidVerificationCode || "Invalid code");
       }
     } catch (error) {
-      setVerificationError("Network error. Please try again.");
+      setOtpError(t.auth.networkError || "Network error");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const onResendCode = async () => {
-    if (!registrationData?.phone) return;
+  // OTP resend handler
+  const onResendOtp = async () => {
+    if (!registrationData?.phone || resendCooldown > 0) return;
 
     setIsLoading(true);
     try {
-      const response = await fetch('/api/customer/resend-verification', {
+      const response = await fetch('/api/customers/resend-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          phone: registrationData.phone
+          phone: registrationData.phone,
+          email: registrationData.email,
         }),
       });
 
@@ -603,22 +535,34 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
 
       if (result.success) {
         toast({
-          title: "Code Resent",
-          description: "A new verification code has been sent to your mobile number",
+          title: t.auth.codeSent || "Code Sent",
+          description: t.auth.newCodeSent || "A new verification code has been sent",
         });
-        setVerificationCode("");
-        setVerificationError("");
+        setOtpCode("");
+        setOtpError("");
+        
+        // Set cooldown timer (60 seconds)
+        setResendCooldown(60);
+        const interval = setInterval(() => {
+          setResendCooldown((prev) => {
+            if (prev <= 1) {
+              clearInterval(interval);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
       } else {
         toast({
           variant: "destructive",
-          title: "Resend Error",
+          title: t.auth.resendError || "Resend Error",
           description: result.message || "Failed to resend code",
         });
       }
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Network Error",
+        title: t.auth.networkError || "Network Error",
         description: "Connection problem. Please try again.",
       });
     } finally {
@@ -631,17 +575,17 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {showVerificationForm ? t.auth.verifyMobileNumber : t.auth.customerLogin}
+            {showOtpVerification ? t.auth.verifyMobileNumber : t.auth.customerLogin}
           </DialogTitle>
           <DialogDescription>
-            {showVerificationForm 
+            {showOtpVerification 
               ? t.auth.verificationCodeDescription
               : t.auth.signInOrRegister
             }
           </DialogDescription>
         </DialogHeader>
 
-        {emailExists && (
+        {emailExists && !showOtpVerification && (
           <Alert className="mb-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -658,61 +602,67 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
           </Alert>
         )}
 
-        {showVerificationForm && (
-          <div className="space-y-4">
+        {showOtpVerification && (
+          <div className="space-y-4 p-4">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">{t.auth.smsVerification}</h3>
+              <h3 className="text-lg font-semibold mb-2">{t.auth.otpVerification || "OTP Verification"}</h3>
               <p className="text-sm text-gray-600 mb-4">
-                {t.auth.codeSentTo} {registrationData?.phone}
+                {t.auth.codeSentTo || "Code sent to"}: {registrationData?.phone}, {registrationData?.email}
+              </p>
+              <p className="text-xs text-gray-500">
+                {t.auth.checkEmailWhatsAppSMS || "Check your Email, WhatsApp, and SMS"}
               </p>
             </div>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  {t.auth.enterVerificationCode}
+                  {t.auth.enterVerificationCode || "Enter 4-digit code"}
                 </label>
                 <Input
                   type="text"
-                  placeholder={t.auth.enter4DigitCode}
-                  value={verificationCode}
+                  placeholder={t.auth.enter4DigitCode || "0000"}
+                  value={otpCode}
                   onChange={(e) => {
                     const value = e.target.value.replace(/\D/g, '').slice(0, 4);
-                    setVerificationCode(value);
-                    if (verificationError) setVerificationError("");
+                    setOtpCode(value);
+                    if (otpError) setOtpError("");
                   }}
-                  className="text-center text-lg tracking-widest"
+                  className="text-center text-2xl tracking-widest font-mono"
                   maxLength={4}
+                  autoFocus
                 />
-                {verificationError && (
-                  <p className="text-sm text-red-600 mt-1">{verificationError}</p>
+                {otpError && (
+                  <p className="text-sm text-red-600 mt-2 text-center">{otpError}</p>
                 )}
               </div>
               
               <div className="flex gap-2">
                 <Button
-                  onClick={onVerifyCode}
-                  disabled={isLoading || verificationCode.length !== 4}
+                  onClick={onVerifyOtp}
+                  disabled={isLoading || otpCode.length !== 4}
                   className="flex-1"
                 >
                   {isLoading ? t.auth.verifying : t.auth.verifyCode}
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={onResendCode}
-                  disabled={isLoading}
+                  onClick={onResendOtp}
+                  disabled={isLoading || resendCooldown > 0}
+                  className="min-w-[100px]"
                 >
-                  {t.auth.resend}
+                  {resendCooldown > 0 ? `${resendCooldown}s` : t.auth.resend}
                 </Button>
               </div>
               
               <Button
                 variant="ghost"
                 onClick={() => {
-                  setShowVerificationForm(false);
-                  setVerificationCode("");
-                  setVerificationError("");
+                  setShowOtpVerification(false);
+                  setOtpCode("");
+                  setOtpError("");
                   setRegistrationData(null);
+                  setResendCooldown(0);
                 }}
                 className="w-full"
               >
@@ -722,7 +672,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
           </div>
         )}
 
-        {!showVerificationForm && (
+        {!showOtpVerification && (
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'register')} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">{t.auth.login}</TabsTrigger>
@@ -1171,90 +1121,6 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
         </Tabs>
         )}
 
-        {/* Dual Verification Form */}
-        {showDualVerification && (
-          <div className="p-6 space-y-4">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {t.auth.dualVerification}
-              </h3>
-              <p className="text-sm text-gray-600 mt-2">
-                {t.auth.verificationCodesSentTo} {verificationMethods?.sms ? t.auth.mobileNumber : ''} 
-                {verificationMethods?.sms && verificationMethods?.email ? t.auth.and : ''}
-                {verificationMethods?.email ? t.email : ''}
-              </p>
-            </div>
-
-            {dualVerificationError && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                <p className="text-sm text-red-600 text-center">
-                  {dualVerificationError}
-                </p>
-              </div>
-            )}
-
-            <div className="space-y-4">
-              {verificationMethods?.sms && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t.auth.smsVerificationCode}
-                  </label>
-                  <Input
-                    type="text"
-                    maxLength={4}
-                    placeholder={t.auth.fourDigitCode}
-                    value={smsCode}
-                    onChange={(e) => setSmsCode(e.target.value.replace(/\D/g, ''))}
-                    className="text-center text-lg tracking-widest"
-                  />
-                </div>
-              )}
-
-              {verificationMethods?.email && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t.auth.emailVerificationCode}
-                  </label>
-                  <Input
-                    type="text"
-                    maxLength={6}
-                    placeholder={t.auth.sixDigitCode}
-                    value={emailCode}
-                    onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, ''))}
-                    className="text-center text-lg tracking-widest"
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Button 
-                onClick={onDualVerification} 
-                className="w-full"
-                disabled={isLoading || 
-                  (verificationMethods?.sms && (!smsCode || smsCode.length !== 4)) ||
-                  (verificationMethods?.email && (!emailCode || emailCode.length !== 6))
-                }
-              >
-                {isLoading ? t.auth.verifying : t.auth.verifyCodes}
-              </Button>
-
-              <Button 
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  setShowDualVerification(false);
-                  setSmsCode("");
-                  setEmailCode("");
-                  setDualVerificationError("");
-                }}
-              >
-                {t.auth.back}
-              </Button>
-            </div>
-          </div>
-        )}
       </DialogContent>
     </Dialog>
   );
