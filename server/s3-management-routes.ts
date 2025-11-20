@@ -35,9 +35,12 @@ router.get('/api/admin/s3/check-missing-images', async (req, res) => {
   try {
     const { pool } = await import('./db');
     
-    // Get all products from API (they're loaded from somewhere)
-    const productsResponse = await fetch('http://localhost:5000/api/products');
-    const products = await productsResponse.json();
+    // Get all products directly from database instead of HTTP call  
+    const productsResult = await pool.query(`
+      SELECT id, name, image_url as "imageUrl"
+      FROM products
+    `);
+    const products = productsResult.rows;
     
     // Get all files in S3
     const s3Service = getAwsS3Service();
@@ -52,9 +55,8 @@ router.get('/api/admin/s3/check-missing-images', async (req, res) => {
     // Extract all image URLs from products
     const allImageUrls: Set<string> = new Set();
     products.forEach((product: any) => {
-      if (product.imageUrl) allImageUrls.add(product.imageUrl);
-      if (product.imageUrls && Array.isArray(product.imageUrls)) {
-        product.imageUrls.forEach((url: string) => allImageUrls.add(url));
+      if (product.imageUrl) {
+        allImageUrls.add(product.imageUrl);
       }
     });
     
