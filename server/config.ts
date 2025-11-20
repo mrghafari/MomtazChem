@@ -32,13 +32,15 @@ export const CONFIG = {
   
   // Generate password reset URL (admin users)
   getPasswordResetUrl: (token: string, req?: any): string => {
-    const baseUrl = CONFIG.getBaseUrl(req);
+    // Always use production domain for password reset emails (never localhost)
+    const baseUrl = process.env.FRONTEND_URL || CONFIG.PRODUCTION_DOMAIN;
     return `${baseUrl}/reset-password/${token}`;
   },
   
   // Generate customer password reset URL
   getCustomerPasswordResetUrl: (token: string, req?: any): string => {
-    const baseUrl = CONFIG.getBaseUrl(req);
+    // Always use production domain for password reset emails (never localhost)
+    const baseUrl = process.env.FRONTEND_URL || CONFIG.PRODUCTION_DOMAIN;
     return `${baseUrl}/customer-reset-password?token=${token}`;
   },
   
