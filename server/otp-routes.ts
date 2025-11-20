@@ -4,7 +4,7 @@ import { customersOtp } from '../shared/schema';
 import { eq, and, gt } from 'drizzle-orm';
 import { SmsService } from './sms-service';
 import { WhatsAppService } from './whatsapp-service';
-import { UniversalEmailService } from './universal-email-service';
+import nodemailer from 'nodemailer';
 
 const router = Router();
 
@@ -117,15 +117,27 @@ async function sendOtpEmail(email: string, code: string, name?: string): Promise
       </html>
     `;
 
-    const result = await UniversalEmailService.sendEmail({
-      categoryKey: 'customer_support',
-      to: [email],
+    // Create SMTP transporter with environment variables
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: false, // Use STARTTLS
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    // Send email
+    const info = await transporter.sendMail({
+      from: process.env.SMTP_USER || 'noreply@momtazchem.com',
+      to: email,
       subject: `کد تایید ثبت نام - Registration Code: ${code}`,
       html,
     });
 
-    console.log(`📧 [OTP Email] Sent to ${email}:`, result);
-    return result;
+    console.log(`📧 [OTP Email] Sent to ${email}:`, info.messageId);
+    return true;
   } catch (error) {
     console.error('❌ [OTP Email] Error:', error);
     return false;
