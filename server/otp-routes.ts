@@ -80,12 +80,18 @@ async function sendOtpEmail(email: string, code: string, name?: string): Promise
     }
 
     // Load OTP email template from database
-    const template = await db.query.emailTemplates.findFirst({
-      where: and(
-        eq(emailTemplates.category, 'authentication'),
-        eq(emailTemplates.isActive, true)
-      ),
-    });
+    const templates = await db
+      .select()
+      .from(emailTemplates)
+      .where(
+        and(
+          eq(emailTemplates.category, 'authentication'),
+          eq(emailTemplates.isActive, true)
+        )
+      )
+      .limit(1);
+    
+    const template = templates[0];
 
     if (!template) {
       console.error('❌ [OTP Email] No OTP email template found in database');
