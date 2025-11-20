@@ -4,6 +4,21 @@
 The Momtazchem Chemical Solutions Platform is a comprehensive, multilingual system integrating a public showcase website, e-commerce, and administrative tools for a chemical company. Its primary purpose is to optimize CRM, inventory, sales, logistics, and financial management while expanding market reach. Key capabilities include multi-language support (English, Arabic, Kurdish, Turkish), unified site management, advanced e-commerce, GPS tracking, real-time analytics, email automation, barcode and Kardex-synced inventory, and financial management. The project aims to establish Momtazchem as a digital leader in the chemical industry.
 
 ## Recent Changes (November 2025)
+- **Procedures Management S3 Integration Complete (Nov 20, 2025)**:
+  - Migrated all procedure documents and safety protocol documents to AWS S3 storage
+  - Upload routes already using S3 (uploadPrivateFile) with files stored in 'procedure-documents' folder
+  - Fixed download routes to stream files from S3 using getFileStream instead of local filesystem
+  - Fixed delete routes to remove files from S3 using deleteFile instead of local filesystem
+  - Updated uploadPrivateFile to return both 'key' and 'url' (url = key for private files)
+  - Fixed duplicate function definitions in aws-s3-service.ts (uploadFile → uploadFileFromBuffer/uploadFileFromPath)
+  - All procedure document operations (upload/download/delete) now fully integrated with AWS S3
+  - System handles both procedures and safety protocols through unified S3 service
+- **Product Image Optimistic Updates Fixed (Nov 20, 2025)**:
+  - Implemented proper optimistic UI updates for product image deletion in kardex management
+  - Images now immediately disappear from UI when delete button is clicked
+  - Fixed by updating both form.setValue() AND setEditingProduct() to trigger useMemo recalculation
+  - Applied same fix to Catalog PDF and MSDS PDF deletion for consistent user experience
+  - displayImagePreviews now properly refreshes when editingProduct state changes
 - **Critical Email Template System & AWS S3 Fixes (Nov 20, 2025)**:
   - **Fixed SQL Syntax Error**: Corrected `emailStorage.getTemplates()` method that was ordering by non-existent `templateName` field instead of `name`
   - Error was causing password reset emails to fail with "syntax error at end of input" at position 230

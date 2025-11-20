@@ -168,9 +168,9 @@ export class AwsS3Service {
   }
 
   /**
-   * Upload file to S3
+   * Upload file to S3 from buffer
    */
-  async uploadFile(
+  async uploadFileFromBuffer(
     fileBuffer: Buffer,
     fileName: string,
     contentType: string,
@@ -329,7 +329,7 @@ export class AwsS3Service {
     fileName: string,
     contentType: string,
     folder: string = 'private'
-  ): Promise<{ success: boolean; key?: string; message?: string }> {
+  ): Promise<{ success: boolean; key?: string; url?: string; message?: string }> {
     if (!this.client || !this.settings) {
       return {
         success: false,
@@ -362,7 +362,8 @@ export class AwsS3Service {
 
       return {
         success: true,
-        key, // Return only key, not URL - use getSignedUrl to access
+        key, // S3 key for accessing the file
+        url: key, // For private files, url = key (use getFileStream to download)
       };
     } catch (error: any) {
       console.error('❌ S3 Upload Error:', error);
@@ -463,7 +464,7 @@ export class AwsS3Service {
   /**
    * Upload file from path to S3
    */
-  async uploadFile(
+  async uploadFileFromPath(
     filePath: string,
     s3Key: string,
     options?: {
