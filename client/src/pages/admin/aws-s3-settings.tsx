@@ -26,7 +26,6 @@ interface AwsS3Settings {
   secretAccessKey: string;
   region: string;
   bucketName: string;
-  encryptionKey?: string;
   isActive: boolean;
   endpoint?: string;
   usePathStyle: boolean;
@@ -40,7 +39,6 @@ export default function AwsS3Settings() {
     secretAccessKey: '',
     region: 'us-east-1',
     bucketName: '',
-    encryptionKey: '',
     isActive: true,
     usePathStyle: false,
     endpoint: '',
@@ -50,7 +48,6 @@ export default function AwsS3Settings() {
   
   const [showSecretKey, setShowSecretKey] = useState(false);
   const [showAccessKey, setShowAccessKey] = useState(false);
-  const [showEncryptionKey, setShowEncryptionKey] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -70,8 +67,7 @@ export default function AwsS3Settings() {
             ...data.settings,
             // Don't show actual keys in UI for security
             accessKeyId: data.settings.accessKeyId ? '••••••••' : '',
-            secretAccessKey: data.settings.secretAccessKey ? '••••••••' : '',
-            encryptionKey: data.settings.encryptionKey ? '••••••••' : ''
+            secretAccessKey: data.settings.secretAccessKey ? '••••••••' : ''
           });
         }
       }
@@ -109,9 +105,6 @@ export default function AwsS3Settings() {
       }
       if (settings.secretAccessKey && settings.secretAccessKey !== '••••••••') {
         payload.secretAccessKey = settings.secretAccessKey;
-      }
-      if (settings.encryptionKey && settings.encryptionKey !== '••••••••') {
-        payload.encryptionKey = settings.encryptionKey;
       }
 
       const response = await fetch('/api/admin/aws-s3/settings', {
@@ -328,34 +321,17 @@ export default function AwsS3Settings() {
               />
             </div>
 
-            {/* Encryption Key */}
-            <div className="space-y-2">
-              <Label htmlFor="encryptionKey">
-                Encryption Key (AWS_CREDENTIALS_ENCRYPTION_KEY)
-              </Label>
-              <div className="relative">
-                <Input
-                  id="encryptionKey"
-                  type={showEncryptionKey ? "text" : "password"}
-                  value={settings.encryptionKey || ''}
-                  onChange={(e) => setSettings({ ...settings, encryptionKey: e.target.value })}
-                  placeholder="8f9d2a6b4c7e1f3a9b2d5c6e7f1a2b3c"
-                  className="pr-10"
-                  data-testid="input-encryption-key"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowEncryptionKey(!showEncryptionKey)}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  data-testid="button-toggle-encryption-key"
-                >
-                  {showEncryptionKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-              <p className="text-sm text-gray-500">
-                کلید 32 کاراکتری برای رمزنگاری کلیدهای AWS (اختیاری - اگر خالی بماند از متغیر محیطی استفاده می‌شود)
-              </p>
-            </div>
+            {/* Encryption Key Info */}
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                <div className="space-y-2">
+                  <p className="font-semibold">کلید رمزنگاری (Encryption Key):</p>
+                  <p>کلید رمزنگاری برای امنیت بالاتر از <strong>Replit Secrets</strong> خوانده می‌شود (متغیر: <code className="bg-gray-100 px-1 rounded">AWS_CREDENTIALS_ENCRYPTION_KEY</code>).</p>
+                  <p className="text-sm">برای تنظیم: Tools → Secrets → اضافه کردن یک کلید 32 کاراکتری تصادفی</p>
+                </div>
+              </AlertDescription>
+            </Alert>
 
             {/* تنظیمات اضافی */}
             <div className="border-t pt-6 space-y-4">

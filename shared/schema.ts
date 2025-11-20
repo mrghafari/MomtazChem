@@ -48,11 +48,10 @@ export type AiApiSettings = typeof aiApiSettings.$inferSelect;
 // AWS S3 Settings table for storing S3 configuration
 export const awsS3Settings = pgTable("aws_s3_settings", {
   id: serial("id").primaryKey(),
-  accessKeyId: text("access_key_id").notNull(), // Encrypted AWS Access Key ID
-  secretAccessKey: text("secret_access_key").notNull(), // Encrypted AWS Secret Access Key
+  accessKeyId: text("access_key_id").notNull(), // Encrypted AWS Access Key ID (encrypted with AWS_CREDENTIALS_ENCRYPTION_KEY env var)
+  secretAccessKey: text("secret_access_key").notNull(), // Encrypted AWS Secret Access Key (encrypted with AWS_CREDENTIALS_ENCRYPTION_KEY env var)
   region: text("region").notNull(), // AWS region (e.g., us-east-1)
   bucketName: text("bucket_name").notNull(), // S3 bucket name
-  encryptionKey: text("encryption_key"), // Encryption key for encrypting AWS credentials
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
