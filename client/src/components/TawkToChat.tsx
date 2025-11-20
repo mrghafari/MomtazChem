@@ -15,17 +15,32 @@ declare global {
 
 export default function TawkToChat() {
   const scriptLoadedRef = useRef(false);
+  const lastEnabledState = useRef<boolean | null>(null);
   
-  const { data: tawkSettings } = useQuery<{ success: boolean; data: TawkSettings }>({
+  const { data: tawkSettings, refetch } = useQuery<{ success: boolean; data: TawkSettings }>({
     queryKey: ['/api/tawk-support'],
-    refetchInterval: 30000, // Check every 30 seconds
+    refetchInterval: 10000, // Check every 10 seconds
+    refetchOnWindowFocus: true, // Refetch when user comes back to tab
   });
+
+  // Listen for custom tawk settings update event
+  useEffect(() => {
+    const handleTawkUpdate = () => {
+      console.log('🔄 Tawk settings update event received, refetching...');
+      refetch();
+    };
+    
+    window.addEventListener('tawk-settings-updated', handleTawkUpdate);
+    return () => window.removeEventListener('tawk-settings-updated', handleTawkUpdate);
+  }, [refetch]);
 
   useEffect(() => {
     const isEnabled = tawkSettings?.success && tawkSettings.data?.isEnabled;
     const scriptCode = tawkSettings?.data?.scriptCode;
 
     const removeTawkWidget = () => {
+      console.log('🔄 Attempting to remove Tawk.to widget...');
+      
       // Remove all Tawk.to scripts
       const tawkScripts = document.querySelectorAll('script[src*="tawk.to"], script[data-tawk-script="true"]');
       tawkScripts.forEach(script => {
@@ -35,11 +50,11 @@ export default function TawkToChat() {
       
       // Remove all Tawk.to widget containers and iframes
       const tawkContainers = document.querySelectorAll(
-        '[id^="tawk"], [class*="tawk"], div[style*="tawk"]'
+        '[id^="tawk"], [class*="tawk"], div[style*="tawk"], iframe[src*="tawk"]'
       );
       tawkContainers.forEach(container => {
         container.remove();
-        console.log('🗑️ Removed Tawk.to container');
+        console.log('🗑️ Removed Tawk.to container:', container.id || container.className);
       });
       
       // Clear Tawk API objects
@@ -47,22 +62,39 @@ export default function TawkToChat() {
         try {
           if (typeof window.Tawk_API.hideWidget === 'function') {
             window.Tawk_API.hideWidget();
+            console.log('👻 Hid Tawk.to widget');
+          }
+          if (typeof window.Tawk_API.onLoad === 'function') {
+            window.Tawk_API.onLoad = null;
           }
         } catch (e) {
-          console.log('Could not hide widget:', e);
+          console.log('⚠️ Could not interact with Tawk API:', e);
         }
         delete window.Tawk_API;
         delete window.Tawk_LoadStart;
+        console.log('🧹 Cleared Tawk API objects');
       }
       
       scriptLoadedRef.current = false;
-      console.log('🚫 Tawk.to Live Chat disabled and removed');
+      lastEnabledState.current = false;
+      console.log('✅ Tawk.to Live Chat completely removed');
     };
     
+    // Check if enabled state changed
+    const hasStateChanged = lastEnabledState.current !== null && lastEnabledState.current !== isEnabled;
+    
     if (isEnabled && scriptCode) {
+      // Chat is enabled
+      if (hasStateChanged && lastEnabledState.current === false) {
+        console.log('🔄 State changed from disabled to enabled');
+        // Remove old widget first
+        removeTawkWidget();
+      }
+      
       // Only load if not already loaded
       if (scriptLoadedRef.current) {
         console.log('ℹ️ Tawk.to already loaded, skipping');
+        lastEnabledState.current = true;
         return;
       }
 
@@ -74,10 +106,12 @@ export default function TawkToChat() {
         const existingScript = document.querySelector(`script[src="${scriptSrc}"]`);
         if (existingScript) {
           scriptLoadedRef.current = true;
+          lastEnabledState.current = true;
           console.log('ℹ️ Tawk.to script already in DOM');
           return;
         }
         
+        console.log('📥 Loading Tawk.to widget...');
         const script = document.createElement('script');
         script.src = scriptSrc;
         script.async = true;
@@ -91,26 +125,24 @@ export default function TawkToChat() {
           
           script.onload = () => {
             scriptLoadedRef.current = true;
+            lastEnabledState.current = true;
             console.log('✅ Tawk.to Live Chat loaded successfully');
           };
           
           script.onerror = () => {
             scriptLoadedRef.current = false;
+            lastEnabledState.current = false;
             console.error('❌ Failed to load Tawk.to script');
           };
         }
       }
-    } else if (tawkSettings?.success && !isEnabled) {
-      // Settings exist but chat is disabled - remove everything
-      removeTawkWidget();
-    }
-
-    // Cleanup function when component unmounts or settings change
-    return () => {
-      if (!isEnabled && scriptLoadedRef.current) {
+    } else if (tawkSettings?.success) {
+      // Settings exist and chat is disabled
+      if (!isEnabled && (scriptLoadedRef.current || hasStateChanged)) {
+        console.log('🔄 Chat is disabled, removing widget...');
         removeTawkWidget();
       }
-    };
+    }
   }, [tawkSettings]);
 
   return null;

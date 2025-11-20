@@ -293,7 +293,12 @@ export default function ContentManagement() {
         description: "Live chat settings saved successfully."
       });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/tawk-support'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tawk-support'] });
       refetchTawk();
+      
+      // Dispatch custom event to notify TawkToChat component
+      window.dispatchEvent(new CustomEvent('tawk-settings-updated'));
+      console.log('✅ Dispatched tawk-settings-updated event');
     },
     onError: () => {
       toast({
