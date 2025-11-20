@@ -403,6 +403,64 @@ export function registerS3ImageRoutes(app: Express) {
       res.status(500).json({ success: false, message: 'Error serving file' });
     }
   });
+
+  // Handle company logos
+  app.get('/uploads/company-logos/:fileName', async (req: Request, res: Response, next: NextFunction) => {
+    const localPath = path.join(process.cwd(), 'uploads', 'company-logos', req.params.fileName);
+    
+    if (fs.existsSync(localPath)) {
+      console.log(`📁 [LOCAL LOGO] Serving from local: ${req.params.fileName}`);
+      return next();
+    }
+    
+    try {
+      console.log(`🏢 [S3 LOGO] File not found locally, trying S3: ${req.params.fileName}`);
+      
+      const s3Service = getS3Service();
+      
+      if (!s3Service) {
+        console.log('❌ [S3 LOGO] No active S3 settings found');
+        return res.status(404).json({ success: false, message: 'Logo not found' });
+      }
+      
+      const s3Key = `company-logos/${req.params.fileName}`;
+      
+      console.log(`🖼️ [S3 LOGO] Fetching from S3: ${s3Key}`);
+      
+      const fileBuffer = await s3Service.getFile(s3Key);
+      
+      if (!fileBuffer) {
+        console.log(`❌ [S3 LOGO] File not found in S3: ${s3Key}`);
+        return res.status(404).json({ success: false, message: 'Logo not found' });
+      }
+      
+      // Determine content type from file extension
+      const ext = path.extname(req.params.fileName).toLowerCase();
+      const contentTypes: {[key: string]: string} = {
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp',
+        '.svg': 'image/svg+xml'
+      };
+      
+      const contentType = contentTypes[ext] || 'application/octet-stream';
+      
+      res.set({
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=31536000',
+        'Content-Length': fileBuffer.length
+      });
+      
+      res.send(fileBuffer);
+      
+      console.log(`✅ [S3 LOGO] Successfully served from S3: ${s3Key} (${fileBuffer.length} bytes)`);
+    } catch (error) {
+      console.error('❌ [S3 LOGO] Error serving logo from S3:', error);
+      res.status(500).json({ success: false, message: 'Error serving logo' });
+    }
+  });
   
-  console.log('✅ [S3 ROUTES] S3 file serving routes registered (images, product-images, product-catalogs, product-msds, payment-receipts, general-files)');
+  console.log('✅ [S3 ROUTES] S3 file serving routes registered (images, product-images, product-catalogs, product-msds, payment-receipts, general-files, company-logos)');
 }
