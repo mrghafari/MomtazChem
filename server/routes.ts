@@ -24083,7 +24083,8 @@ Leading Chemical Solutions Provider
         username,
         password,
         fromName,
-        fromEmail
+        fromEmail,
+        useForOtp
       } = req.body;
 
       if (!host || !username || !password || !fromName || !fromEmail) {
@@ -24101,7 +24102,8 @@ Leading Chemical Solutions Provider
         password: password.toString(),
         fromName: fromName.toString(),
         fromEmail: fromEmail.toString(),
-        categoryId: parseInt(categoryId)
+        categoryId: parseInt(categoryId),
+        useForOtp: Boolean(useForOtp),
       };
 
       console.log("Processed SMTP data:", smtpData);
