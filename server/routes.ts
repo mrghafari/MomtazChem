@@ -34598,8 +34598,8 @@ momtazchem.com
           is_enabled: tawkSupportChat.is_enabled,
           script_code: tawkSupportChat.script_code
         })
-        .from(tawkSupportChat)
-        .orderBy(desc(tawkSupportChat.id))
+        .from(schema.tawkSupportChat)
+        .orderBy(desc(schema.tawkSupportChat.id))
         .limit(1);
       
       if (!settings) {
@@ -53231,8 +53231,8 @@ momtazchem.com
     try {
       const [settings] = await db
         .select()
-        .from(tawkSupportChat)
-        .orderBy(desc(tawkSupportChat.id))
+        .from(schema.tawkSupportChat)
+        .orderBy(desc(schema.tawkSupportChat.id))
         .limit(1);
       
       if (!settings) {
@@ -53272,8 +53272,8 @@ momtazchem.com
       // Get existing settings to update or create new
       const [existing] = await db
         .select()
-        .from(tawkSupportChat)
-        .orderBy(desc(tawkSupportChat.id))
+        .from(schema.tawkSupportChat)
+        .orderBy(desc(schema.tawkSupportChat.id))
         .limit(1);
       
       let result;
@@ -53290,7 +53290,7 @@ momtazchem.com
             notes,
             updated_at: new Date()
           })
-          .where(eq(tawkSupportChat.id, existing.id))
+          .where(eq(schema.tawkSupportChat.id, existing.id))
           .returning();
       } else {
         // Create new
@@ -53324,8 +53324,8 @@ momtazchem.com
           is_enabled: tawkSupportChat.is_enabled,
           script_code: tawkSupportChat.script_code
         })
-        .from(tawkSupportChat)
-        .orderBy(desc(tawkSupportChat.id))
+        .from(schema.tawkSupportChat)
+        .orderBy(desc(schema.tawkSupportChat.id))
         .limit(1);
       
       if (!settings) {
