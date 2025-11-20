@@ -48,7 +48,28 @@ export function registerS3ImageRoutes(app: Express) {
       }
       
       if (!fileBuffer) {
-        console.log(`❌ [S3 IMAGE] File not found in S3: ${req.params.fileName}`);
+        console.log(`❌ [S3 IMAGE] File not found in S3: ${req.params.fileName}, serving company logo instead`);
+        
+        // Serve company logo as fallback
+        try {
+          const logoKey = 'company-logos/Momtazchem-Logo.png';
+          const logoBuffer = await s3Service.getFile(logoKey);
+          
+          if (logoBuffer) {
+            res.set({
+              'Content-Type': 'image/png',
+              'Cache-Control': 'public, max-age=31536000',
+              'Content-Length': logoBuffer.length
+            });
+            
+            res.send(logoBuffer);
+            console.log(`✅ [S3 IMAGE] Served company logo as fallback`);
+            return;
+          }
+        } catch (logoError) {
+          console.error('❌ [S3 IMAGE] Error serving logo fallback:', logoError);
+        }
+        
         return res.status(404).json({ success: false, message: 'Image not found' });
       }
       
