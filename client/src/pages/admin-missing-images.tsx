@@ -29,6 +29,7 @@ interface MissingImagesData {
 export default function AdminMissingImages() {
   const { toast } = useToast();
   const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({});
+  const [bulkUploading, setBulkUploading] = useState(false);
 
   const { data, isLoading, refetch } = useQuery<{ success: boolean; data: MissingImagesData }>({
     queryKey: ['/api/admin/s3/check-missing-images'],
@@ -60,6 +61,42 @@ export default function AdminMissingImages() {
       });
     },
   });
+
+  const bulkUploadMutation = useMutation({
+    mutationFn: async (files: FileList) => {
+      const formData = new FormData();
+      Array.from(files).forEach(file => {
+        formData.append('files', file);
+      });
+      
+      return await apiRequest('/api/admin/s3/bulk-upload-missing', {
+        method: 'POST',
+        body: formData,
+      });
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: 'موفقیت',
+        description: `${data.data.totalUploaded} عکس آپلود شد${data.data.totalFailed > 0 ? ` - ${data.data.totalFailed} خطا` : ''}`,
+      });
+      refetch();
+      setBulkUploading(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'خطا',
+        description: error.message || 'خطا در آپلود دسته‌جمعی',
+        variant: 'destructive',
+      });
+      setBulkUploading(false);
+    },
+  });
+
+  const handleBulkUpload = async (files: FileList) => {
+    if (files.length === 0) return;
+    setBulkUploading(true);
+    await bulkUploadMutation.mutateAsync(files);
+  };
 
   const handleFileUpload = async (expectedKey: string, file: File) => {
     setUploadingFiles(prev => ({ ...prev, [expectedKey]: true }));
@@ -144,6 +181,38 @@ export default function AdminMissingImages() {
                   <strong>{missingData.totalMissing} عکس</strong> از S3 گم شده‌اند. این عکس‌ها باید دوباره آپلود شوند.
                 </AlertDescription>
               </Alert>
+
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle>آپلود دسته‌جمعی</CardTitle>
+                  <CardDescription>
+                    همه عکس‌های محصولات رو یکجا انتخاب کنید و آپلود کنید
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-4">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          handleBulkUpload(e.target.files);
+                        }
+                      }}
+                      disabled={bulkUploading}
+                      className="max-w-md"
+                      data-testid="input-bulk-upload"
+                    />
+                    {bulkUploading && (
+                      <div className="flex items-center gap-2">
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span className="text-sm text-muted-foreground">در حال آپلود...</span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
 
               <Card>
                 <CardHeader>
