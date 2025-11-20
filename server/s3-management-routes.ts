@@ -222,13 +222,14 @@ router.post('/api/admin/s3/bulk-upload-missing', upload.array('files', 50), asyn
 
 /**
  * Fix product image URLs - Convert /uploads/ and /objects/ paths to S3 URLs
+ * Works on BOTH shop_products AND showcase_products tables
  */
 router.post('/api/admin/s3/fix-product-urls', async (req, res) => {
   try {
     const { pool } = await import('./db');
     const s3Service = getAwsS3Service();
     
-    console.log('🔍 Starting product image URL fix...');
+    console.log('🔍 Starting product image URL fix for both shop and showcase products...');
     
     // Get all files from S3
     const [generalFiles, productImages] = await Promise.all([
@@ -248,90 +249,159 @@ router.post('/api/admin/s3/fix-product-urls', async (req, res) => {
     
     console.log(`✅ Found ${s3FileMap.size} files in S3`);
     
-    // Get all products
-    const result = await pool.query(`
-      SELECT id, name, image_urls, thumbnail_url 
-      FROM shop_products
-    `);
+    // Process BOTH tables
+    const tables = ['shop_products', 'showcase_products'];
+    const allUpdates: any = {};
     
-    console.log(`📋 Processing ${result.rows.length} products...`);
-    
-    let updatedCount = 0;
-    let unchangedCount = 0;
-    const updates = [];
-    
-    for (const product of result.rows) {
-      let needsUpdate = false;
-      let updatedImageUrls = product.image_urls;
-      let updatedThumbnail = product.thumbnail_url;
-      const details: any = { id: product.id, name: product.name, changes: [] };
+    for (const tableName of tables) {
+      console.log(`\n📋 Processing ${tableName}...`);
       
-      // Fix image_urls array
-      if (Array.isArray(product.image_urls)) {
-        const newUrls = product.image_urls.map((url: string) => {
-          // Skip if already S3 URL
-          if (url.startsWith('https://') && url.includes('amazonaws.com')) {
+      // Get column structure for this table
+      const columnsResult = await pool.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = '${tableName}' 
+        AND column_name LIKE '%image%'
+      `);
+      
+      const availableColumns = columnsResult.rows.map((r: any) => r.column_name);
+      const hasImageUrl = availableColumns.includes('image_url');
+      const hasImageUrls = availableColumns.includes('image_urls');
+      const hasThumbnailUrl = availableColumns.includes('thumbnail_url');
+      
+      console.log(`   Columns: image_url=${hasImageUrl}, image_urls=${hasImageUrls}, thumbnail_url=${hasThumbnailUrl}`);
+      
+      // Build SELECT query based on available columns
+      const selectFields = ['id', 'name'];
+      if (hasImageUrls) selectFields.push('image_urls');
+      if (hasImageUrl) selectFields.push('image_url');
+      if (hasThumbnailUrl) selectFields.push('thumbnail_url');
+      
+      const result = await pool.query(`SELECT ${selectFields.join(', ')} FROM ${tableName}`);
+      
+      console.log(`   Found ${result.rows.length} products`);
+      
+      let updatedCount = 0;
+      let unchangedCount = 0;
+      const updates = [];
+      
+      for (const product of result.rows) {
+        let needsUpdate = false;
+        let updatedImageUrls = product.image_urls;
+        let updatedImageUrl = product.image_url;
+        let updatedThumbnail = product.thumbnail_url;
+        const details: any = { id: product.id, name: product.name, changes: [] };
+        
+        // Fix image_urls array
+        if (Array.isArray(product.image_urls)) {
+          const newUrls = product.image_urls.map((url: string) => {
+            // Skip if already S3 URL
+            if (url.startsWith('https://') && url.includes('amazonaws.com')) {
+              return url;
+            }
+            
+            // Extract filename from old path
+            const filename = url.split('/').pop();
+            if (filename && s3FileMap.has(filename)) {
+              needsUpdate = true;
+              const s3Url = s3FileMap.get(filename)!;
+              details.changes.push({ from: url, to: s3Url });
+              return s3Url;
+            }
+            
+            details.changes.push({ from: url, to: url, status: 'not_found_in_s3' });
             return url;
-          }
+          });
           
-          // Extract filename from old path
-          const filename = url.split('/').pop();
+          updatedImageUrls = newUrls;
+        }
+        
+        // Fix image_url (single image field) if exists
+        if (hasImageUrl && product.image_url && !product.image_url.startsWith('https://')) {
+          const filename = product.image_url.split('/').pop();
           if (filename && s3FileMap.has(filename)) {
             needsUpdate = true;
-            const s3Url = s3FileMap.get(filename)!;
-            details.changes.push({ from: url, to: s3Url });
-            return s3Url;
+            updatedImageUrl = s3FileMap.get(filename)!;
+            details.changes.push({ 
+              type: 'image_url', 
+              from: product.image_url, 
+              to: updatedImageUrl 
+            });
+          }
+        }
+        
+        // Fix thumbnail_url if exists
+        if (hasThumbnailUrl && product.thumbnail_url && !product.thumbnail_url.startsWith('https://')) {
+          const filename = product.thumbnail_url.split('/').pop();
+          if (filename && s3FileMap.has(filename)) {
+            needsUpdate = true;
+            updatedThumbnail = s3FileMap.get(filename)!;
+            details.changes.push({ 
+              type: 'thumbnail', 
+              from: product.thumbnail_url, 
+              to: updatedThumbnail 
+            });
+          }
+        }
+        
+        if (needsUpdate) {
+          // Build UPDATE query based on which fields exist
+          const updateFields = [];
+          const updateValues = [];
+          let paramIndex = 1;
+          
+          if (hasImageUrls) {
+            updateFields.push(`image_urls = $${paramIndex++}`);
+            updateValues.push(JSON.stringify(updatedImageUrls));
+          }
+          if (hasImageUrl) {
+            updateFields.push(`image_url = $${paramIndex++}`);
+            updateValues.push(updatedImageUrl);
+          }
+          if (hasThumbnailUrl) {
+            updateFields.push(`thumbnail_url = $${paramIndex++}`);
+            updateValues.push(updatedThumbnail);
           }
           
-          details.changes.push({ from: url, to: url, status: 'not_found_in_s3' });
-          return url;
-        });
-        
-        updatedImageUrls = newUrls;
-      }
-      
-      // Fix thumbnail_url
-      if (product.thumbnail_url && !product.thumbnail_url.startsWith('https://')) {
-        const filename = product.thumbnail_url.split('/').pop();
-        if (filename && s3FileMap.has(filename)) {
-          needsUpdate = true;
-          updatedThumbnail = s3FileMap.get(filename)!;
-          details.changes.push({ 
-            type: 'thumbnail', 
-            from: product.thumbnail_url, 
-            to: updatedThumbnail 
-          });
+          updateFields.push(`updated_at = CURRENT_TIMESTAMP`);
+          updateValues.push(product.id);
+          
+          const updateQuery = `
+            UPDATE ${tableName} 
+            SET ${updateFields.join(', ')}
+            WHERE id = $${paramIndex}
+          `;
+          
+          await pool.query(updateQuery, updateValues);
+          
+          console.log(`   ✅ Updated: ${product.name} (ID: ${product.id})`);
+          updatedCount++;
+          details.status = 'updated';
+        } else {
+          unchangedCount++;
+          details.status = 'unchanged';
         }
-      }
-      
-      if (needsUpdate) {
-        await pool.query(`
-          UPDATE shop_products 
-          SET image_urls = $1, thumbnail_url = $2, updated_at = CURRENT_TIMESTAMP
-          WHERE id = $3
-        `, [JSON.stringify(updatedImageUrls), updatedThumbnail, product.id]);
         
-        console.log(`✅ Updated: ${product.name} (ID: ${product.id})`);
-        updatedCount++;
-        details.status = 'updated';
-      } else {
-        unchangedCount++;
-        details.status = 'unchanged';
+        updates.push(details);
       }
       
-      updates.push(details);
+      console.log(`   📊 ${tableName}: ${updatedCount} updated, ${unchangedCount} unchanged`);
+      
+      allUpdates[tableName] = {
+        totalProducts: result.rows.length,
+        updatedCount,
+        unchangedCount,
+        updates
+      };
     }
     
-    console.log(`📊 Summary: ${updatedCount} updated, ${unchangedCount} unchanged`);
+    console.log('\n✨ All tables processed successfully!');
     
     res.json({
       success: true,
       data: {
-        totalProducts: result.rows.length,
-        updatedCount,
-        unchangedCount,
         s3FilesCount: s3FileMap.size,
-        updates
+        tables: allUpdates
       }
     });
     
