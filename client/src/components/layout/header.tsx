@@ -25,8 +25,8 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
-// Company logo from S3
-const COMPANY_LOGO_URL = "https://momtazchem.s3.eu-central-1.amazonaws.com/company-logos/Momtazchem-Logo.png";
+// Company logo via proxy route (supports both local and S3)
+const COMPANY_LOGO_URL = "/uploads/company-logos/Momtazchem-Logo.png";
 
 export default function Header() {
   const [location] = useLocation();
