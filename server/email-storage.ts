@@ -320,7 +320,7 @@ export class EmailStorage implements IEmailStorage {
     return await emailDb
       .select()
       .from(emailTemplates)
-      .orderBy(emailTemplates.templateName);
+      .orderBy(emailTemplates.name);
   }
 
   async getAllTemplates(): Promise<EmailTemplate[]> {

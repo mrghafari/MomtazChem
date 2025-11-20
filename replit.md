@@ -4,6 +4,13 @@
 The Momtazchem Chemical Solutions Platform is a comprehensive, multilingual system integrating a public showcase website, e-commerce, and administrative tools for a chemical company. Its primary purpose is to optimize CRM, inventory, sales, logistics, and financial management while expanding market reach. Key capabilities include multi-language support (English, Arabic, Kurdish, Turkish), unified site management, advanced e-commerce, GPS tracking, real-time analytics, email automation, barcode and Kardex-synced inventory, and financial management. The project aims to establish Momtazchem as a digital leader in the chemical industry.
 
 ## Recent Changes (November 2025)
+- **Critical Email Template System & AWS S3 Fixes (Nov 20, 2025)**:
+  - **Fixed SQL Syntax Error**: Corrected `emailStorage.getTemplates()` method that was ordering by non-existent `templateName` field instead of `name`
+  - Error was causing password reset emails to fail with "syntax error at end of input" at position 230
+  - Password reset flow now working perfectly: email sending → token verification → password update
+  - **AWS S3 Service Initialization Fixed**: Resolved issue where AWS S3 client wasn't initializing from encrypted database credentials
+  - AWS S3 now properly decrypts stored credentials and initializes on server startup
+  - Image uploads and S3 file serving routes now fully functional
 - **AWS S3 Credentials Management with Encryption (Nov 20, 2025)**:
   - Implemented secure AWS S3 credentials management system with AES-256 encryption
   - Added encryption_key field to aws_s3_settings table (kept empty in database for security)
