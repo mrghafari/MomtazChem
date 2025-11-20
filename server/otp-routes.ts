@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import { db } from './db';
-import { customersOtp } from '../shared/schema';
+import { customersOtp, crmCustomers } from '../shared/schema';
 import { eq, and, gt } from 'drizzle-orm';
 import { SmsService } from './sms-service';
 import { WhatsAppService } from './whatsapp-service';
 import nodemailer from 'nodemailer';
 import { EmailStorage } from './email-storage';
+import bcrypt from 'bcryptjs';
 
 const router = Router();
 const emailStorage = new EmailStorage();
@@ -312,6 +313,61 @@ router.post('/api/customers/verify-otp', async (req, res) => {
       .where(eq(customersOtp.id, otpRecord.id));
 
     console.log(`✅ [OTP] Verified successfully for ${phone}/${email}`);
+
+    // Create customer account from registrationData
+    if (otpRecord.registrationData) {
+      const regData = otpRecord.registrationData as any;
+      
+      // Check if customer already exists
+      const existingCustomer = await db.query.crmCustomers.findFirst({
+        where: eq(crmCustomers.email, email),
+      });
+
+      if (existingCustomer) {
+        return res.json({
+          success: true,
+          message: 'Verification successful',
+          customer: existingCustomer,
+        });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(regData.password, 10);
+
+      // Create customer in CRM
+      const [newCustomer] = await db.insert(crmCustomers).values({
+        email: regData.email,
+        passwordHash: hashedPassword,
+        firstName: regData.firstName,
+        lastName: regData.lastName,
+        phone: regData.phone,
+        alternatePhone: regData.alternatePhone || null,
+        company: regData.company || null,
+        country: regData.country,
+        province: regData.province,
+        cityRegion: regData.city,
+        address: regData.address,
+        secondaryAddress: regData.secondaryAddress || null,
+        postalCode: regData.postalCode || null,
+        industry: regData.industry || null,
+        businessType: regData.businessType || 'end_user',
+        companySize: regData.companySize || null,
+        communicationPreference: regData.communicationPreference || 'email',
+        preferredLanguage: regData.preferredLanguage || 'en',
+        marketingConsent: regData.marketingConsent || false,
+        customerType: 'retail',
+        customerSource: 'website',
+        customerStatus: 'active',
+      }).returning();
+
+      console.log(`✅ [OTP] Customer account created for ${email}`);
+
+      return res.json({
+        success: true,
+        message: 'Verification successful',
+        customer: newCustomer,
+      });
+    }
 
     return res.json({
       success: true,
