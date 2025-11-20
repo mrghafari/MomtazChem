@@ -8,9 +8,9 @@ import nodemailer from 'nodemailer';
 
 const router = Router();
 
-// Helper: Generate 6-digit OTP code
+// Helper: Generate 4-digit OTP code
 function generateOtpCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
 // Helper: Send OTP via WhatsApp

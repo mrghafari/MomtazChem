@@ -153,20 +153,15 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showVerificationForm, setShowVerificationForm] = useState(false);
-  const [registrationData, setRegistrationData] = useState<any>(null);
-  const [verificationCode, setVerificationCode] = useState("");
-  const [verificationError, setVerificationError] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
   const [selectedProvince, setSelectedProvince] = useState("");
   
-  // Dual verification states
-  const [showDualVerification, setShowDualVerification] = useState(false);
-  const [smsCode, setSmsCode] = useState("");
-  const [emailCode, setEmailCode] = useState("");
-  const [verificationSettings, setVerificationSettings] = useState<any>(null);
-  const [verificationMethods, setVerificationMethods] = useState<any>({ sms: false, email: false });
-  const [dualVerificationError, setDualVerificationError] = useState("");
+  // OTP verification states
+  const [showOtpVerification, setShowOtpVerification] = useState(false);
+  const [registrationData, setRegistrationData] = useState<any>(null);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
   
   // Collapsible sections state
   const [basicInfoOpen, setBasicInfoOpen] = useState(true);
@@ -182,17 +177,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
   
   const provinces = (provincesResponse as any)?.data || [];
 
-  // Fetch verification settings
-  const { data: verificationSettingsResponse } = useQuery({
-    queryKey: ["/api/customer/verification-settings"],
-    enabled: true,
-  });
-
-  useEffect(() => {
-    if (verificationSettingsResponse?.success) {
-      setVerificationSettings(verificationSettingsResponse.settings);
-    }
-  }, [verificationSettingsResponse]);
+  // No need for verification settings anymore - OTP is always used
 
   // Find selected province ID 
   const selectedProvinceData = Array.isArray(provinces) ? provinces.find((p: any) => p.nameEnglish === selectedProvince) : null;
@@ -361,42 +346,52 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
         }
       }
       
-      // Check if dual verification is enabled
-      if (verificationSettings && (verificationSettings.smsVerificationEnabled || verificationSettings.emailVerificationEnabled)) {
-        // Store registration data for dual verification
-        setRegistrationData({ ...registerData });
+      // Send OTP for verification
+      const fullRegistrationData = {
+        ...registerData,
+        customerType: 'retail',
+        customerSource: 'website',
+        passwordHash: registerData.password,
+        whatsappNumber: registerData.whatsappNumber || registerData.phone,
+      };
+      
+      setRegistrationData(fullRegistrationData);
+      
+      const otpResponse = await fetch('/api/customers/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: registerData.email,
+          phone: registerData.phone,
+          registrationData: fullRegistrationData,
+        }),
+      });
+
+      const otpResult = await otpResponse.json();
+
+      if (otpResult.success) {
+        setShowOtpVerification(true);
         
-        // Send dual verification codes
-        const verificationResponse = await fetch('/api/customer/send-dual-verification', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            email: registerData.email,
-            phone: registerData.phone,
-            firstName: registerData.firstName,
-            lastName: registerData.lastName,
-          }),
+        const channels = [];
+        if (otpResult.sentVia?.email) channels.push("Email");
+        if (otpResult.sentVia?.whatsapp) channels.push("WhatsApp");
+        if (otpResult.sentVia?.sms) channels.push("SMS");
+        
+        toast({
+          title: t.auth.verificationCodesSent || "Verification Code Sent",
+          description: `${t.auth.codeSentTo || "Code sent to"}: ${channels.join(", ")}`,
         });
-
-        const verificationResult = await verificationResponse.json();
-
-        if (verificationResult.success) {
-          setVerificationMethods(verificationResult.verificationMethods);
-          setShowDualVerification(true);
-          
-          toast({
-            title: t.auth.verificationCodesSent,
-            description: verificationResult.message,
-          });
-        } else {
-          toast({
-            variant: "destructive",
-            title: t.auth.verificationCodesError,
-            description: verificationResult.message,
-          });
-        }
       } else {
+        toast({
+          variant: "destructive",
+          title: t.auth.verificationCodesError || "Error",
+          description: otpResult.message || "Failed to send verification code",
+        });
+      }
+      
+      // Skip old code
+      if (false) {
         // Regular registration without dual verification
         const fullRegistrationData = {
           ...registerData,
