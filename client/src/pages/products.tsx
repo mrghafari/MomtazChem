@@ -2962,13 +2962,13 @@ export default function ProductsPage() {
                             <div key={index} className="space-y-2">
                               <div className="text-xs text-gray-500 text-center font-medium">{t.productManagement.imageNumber.replace('{index}', (index + 1).toString())}</div>
                               <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-3 text-center flex flex-col justify-center">
-                                {(editingProduct ? displayImagePreviews[index] : imagePreviews[index]) ? (
+                                {(imagePreviews[index] || (editingProduct && displayImagePreviews[index])) ? (
                                   <div className="relative w-full aspect-square">
                                     <img 
-                                      src={(editingProduct ? displayImagePreviews[index] : imagePreviews[index]) || ''} 
+                                      src={(imagePreviews[index] || displayImagePreviews[index]) || ''} 
                                       alt={t.productManagement.imagePreview.replace('{index}', (index + 1).toString())} 
                                       className={`w-full h-full object-cover rounded-lg transition-all ${
-                                        (editingProduct ? displayPrimaryImageIndex : primaryImageIndex) === index ? 'ring-2 ring-blue-500 ring-offset-2' : ''
+                                        primaryImageIndex === index ? 'ring-2 ring-blue-500 ring-offset-2' : ''
                                       }`}
                                     />
                                     {/* Primary image indicator */}
