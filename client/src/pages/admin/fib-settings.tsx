@@ -194,6 +194,18 @@ export default function FibSettings() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Page Info */}
+          <Alert className="border-blue-200 bg-blue-50">
+            <Info className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              <div className="space-y-2">
+                <p className="font-semibold">💡 تنظیمات پیشرفته FIB Payment Gateway</p>
+                <p className="text-sm">این صفحه برای مدیریت اطلاعات احراز هویت و تنظیمات تخصصی FIB است.</p>
+                <p className="text-sm">برای مدیریت تنظیمات عمومی gateway (فعال/غیرفعال کردن)، به <a href="/admin/payment-settings" className="underline font-semibold">Payment Settings</a> مراجعه کنید.</p>
+              </div>
+            </AlertDescription>
+          </Alert>
+
           {/* Encryption Key Info */}
           <Alert>
             <Info className="h-4 w-4" />

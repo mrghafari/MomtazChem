@@ -868,22 +868,40 @@ const PaymentSettings = () => {
           </div>
         </div>
 
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button
-            variant="outline"
-            onClick={() => {
-              setIsEditDialogOpen(false);
-              setSelectedGateway(null);
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={() => saveGatewayMutation.mutate(selectedGateway)}
-            disabled={saveGatewayMutation.isPending}
-          >
-            {saveGatewayMutation.isPending ? "Saving..." : "Save Gateway"}
-          </Button>
+        <div className="flex justify-between items-center pt-4">
+          {/* Show Advanced Settings button only for FIB gateway */}
+          {selectedGateway.name?.toLowerCase().includes('fib') || selectedGateway.name?.toLowerCase().includes('first iraqi bank') ? (
+            <Button
+              variant="secondary"
+              onClick={() => {
+                window.location.href = '/admin/fib-settings';
+              }}
+              className="flex items-center gap-2"
+            >
+              <Settings className="w-4 h-4" />
+              Advanced FIB Settings
+            </Button>
+          ) : (
+            <div></div>
+          )}
+          
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEditDialogOpen(false);
+                setSelectedGateway(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => saveGatewayMutation.mutate(selectedGateway)}
+              disabled={saveGatewayMutation.isPending}
+            >
+              {saveGatewayMutation.isPending ? "Saving..." : "Save Gateway"}
+            </Button>
+          </div>
         </div>
       </div>
     );
