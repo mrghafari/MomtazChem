@@ -4,6 +4,7 @@ import MemoryStore from "memorystore";
 import path from "path";
 import { registerRoutes } from "./routes";
 import backupRoutes from "./backup-routes";
+import otpRoutes from "./otp-routes";
 import InventoryAlertService from "./inventory-alerts";
 import { expiredOrdersCleanup } from "./expired-orders-cleanup";
 import { abandonedCartCleanup } from "./abandoned-cart-cleanup";
@@ -302,6 +303,10 @@ app.use((req, res, next) => {
     app.use(adminSessionMiddleware);
     app.use(backupRoutes);
     log('💾 [BACKUP] Backup routes registered');
+
+    // Register OTP routes (no auth required - public registration)
+    app.use(otpRoutes);
+    log('🔐 [OTP] OTP verification routes registered');
 
     // Register routes BEFORE Vite middleware to ensure API routes take precedence
     const server = await registerRoutes(app);

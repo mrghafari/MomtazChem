@@ -1702,5 +1702,32 @@ export const insertFibSettingsSchema = createInsertSchema(fibSettings).omit({
 export type InsertFibSettings = z.infer<typeof insertFibSettingsSchema>;
 export type FibSettings = typeof fibSettings.$inferSelect;
 
+// =============================================================================
+// CUSTOMER OTP VERIFICATION SYSTEM
+// =============================================================================
+
+// Customer OTP table for registration and verification
+export const customersOtp = pgTable("customers_otp", {
+  id: serial("id").primaryKey(),
+  phone: text("phone").notNull(), // Phone number OTP was sent to
+  email: text("email").notNull(), // Email address OTP was sent to
+  code: text("code").notNull(), // The OTP code (6 digits)
+  expiresAt: timestamp("expires_at").notNull(), // When OTP expires (5 minutes default)
+  attempts: integer("attempts").notNull().default(0), // Number of verification attempts
+  verified: boolean("verified").default(false), // Whether OTP was successfully verified
+  lastSentAt: timestamp("last_sent_at").notNull().defaultNow(), // Last time OTP was sent
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  // Store registration data temporarily until OTP is verified
+  registrationData: json("registration_data"), // Customer registration data
+});
+
+export const insertCustomersOtpSchema = createInsertSchema(customersOtp).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertCustomersOtp = z.infer<typeof insertCustomersOtpSchema>;
+export type CustomersOtp = typeof customersOtp.$inferSelect;
+
 // Re-export marketing schema
 export * from './marketing-schema';
