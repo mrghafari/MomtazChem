@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { db } from './db';
 import { customersOtp, crmCustomers } from '../shared/schema';
+import { emailTemplates } from '../shared/customer-schema';
 import { eq, and, gt } from 'drizzle-orm';
 import { SmsService } from './sms-service';
 import { WhatsAppService } from './whatsapp-service';
@@ -78,55 +79,42 @@ async function sendOtpEmail(email: string, code: string, name?: string): Promise
       return false;
     }
 
-    const html = `
-      <!DOCTYPE html>
-      <html dir="rtl">
-      <head>
-        <meta charset="UTF-8">
-        <style>
-          body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
-          .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 10px; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-          .header { text-align: center; margin-bottom: 30px; }
-          .logo { font-size: 32px; font-weight: bold; color: #2563eb; }
-          .code-box { background: #eff6ff; border: 2px solid #2563eb; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }
-          .code { font-size: 36px; font-weight: bold; color: #1e40af; letter-spacing: 8px; }
-          .note { color: #666; font-size: 14px; margin-top: 20px; text-align: center; }
-          .footer { text-align: center; margin-top: 30px; color: #999; font-size: 12px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <div class="logo">Momtazchem</div>
-            <h2>کد تایید ثبت نام</h2>
-            <h3>Registration Verification Code</h3>
-          </div>
-          
-          ${name ? `<p>مشتری گرامی ${name}، / Dear ${name},</p>` : '<p>مشتری گرامی، / Dear Customer,</p>'}
-          
-          <p>کد تایید شما برای تکمیل ثبت نام:</p>
-          <p>Your verification code to complete registration:</p>
-          
-          <div class="code-box">
-            <div class="code">${code}</div>
-          </div>
-          
-          <div class="note">
-            <p>⏰ این کد ظرف <strong>5 دقیقه</strong> منقضی خواهد شد.</p>
-            <p>⏰ This code will expire in <strong>5 minutes</strong>.</p>
-            <p>🔒 برای امنیت حساب خود، این کد را با کسی به اشتراک نگذارید.</p>
-            <p>🔒 For your account security, do not share this code with anyone.</p>
-          </div>
-          
-          <div class="footer">
-            <p>© ${new Date().getFullYear()} Momtazchem. All rights reserved.</p>
-            <p>اگر شما این درخواست را انجام نداده‌اید، این ایمیل را نادیده بگیرید.</p>
-            <p>If you did not request this code, please ignore this email.</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
+    // Load OTP email template from database
+    const template = await db.query.emailTemplates.findFirst({
+      where: and(
+        eq(emailTemplates.category, 'authentication'),
+        eq(emailTemplates.isActive, true)
+      ),
+    });
+
+    if (!template) {
+      console.error('❌ [OTP Email] No OTP email template found in database');
+      return false;
+    }
+
+    // Simple template variable replacement
+    const variables = {
+      code,
+      customerName: name || '',
+      year: new Date().getFullYear().toString(),
+    };
+
+    let html = template.htmlContent;
+    let subject = template.subject;
+
+    // Replace all variables in format {{variableName}}
+    Object.entries(variables).forEach(([key, value]) => {
+      const regex = new RegExp(`{{${key}}}`, 'g');
+      html = html.replace(regex, value);
+      subject = subject.replace(regex, value);
+    });
+
+    // Handle conditional blocks {{#if customerName}}...{{else}}...{{/if}}
+    if (name) {
+      html = html.replace(/{{#if customerName}}(.*?){{else}}.*?{{\/if}}/gs, '$1');
+    } else {
+      html = html.replace(/{{#if customerName}}.*?{{else}}(.*?){{\/if}}/gs, '$1');
+    }
 
     // Create SMTP transporter with database settings
     const transporter = nodemailer.createTransport({
@@ -143,7 +131,7 @@ async function sendOtpEmail(email: string, code: string, name?: string): Promise
     const info = await transporter.sendMail({
       from: `"${smtpSetting.fromName}" <${smtpSetting.fromEmail}>`,
       to: email,
-      subject: `کد تایید ثبت نام - Registration Code: ${code}`,
+      subject,
       html,
     });
 
