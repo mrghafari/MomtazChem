@@ -1703,6 +1703,31 @@ export type InsertFibSettings = z.infer<typeof insertFibSettingsSchema>;
 export type FibSettings = typeof fibSettings.$inferSelect;
 
 // =============================================================================
+// TAWK.TO SUPPORT CHAT SETTINGS
+// =============================================================================
+
+// Tawk.to Settings table for managing live chat support
+export const tawkSettings = pgTable("tawk_settings", {
+  id: serial("id").primaryKey(),
+  isEnabled: boolean("is_enabled").default(false).notNull(), // Enable/disable Tawk.to chat
+  scriptCode: text("script_code"), // Full Tawk.to script code provided by Tawk.to dashboard
+  propertyId: text("property_id"), // Tawk.to Property ID (extracted from script)
+  widgetId: text("widget_id"), // Tawk.to Widget ID (extracted from script)
+  notes: text("notes"), // Admin notes about configuration
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertTawkSettingsSchema = createInsertSchema(tawkSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertTawkSettings = z.infer<typeof insertTawkSettingsSchema>;
+export type TawkSettings = typeof tawkSettings.$inferSelect;
+
+// =============================================================================
 // CUSTOMER OTP VERIFICATION SYSTEM
 // =============================================================================
 
