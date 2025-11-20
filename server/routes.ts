@@ -34450,6 +34450,114 @@ momtazchem.com
     }
   });
 
+  // =============================================================================
+  // TAWK.TO SUPPORT CHAT SETTINGS
+  // =============================================================================
+
+  // Get Tawk.to settings
+  app.get('/api/admin/tawk/settings', requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT id, is_enabled, script_code, property_id, widget_id, notes, created_at, updated_at
+        FROM tawk_settings
+        ORDER BY id DESC
+        LIMIT 1
+      `);
+      
+      if (result.rows.length === 0) {
+        // Create default settings
+        const defaultResult = await pool.query(`
+          INSERT INTO tawk_settings (is_enabled, script_code, notes)
+          VALUES (false, '', 'Configure Tawk.to live chat script from your Tawk.to dashboard')
+          RETURNING id, is_enabled, script_code, property_id, widget_id, notes, created_at, updated_at
+        `);
+        
+        return res.json({ success: true, data: defaultResult.rows[0] });
+      }
+      
+      res.json({ success: true, data: result.rows[0] });
+    } catch (error) {
+      console.error('Error fetching Tawk.to settings:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch Tawk.to settings' });
+    }
+  });
+
+  // Update Tawk.to settings
+  app.put('/api/admin/tawk/settings', requireAuth, async (req, res) => {
+    try {
+      const { isEnabled, scriptCode, propertyId, widgetId, notes } = req.body;
+      
+      const { pool } = await import('./db');
+      
+      // Check if settings exist
+      const checkResult = await pool.query('SELECT id FROM tawk_settings LIMIT 1');
+      
+      let result;
+      if (checkResult.rows.length === 0) {
+        // Insert new settings
+        result = await pool.query(`
+          INSERT INTO tawk_settings (is_enabled, script_code, property_id, widget_id, notes, updated_at)
+          VALUES ($1, $2, $3, $4, $5, NOW())
+          RETURNING id, is_enabled, script_code, property_id, widget_id, notes, created_at, updated_at
+        `, [isEnabled || false, scriptCode || '', propertyId || '', widgetId || '', notes || '']);
+      } else {
+        // Update existing settings
+        result = await pool.query(`
+          UPDATE tawk_settings
+          SET is_enabled = $1,
+              script_code = $2,
+              property_id = $3,
+              widget_id = $4,
+              notes = $5,
+              updated_at = NOW()
+          WHERE id = $6
+          RETURNING id, is_enabled, script_code, property_id, widget_id, notes, created_at, updated_at
+        `, [isEnabled || false, scriptCode || '', propertyId || '', widgetId || '', notes || '', checkResult.rows[0].id]);
+      }
+      
+      res.json({ 
+        success: true, 
+        data: result.rows[0],
+        message: 'Tawk.to settings updated successfully' 
+      });
+    } catch (error) {
+      console.error('Error updating Tawk.to settings:', error);
+      res.status(500).json({ success: false, message: 'Failed to update Tawk.to settings' });
+    }
+  });
+
+  // Public endpoint to get Tawk.to script if enabled
+  app.get('/api/public/tawk/settings', async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT is_enabled, script_code, property_id, widget_id
+        FROM tawk_settings
+        WHERE is_enabled = true
+        ORDER BY id DESC
+        LIMIT 1
+      `);
+      
+      if (result.rows.length === 0 || !result.rows[0].is_enabled) {
+        return res.json({ success: true, enabled: false });
+      }
+      
+      res.json({ 
+        success: true, 
+        enabled: true,
+        scriptCode: result.rows[0].script_code 
+      });
+    } catch (error) {
+      console.error('Error fetching public Tawk.to settings:', error);
+      res.json({ success: true, enabled: false }); // Fail silently
+    }
+  });
+
+
+
   // Public API for footer settings (for frontend footer component)
   app.get('/api/footer-settings', async (req, res) => {
     try {
@@ -34481,6 +34589,148 @@ momtazchem.com
       res.status(500).json({ success: false, message: 'Failed to fetch footer settings' });
     }
   });
+
+  // Public API for Tawk.to settings (for frontend widget loading)
+  app.get('/api/tawk-support', async (req, res) => {
+    try {
+      const [settings] = await db
+        .select({
+          is_enabled: tawkSupportChat.is_enabled,
+          script_code: tawkSupportChat.script_code
+        })
+        .from(tawkSupportChat)
+        .orderBy(desc(tawkSupportChat.id))
+        .limit(1);
+      
+      if (!settings) {
+        return res.json({ 
+          success: true, 
+          data: { is_enabled: false, script_code: '' } 
+        });
+      }
+      
+      // Only return script code if chat is enabled
+      res.json({ 
+        success: true, 
+        data: {
+          is_enabled: settings.is_enabled,
+          script_code: settings.is_enabled ? settings.script_code : ''
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching Tawk.to settings:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to fetch Tawk.to settings' 
+      });
+    }
+  });
+  // =============================================================================
+  // TAWK.TO SUPPORT CHAT SETTINGS
+  // =============================================================================
+
+  // Get Tawk.to settings
+  app.get('/api/admin/tawk/settings', requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT id, is_enabled, script_code, property_id, widget_id, notes, created_at, updated_at
+        FROM tawk_settings
+        ORDER BY id DESC
+        LIMIT 1
+      `);
+      
+      if (result.rows.length === 0) {
+        // Create default settings
+        const defaultResult = await pool.query(`
+          INSERT INTO tawk_settings (is_enabled, script_code, notes)
+          VALUES (false, '', 'Configure Tawk.to live chat script from your Tawk.to dashboard')
+          RETURNING id, is_enabled, script_code, property_id, widget_id, notes, created_at, updated_at
+        `);
+        
+        return res.json({ success: true, data: defaultResult.rows[0] });
+      }
+      
+      res.json({ success: true, data: result.rows[0] });
+    } catch (error) {
+      console.error('Error fetching Tawk.to settings:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch Tawk.to settings' });
+    }
+  });
+
+  // Update Tawk.to settings
+  app.put('/api/admin/tawk/settings', requireAuth, async (req, res) => {
+    try {
+      const { isEnabled, scriptCode, propertyId, widgetId, notes } = req.body;
+      
+      const { pool } = await import('./db');
+      
+      // Check if settings exist
+      const checkResult = await pool.query('SELECT id FROM tawk_settings LIMIT 1');
+      
+      let result;
+      if (checkResult.rows.length === 0) {
+        // Insert new settings
+        result = await pool.query(`
+          INSERT INTO tawk_settings (is_enabled, script_code, property_id, widget_id, notes, updated_at)
+          VALUES ($1, $2, $3, $4, $5, NOW())
+          RETURNING id, is_enabled, script_code, property_id, widget_id, notes, created_at, updated_at
+        `, [isEnabled || false, scriptCode || '', propertyId || '', widgetId || '', notes || '']);
+      } else {
+        // Update existing settings
+        result = await pool.query(`
+          UPDATE tawk_settings
+          SET is_enabled = $1,
+              script_code = $2,
+              property_id = $3,
+              widget_id = $4,
+              notes = $5,
+              updated_at = NOW()
+          WHERE id = $6
+          RETURNING id, is_enabled, script_code, property_id, widget_id, notes, created_at, updated_at
+        `, [isEnabled || false, scriptCode || '', propertyId || '', widgetId || '', notes || '', checkResult.rows[0].id]);
+      }
+      
+      res.json({ 
+        success: true, 
+        data: result.rows[0],
+        message: 'Tawk.to settings updated successfully' 
+      });
+    } catch (error) {
+      console.error('Error updating Tawk.to settings:', error);
+      res.status(500).json({ success: false, message: 'Failed to update Tawk.to settings' });
+    }
+  });
+
+  // Public endpoint to get Tawk.to script if enabled
+  app.get('/api/public/tawk/settings', async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT is_enabled, script_code, property_id, widget_id
+        FROM tawk_settings
+        WHERE is_enabled = true
+        ORDER BY id DESC
+        LIMIT 1
+      `);
+      
+      if (result.rows.length === 0 || !result.rows[0].is_enabled) {
+        return res.json({ success: true, enabled: false });
+      }
+      
+      res.json({ 
+        success: true, 
+        enabled: true,
+        scriptCode: result.rows[0].script_code 
+      });
+    } catch (error) {
+      console.error('Error fetching public Tawk.to settings:', error);
+      res.json({ success: true, enabled: false }); // Fail silently
+    }
+  });
+
 
   // Mark invoice as paid
   app.post('/api/invoices/:id/mark-paid', requireAuth, async (req, res) => {
@@ -52971,6 +53221,137 @@ momtazchem.com
 
   // Register FIB payment routes
   registerFibRoutes(app);
+
+  // ========================================
+  // Tawk.to Support Chat Management Routes
+  // ========================================
+
+  // GET /api/admin/tawk-support - Fetch Tawk.to Support Chat Settings
+  app.get('/api/admin/tawk-support', requireAdmin, async (req, res) => {
+    try {
+      const [settings] = await db
+        .select()
+        .from(tawkSupportChat)
+        .orderBy(desc(tawkSupportChat.id))
+        .limit(1);
+      
+      if (!settings) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Tawk.to settings not found' 
+        });
+      }
+      
+      res.json({ success: true, data: settings });
+    } catch (error) {
+      console.error('Error fetching Tawk.to settings:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to fetch Tawk.to settings' 
+      });
+    }
+  });
+
+  // PUT /api/admin/tawk-support - Update Tawk.to Support Chat Settings
+  app.put('/api/admin/tawk-support', requireAdmin, async (req, res) => {
+    try {
+      const { is_enabled, script_code, notes } = req.body;
+      
+      // Extract Property ID and Widget ID from script code
+      let property_id = null;
+      let widget_id = null;
+      
+      if (script_code) {
+        const match = script_code.match(/tawk\.to\/([^/]+)\/([^'"]+)/);
+        if (match) {
+          property_id = match[1];
+          widget_id = match[2];
+        }
+      }
+      
+      // Get existing settings to update or create new
+      const [existing] = await db
+        .select()
+        .from(tawkSupportChat)
+        .orderBy(desc(tawkSupportChat.id))
+        .limit(1);
+      
+      let result;
+      
+      if (existing) {
+        // Update existing
+        [result] = await db
+          .update(tawkSupportChat)
+          .set({
+            is_enabled,
+            script_code,
+            property_id,
+            widget_id,
+            notes,
+            updated_at: new Date()
+          })
+          .where(eq(tawkSupportChat.id, existing.id))
+          .returning();
+      } else {
+        // Create new
+        [result] = await db
+          .insert(tawkSupportChat)
+          .values({
+            is_enabled,
+            script_code,
+            property_id,
+            widget_id,
+            notes
+          })
+          .returning();
+      }
+      
+      res.json({ success: true, data: result });
+    } catch (error) {
+      console.error('Error updating Tawk.to settings:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to update Tawk.to settings' 
+      });
+    }
+  });
+
+  // Public API for Tawk.to settings (for frontend widget loading)
+  app.get('/api/tawk-support', async (req, res) => {
+    try {
+      const [settings] = await db
+        .select({
+          is_enabled: tawkSupportChat.is_enabled,
+          script_code: tawkSupportChat.script_code
+        })
+        .from(tawkSupportChat)
+        .orderBy(desc(tawkSupportChat.id))
+        .limit(1);
+      
+      if (!settings) {
+        return res.json({ 
+          success: true, 
+          data: { is_enabled: false, script_code: '' } 
+        });
+      }
+      
+      // Only return script code if chat is enabled
+      res.json({ 
+        success: true, 
+        data: {
+          is_enabled: settings.is_enabled,
+          script_code: settings.is_enabled ? settings.script_code : ''
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching Tawk.to settings:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to fetch Tawk.to settings' 
+      });
+    }
+  });
+
   app.all('/api/*', (req, res) => {
     console.log(`❌ 404 - Unmatched API route: ${req.method} ${req.originalUrl}`);
     res.status(404).json({

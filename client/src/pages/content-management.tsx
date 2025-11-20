@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Upload, Image, Type, Globe, Palette, Save, RefreshCw, Trash2, Eye, Edit3, Package } from "lucide-react";
+import { ArrowLeft, Upload, Image, Type, Globe, Palette, Save, RefreshCw, Trash2, Eye, Edit3, Package, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -61,6 +61,17 @@ interface CategoryProductSettings {
   selectedProductIds: number[];
 }
 
+interface TawkSettings {
+  id: number;
+  is_enabled: boolean;
+  script_code: string;
+  property_id?: string;
+  widget_id?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export default function ContentManagement() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -71,6 +82,9 @@ export default function ContentManagement() {
   const [editingContent, setEditingContent] = useState<ContentItem | null>(null);
   const [activeTab, setActiveTab] = useState<string>('content');
   const [selectedCategory, setSelectedCategory] = useState<string>('agricultural-fertilizers');
+  
+  // State for Tawk.to Support Chat
+  const [editingTawk, setEditingTawk] = useState<TawkSettings | null>(null);
 
   // Check URL parameters on component mount
   useEffect(() => {
@@ -137,6 +151,23 @@ export default function ContentManagement() {
         .then(res => res.json())
         .then(data => data.success ? data.data : [])
   });
+
+  // Query for Tawk.to support chat settings
+  const { data: tawkSettings, isLoading: loadingTawk, refetch: refetchTawk } = useQuery<TawkSettings>({
+    queryKey: ['/api/admin/tawk-support'],
+    queryFn: () => 
+      fetch('/api/admin/tawk-support')
+        .then(res => res.json())
+        .then(data => data.success ? data.data : null),
+    enabled: activeTab === 'tawk-support'
+  });
+
+  // Initialize editing state when tawk settings load
+  useEffect(() => {
+    if (tawkSettings && !editingTawk) {
+      setEditingTawk(tawkSettings);
+    }
+  }, [tawkSettings]);
 
   // Mutation for updating content
   const updateContentMutation = useMutation({
@@ -243,6 +274,31 @@ export default function ContentManagement() {
       toast({
         title: "خطا در به‌روزرسانی",
         description: "خطا در ذخیره اختصاص محصولات.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Mutation for updating Tawk.to support chat settings
+  const updateTawkMutation = useMutation({
+    mutationFn: async (data: { is_enabled: boolean; script_code: string; notes?: string }) => {
+      return apiRequest('/api/admin/tawk-support', {
+        method: 'PUT',
+        body: data
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Tawk.to Settings Updated",
+        description: "Live chat settings saved successfully."
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/tawk-support'] });
+      refetchTawk();
+    },
+    onError: () => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to save Tawk.to settings.",
         variant: "destructive"
       });
     }
@@ -372,7 +428,7 @@ export default function ContentManagement() {
 
         {/* Content Management Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="content" className="flex items-center gap-2">
               <Type className="w-4 h-4" />
               Text Content
@@ -400,6 +456,10 @@ export default function ContentManagement() {
             <TabsTrigger value="theme" className="flex items-center gap-2">
               <Palette className="w-4 h-4" />
               Theme Settings
+            </TabsTrigger>
+            <TabsTrigger value="tawk-support" className="flex items-center gap-2">
+              <MessageCircle className="w-4 h-4" />
+              Live Chat
             </TabsTrigger>
           </TabsList>
 
@@ -1415,6 +1475,179 @@ export default function ContentManagement() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Tawk.to Support Chat Tab */}
+          <TabsContent value="tawk-support" className="space-y-6">
+            {loadingTawk ? (
+              <div className="flex items-center justify-center p-8">
+                <RefreshCw className="w-6 h-6 animate-spin" />
+                <span className="ml-2">Loading Tawk.to settings...</span>
+              </div>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <MessageCircle className="w-5 h-5" />
+                        Tawk.to Live Chat Configuration
+                      </CardTitle>
+                      <CardDescription>
+                        Manage your Tawk.to live chat widget settings. Enable/disable the chat and configure the script code.
+                      </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Chat Status:</span>
+                      <Badge variant={editingTawk?.is_enabled ? "default" : "secondary"}>
+                        {editingTawk?.is_enabled ? "Enabled" : "Disabled"}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {editingTawk && (
+                    <>
+                      {/* Enable/Disable Toggle */}
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1">
+                          <Label htmlFor="tawk-enabled" className="text-base font-medium">
+                            Enable Live Chat
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            Turn on/off the Tawk.to chat widget on your website
+                          </p>
+                        </div>
+                        <Switch
+                          id="tawk-enabled"
+                          checked={editingTawk.is_enabled}
+                          onCheckedChange={(checked) => 
+                            setEditingTawk({ ...editingTawk, is_enabled: checked })
+                          }
+                          data-testid="switch-tawk-enabled"
+                        />
+                      </div>
+
+                      {/* Script Code Input */}
+                      <div className="space-y-2">
+                        <Label htmlFor="tawk-script" className="text-base font-medium">
+                          Tawk.to Script Code
+                        </Label>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Paste your complete Tawk.to script code here (including &lt;script&gt; tags)
+                        </p>
+                        <Textarea
+                          id="tawk-script"
+                          value={editingTawk.script_code}
+                          onChange={(e) => 
+                            setEditingTawk({ ...editingTawk, script_code: e.target.value })
+                          }
+                          placeholder="<script>
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement('script'),s0=document.getElementsByTagName('script')[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/YOUR_PROPERTY_ID/YOUR_WIDGET_ID';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>"
+                          className="font-mono text-sm min-h-[200px]"
+                          data-testid="textarea-tawk-script"
+                        />
+                      </div>
+
+                      {/* Auto-extracted IDs (read-only display) */}
+                      {editingTawk.property_id && editingTawk.widget_id && (
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium">Property ID</Label>
+                            <Input
+                              value={editingTawk.property_id}
+                              readOnly
+                              className="bg-muted font-mono text-sm"
+                              data-testid="input-property-id"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium">Widget ID</Label>
+                            <Input
+                              value={editingTawk.widget_id}
+                              readOnly
+                              className="bg-muted font-mono text-sm"
+                              data-testid="input-widget-id"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Notes */}
+                      <div className="space-y-2">
+                        <Label htmlFor="tawk-notes" className="text-base font-medium">
+                          Notes (Optional)
+                        </Label>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Add any notes or instructions for managing this integration
+                        </p>
+                        <Textarea
+                          id="tawk-notes"
+                          value={editingTawk.notes || ''}
+                          onChange={(e) => 
+                            setEditingTawk({ ...editingTawk, notes: e.target.value })
+                          }
+                          placeholder="e.g., Contact support@tawk.to if widget stops working..."
+                          className="min-h-[100px]"
+                          data-testid="textarea-tawk-notes"
+                        />
+                      </div>
+
+                      {/* Save Button */}
+                      <div className="flex justify-end gap-2 pt-4 border-t">
+                        <Button
+                          onClick={() => {
+                            updateTawkMutation.mutate({
+                              is_enabled: editingTawk.is_enabled,
+                              script_code: editingTawk.script_code,
+                              notes: editingTawk.notes
+                            });
+                          }}
+                          disabled={updateTawkMutation.isPending}
+                          className="min-w-[120px]"
+                          data-testid="button-save-tawk"
+                        >
+                          {updateTawkMutation.isPending ? (
+                            <>
+                              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                              Saving...
+                            </>
+                          ) : (
+                            <>
+                              <Save className="w-4 h-4 mr-2" />
+                              Save Settings
+                            </>
+                          )}
+                        </Button>
+                      </div>
+
+                      {/* Information Box */}
+                      <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                        <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                          How to get your Tawk.to script:
+                        </h4>
+                        <ol className="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">
+                          <li>Log in to your <a href="https://dashboard.tawk.to" target="_blank" rel="noopener noreferrer" className="underline">Tawk.to Dashboard</a></li>
+                          <li>Navigate to Administration &gt; Channels &gt; Chat Widget</li>
+                          <li>Copy the complete script code provided</li>
+                          <li>Paste it in the "Script Code" field above</li>
+                          <li>Enable the chat and save your settings</li>
+                        </ol>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>
