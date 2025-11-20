@@ -3,6 +3,7 @@ import session from "express-session";
 import MemoryStore from "memorystore";
 import path from "path";
 import { registerRoutes } from "./routes";
+import backupRoutes from "./backup-routes";
 import InventoryAlertService from "./inventory-alerts";
 import { expiredOrdersCleanup } from "./expired-orders-cleanup";
 import { abandonedCartCleanup } from "./abandoned-cart-cleanup";
@@ -297,6 +298,11 @@ app.use((req, res, next) => {
       console.error('⚠️ [S3 ROUTES] Failed to register S3 image routes:', error.message);
     }
 
+    // Register backup routes
+    app.use(adminSessionMiddleware);
+    app.use(backupRoutes);
+    log('💾 [BACKUP] Backup routes registered');
+
     // Register routes BEFORE Vite middleware to ensure API routes take precedence
     const server = await registerRoutes(app);
 
@@ -382,6 +388,16 @@ app.use((req, res, next) => {
           import('./auto-invoice-converter').then(({ AutoInvoiceConverter }) => {
             AutoInvoiceConverter.startPeriodicCheck();
             log('🧾 Auto-invoice conversion service started');
+          });
+
+          // Start database backup scheduler
+          import('./backup-scheduler').then(({ getBackupScheduler }) => {
+            const scheduler = getBackupScheduler();
+            scheduler.initialize().then(() => {
+              log('💾 Database backup scheduler started');
+            }).catch((err) => {
+              console.error('❌ Failed to start backup scheduler:', err);
+            });
           });
           
           // NOTE: AWS credentials migration is DISABLED
