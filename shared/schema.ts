@@ -67,6 +67,30 @@ export type InsertAwsS3Settings = z.infer<typeof insertAwsS3SettingsSchema>;
 export type AwsS3Settings = typeof awsS3Settings.$inferSelect;
 
 // =============================================================================
+// TAWK.TO LIVE CHAT SUPPORT
+// =============================================================================
+
+// Tawk.to Support Chat table for managing live chat widget
+export const tawkSupportChat = pgTable("tawk_support_chat", {
+  id: serial("id").primaryKey(),
+  isEnabled: boolean("is_enabled").default(false),
+  scriptCode: text("script_code").notNull(),
+  propertyId: varchar("property_id", { length: 255 }),
+  widgetId: varchar("widget_id", { length: 255 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertTawkSupportChatSchema = createInsertSchema(tawkSupportChat).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTawkSupportChat = z.infer<typeof insertTawkSupportChatSchema>;
+export type TawkSupportChat = typeof tawkSupportChat.$inferSelect;
+
+// =============================================================================
 // DATABASE BACKUP SYSTEM
 // =============================================================================
 
