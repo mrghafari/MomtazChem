@@ -380,12 +380,9 @@ app.use((req, res, next) => {
             log('🧾 Auto-invoice conversion service started');
           });
           
-          // Migrate AWS credentials from environment to database
-          import('./migrate-aws-credentials').then(({ migrateAwsCredentialsToDatabase }) => {
-            migrateAwsCredentialsToDatabase().catch(err => {
-              console.error('Failed to migrate AWS credentials:', err);
-            });
-          });
+          // NOTE: AWS credentials migration is DISABLED
+          // Credentials are now managed through the admin panel at /admin/aws-s3-settings
+          // To manually migrate, run: npx tsx server/migrate-aws-credentials.ts
           
           // Start inventory monitoring service
           InventoryAlertService.startInventoryMonitoring();
