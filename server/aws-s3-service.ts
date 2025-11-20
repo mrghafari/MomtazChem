@@ -566,7 +566,40 @@ export async function initializeAwsS3FromDb(db: any): Promise<void> {
       service.initialize(settings[0]);
       console.log('✅ AWS S3 Service initialized from database');
     } else {
-      console.log('ℹ️ No active AWS S3 settings found');
+      console.log('ℹ️ No active AWS S3 settings in database - checking environment variables');
+      
+      // Fallback to environment variables
+      const accessKey = process.env.AWS_ACCESS_KEY_ID;
+      const secretKey = process.env.AWS_SECRET_ACCESS_KEY;
+      const region = process.env.AWS_REGION;
+      const bucketName = process.env.AWS_S3_BUCKET_NAME;
+      const encryptionKey = process.env.AWS_CREDENTIALS_ENCRYPTION_KEY;
+      
+      if (accessKey && secretKey && region && bucketName && encryptionKey) {
+        console.log('🔑 Found AWS credentials in environment variables - initializing and saving to database');
+        
+        // Encrypt credentials
+        const encryptedAccessKey = encrypt(accessKey);
+        const encryptedSecretKey = encrypt(secretKey);
+        
+        // Save to database
+        const { awsS3Settings } = await import('../shared/schema');
+        const [newSettings] = await db.insert(awsS3Settings).values({
+          accessKeyId: encryptedAccessKey,
+          secretAccessKey: encryptedSecretKey,
+          region,
+          bucketName,
+          isActive: true,
+        }).returning();
+        
+        // Initialize service
+        const service = getAwsS3Service();
+        service.initialize(newSettings);
+        
+        console.log('✅ AWS S3 Service initialized from environment variables and saved to database');
+      } else {
+        console.log('⚠️ AWS S3 credentials not found in environment variables');
+      }
     }
   } catch (error) {
     console.error('❌ Failed to initialize AWS S3 from database:', error);
