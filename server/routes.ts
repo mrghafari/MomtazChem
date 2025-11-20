@@ -52229,7 +52229,8 @@ momtazchem.com
         settings: {
           ...settings,
           accessKeyId: settings.accessKeyId ? '••••••••' : '',
-          secretAccessKey: settings.secretAccessKey ? '••••••••' : ''
+          secretAccessKey: settings.secretAccessKey ? '••••••••' : '',
+          encryptionKey: process.env.AWS_CREDENTIALS_ENCRYPTION_KEY ? '••••••••' : ''
         }
       });
     } catch (error: any) {

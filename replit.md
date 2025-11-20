@@ -4,6 +4,18 @@
 The Momtazchem Chemical Solutions Platform is a comprehensive, multilingual system integrating a public showcase website, e-commerce, and administrative tools for a chemical company. Its primary purpose is to optimize CRM, inventory, sales, logistics, and financial management while expanding market reach. Key capabilities include multi-language support (English, Arabic, Kurdish, Turkish), unified site management, advanced e-commerce, GPS tracking, real-time analytics, email automation, barcode and Kardex-synced inventory, and financial management. The project aims to establish Momtazchem as a digital leader in the chemical industry.
 
 ## Recent Changes (November 2025)
+- **AWS S3 Credentials Management with Encryption (Nov 20, 2025)**:
+  - Implemented secure AWS S3 credentials management system with AES-256 encryption
+  - Added encryption_key field to aws_s3_settings table (kept empty in database for security)
+  - Encryption key stored in Replit Secrets (AWS_CREDENTIALS_ENCRYPTION_KEY) instead of database
+  - Built admin interface at /admin/aws-s3-settings for secure credential management
+  - All credentials (Access Key, Secret Key) encrypted before database storage using crypto module
+  - Credentials displayed as masked (••••••••) in admin UI for security
+  - Auto-migration disabled to prevent environment variables from overwriting manual database credentials
+  - AWS S3 Service automatically initializes from encrypted database credentials on server startup
+  - API endpoints: GET /api/admin/aws-s3/settings (masked), POST /api/admin/aws-s3/settings (auto-encrypts), POST /api/admin/aws-s3/test-connection
+  - Current configuration: Access Key (AKIAYLLSZQTM4PTO2D4F), Region (eu-central-1), Bucket (momtazchem) - all encrypted in database
+  - Security architecture follows best practices: encryption key never stored with encrypted data
 - **OAuth Authentication Integration (Nov 6, 2025)**:
   - Integrated Google and Facebook OAuth login for customer accounts using Passport.js
   - Added database fields: google_id, facebook_id, oauth_provider, profile_completed, avatar_url to customers table
