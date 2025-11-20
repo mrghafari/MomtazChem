@@ -37,8 +37,6 @@ export class DatabaseBackupService {
         backupType: options.backupType || 'manual',
         scheduleId: options.scheduleId,
         status: 'in_progress',
-        createdBy: options.createdBy,
-        notes: options.notes,
       }).returning();
 
       backupId = backupRecord.id;
@@ -60,7 +58,7 @@ export class DatabaseBackupService {
       await s3Service.uploadFile(tempFilePath, s3Key, {
         contentType: 'application/gzip',
         metadata: {
-          'backup-id': String(backup.id),
+          'backup-id': String(backupRecord.id),
           'backup-type': options.backupType || 'manual',
           'created-at': new Date().toISOString(),
         },

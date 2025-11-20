@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, decimal, boolean, integer, json, varchar, uuid, date } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, decimal, boolean, integer, bigint, json, varchar, uuid, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { sql } from "drizzle-orm";
@@ -81,10 +81,8 @@ export const databaseBackups = pgTable("database_backups", {
   scheduleId: integer("schedule_id"), // Reference to backup schedule if automatic
   status: text("status").notNull().default("completed"), // 'pending', 'in_progress', 'completed', 'failed'
   errorMessage: text("error_message"), // Error message if backup failed
-  createdBy: integer("created_by"), // Admin user who created the backup
   createdAt: timestamp("created_at").notNull().defaultNow(),
   completedAt: timestamp("completed_at"),
-  notes: text("notes"), // Admin notes about this backup
 });
 
 export const insertDatabaseBackupSchema = createInsertSchema(databaseBackups);
@@ -105,8 +103,6 @@ export const backupSchedules = pgTable("backup_schedules", {
   nextRunAt: timestamp("next_run_at"), // When the next backup is scheduled
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  createdBy: integer("created_by"), // Admin user who created the schedule
-  notes: text("notes"), // Admin notes about this schedule
 });
 
 export const insertBackupScheduleSchema = createInsertSchema(backupSchedules);

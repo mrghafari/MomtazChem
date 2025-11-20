@@ -48,7 +48,6 @@ import InquiryResponses from '@/pages/admin/inquiry-responses';
 import ServerConfig from "@/components/admin/server-config";
 import AwsS3Settings from "@/pages/admin/aws-s3-settings";
 import FibSettings from "@/pages/admin/fib-settings";
-import DatabaseBackupsPage from "@/pages/admin/database-backups";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import PasswordReset from "@/pages/password-reset";
@@ -287,7 +286,6 @@ function Router() {
           <Route path="/admin/server-config" component={ServerConfig} />
           <Route path="/admin/aws-s3-settings" component={AwsS3Settings} />
           <Route path="/admin/fib-settings" component={FibSettings} />
-          <Route path="/admin/database-backups" component={DatabaseBackupsPage} />
           <Route path="/admin/batch-management" component={BatchManagement} />
           <Route path="/admin/kpi-dashboard" component={KpiDashboard} />
           <Route path="/admin/kpi-report" component={KpiReport} />

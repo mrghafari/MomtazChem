@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { db } from './db';
 import { databaseBackups, backupSchedules } from '../shared/schema';
 import { eq, desc } from 'drizzle-orm';
@@ -7,8 +7,19 @@ import { getBackupScheduler } from './backup-scheduler';
 
 const router = Router();
 
+// Admin authentication middleware
+const requireAdminAuth = (req: Request, res: Response, next: NextFunction) => {
+  if (req.session?.adminId && req.session?.isAuthenticated === true) {
+    return next();
+  }
+  return res.status(401).json({ 
+    success: false, 
+    message: "احراز هویت مدیریت مورد نیاز است" 
+  });
+};
+
 // Get all backups
-router.get('/api/admin/backups', async (req, res) => {
+router.get('/api/admin/backups', requireAdminAuth, async (req, res) => {
   try {
     const backups = await db
       .select()
@@ -23,16 +34,11 @@ router.get('/api/admin/backups', async (req, res) => {
 });
 
 // Create manual backup
-router.post('/api/admin/backups/create', async (req, res) => {
+router.post('/api/admin/backups/create', requireAdminAuth, async (req, res) => {
   try {
-    const { notes } = req.body;
-    const userId = (req.user as any)?.id;
-
     const backupService = getBackupService();
     const result = await backupService.createBackup({
       backupType: 'manual',
-      createdBy: userId,
-      notes,
     });
 
     if (result.success) {
@@ -54,7 +60,7 @@ router.post('/api/admin/backups/create', async (req, res) => {
 });
 
 // Download backup
-router.get('/api/admin/backups/:id/download', async (req, res) => {
+router.get('/api/admin/backups/:id/download', requireAdminAuth, async (req, res) => {
   try {
     const backupId = parseInt(req.params.id);
     const backupService = getBackupService();
@@ -75,7 +81,7 @@ router.get('/api/admin/backups/:id/download', async (req, res) => {
 });
 
 // Delete backup
-router.delete('/api/admin/backups/:id', async (req, res) => {
+router.delete('/api/admin/backups/:id', requireAdminAuth, async (req, res) => {
   try {
     const backupId = parseInt(req.params.id);
     const backupService = getBackupService();
@@ -94,7 +100,7 @@ router.delete('/api/admin/backups/:id', async (req, res) => {
 });
 
 // Get all backup schedules
-router.get('/api/admin/backup-schedules', async (req, res) => {
+router.get('/api/admin/backup-schedules', requireAdminAuth, async (req, res) => {
   try {
     const schedules = await db
       .select()
@@ -109,10 +115,9 @@ router.get('/api/admin/backup-schedules', async (req, res) => {
 });
 
 // Create backup schedule
-router.post('/api/admin/backup-schedules', async (req, res) => {
+router.post('/api/admin/backup-schedules', requireAdminAuth, async (req, res) => {
   try {
-    const { name, frequency, timeOfDay, dayOfWeek, dayOfMonth, retentionDays, notes } = req.body;
-    const userId = (req.user as any)?.id;
+    const { name, frequency, timeOfDay, dayOfWeek, dayOfMonth, retentionDays } = req.body;
 
     const [schedule] = await db.insert(backupSchedules).values({
       name,
@@ -122,8 +127,6 @@ router.post('/api/admin/backup-schedules', async (req, res) => {
       dayOfMonth,
       retentionDays,
       isActive: true,
-      createdBy: userId,
-      notes,
     }).returning();
 
     // Schedule the backup job
@@ -142,10 +145,10 @@ router.post('/api/admin/backup-schedules', async (req, res) => {
 });
 
 // Update backup schedule
-router.put('/api/admin/backup-schedules/:id', async (req, res) => {
+router.put('/api/admin/backup-schedules/:id', requireAdminAuth, async (req, res) => {
   try {
     const scheduleId = parseInt(req.params.id);
-    const { name, frequency, timeOfDay, dayOfWeek, dayOfMonth, retentionDays, isActive, notes } = req.body;
+    const { name, frequency, timeOfDay, dayOfWeek, dayOfMonth, retentionDays, isActive } = req.body;
 
     const [schedule] = await db.update(backupSchedules)
       .set({
@@ -156,7 +159,6 @@ router.put('/api/admin/backup-schedules/:id', async (req, res) => {
         dayOfMonth,
         retentionDays,
         isActive,
-        notes,
         updatedAt: new Date(),
       })
       .where(eq(backupSchedules.id, scheduleId))
@@ -182,7 +184,7 @@ router.put('/api/admin/backup-schedules/:id', async (req, res) => {
 });
 
 // Delete backup schedule
-router.delete('/api/admin/backup-schedules/:id', async (req, res) => {
+router.delete('/api/admin/backup-schedules/:id', requireAdminAuth, async (req, res) => {
   try {
     const scheduleId = parseInt(req.params.id);
 

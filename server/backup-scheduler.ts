@@ -75,7 +75,7 @@ export class BackupScheduler {
       this.jobs.set(schedule.id, job);
       
       const nextRun = job.nextDate();
-      console.log(`✅ Scheduled "${schedule.name}" - Next run: ${nextRun.toISO()}`);
+      console.log(`✅ Scheduled "${schedule.name}" - Next run: ${nextRun.toISOString()}`);
 
       // Update next run time in database
       db.update(backupSchedules)
