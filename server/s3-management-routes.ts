@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import { getAwsS3Service } from './aws-s3-service';
+import multer from 'multer';
 
 const router = Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
 /**
  * List all files in S3 bucket (Admin only)
@@ -102,6 +104,116 @@ router.get('/api/admin/s3/check-missing-images', async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || 'خطا در بررسی عکس‌های گمشده'
+    });
+  }
+});
+
+/**
+ * Upload missing image to S3 with the exact expected key
+ */
+router.post('/api/admin/s3/upload-missing-image', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'فایلی انتخاب نشده است'
+      });
+    }
+
+    const expectedKey = req.body.expectedKey;
+    if (!expectedKey) {
+      return res.status(400).json({
+        success: false,
+        message: 'expectedKey ارسال نشده است'
+      });
+    }
+
+    const s3Service = getAwsS3Service();
+    
+    // Upload to S3 with the exact expected key
+    const result = await s3Service.uploadFile(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype,
+      expectedKey.split('/')[0] // folder name (product-images, general-files, etc.)
+    );
+
+    if (!result.success) {
+      return res.status(500).json(result);
+    }
+
+    res.json({
+      success: true,
+      data: {
+        url: result.url,
+        key: result.key,
+        message: 'عکس با موفقیت آپلود شد'
+      }
+    });
+  } catch (error: any) {
+    console.error('❌ Error uploading missing image:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'خطا در آپلود عکس'
+    });
+  }
+});
+
+/**
+ * Bulk upload all missing images at once
+ */
+router.post('/api/admin/s3/bulk-upload-missing', upload.array('files', 50), async (req, res) => {
+  try {
+    const files = req.files as Express.Multer.File[];
+    if (!files || files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'فایلی انتخاب نشده است'
+      });
+    }
+
+    const s3Service = getAwsS3Service();
+    const results = [];
+    const errors = [];
+
+    for (const file of files) {
+      try {
+        const result = await s3Service.uploadPublicFile(
+          file.buffer,
+          file.originalname,
+          file.mimetype,
+          'product-images',
+          { preserveFileName: true }
+        );
+
+        results.push({
+          fileName: file.originalname,
+          success: result.success,
+          url: result.url,
+          key: result.key
+        });
+      } catch (error: any) {
+        errors.push({
+          fileName: file.originalname,
+          error: error.message
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      data: {
+        totalUploaded: results.filter(r => r.success).length,
+        totalFailed: errors.length,
+        results,
+        errors
+      }
+    });
+  } catch (error: any) {
+    console.error('❌ Error in bulk upload:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'خطا در آپلود دسته‌جمعی'
     });
   }
 });

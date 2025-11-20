@@ -367,6 +367,14 @@ export default function SiteManagement() {
       moduleId: "aws_s3_settings"
     },
     {
+      id: "missing-images",
+      label: "Missing Images",
+      icon: Cloud,
+      onClick: () => trackButtonClick("missing-images", () => setLocation("/admin/missing-images")),
+      className: "border-red-300 text-red-600 hover:bg-red-50 hover:text-red-800",
+      moduleId: "missing_images_management"
+    },
+    {
       id: "fib-settings",
       label: "FIB Payment Gateway",
       icon: CreditCard,
