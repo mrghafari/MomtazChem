@@ -401,6 +401,8 @@ app.use((req, res, next) => {
           });
 
           // Start database backup scheduler
+          // NOTE: Temporarily disabled - backup_schedules table requires manual creation
+          /*
           import('./backup-scheduler').then(({ getBackupScheduler }) => {
             const scheduler = getBackupScheduler();
             scheduler.initialize().then(() => {
@@ -409,6 +411,8 @@ app.use((req, res, next) => {
               console.error('❌ Failed to start backup scheduler:', err);
             });
           });
+          */
+          log('ℹ️  Database backup scheduler temporarily disabled');
           
           // NOTE: AWS credentials migration is DISABLED
           // Credentials are now managed through the admin panel at /admin/aws-s3-settings
