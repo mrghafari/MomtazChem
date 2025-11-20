@@ -25,6 +25,7 @@ export const smtpSettings = pgTable("smtp_settings", {
   fromName: text("from_name").notNull(),
   fromEmail: text("from_email").notNull(),
   isActive: boolean("is_active").default(true),
+  useForOtp: boolean("use_for_otp").default(false), // Use this SMTP for OTP verification emails
   testStatus: text("test_status").default("untested"), // untested, success, failed
   lastTested: timestamp("last_tested"),
   createdAt: timestamp("created_at").defaultNow(),

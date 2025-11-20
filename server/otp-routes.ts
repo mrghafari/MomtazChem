@@ -5,8 +5,10 @@ import { eq, and, gt } from 'drizzle-orm';
 import { SmsService } from './sms-service';
 import { WhatsAppService } from './whatsapp-service';
 import nodemailer from 'nodemailer';
+import { EmailStorage } from './email-storage';
 
 const router = Router();
+const emailStorage = new EmailStorage();
 
 // Helper: Generate 4-digit OTP code
 function generateOtpCode(): string {
@@ -67,6 +69,14 @@ async function sendOtpSms(phone: string, code: string): Promise<boolean> {
 // Helper: Send OTP via Email
 async function sendOtpEmail(email: string, code: string, name?: string): Promise<boolean> {
   try {
+    // Get SMTP settings for OTP from database
+    const smtpSetting = await emailStorage.getOtpSmtpSetting();
+    
+    if (!smtpSetting) {
+      console.error('❌ [OTP Email] No SMTP settings configured for OTP');
+      return false;
+    }
+
     const html = `
       <!DOCTYPE html>
       <html dir="rtl">
@@ -117,26 +127,26 @@ async function sendOtpEmail(email: string, code: string, name?: string): Promise
       </html>
     `;
 
-    // Create SMTP transporter with environment variables
+    // Create SMTP transporter with database settings
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false, // Use STARTTLS
+      host: smtpSetting.host,
+      port: smtpSetting.port,
+      secure: smtpSetting.secure,
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: smtpSetting.username,
+        pass: smtpSetting.password,
       },
     });
 
     // Send email
     const info = await transporter.sendMail({
-      from: process.env.SMTP_USER || 'noreply@momtazchem.com',
+      from: `"${smtpSetting.fromName}" <${smtpSetting.fromEmail}>`,
       to: email,
       subject: `کد تایید ثبت نام - Registration Code: ${code}`,
       html,
     });
 
-    console.log(`📧 [OTP Email] Sent to ${email}:`, info.messageId);
+    console.log(`📧 [OTP Email] Sent to ${email} using ${smtpSetting.fromEmail}:`, info.messageId);
     return true;
   } catch (error) {
     console.error('❌ [OTP Email] Error:', error);

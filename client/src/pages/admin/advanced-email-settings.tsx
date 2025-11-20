@@ -68,6 +68,7 @@ interface SMTPForm {
   password: string;
   fromName: string;
   fromEmail: string;
+  useForOtp?: boolean;
 }
 
 export default function AdvancedEmailSettingsPage() {
@@ -90,7 +91,8 @@ export default function AdvancedEmailSettingsPage() {
     username: "",
     password: "",
     fromName: "",
-    fromEmail: ""
+    fromEmail: "",
+    useForOtp: false
   });
   const [recipients, setRecipients] = useState<EmailRecipient[]>([]);
   const [newRecipient, setNewRecipient] = useState<EmailRecipient>({
@@ -505,7 +507,8 @@ export default function AdvancedEmailSettingsPage() {
         username: smtp.username || "",
         password: smtp.password || "", // Show actual password
         fromName: smtp.fromName || smtp.from_name || "",
-        fromEmail: smtp.fromEmail || smtp.from_email || ""
+        fromEmail: smtp.fromEmail || smtp.from_email || "",
+        useForOtp: smtp.useForOtp || smtp.use_for_otp || false
       });
     } else {
       setSmtpForm({
@@ -515,7 +518,8 @@ export default function AdvancedEmailSettingsPage() {
         username: "",
         password: "",
         fromName: "",
-        fromEmail: ""
+        fromEmail: "",
+        useForOtp: false
       });
     }
     
@@ -951,6 +955,20 @@ export default function AdvancedEmailSettingsPage() {
                           onChange={(e) => setSmtpForm({ ...smtpForm, fromEmail: e.target.value })}
                           placeholder="info@momtazchem.com"
                         />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <Switch
+                        id="useForOtp"
+                        checked={smtpForm.useForOtp || false}
+                        onCheckedChange={(checked) => setSmtpForm({ ...smtpForm, useForOtp: checked })}
+                      />
+                      <div className="flex-1">
+                        <Label htmlFor="useForOtp" className="cursor-pointer">
+                          <div className="font-semibold text-blue-900">استفاده برای ارسال کد OTP</div>
+                          <div className="text-sm text-blue-700">Use this SMTP for sending customer OTP verification codes</div>
+                        </Label>
                       </div>
                     </div>
 

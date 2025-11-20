@@ -34,6 +34,7 @@ export interface IEmailStorage {
   getSmtpSettings(): Promise<SmtpSetting[]>;
   getSmtpSettingById(id: number): Promise<SmtpSetting | undefined>;
   getSmtpSettingByCategory(categoryId: number): Promise<SmtpSetting | null>;
+  getOtpSmtpSetting(): Promise<SmtpSetting | null>;
   updateSmtpSetting(id: number, setting: Partial<InsertSmtpSetting>): Promise<SmtpSetting>;
   deleteSmtpSetting(id: number): Promise<void>;
   testSmtpConnection(id: number): Promise<boolean>;
@@ -150,6 +151,18 @@ export class EmailStorage implements IEmailStorage {
         eq(smtpSettings.categoryId, categoryId),
         eq(smtpSettings.isActive, true)
       ));
+    return setting || null;
+  }
+  
+  async getOtpSmtpSetting(): Promise<SmtpSetting | null> {
+    const [setting] = await emailDb
+      .select()
+      .from(smtpSettings)
+      .where(and(
+        eq(smtpSettings.useForOtp, true),
+        eq(smtpSettings.isActive, true)
+      ))
+      .limit(1);
     return setting || null;
   }
   
