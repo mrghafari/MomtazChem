@@ -53032,15 +53032,19 @@ momtazchem.com
   // PUT /api/admin/tawk-support - Update Tawk.to settings (Admin only)
   app.put('/api/admin/tawk-support', requireAdmin, async (req, res) => {
     try {
-      const { is_enabled, script_code, notes } = req.body;
+      // Support both camelCase (new) and snake_case (legacy)
+      const { isEnabled, scriptCode, notes, is_enabled, script_code } = req.body;
       
-      console.log('📝 [TAWK] Saving:', { is_enabled, has_script: !!script_code });
+      const enabled = isEnabled !== undefined ? isEnabled : is_enabled;
+      const script = scriptCode !== undefined ? scriptCode : script_code;
+      
+      console.log('📝 [TAWK] Saving:', { isEnabled: enabled, hasScript: !!script });
       
       let propertyId = null;
       let widgetId = null;
       
-      if (script_code) {
-        const match = script_code.match(/tawk\.to\/([^/]+)\/([^'"]+)/);
+      if (script) {
+        const match = script.match(/tawk\.to\/([^/]+)\/([^'"]+)/);
         if (match) {
           propertyId = match[1];
           widgetId = match[2];
@@ -53059,8 +53063,8 @@ momtazchem.com
         [result] = await db
           .update(schema.tawkSupportChat)
           .set({
-            isEnabled: is_enabled,
-            scriptCode: script_code || '',
+            isEnabled: enabled,
+            scriptCode: script || '',
             propertyId,
             widgetId,
             notes,
@@ -53072,8 +53076,8 @@ momtazchem.com
         [result] = await db
           .insert(schema.tawkSupportChat)
           .values({
-            isEnabled: is_enabled,
-            scriptCode: script_code || '',
+            isEnabled: enabled,
+            scriptCode: script || '',
             propertyId,
             widgetId,
             notes
@@ -53081,7 +53085,7 @@ momtazchem.com
           .returning();
       }
       
-      console.log('✅ [TAWK] Saved successfully');
+      console.log('✅ [TAWK] Saved successfully:', { id: result.id, isEnabled: result.isEnabled });
       res.json({ success: true, data: result });
     } catch (error) {
       console.error('❌ [TAWK] Error:', error);

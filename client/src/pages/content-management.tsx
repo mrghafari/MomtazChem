@@ -1499,8 +1499,8 @@ export default function ContentManagement() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">Chat Status:</span>
-                      <Badge variant={editingTawk?.is_enabled ? "default" : "secondary"}>
-                        {editingTawk?.is_enabled ? "Enabled" : "Disabled"}
+                      <Badge variant={editingTawk?.isEnabled ? "default" : "secondary"}>
+                        {editingTawk?.isEnabled ? "Enabled" : "Disabled"}
                       </Badge>
                     </div>
                   </div>
@@ -1522,7 +1522,7 @@ export default function ContentManagement() {
                           id="tawk-enabled"
                           checked={editingTawk.isEnabled}
                           onCheckedChange={(checked) => 
-                            setEditingTawk({ ...editingTawk, is_enabled: checked })
+                            setEditingTawk({ ...editingTawk, isEnabled: checked })
                           }
                           data-testid="switch-tawk-enabled"
                         />
@@ -1540,7 +1540,7 @@ export default function ContentManagement() {
                           id="tawk-script"
                           value={editingTawk.scriptCode}
                           onChange={(e) => 
-                            setEditingTawk({ ...editingTawk, script_code: e.target.value })
+                            setEditingTawk({ ...editingTawk, scriptCode: e.target.value })
                           }
                           placeholder="<script>
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
@@ -1607,8 +1607,8 @@ s0.parentNode.insertBefore(s1,s0);
                         <Button
                           onClick={() => {
                             updateTawkMutation.mutate({
-                              is_enabled: editingTawk.isEnabled,
-                              script_code: editingTawk.scriptCode,
+                              isEnabled: editingTawk.isEnabled,
+                              scriptCode: editingTawk.scriptCode,
                               notes: editingTawk.notes
                             });
                           }}
