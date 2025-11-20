@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, HeadBucketCommand, GetObjectCommand as GetObjectCommandType } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, HeadBucketCommand, ListObjectsV2Command, GetObjectCommand as GetObjectCommandType } from '@aws-sdk/client-s3';
 import { getSignedUrl as getS3SignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Upload } from '@aws-sdk/lib-storage';
 import crypto from 'crypto';
@@ -530,6 +530,39 @@ export class AwsS3Service {
     });
 
     await this.client.send(command);
+  }
+
+  /**
+   * List all files in a specific folder/prefix
+   */
+  async listFiles(prefix: string = ''): Promise<{ files: Array<{ key: string; size: number; lastModified: Date }>; totalCount: number }> {
+    if (!this.client || !this.settings) {
+      throw new Error('AWS S3 client not initialized');
+    }
+
+    try {
+      const command = new ListObjectsV2Command({
+        Bucket: this.settings.bucketName,
+        Prefix: prefix,
+        MaxKeys: 1000, // List up to 1000 files
+      });
+
+      const response = await this.client.send(command);
+      
+      const files = (response.Contents || []).map(item => ({
+        key: item.Key || '',
+        size: item.Size || 0,
+        lastModified: item.LastModified || new Date(),
+      }));
+
+      return {
+        files,
+        totalCount: files.length,
+      };
+    } catch (error: any) {
+      console.error('❌ S3 List Files Error:', error);
+      throw new Error(`خطا در لیست کردن فایل‌ها: ${error.message}`);
+    }
   }
 }
 

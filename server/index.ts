@@ -5,6 +5,7 @@ import path from "path";
 import { registerRoutes } from "./routes";
 import backupRoutes from "./backup-routes";
 import otpRoutes from "./otp-routes";
+import s3ManagementRoutes from "./s3-management-routes";
 import InventoryAlertService from "./inventory-alerts";
 import { expiredOrdersCleanup } from "./expired-orders-cleanup";
 import { abandonedCartCleanup } from "./abandoned-cart-cleanup";
@@ -307,6 +308,10 @@ app.use((req, res, next) => {
     // Register OTP routes (no auth required - public registration)
     app.use(otpRoutes);
     log('🔐 [OTP] OTP verification routes registered');
+
+    // Register S3 management routes (admin only)
+    app.use(s3ManagementRoutes);
+    log('📦 [S3 MGMT] S3 management routes registered');
 
     // Register routes BEFORE Vite middleware to ensure API routes take precedence
     const server = await registerRoutes(app);
