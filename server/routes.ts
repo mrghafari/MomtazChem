@@ -53112,10 +53112,7 @@ momtazchem.com
         return res.json({ success: false, data: null });
       }
       
-      res.json({ success: true, data: {
-        is_enabled: settings.isEnabled,
-        script_code: settings.scriptCode
-      }});
+      res.json({ success: true, data: settings });
     } catch (error) {
       console.error('Error fetching public Tawk.to settings:', error);
       res.status(500).json({ 
@@ -53124,6 +53121,7 @@ momtazchem.com
       });
     }
   });
+
 
   registerFibRoutes(app);
   app.all('/api/*', (req, res) => {
