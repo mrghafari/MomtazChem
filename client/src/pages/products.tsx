@@ -3015,16 +3015,28 @@ export default function ProductsPage() {
                                         e.stopPropagation();
                                         console.log(`🗑️ [IMAGE DELETE] Deleting image at index ${index}`);
                                         
-                                        // Optimistic update: Remove from UI immediately
-                                        const newPreviews = [...imagePreviews];
-                                        newPreviews[index] = null;
-                                        setImagePreviews(newPreviews);
-                                        
+                                        // Get current URLs
                                         const currentUrls = form.getValues('imageUrls') || [];
                                         const newUrls = [...currentUrls];
                                         newUrls[index] = '';
                                         const filteredUrls = newUrls.filter(url => url);
+                                        
+                                        // Optimistic update: Update form and editing product state immediately
                                         form.setValue('imageUrls', filteredUrls);
+                                        
+                                        // Update editingProduct to trigger UI refresh
+                                        if (editingProduct) {
+                                          setEditingProduct({
+                                            ...editingProduct,
+                                            imageUrls: filteredUrls,
+                                            imageUrl: filteredUrls.length > 0 ? filteredUrls[0] : ''
+                                          } as any);
+                                        }
+                                        
+                                        // Update local previews for new products
+                                        const newPreviews = [...imagePreviews];
+                                        newPreviews[index] = null;
+                                        setImagePreviews(newPreviews);
                                         
                                         // If removing the primary image, set first available image as primary
                                         if (primaryImageIndex === index) {
@@ -3330,8 +3342,15 @@ export default function ProductsPage() {
                                     form.setValue('pdfCatalogUrl', '');
                                     form.setValue('catalogFileName', '');
                                     
-                                    // Then update the database if editing existing product
+                                    // Update editingProduct to trigger UI refresh
                                     if (editingProduct) {
+                                      setEditingProduct({
+                                        ...editingProduct,
+                                        pdfCatalogUrl: '',
+                                        catalogFileName: ''
+                                      } as any);
+                                      
+                                      // Then update the database
                                       try {
                                         await apiRequest(`/api/products/${editingProduct.id}`, {
                                           method: 'PATCH',
@@ -3507,8 +3526,15 @@ export default function ProductsPage() {
                                     form.setValue('msdsUrl', '');
                                     form.setValue('msdsFileName', '');
                                     
-                                    // Then update the database if editing existing product
+                                    // Update editingProduct to trigger UI refresh
                                     if (editingProduct) {
+                                      setEditingProduct({
+                                        ...editingProduct,
+                                        msdsUrl: '',
+                                        msdsFileName: ''
+                                      } as any);
+                                      
+                                      // Then update the database
                                       try {
                                         await apiRequest(`/api/products/${editingProduct.id}`, {
                                           method: 'PATCH',
