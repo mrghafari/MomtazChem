@@ -67,6 +67,53 @@ export type InsertAwsS3Settings = z.infer<typeof insertAwsS3SettingsSchema>;
 export type AwsS3Settings = typeof awsS3Settings.$inferSelect;
 
 // =============================================================================
+// DATABASE BACKUP SYSTEM
+// =============================================================================
+
+// Database Backups table for tracking backup files
+export const databaseBackups = pgTable("database_backups", {
+  id: serial("id").primaryKey(),
+  fileName: text("file_name").notNull(), // Backup file name
+  s3Key: text("s3_key").notNull(), // S3 object key
+  s3Bucket: text("s3_bucket").notNull(), // S3 bucket name
+  fileSize: integer("file_size").notNull(), // File size in bytes
+  backupType: text("backup_type").notNull().default("manual"), // 'manual', 'scheduled'
+  scheduleId: integer("schedule_id"), // Reference to backup schedule if automatic
+  status: text("status").notNull().default("completed"), // 'pending', 'in_progress', 'completed', 'failed'
+  errorMessage: text("error_message"), // Error message if backup failed
+  createdBy: integer("created_by"), // Admin user who created the backup
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
+  notes: text("notes"), // Admin notes about this backup
+});
+
+export const insertDatabaseBackupSchema = createInsertSchema(databaseBackups);
+export type InsertDatabaseBackup = z.infer<typeof insertDatabaseBackupSchema>;
+export type DatabaseBackup = typeof databaseBackups.$inferSelect;
+
+// Backup Schedules table for automated backup configuration
+export const backupSchedules = pgTable("backup_schedules", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // Schedule name (e.g., "Daily Backup", "Weekly Backup")
+  frequency: text("frequency").notNull(), // 'daily', 'weekly', 'monthly'
+  timeOfDay: text("time_of_day").notNull(), // Time to run backup (HH:MM format, e.g., "02:00")
+  dayOfWeek: integer("day_of_week"), // Day of week for weekly backups (0=Sunday, 6=Saturday)
+  dayOfMonth: integer("day_of_month"), // Day of month for monthly backups (1-31)
+  retentionDays: integer("retention_days").notNull().default(30), // Days to keep backups before auto-deletion
+  isActive: boolean("is_active").default(true),
+  lastRunAt: timestamp("last_run_at"), // When the backup was last executed
+  nextRunAt: timestamp("next_run_at"), // When the next backup is scheduled
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdBy: integer("created_by"), // Admin user who created the schedule
+  notes: text("notes"), // Admin notes about this schedule
+});
+
+export const insertBackupScheduleSchema = createInsertSchema(backupSchedules);
+export type InsertBackupSchedule = z.infer<typeof insertBackupScheduleSchema>;
+export type BackupSchedule = typeof backupSchedules.$inferSelect;
+
+// =============================================================================
 // ABANDONED ORDERS TRACKING SYSTEM
 // =============================================================================
 

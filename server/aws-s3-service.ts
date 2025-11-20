@@ -449,6 +449,88 @@ export class AwsS3Service {
 
     return `https://${this.settings.bucketName}.s3.${this.settings.region}.amazonaws.com/${key}`;
   }
+
+  /**
+   * Get bucket name
+   */
+  getBucketName(): string {
+    if (!this.settings) {
+      throw new Error('AWS S3 settings not initialized');
+    }
+    return this.settings.bucketName;
+  }
+
+  /**
+   * Upload file from path to S3
+   */
+  async uploadFile(
+    filePath: string,
+    s3Key: string,
+    options?: {
+      contentType?: string;
+      metadata?: Record<string, string>;
+    }
+  ): Promise<void> {
+    if (!this.client || !this.settings) {
+      throw new Error('AWS S3 client not initialized');
+    }
+
+    const fs = await import('fs');
+    const fileBuffer = fs.readFileSync(filePath);
+
+    const upload = new Upload({
+      client: this.client,
+      params: {
+        Bucket: this.settings.bucketName,
+        Key: s3Key,
+        Body: fileBuffer,
+        ContentType: options?.contentType || 'application/octet-stream',
+        Metadata: options?.metadata,
+      },
+    });
+
+    await upload.done();
+  }
+
+  /**
+   * Get file stream from S3
+   */
+  async getFileStream(s3Key: string): Promise<NodeJS.ReadableStream> {
+    if (!this.client || !this.settings) {
+      throw new Error('AWS S3 client not initialized');
+    }
+
+    const command = new GetObjectCommand({
+      Bucket: this.settings.bucketName,
+      Key: s3Key,
+    });
+
+    const response = await this.client.send(command);
+
+    if (!response.Body) {
+      throw new Error('File not found in S3');
+    }
+
+    return response.Body as NodeJS.ReadableStream;
+  }
+
+  /**
+   * Delete file from S3
+   */
+  async deleteFile(s3Key: string): Promise<void> {
+    if (!this.client || !this.settings) {
+      throw new Error('AWS S3 client not initialized');
+    }
+
+    const { DeleteObjectCommand } = await import('@aws-sdk/client-s3');
+
+    const command = new DeleteObjectCommand({
+      Bucket: this.settings.bucketName,
+      Key: s3Key,
+    });
+
+    await this.client.send(command);
+  }
 }
 
 // Singleton instance
