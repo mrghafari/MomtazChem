@@ -3010,11 +3010,12 @@ export default function ProductsPage() {
                                       variant="outline"
                                       size="sm"
                                       className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-white shadow-md z-10"
-                                      onClick={(e) => {
+                                      onClick={async (e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
                                         console.log(`🗑️ [IMAGE DELETE] Deleting image at index ${index}`);
                                         
+                                        // Optimistic update: Remove from UI immediately
                                         const newPreviews = [...imagePreviews];
                                         newPreviews[index] = null;
                                         setImagePreviews(newPreviews);
@@ -3022,7 +3023,8 @@ export default function ProductsPage() {
                                         const currentUrls = form.getValues('imageUrls') || [];
                                         const newUrls = [...currentUrls];
                                         newUrls[index] = '';
-                                        form.setValue('imageUrls', newUrls.filter(url => url));
+                                        const filteredUrls = newUrls.filter(url => url);
+                                        form.setValue('imageUrls', filteredUrls);
                                         
                                         // If removing the primary image, set first available image as primary
                                         if (primaryImageIndex === index) {
@@ -3036,6 +3038,28 @@ export default function ProductsPage() {
                                             setPrimaryImageIndex(0);
                                             form.setValue('imageUrl', '');
                                             setImagePreview(null);
+                                          }
+                                        }
+                                        
+                                        // Then update the database if editing existing product
+                                        if (editingProduct) {
+                                          try {
+                                            await apiRequest(`/api/products/${editingProduct.id}`, {
+                                              method: 'PATCH',
+                                              body: {
+                                                imageUrls: filteredUrls,
+                                                imageUrl: filteredUrls.length > 0 ? filteredUrls[0] : ''
+                                              }
+                                            });
+                                            console.log('✅ [IMAGE DELETE] Image removed from database');
+                                            queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+                                          } catch (error) {
+                                            console.error('❌ [IMAGE DELETE] Failed to remove image:', error);
+                                            toast({
+                                              variant: "destructive",
+                                              title: "Error",
+                                              description: "Failed to remove product image"
+                                            });
                                           }
                                         }
                                       }}
@@ -3300,10 +3324,33 @@ export default function ProductsPage() {
                                   variant="outline"
                                   size="sm"
                                   className="absolute top-2 right-2 h-6 w-6 p-0"
-                                  onClick={() => {
+                                  onClick={async () => {
+                                    // Optimistic update: Remove from UI immediately
                                     setCatalogPreview(null);
                                     form.setValue('pdfCatalogUrl', '');
                                     form.setValue('catalogFileName', '');
+                                    
+                                    // Then update the database if editing existing product
+                                    if (editingProduct) {
+                                      try {
+                                        await apiRequest(`/api/products/${editingProduct.id}`, {
+                                          method: 'PATCH',
+                                          body: {
+                                            pdfCatalogUrl: '',
+                                            catalogFileName: ''
+                                          }
+                                        });
+                                        console.log('✅ [CATALOG DELETE] Catalog removed from database');
+                                        queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+                                      } catch (error) {
+                                        console.error('❌ [CATALOG DELETE] Failed to remove catalog:', error);
+                                        toast({
+                                          variant: "destructive",
+                                          title: "Error",
+                                          description: "Failed to remove catalog file"
+                                        });
+                                      }
+                                    }
                                   }}
                                 >
                                   <X className="h-3 w-3" />
@@ -3454,10 +3501,33 @@ export default function ProductsPage() {
                                   variant="outline"
                                   size="sm"
                                   className="absolute top-2 right-2 h-6 w-6 p-0"
-                                  onClick={() => {
+                                  onClick={async () => {
+                                    // Optimistic update: Remove from UI immediately
                                     setMsdsPreview(null);
                                     form.setValue('msdsUrl', '');
                                     form.setValue('msdsFileName', '');
+                                    
+                                    // Then update the database if editing existing product
+                                    if (editingProduct) {
+                                      try {
+                                        await apiRequest(`/api/products/${editingProduct.id}`, {
+                                          method: 'PATCH',
+                                          body: {
+                                            msdsUrl: '',
+                                            msdsFileName: ''
+                                          }
+                                        });
+                                        console.log('✅ [MSDS DELETE] MSDS removed from database');
+                                        queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+                                      } catch (error) {
+                                        console.error('❌ [MSDS DELETE] Failed to remove MSDS:', error);
+                                        toast({
+                                          variant: "destructive",
+                                          title: "Error",
+                                          description: "Failed to remove MSDS file"
+                                        });
+                                      }
+                                    }
                                   }}
                                 >
                                   <X className="h-3 w-3" />
