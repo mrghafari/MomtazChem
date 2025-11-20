@@ -82,19 +82,20 @@ export const automaticEmailLogs = pgTable("automatic_email_logs", {
 // Email Templates Table
 export const emailTemplates = pgTable("email_templates", {
   id: serial("id").primaryKey(),
-  categoryId: integer("category_id").references(() => emailCategories.id),
-  templateKey: text("template_key").notNull(), // inquiry_notification, order_confirmation, etc.
-  templateName: text("template_name").notNull(),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // authentication, password-reset, etc.
   subject: text("subject").notNull(),
-  bodyHtml: text("body_html").notNull(),
-  bodyText: text("body_text"),
-  variables: text("variables").array(), // ["customerName", "productName", etc.]
-  isDefault: boolean("is_default").default(false),
+  htmlContent: text("html_content").notNull(),
+  textContent: text("text_content"),
+  variables: text("variables").array(), // ["code", "customerName", etc.]
   isActive: boolean("is_active").default(true),
-  language: text("language").default("en"),
+  isDefault: boolean("is_default").default(false),
+  language: text("language").notNull().default("en"),
+  createdBy: integer("created_by").notNull(),
   usageCount: integer("usage_count").default(0),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  lastUsed: timestamp("last_used"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Email Logs Table - track sent emails
@@ -178,6 +179,8 @@ export const insertEmailRecipientSchema = createInsertSchema(emailRecipients).om
 
 export const insertEmailTemplateSchema = createInsertSchema(emailTemplates).omit({
   id: true,
+  usageCount: true,
+  lastUsed: true,
   createdAt: true,
   updatedAt: true,
 });
