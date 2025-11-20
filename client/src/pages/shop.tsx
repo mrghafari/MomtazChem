@@ -1267,6 +1267,9 @@ const Shop = () => {
                                       src={currentImage} 
                                       alt={product.name}
                                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
+                                      onError={(e) => {
+                                        e.currentTarget.src = '/images/no-image-placeholder.jpg';
+                                      }}
                                     />
                                     {/* Multiple images carousel controls */}
                                     {images.length > 1 && (
@@ -1335,9 +1338,12 @@ const Shop = () => {
                                 return (
                                   <div className="w-full h-full flex items-center justify-center bg-gray-50">
                                     <img 
-                                      src="/placeholder-product.jpg"
+                                      src="/images/no-image-placeholder.jpg"
                                       alt="No product image available"
                                       className="w-full h-full object-contain p-8 opacity-50"
+                                      onError={(e) => {
+                                        e.currentTarget.src = '/images/no-image-placeholder.jpg';
+                                      }}
                                     />
                                   </div>
                                 );
@@ -1706,6 +1712,9 @@ const Shop = () => {
                                       src={currentImage} 
                                       alt={product.name}
                                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
+                                      onError={(e) => {
+                                        e.currentTarget.src = '/images/no-image-placeholder.jpg';
+                                      }}
                                     />
                                     {/* Multiple images carousel controls */}
                                     {images.length > 1 && (
@@ -1774,9 +1783,12 @@ const Shop = () => {
                                 return (
                                   <div className="w-full h-full flex items-center justify-center bg-gray-50">
                                     <img 
-                                      src="/placeholder-product.jpg"
+                                      src="/images/no-image-placeholder.jpg"
                                       alt="No product image available"
                                       className="w-full h-full object-contain p-8 opacity-50"
+                                      onError={(e) => {
+                                        e.currentTarget.src = '/images/no-image-placeholder.jpg';
+                                      }}
                                     />
                                   </div>
                                 );
