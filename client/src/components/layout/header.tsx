@@ -25,8 +25,8 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
-// Import company logo
-import companyLogoPath from '@assets/company-logo.png';
+// Company logo from S3
+const COMPANY_LOGO_URL = "https://momtazchem.s3.eu-central-1.amazonaws.com/company-logos/Momtazchem-Logo.png";
 
 export default function Header() {
   const [location] = useLocation();
@@ -192,7 +192,7 @@ export default function Header() {
               className="flex items-center gap-2"
             >
               <img 
-                src={companyLogoPath} 
+                src={COMPANY_LOGO_URL} 
                 alt="Momtazchem" 
                 className="h-8 w-auto"
               />
