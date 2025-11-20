@@ -52994,16 +52994,30 @@ momtazchem.com
         const [newSettings] = await db
           .insert(schema.tawkSupportChat)
           .values({
-            is_enabled: false,
-            script_code: '',
+            isEnabled: false,
+            scriptCode: '',
             notes: 'Initial setup - add your Tawk.to script code here'
           })
           .returning();
         
-        return res.json({ success: true, data: newSettings });
+        return res.json({ success: true, data: {
+          id: newSettings.id,
+          isEnabled: newSettings.isEnabled,
+          scriptCode: newSettings.scriptCode,
+          propertyId: newSettings.propertyId,
+          widgetId: newSettings.widgetId,
+          notes: newSettings.notes
+        }});
       }
       
-      res.json({ success: true, data: settings });
+      res.json({ success: true, data: {
+        id: settings.id,
+        isEnabled: settings.isEnabled,
+        scriptCode: settings.scriptCode,
+        propertyId: settings.propertyId,
+        widgetId: settings.widgetId,
+        notes: settings.notes
+      }});
     } catch (error) {
       console.error('Error fetching Tawk.to settings:', error);
       res.status(500).json({ 
@@ -53013,6 +53027,8 @@ momtazchem.com
     }
   });
 
+
+
   // PUT /api/admin/tawk-support - Update Tawk.to settings (Admin only)
   app.put('/api/admin/tawk-support', requireAdmin, async (req, res) => {
     try {
@@ -53020,14 +53036,14 @@ momtazchem.com
       
       console.log('📝 [TAWK] Saving:', { is_enabled, has_script: !!script_code });
       
-      let property_id = null;
-      let widget_id = null;
+      let propertyId = null;
+      let widgetId = null;
       
       if (script_code) {
         const match = script_code.match(/tawk\.to\/([^/]+)\/([^'"]+)/);
         if (match) {
-          property_id = match[1];
-          widget_id = match[2];
+          propertyId = match[1];
+          widgetId = match[2];
         }
       }
       
@@ -53043,12 +53059,12 @@ momtazchem.com
         [result] = await db
           .update(schema.tawkSupportChat)
           .set({
-            is_enabled,
-            script_code,
-            property_id,
-            widget_id,
+            isEnabled: is_enabled,
+            scriptCode: script_code || '',
+            propertyId,
+            widgetId,
             notes,
-            updated_at: new Date()
+            updatedAt: new Date()
           })
           .where(eq(schema.tawkSupportChat.id, existing.id))
           .returning();
@@ -53056,10 +53072,10 @@ momtazchem.com
         [result] = await db
           .insert(schema.tawkSupportChat)
           .values({
-            is_enabled,
-            script_code,
-            property_id,
-            widget_id,
+            isEnabled: is_enabled,
+            scriptCode: script_code || '',
+            propertyId,
+            widgetId,
             notes
           })
           .returning();
@@ -53081,8 +53097,8 @@ momtazchem.com
     try {
       const [settings] = await db
         .select({
-          is_enabled: schema.tawkSupportChat.is_enabled,
-          script_code: schema.tawkSupportChat.script_code
+          isEnabled: schema.tawkSupportChat.isEnabled,
+          scriptCode: schema.tawkSupportChat.scriptCode
         })
         .from(schema.tawkSupportChat)
         .orderBy(desc(schema.tawkSupportChat.id))
@@ -53092,7 +53108,10 @@ momtazchem.com
         return res.json({ success: false, data: null });
       }
       
-      res.json({ success: true, data: settings });
+      res.json({ success: true, data: {
+        is_enabled: settings.isEnabled,
+        script_code: settings.scriptCode
+      }});
     } catch (error) {
       console.error('Error fetching public Tawk.to settings:', error);
       res.status(500).json({ 
