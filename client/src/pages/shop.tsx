@@ -129,9 +129,12 @@ const Shop = () => {
 
   // Helper function to get images array (without artificial expansion)
   const getImages = (product: any) => {
-    return Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
+    const images = Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
       ? product.imageUrls 
       : (product.imageUrl ? [product.imageUrl] : []);
+    
+    // If product has no images at all, use company logo as fallback
+    return images.length > 0 ? images : [COMPANY_LOGO];
   };
 
   // Debounce search term - only search with 3+ characters
