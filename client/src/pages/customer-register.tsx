@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Link, useLocation } from "wouter";
 import { z } from "zod";
+import { OtpVerificationModal } from "@/components/OtpVerificationModal";
 
 // Enhanced registration schema with mandatory fields
 const customerRegistrationSchema = z.object({
@@ -41,6 +42,8 @@ const CustomerRegister = () => {
   const [, setLocation] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState("");
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [pendingRegistrationData, setPendingRegistrationData] = useState<any>(null);
 
   // Fetch provinces data
   const { data: provinces = [] } = useQuery({
@@ -82,18 +85,60 @@ const CustomerRegister = () => {
     },
   });
 
-  const registerMutation = useMutation({
+  // Mutation to send OTP
+  const sendOtpMutation = useMutation({
     mutationFn: async (data: CustomerRegistrationData) => {
       const { confirmPassword, ...registerData } = data;
-      return await apiRequest("/api/customers/register", {
+      const registrationPayload = {
+        ...registerData,
+        passwordHash: registerData.password,
+        customerSource: "website",
+        customerType: "retail",
+        whatsappNumber: registerData.phone,
+      };
+      
+      return await apiRequest("/api/customers/send-otp", {
         method: "POST",
         body: {
-          ...registerData,
-          passwordHash: registerData.password,
-          customerSource: "website",
-          customerType: "retail",
-          whatsappNumber: registerData.phone, // Use phone as WhatsApp number
-        }
+          phone: registerData.phone,
+          email: registerData.email,
+          registrationData: registrationPayload,
+        },
+      });
+    },
+    onSuccess: (response, variables) => {
+      const { confirmPassword, ...registerData } = variables;
+      setPendingRegistrationData({
+        ...registerData,
+        passwordHash: registerData.password,
+        customerSource: "website",
+        customerType: "retail",
+        whatsappNumber: registerData.phone,
+      });
+      setShowOtpModal(true);
+      setIsSubmitting(false);
+      
+      toast({
+        title: "Verification Code Sent",
+        description: "Please check your phone and email for the verification code",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to Send Code",
+        description: error.message || "Failed to send verification code. Please try again.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+    },
+  });
+
+  // Mutation to complete registration after OTP verification
+  const registerMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("/api/customers/register", {
+        method: "POST",
+        body: data,
       });
     },
     onSuccess: () => {
@@ -101,8 +146,8 @@ const CustomerRegister = () => {
         title: "Registration Successful",
         description: "Your account has been created. You can now log in.",
       });
-      setLocation("/customer/profile");
-      setIsSubmitting(false);
+      setShowOtpModal(false);
+      setLocation("/customer/login");
     },
     onError: (error: any) => {
       toast({
@@ -110,13 +155,20 @@ const CustomerRegister = () => {
         description: error.message || "Failed to create account. Please try again.",
         variant: "destructive",
       });
-      setIsSubmitting(false);
+      setShowOtpModal(false);
     },
   });
 
+  // Handler called when OTP is verified
+  const handleOtpVerified = (registrationData: any) => {
+    if (pendingRegistrationData) {
+      registerMutation.mutate(pendingRegistrationData);
+    }
+  };
+
   const onSubmit = (data: CustomerRegistrationData) => {
     setIsSubmitting(true);
-    registerMutation.mutate(data);
+    sendOtpMutation.mutate(data);
   };
 
   return (
@@ -487,6 +539,15 @@ const CustomerRegister = () => {
           </Form>
         </div>
       </div>
+
+      {/* OTP Verification Modal */}
+      <OtpVerificationModal
+        isOpen={showOtpModal}
+        onClose={() => setShowOtpModal(false)}
+        phone={form.getValues("phone")}
+        email={form.getValues("email")}
+        onVerified={handleOtpVerified}
+      />
     </div>
   );
 };
