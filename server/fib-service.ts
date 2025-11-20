@@ -38,14 +38,34 @@ class FIBService {
       return;
     }
 
-    const clientId = process.env.FIB_CLIENT_ID;
-    const clientSecret = process.env.FIB_CLIENT_SECRET;
+    // Try to get credentials from database first
+    const settings = await storage.getActiveFibSettings();
+    let clientId: string;
+    let clientSecret: string;
 
-    if (!clientId || !clientSecret) {
-      throw new Error('FIB credentials not configured. Please set FIB_CLIENT_ID and FIB_CLIENT_SECRET environment variables.');
+    if (settings && settings.clientId && settings.clientSecret) {
+      // Use encrypted credentials from database
+      try {
+        const { getDecryptedFibCredentials } = await import('./fib-credentials-service');
+        const credentials = getDecryptedFibCredentials(settings);
+        clientId = credentials.clientId;
+        clientSecret = credentials.clientSecret;
+        console.log('✅ [FIB] Using encrypted credentials from database');
+      } catch (error) {
+        console.error('❌ [FIB] Failed to decrypt credentials from database:', error);
+        throw new Error('Failed to decrypt FIB credentials. Please check encryption key.');
+      }
+    } else {
+      // Fallback to environment variables
+      clientId = process.env.FIB_CLIENT_ID || '';
+      clientSecret = process.env.FIB_CLIENT_SECRET || '';
+      
+      if (!clientId || !clientSecret) {
+        throw new Error('FIB credentials not configured. Please set credentials in admin panel or environment variables.');
+      }
+      console.log('⚠️  [FIB] Using credentials from environment variables');
     }
 
-    const settings = await storage.getActiveFibSettings();
     const environment = (settings?.environment || 'stage') as Environment;
 
     this.client = PaymentSDK.getClient(clientId, clientSecret, environment);

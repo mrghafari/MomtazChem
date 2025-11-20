@@ -367,6 +367,14 @@ export default function SiteManagement() {
       moduleId: "aws_s3_settings"
     },
     {
+      id: "fib-settings",
+      label: "FIB Payment Gateway",
+      icon: CreditCard,
+      onClick: () => trackButtonClick("fib-settings", () => setLocation("/admin/fib-settings")),
+      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-800",
+      moduleId: "fib_payment_settings"
+    },
+    {
       id: "user-guide",
       label: "User Guide",
       icon: BookOpen,

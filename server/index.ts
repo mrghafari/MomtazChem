@@ -173,6 +173,10 @@ app.use((req, res, next) => {
     const { paymentRoutes } = await import('./payment-routes');
     app.use('/api', paymentRoutes);
     
+    // Import and register FIB settings routes
+    const fibSettingsRoutes = (await import('./fib-settings-routes')).default;
+    app.use('/api/admin/fib', fibSettingsRoutes);
+    
     // Start auto-approval service
     try {
       const { autoApprovalService } = await import('./auto-approval-service');
