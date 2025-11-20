@@ -344,11 +344,6 @@ export function registerS3ImageRoutes(app: Express) {
       
       const fileBuffer = await s3Service.getFile(s3Key);
       
-      if (!fileBuffer) {
-        console.log(`❌ [S3 FILE] File not found in S3: ${s3Key}`);
-        return res.status(404).json({ success: false, message: 'File not found' });
-      }
-      
       // Determine content type from file extension
       const ext = path.extname(req.params.fileName).toLowerCase();
       const contentTypes: {[key: string]: string} = {
@@ -362,6 +357,37 @@ export function registerS3ImageRoutes(app: Express) {
       };
       
       const contentType = contentTypes[ext] || 'application/octet-stream';
+      const isImageFile = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'].includes(ext);
+      
+      if (!fileBuffer) {
+        console.log(`❌ [S3 FILE] File not found in S3: ${s3Key}`);
+        
+        // For image files, serve company logo as fallback
+        if (isImageFile) {
+          console.log(`🖼️ [S3 FILE] Image file missing, serving company logo instead`);
+          
+          try {
+            const logoKey = 'company-logos/Momtazchem-Logo.png';
+            const logoBuffer = await s3Service.getFile(logoKey);
+            
+            if (logoBuffer) {
+              res.set({
+                'Content-Type': 'image/png',
+                'Cache-Control': 'public, max-age=31536000',
+                'Content-Length': logoBuffer.length
+              });
+              
+              res.send(logoBuffer);
+              console.log(`✅ [S3 FILE] Served company logo as fallback for missing image`);
+              return;
+            }
+          } catch (logoError) {
+            console.error('❌ [S3 FILE] Error serving logo fallback:', logoError);
+          }
+        }
+        
+        return res.status(404).json({ success: false, message: 'File not found' });
+      }
       
       res.set({
         'Content-Type': contentType,
