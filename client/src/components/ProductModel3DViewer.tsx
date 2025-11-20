@@ -35,13 +35,35 @@ export default function ProductModel3DViewer({ model3dKey, productName, classNam
   const [scriptLoaded, setScriptLoaded] = useState(false);
 
   useEffect(() => {
+    // Check WebGL/WebXR support before loading model-viewer
+    const checkSupport = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        return !!gl;
+      } catch (e) {
+        return false;
+      }
+    };
+
+    // If WebGL is not supported, show error and don't load script
+    if (!checkSupport()) {
+      console.warn('WebGL not supported, 3D model viewer disabled');
+      setError(true);
+      setLoading(false);
+      return;
+    }
+
     // Load model-viewer script if not already loaded
     if (!document.querySelector('script[src*="model-viewer"]')) {
       const script = document.createElement('script');
       script.type = 'module';
       script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js';
       script.onload = () => setScriptLoaded(true);
-      script.onerror = () => setError(true);
+      script.onerror = () => {
+        setError(true);
+        setLoading(false);
+      };
       document.head.appendChild(script);
     } else {
       setScriptLoaded(true);
@@ -98,6 +120,7 @@ export default function ProductModel3DViewer({ model3dKey, productName, classNam
             loading="eager"
             interaction-prompt="auto"
             reveal="auto"
+            ar={('xr' in navigator) ? true : undefined}
             style={{
               width: '100%',
               height: '100%',
