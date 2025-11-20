@@ -375,6 +375,14 @@ export default function SiteManagement() {
       moduleId: "fib_payment_settings"
     },
     {
+      id: "database-backups",
+      label: "Database Backups",
+      icon: Database,
+      onClick: () => trackButtonClick("database-backups", () => setLocation("/admin/database-backups")),
+      className: "border-violet-300 text-violet-600 hover:bg-violet-50 hover:text-violet-800",
+      moduleId: "database_backups"
+    },
+    {
       id: "user-guide",
       label: "User Guide",
       icon: BookOpen,
