@@ -44,6 +44,11 @@ const CustomerRegister = () => {
   const [selectedProvince, setSelectedProvince] = useState("");
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [pendingRegistrationData, setPendingRegistrationData] = useState<any>(null);
+  const [sentVia, setSentVia] = useState<{ whatsapp: boolean; sms: boolean; email: boolean }>({
+    whatsapp: false,
+    sms: false,
+    email: false,
+  });
 
   // Fetch provinces data
   const { data: provinces = [] } = useQuery({
@@ -115,12 +120,23 @@ const CustomerRegister = () => {
         customerType: "retail",
         whatsappNumber: registerData.phone,
       });
+      
+      // Store sentVia info from response
+      if (response.sentVia) {
+        setSentVia(response.sentVia);
+      }
+      
       setShowOtpModal(true);
       setIsSubmitting(false);
       
+      const channels = [];
+      if (response.sentVia?.email) channels.push("Email");
+      if (response.sentVia?.whatsapp) channels.push("WhatsApp");
+      if (response.sentVia?.sms) channels.push("SMS");
+      
       toast({
         title: "Verification Code Sent",
-        description: "Please check your phone and email for the verification code",
+        description: `Check your ${channels.join(", ")} for the verification code`,
       });
     },
     onError: (error: any) => {
@@ -541,13 +557,16 @@ const CustomerRegister = () => {
       </div>
 
       {/* OTP Verification Modal */}
-      <OtpVerificationModal
-        isOpen={showOtpModal}
-        onClose={() => setShowOtpModal(false)}
-        phone={form.getValues("phone")}
-        email={form.getValues("email")}
-        onVerified={handleOtpVerified}
-      />
+      {showOtpModal && (
+        <OtpVerificationModal
+          isOpen={showOtpModal}
+          onClose={() => setShowOtpModal(false)}
+          phone={form.getValues("phone")}
+          email={form.getValues("email")}
+          onVerified={handleOtpVerified}
+          initialSentVia={sentVia}
+        />
+      )}
     </div>
   );
 };

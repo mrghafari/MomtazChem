@@ -13,6 +13,7 @@ interface OtpVerificationModalProps {
   phone: string;
   email: string;
   onVerified: (registrationData: any) => void;
+  initialSentVia?: { whatsapp: boolean; sms: boolean; email: boolean };
 }
 
 export function OtpVerificationModal({
@@ -21,6 +22,7 @@ export function OtpVerificationModal({
   phone,
   email,
   onVerified,
+  initialSentVia,
 }: OtpVerificationModalProps) {
   const { toast } = useToast();
   const [code, setCode] = useState("");
@@ -30,11 +32,13 @@ export function OtpVerificationModal({
   const [canResend, setCanResend] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [attemptsRemaining, setAttemptsRemaining] = useState(3);
-  const [sentVia, setSentVia] = useState<{ whatsapp: boolean; sms: boolean; email: boolean }>({
-    whatsapp: false,
-    sms: false,
-    email: false,
-  });
+  const [sentVia, setSentVia] = useState<{ whatsapp: boolean; sms: boolean; email: boolean }>(
+    initialSentVia || {
+      whatsapp: false,
+      sms: false,
+      email: false,
+    }
+  );
 
   // Countdown timer for OTP expiry
   useEffect(() => {
