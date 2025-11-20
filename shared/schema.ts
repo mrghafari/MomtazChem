@@ -52,6 +52,7 @@ export const awsS3Settings = pgTable("aws_s3_settings", {
   secretAccessKey: text("secret_access_key").notNull(), // Encrypted AWS Secret Access Key
   region: text("region").notNull(), // AWS region (e.g., us-east-1)
   bucketName: text("bucket_name").notNull(), // S3 bucket name
+  encryptionKey: text("encryption_key"), // Encryption key for encrypting AWS credentials
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

@@ -52244,7 +52244,7 @@ momtazchem.com
   // Save/Update AWS S3 settings
   app.post("/api/admin/aws-s3/settings", requireAuth, async (req, res) => {
     try {
-      const { accessKeyId, secretAccessKey, region, bucketName, isActive, endpoint, usePathStyle, publicUrl, description } = req.body;
+      const { accessKeyId, secretAccessKey, region, bucketName, encryptionKey, isActive, endpoint, usePathStyle, publicUrl, description } = req.body;
 
       // Check if settings already exist
       const existingSettings = await storage.getActiveAwsS3Settings();
@@ -52287,6 +52287,7 @@ momtazchem.com
           isActive: isActive !== undefined ? isActive : existingSettings.isActive,
           endpoint: endpoint !== undefined ? endpoint : existingSettings.endpoint,
           usePathStyle: usePathStyle !== undefined ? usePathStyle : existingSettings.usePathStyle,
+          encryptionKey: encryptionKey !== undefined ? encryptionKey : existingSettings.encryptionKey,
           publicUrl: publicUrl !== undefined ? publicUrl : existingSettings.publicUrl,
           description: description !== undefined ? description : existingSettings.description
         });
@@ -52301,7 +52302,8 @@ momtazchem.com
           endpoint: endpoint || undefined,
           usePathStyle: usePathStyle || false,
           publicUrl: publicUrl || undefined,
-          description: description || undefined
+          description: description || undefined,
+                    encryptionKey: encryptionKey || undefined
         });
       }
 
