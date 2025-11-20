@@ -1,46 +1,11 @@
 import { Express, Request, Response, NextFunction } from 'express';
 import path from 'path';
 import fs from 'fs';
-import { AwsS3Service } from './aws-s3-service';
-import { db } from './db';
-import { awsS3Settings } from '../shared/schema';
-import { sql } from 'drizzle-orm';
+import { getAwsS3Service } from './aws-s3-service';
 
-// Initialize S3 service from environment variables (not database)
-let s3ServiceInstance: AwsS3Service | null = null;
-
-function getS3Service(): AwsS3Service | null {
-  if (s3ServiceInstance) {
-    return s3ServiceInstance;
-  }
-  
-  // Initialize from environment variables
-  if (process.env.AWS_S3_BUCKET_NAME && process.env.AWS_REGION) {
-    try {
-      s3ServiceInstance = new AwsS3Service({
-        id: 1,
-        bucketName: process.env.AWS_S3_BUCKET_NAME,
-        region: process.env.AWS_REGION,
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        endpoint: null,
-        usePathStyle: null,
-        publicUrl: null,
-        description: null
-      });
-      console.log('✅ [S3 SERVICE] Initialized from environment variables');
-      return s3ServiceInstance;
-    } catch (error) {
-      console.error('❌ [S3 SERVICE] Failed to initialize:', error);
-      return null;
-    }
-  }
-  
-  console.error('❌ [S3 SERVICE] Missing environment variables');
-  return null;
+// Use the globally initialized S3 service from database
+function getS3Service() {
+  return getAwsS3Service();
 }
 
 /**
