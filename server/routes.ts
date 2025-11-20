@@ -53281,7 +53281,7 @@ momtazchem.com
       if (existing) {
         // Update existing
         [result] = await db
-          .update(tawkSupportChat)
+          .update(schema.tawkSupportChat)
           .set({
             is_enabled,
             script_code,
@@ -53295,7 +53295,7 @@ momtazchem.com
       } else {
         // Create new
         [result] = await db
-          .insert(tawkSupportChat)
+          .insert(schema.tawkSupportChat)
           .values({
             is_enabled,
             script_code,
