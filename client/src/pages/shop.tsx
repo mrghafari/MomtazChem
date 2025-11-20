@@ -39,6 +39,9 @@ const Shop = () => {
   const { t, direction } = useLanguage();
   const queryClient = useQueryClient();
   const { isAuthenticated, user: authenticatedCustomer, logout: customerLogout } = useCustomerAuth();
+  
+  // استفاده از لوگو شرکت به جای placeholder
+  const COMPANY_LOGO = '/uploads/company-logos/Momtazchem-Logo.png';
 
 
   const [, navigate] = useLocation();
@@ -1268,7 +1271,9 @@ const Shop = () => {
                                       alt={product.name}
                                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
                                       onError={(e) => {
-                                        e.currentTarget.src = '/images/no-image-placeholder.jpg';
+                                        e.currentTarget.src = COMPANY_LOGO;
+                                        e.currentTarget.classList.add('object-contain', 'p-4');
+                                        e.currentTarget.classList.remove('object-cover');
                                       }}
                                     />
                                     {/* Multiple images carousel controls */}
@@ -1338,11 +1343,11 @@ const Shop = () => {
                                 return (
                                   <div className="w-full h-full flex items-center justify-center bg-gray-50">
                                     <img 
-                                      src="/images/no-image-placeholder.jpg"
-                                      alt="No product image available"
+                                      src={COMPANY_LOGO}
+                                      alt="Momtazchem Logo"
                                       className="w-full h-full object-contain p-8 opacity-50"
                                       onError={(e) => {
-                                        e.currentTarget.src = '/images/no-image-placeholder.jpg';
+                                        e.currentTarget.src = COMPANY_LOGO;
                                       }}
                                     />
                                   </div>
@@ -1713,7 +1718,9 @@ const Shop = () => {
                                       alt={product.name}
                                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
                                       onError={(e) => {
-                                        e.currentTarget.src = '/images/no-image-placeholder.jpg';
+                                        e.currentTarget.src = COMPANY_LOGO;
+                                        e.currentTarget.classList.add('object-contain', 'p-4');
+                                        e.currentTarget.classList.remove('object-cover');
                                       }}
                                     />
                                     {/* Multiple images carousel controls */}
@@ -1783,11 +1790,11 @@ const Shop = () => {
                                 return (
                                   <div className="w-full h-full flex items-center justify-center bg-gray-50">
                                     <img 
-                                      src="/images/no-image-placeholder.jpg"
-                                      alt="No product image available"
+                                      src={COMPANY_LOGO}
+                                      alt="Momtazchem Logo"
                                       className="w-full h-full object-contain p-8 opacity-50"
                                       onError={(e) => {
-                                        e.currentTarget.src = '/images/no-image-placeholder.jpg';
+                                        e.currentTarget.src = COMPANY_LOGO;
                                       }}
                                     />
                                   </div>
