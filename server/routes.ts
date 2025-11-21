@@ -31827,6 +31827,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "marketing_module", "aws_s3_settings", "whatsapp_crm", "blog", "marketplace_management"
         ];
         
+        console.log("🔍 [CRITICAL DEBUG] marketplace_management included:", allModules.includes("marketplace_management"));
         console.log('🔍 [DEBUG] allModules array contains:', allModules.length, 'modules');
         console.log('🔍 [DEBUG] whatsapp_crm included?', allModules.includes('whatsapp_crm'));
         console.log('🔍 [DEBUG] blog included?', allModules.includes('blog'));
