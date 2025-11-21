@@ -194,7 +194,24 @@ export class UniversalEmailService {
         attachments: options.attachments
       };
 
-      await transporter.sendMail(mailOptions);
+      const info = await transporter.sendMail(mailOptions);
+      
+      // Check if SMTP server rejected any recipients
+      if (info.rejected && info.rejected.length > 0) {
+        const rejectedEmails = info.rejected.join(', ');
+        console.error(`❌ [Universal Email] SMTP server rejected recipients: ${rejectedEmails}`);
+        console.error(`❌ [Universal Email] SMTP response: ${info.response}`);
+        throw new Error(`Email rejected by SMTP server for: ${rejectedEmails}. Response: ${info.response}`);
+      }
+      
+      if (!info.accepted || info.accepted.length === 0) {
+        console.error(`❌ [Universal Email] No recipients accepted by SMTP server`);
+        console.error(`❌ [Universal Email] SMTP response: ${info.response}`);
+        throw new Error(`No recipients accepted by SMTP server. Response: ${info.response}`);
+      }
+      
+      console.log(`✅ [Universal Email] SMTP accepted: ${info.accepted.join(', ')}`);
+      console.log(`📧 [Universal Email] SMTP response: ${info.response}`);
       
       // Log successful email to both old and new logging systems
       await emailStorage.logEmail({
