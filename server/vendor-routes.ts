@@ -192,38 +192,8 @@ export function createVendorRouter() {
         });
       }
 
-      // If not a vendor user, check if it's a super admin (custom_user)
-      // Try to find by email (username could be email)
-      const customUser = await db.query.customUsers.findFirst({
-        where: eq(customUsers.email, username),
-      });
-
-      if (customUser && customUser.passwordHash) {
-        const isValidPassword = await bcrypt.compare(password, customUser.passwordHash);
-        
-        if (isValidPassword) {
-          // Create special session for super admin
-          req.session.vendorUserId = `admin_${customUser.id}`;
-          req.session.isSuperAdmin = true;
-          req.session.customUserId = String(customUser.id);
-
-          return res.json({
-            success: true,
-            message: "Super admin login successful",
-            user: {
-              id: customUser.id,
-              username: customUser.email,
-              email: customUser.email,
-              role: "super_admin",
-              isSuperAdmin: true,
-              vendorId: null,
-              vendorName: "Super Admin"
-            }
-          });
-        }
-      }
-
-      // If neither vendor nor super admin, return error
+      // Vendor authentication only - no fallback to admin/custom users
+      // This prevents privilege escalation attacks
       return res.status(401).json({
         success: false,
         message: "Invalid username or password"
