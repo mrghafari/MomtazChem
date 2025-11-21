@@ -23,7 +23,11 @@ export function createVendorRouter() {
   // Vendor registration
   router.post("/auth/register", async (req, res) => {
     try {
+      console.log("📝 [VENDOR REGISTRATION] New registration request received");
+      console.log("📦 [REQUEST BODY]:", JSON.stringify(req.body, null, 2));
       const { vendorData, userData } = req.body;
+      console.log("🏢 [VENDOR DATA]:", vendorData);
+      console.log("👤 [USER DATA]:", userData);
 
       // Validate vendor data
       const vendorSchema = insertVendorSchema.pick({
