@@ -1650,6 +1650,12 @@ export default function ProductsPage() {
                             {product.technicalName}
                           </div>
                         )}
+                        {(product as any).vendorName && (
+                          <div className="text-sm text-purple-600 dark:text-purple-400 font-medium mb-1 flex items-center gap-1">
+                            <span className="text-xs">🏪</span>
+                            {(product as any).vendorName}
+                          </div>
+                        )}
                         <div className="flex items-center gap-2 mb-2">
                           {categories.find((c: CategoryOption) => c.value === product.category)?.icon}
                           <span className="text-sm text-gray-600 dark:text-gray-400">

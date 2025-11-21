@@ -1,4 +1,4 @@
-import { users, leads, leadActivities, passwordResets, abandonedOrders, persistentCarts, aiApiSettings, awsS3Settings, fibPayments, fibPaymentCallbacks, fibSettings, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type AbandonedOrder, type InsertAbandonedOrder, type PersistentCart, type InsertPersistentCart, type AiApiSettings, type InsertAiApiSettings, type AwsS3Settings, type InsertAwsS3Settings, type FibPayment, type InsertFibPayment, type FibPaymentCallback, type InsertFibPaymentCallback, type FibSettings, type InsertFibSettings } from "@shared/schema";
+import { users, leads, leadActivities, passwordResets, abandonedOrders, persistentCarts, aiApiSettings, awsS3Settings, fibPayments, fibPaymentCallbacks, fibSettings, vendors, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type AbandonedOrder, type InsertAbandonedOrder, type PersistentCart, type InsertPersistentCart, type AiApiSettings, type InsertAiApiSettings, type AwsS3Settings, type InsertAwsS3Settings, type FibPayment, type InsertFibPayment, type FibPaymentCallback, type InsertFibPaymentCallback, type FibSettings, type InsertFibSettings } from "@shared/schema";
 import { contacts, showcaseProducts, type Contact, type InsertContact, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { db } from "./db";
 import { showcaseDb } from "./showcase-db";
@@ -246,7 +246,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProducts(): Promise<ShowcaseProduct[]> {
-    return await showcaseDb.select().from(showcaseProducts).orderBy(desc(showcaseProducts.createdAt));
+    const results = await showcaseDb
+      .select({
+        ...showcaseProducts,
+        vendorName: vendors.vendorName,
+      })
+      .from(showcaseProducts)
+      .leftJoin(vendors, eq(showcaseProducts.vendorId, vendors.id))
+      .orderBy(desc(showcaseProducts.createdAt));
+    
+    return results as any;
   }
 
   async getProductById(id: number): Promise<ShowcaseProduct | undefined> {
