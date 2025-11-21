@@ -117,7 +117,7 @@ export default function VendorRegistration() {
 
       return apiRequest("/api/vendors/register", {
         method: "POST",
-        body: JSON.stringify({ vendorData, userData }),
+        body: { vendorData, userData },
       });
     },
     onSuccess: () => {
