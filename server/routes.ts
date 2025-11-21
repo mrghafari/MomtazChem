@@ -17100,7 +17100,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await crmStorage.createOrUpdateCustomerFromOrder(crmOrderData);
         console.log(`✅ Customer auto-captured in CRM for order ${orderNumber}`);
 
+      } catch (crmError) {
+        console.error("❌ Error auto-capturing customer in CRM:", crmError);
+        // Don't fail the order if CRM capture fails
+      }
+
+
       // 📧 Send order confirmation email to customer (async, non-blocking)
+      // Moved outside CRM try-catch to ensure it always runs
       (async () => {
         try {
           console.log(`📧 [EMAIL] Preparing order confirmation email for order ${orderNumber}...`);
@@ -17170,12 +17177,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Don't fail the order if email fails
         }
       })();
-
-      } catch (crmError) {
-        console.error("❌ Error auto-capturing customer in CRM:", crmError);
-        // Don't fail the order if CRM capture fails
-      }
-
       // Create order_management record for workflow routing
       try {
         // CRITICAL: Route pure wallet payments directly to warehouse
