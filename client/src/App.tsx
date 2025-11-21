@@ -150,6 +150,7 @@ import MarketplaceManagement from "@/pages/admin/marketplace-management";
 import VendorRegistration from "@/pages/vendor-registration";
 import VendorLogin from "@/pages/vendor-login";
 import VendorDashboard from "@/pages/vendor-dashboard";
+import VendorPortal from "@/pages/vendor-portal";
 import VehicleHistoryPage from "@/pages/admin/vehicle-history";
 import BlogManagement from "@/pages/admin/blog-management";
 import Blog from "@/pages/blog";
@@ -171,6 +172,7 @@ function Router() {
           <Route path="/user-guide" component={UserGuide} />
           <Route path="/help" component={UserGuide} />
           <Route path="/shop" component={Shop} />
+          <Route path="/vendor" component={VendorPortal} />
           <Route path="/vendor-registration" component={VendorRegistration} />
           <Route path="/become-vendor" component={VendorRegistration} />
           <Route path="/vendor/login" component={VendorLogin} />

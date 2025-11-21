@@ -27,13 +27,24 @@ const HeroSection = () => {
             {t.heroDescription}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/products/fuel-additives">
+            <Link href="/shop">
               <Button
                 size="lg"
-                className="bg-accent-orange hover:bg-accent-orange-dark text-white text-lg font-semibold"
+                className="bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold"
+                data-testid="button-shop"
               >
                 <FlaskRound className="mr-3 h-5 w-5" />
-                {t.exploreProducts}
+                Shop
+              </Button>
+            </Link>
+            <Link href="/vendor">
+              <Button
+                size="lg"
+                className="bg-green-600 hover:bg-green-700 text-white text-lg font-semibold"
+                data-testid="button-vendor"
+              >
+                <FlaskRound className="mr-3 h-5 w-5" />
+                Vendor
               </Button>
             </Link>
             <Link href="/contact">
