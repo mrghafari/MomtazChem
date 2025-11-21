@@ -32,7 +32,7 @@ export default function VendorLogin() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginForm) => {
-      return apiRequest("/api/vendor/auth/login", {
+      return apiRequest("/api/vendors/auth/login", {
         method: "POST",
         body: data,
       });

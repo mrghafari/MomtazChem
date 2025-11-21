@@ -24,9 +24,9 @@ export default function VendorDashboard() {
 
   // Fetch vendor profile
   const { data: vendorData, isLoading: isLoadingVendor } = useQuery({
-    queryKey: ["/api/vendor/auth/me"],
+    queryKey: ["/api/vendors/auth/me"],
     queryFn: async () => {
-      const response = await fetch("/api/vendor/auth/me");
+      const response = await fetch("/api/vendors/auth/me");
       if (!response.ok) {
         if (response.status === 401) {
           setLocation("/vendor/login");
@@ -40,10 +40,10 @@ export default function VendorDashboard() {
 
   // Fetch vendor products
   const { data: productsData, isLoading: isLoadingProducts } = useQuery({
-    queryKey: ["/api/vendor/products"],
+    queryKey: ["/api/vendors/products"],
     enabled: !!vendorData?.user,
     queryFn: async () => {
-      const response = await fetch("/api/vendor/products");
+      const response = await fetch("/api/vendors/products");
       if (!response.ok) throw new Error("خطا در دریافت محصولات");
       return response.json();
     },
@@ -51,10 +51,10 @@ export default function VendorDashboard() {
 
   // Fetch vendor orders - disabled for now (not implemented yet)
   const { data: ordersData, isLoading: isLoadingOrders } = useQuery({
-    queryKey: ["/api/vendor/orders"],
+    queryKey: ["/api/vendors/orders"],
     enabled: false, // Disabled - endpoint not implemented yet
     queryFn: async () => {
-      const response = await fetch("/api/vendor/orders");
+      const response = await fetch("/api/vendors/orders");
       if (!response.ok) throw new Error("خطا در دریافت سفارشات");
       return response.json();
     },
@@ -62,10 +62,10 @@ export default function VendorDashboard() {
 
   // Fetch stats
   const { data: statsData } = useQuery({
-    queryKey: ["/api/vendor/statistics"],
+    queryKey: ["/api/vendors/statistics"],
     enabled: !!vendorData?.user,
     queryFn: async () => {
-      const response = await fetch("/api/vendor/statistics");
+      const response = await fetch("/api/vendors/statistics");
       if (!response.ok) throw new Error("خطا در دریافت آمار");
       return response.json();
     },
@@ -73,7 +73,7 @@ export default function VendorDashboard() {
 
   const handleLogout = async () => {
     try {
-      await apiRequest("/api/vendor/auth/logout", { method: "POST" });
+      await apiRequest("/api/vendors/auth/logout", { method: "POST" });
       toast({
         title: "✅ خروج موفق",
         description: "با موفقیت از حساب خود خارج شدید",
