@@ -17130,46 +17130,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log('⚠️ Could not fetch grace period from settings, using default 3 days');
           }
           
-          // Extract customer email and name
+          // Extract customer email and name from CRM (single source of truth)
           let customerEmail = customerInfo.email || '';
           let customerName = customerInfo.name || 'مشتری عزیز';
           
-          // If no email in customerInfo, try to get from customer or CRM record
+          // If no email in customerInfo, get from CRM database
           if (!customerEmail && finalCustomerId) {
             try {
-              const customer = await customerStorage.getCustomerById(finalCustomerId);
-              customerEmail = customer?.email || '';
-              if (!customerEmail) {
-                // Try CRM database if not in customers table
-                const crmCustomer = await crmStorage.getCrmCustomerById(finalCustomerId);
-                customerEmail = crmCustomer?.email || '';
-                if (crmCustomer?.firstName && crmCustomer?.lastName) {
-                  customerName = `${crmCustomer.firstName} ${crmCustomer.lastName}`;
-                }
+              const crmCustomer = await crmStorage.getCrmCustomerById(finalCustomerId);
+              customerEmail = crmCustomer?.email || '';
+              if (crmCustomer?.firstName && crmCustomer?.lastName) {
+                customerName = `${crmCustomer.firstName} ${crmCustomer.lastName}`;
               }
             } catch (err) {
-              console.log('⚠️ Could not fetch customer email from database');
-            }
-          }
-          // Extract customer email and name
-          let customerEmail = customerInfo.email || '';
-          let customerName = customerInfo.name || 'مشتری عزیز';
-          
-          // If no email in customerInfo, try to get from customer or CRM record
-          if (!customerEmail && finalCustomerId) {
-            try {
-              const customer = await customerStorage.getCustomerById(finalCustomerId);
-              customerEmail = customer?.email || '';
-              if (!customerEmail) {
-                // Try CRM database if not in customers table
-                const crmCustomer = await crmStorage.getCrmCustomerById(finalCustomerId);
-                customerEmail = crmCustomer?.email || '';
-                if (crmCustomer?.firstName && crmCustomer?.lastName) {
-                  customerName = `${crmCustomer.firstName} ${crmCustomer.lastName}`;
-                }
-              }
-            } catch (err) {
-              console.log('⚠️ Could not fetch customer email from database');
+              console.log('⚠️ Could not fetch customer email from CRM database');
             }
           }
           
