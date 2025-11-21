@@ -6867,8 +6867,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'marketing_module',
       'aws_s3_settings',
       'whatsapp_crm',
-      'blog'
-      // Total: 36 modules - automatically synced with Site Management
+      'blog',
+      'marketplace_management',
+      // Total: 37 modules - automatically synced with Site Management
     ];
   };
 
