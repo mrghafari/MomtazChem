@@ -1,0 +1,2771 @@
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+1db2780f078ab5a5.js:2 [Coframe] Replit Enterprise watcher loaded
+1db2780f078ab5a5.js:2 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+1db2780f078ab5a5.js:2 Download the Apollo DevTools for a better development experience: https://chrome.google.com/webstore/detail/apollo-client-developer-t/jdkknkkbebbapilgoeccciglkfbmbnfm
+1db2780f078ab5a5.js:2 [LaunchDarkly] LaunchDarkly client initialized
+1db2780f078ab5a5.js:2 [Coframe] Mutation callback infinite loop protection triggered, disconnecting mutation observer Object
+(anonymous) @ 1db2780f078ab5a5.js:2
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar3g4%3A:32 Unrecognized feature: 'ambient-light-sensor'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar3g4%3A:32 Unrecognized feature: 'battery'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar3g4%3A:32 Unrecognized feature: 'execution-while-not-rendered'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar3g4%3A:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar3g4%3A:32 Unrecognized feature: 'layout-animations'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar3g4%3A:32 Unrecognized feature: 'legacy-image-formats'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar3g4%3A:32 Unrecognized feature: 'navigation-override'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar3g4%3A:32 Unrecognized feature: 'oversized-images'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar3g4%3A:32 Unrecognized feature: 'publickey-credentials'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar3g4%3A:32 Unrecognized feature: 'speaker-selection'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar3g4%3A:32 Unrecognized feature: 'unoptimized-images'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar3g4%3A:32 Unrecognized feature: 'unsized-media'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar3g4%3A:32 Allow attribute will take precedence over 'allowfullscreen'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar3g4%3A:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/shop/settings:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/shop/proforma-reminders:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/shop:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/wallet/balance:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/wallet/balance:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/shop:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/shop:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+wallet-debug-test.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+kpi-dashboard.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+management-dashboard.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+kpi-report.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+accounting-management.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev:5173/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/products:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+OtpVerificationModal.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+BankReceiptUploadModal.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+PasswordManagement.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+unified-customer-profile.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+radio-group.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+showcase-schema.ts:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+fifo-batch-display.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+barcode-utils.ts:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ProductImageUploader.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ProductRating.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ProductSchema.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+Breadcrumbs.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+RandomCategoryProducts.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+product-inquiry-form.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+scroll-area.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+checkout-success.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+payment-options.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+shop-admin.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+invoice-management.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+payment-settings.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+PaymentTestPage.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+admin.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+admin-login.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+barcode-inventory.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+admin-users.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+database-management.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+user-management-redesign.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+factory-management.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+procedures-management.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/index.css?t=1763722741674&v=8YpeuF0OoXWzFm7Et4Kkz:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+unified-customer-profile.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+OtpVerificationModal.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+BankReceiptUploadModal.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+radio-group.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+PasswordManagement.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+showcase-schema.ts:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+fifo-batch-display.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+barcode-utils.ts:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ProductImageUploader.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ProductRating.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+Breadcrumbs.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ProductSchema.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+product-inquiry-form.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+useWebRTC.ts:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+RandomCategoryProducts.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+scroll-area.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+DeliveryMethodsManagement.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+useOrderNotifications.ts:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+sms-templates-simple.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ShippingRatesManagement.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+visual-barcode.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+BulkPurchaseProductCard.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+barcode-generator.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+switch.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+greetings.ts:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+AuthGuard.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+barcode-scanner.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+table.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+alert-dialog.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+progress.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+unified-customer-profile.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+email-setup-progress.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+OtpVerificationModal.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+PasswordManagement.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+BankReceiptUploadModal.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+radio-group.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+showcase-schema.ts:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+fifo-batch-display.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+fuel-additives.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+test-product-image-upload.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+water-treatment.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+paint-thinner.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/cart/session:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/cart/session:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/cart/session:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/shop/proforma-reminders:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/shop/settings:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/orders?t=1763725243979:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/shop:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev:5173/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ProductRating.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+barcode-utils.ts:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ProductSchema.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ Unrecognized feature: 'ambient-light-sensor'.
+z @ ed1e693c96a75807.js:2
+ Unrecognized feature: 'battery'.
+z @ ed1e693c96a75807.js:2
+ Unrecognized feature: 'execution-while-not-rendered'.
+z @ ed1e693c96a75807.js:2
+ Unrecognized feature: 'execution-while-out-of-viewport'.
+z @ ed1e693c96a75807.js:2
+ Unrecognized feature: 'layout-animations'.
+z @ ed1e693c96a75807.js:2
+ Unrecognized feature: 'legacy-image-formats'.
+z @ ed1e693c96a75807.js:2
+ Unrecognized feature: 'navigation-override'.
+z @ ed1e693c96a75807.js:2
+ Unrecognized feature: 'oversized-images'.
+z @ ed1e693c96a75807.js:2
+ Unrecognized feature: 'publickey-credentials'.
+z @ ed1e693c96a75807.js:2
+ Unrecognized feature: 'speaker-selection'.
+z @ ed1e693c96a75807.js:2
+ Unrecognized feature: 'unoptimized-images'.
+z @ ed1e693c96a75807.js:2
+ Unrecognized feature: 'unsized-media'.
+z @ ed1e693c96a75807.js:2
+ Unrecognized feature: 'pointer-lock'.
+z @ ed1e693c96a75807.js:2
+ Allow attribute will take precedence over 'allowfullscreen'.
+z @ ed1e693c96a75807.js:2
+ Allow attribute will take precedence over 'allowpaymentrequest'.
+z @ ed1e693c96a75807.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/content-management/items:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/shop:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+email-settings.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+advanced-email-settings.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+email-address-manager-fixed.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+email-progress.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+email-templates.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+email-templates-fixed.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+email-templates-central.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+template05-static-view.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+template05-view.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+email-routing-stats.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+marketing-module.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+server-config.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+inquiry-responses.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+aws-s3-settings.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+automated-email-logs.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+admin-missing-images.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+fib-settings.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+forgot-password.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+reset-password.tsx:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/shop/search?q=&limit=12&offset=0&sortBy=relevance&sortOrder=desc:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/shop/products:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/shop/discounts:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/frontend-controls:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/shop/product-stats:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/shop/categories:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/logistics/provinces:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/shop:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://mr.gh/&size=32:1  Failed to load resource: the server responded with a status of 404 ()
+t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://mr.gh&size=32:1  Failed to load resource: the server responded with a status of 404 ()
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/vendor/auth/login:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/vendor/auth/login:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://mr.gh&size=32:1  Failed to load resource: the server responded with a status of 404 ()
+t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://mr.gh/&size=32:1  Failed to load resource: the server responded with a status of 404 ()
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:37 📥 Loading Tawk.to widget at bottom-left position...
+injected.js:37 ✅ Tawk.to Live Chat loaded successfully at bottom-left
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/vendor/auth/login:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/vendor/auth/login:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/vendor/auth/login:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+424 log entries are not shown.
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ez @ 324ccdd4d183a391.js:2
+value @ 324ccdd4d183a391.js:2
+(anonymous) @ 324ccdd4d183a391.js:2
+(anonymous) @ 324ccdd4d183a391.js:2
+(anonymous) @ 324ccdd4d183a391.js:2
+apply @ 324ccdd4d183a391.js:2
+(anonymous) @ 692af8fc092df196.js:2
+(anonymous) @ 638d5d9b4e22a4ec.js:2
+t @ 638d5d9b4e22a4ec.js:2
+s @ 638d5d9b4e22a4ec.js:2
+(anonymous) @ 638d5d9b4e22a4ec.js:2
+(anonymous) @ 638d5d9b4e22a4ec.js:2
+(anonymous) @ 692af8fc092df196.js:2
+(anonymous) @ 692af8fc092df196.js:2
+(anonymous) @ 638d5d9b4e22a4ec.js:2
+t @ 638d5d9b4e22a4ec.js:2
+s @ 638d5d9b4e22a4ec.js:2
+(anonymous) @ 638d5d9b4e22a4ec.js:2
+(anonymous) @ 638d5d9b4e22a4ec.js:2
+wait @ 692af8fc092df196.js:2
+u @ 6dc7a950438d7a9e.js:2
+(anonymous) @ 6dc7a950438d7a9e.js:2
+o @ 1db2780f078ab5a5.js:2
+injected.js:214  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/vendor/auth/login 400 (Bad Request)
+apply @ injected.js:214
+apiRequest @ queryClient.ts:54
+mutationFn @ vendor-login.tsx:35
+fn @ @tanstack_react-query.js?v=0c8b293d:1189
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+execute @ @tanstack_react-query.js?v=0c8b293d:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=0c8b293d:2630
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3295
+onSubmit @ vendor-login.tsx:59
+(anonymous) @ chunk-4BFJKWC4.js?v=0c8b293d:1465
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=0c8b293d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=0c8b293d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=0c8b293d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=0c8b293d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=0c8b293d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=0c8b293d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=0c8b293d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=0c8b293d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=0c8b293d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=0c8b293d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=0c8b293d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=0c8b293d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=0c8b293d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=0c8b293d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=0c8b293d:5449
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+ez @ 324ccdd4d183a391.js:2
+value @ 324ccdd4d183a391.js:2
+(anonymous) @ 324ccdd4d183a391.js:2
+(anonymous) @ 324ccdd4d183a391.js:2
+(anonymous) @ 324ccdd4d183a391.js:2
+apply @ 324ccdd4d183a391.js:2
+(anonymous) @ 692af8fc092df196.js:2
+(anonymous) @ 638d5d9b4e22a4ec.js:2
+t @ 638d5d9b4e22a4ec.js:2
+s @ 638d5d9b4e22a4ec.js:2
+(anonymous) @ 638d5d9b4e22a4ec.js:2
+(anonymous) @ 638d5d9b4e22a4ec.js:2
+(anonymous) @ 692af8fc092df196.js:2
+(anonymous) @ 692af8fc092df196.js:2
+(anonymous) @ 638d5d9b4e22a4ec.js:2
+t @ 638d5d9b4e22a4ec.js:2
+s @ 638d5d9b4e22a4ec.js:2
+(anonymous) @ 638d5d9b4e22a4ec.js:2
+(anonymous) @ 638d5d9b4e22a4ec.js:2
+wait @ 692af8fc092df196.js:2
+u @ 6dc7a950438d7a9e.js:2
+(anonymous) @ 6dc7a950438d7a9e.js:2
+o @ 1db2780f078ab5a5.js:2
