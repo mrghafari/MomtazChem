@@ -122,6 +122,7 @@ import ContentManagement from "@/pages/content-management";
 import SecurityManagement from "@/pages/security-management-new";
 import OrderTrackingManagement from "@/pages/admin/order-tracking-management";
 import RemoteDesktop from "@/pages/admin/remote-desktop";
+import TawkToChat from "@/components/TawkToChat";
 
 import TemplateDistribution from "@/pages/admin/template-distribution";
 import WhatsAppCRM from "@/pages/admin/whatsapp-crm";
@@ -350,6 +351,7 @@ function App() {
         <LanguageProvider>
           <TooltipProvider>
             <Toaster />
+            <TawkToChat />
             <Router />
           </TooltipProvider>
         </LanguageProvider>

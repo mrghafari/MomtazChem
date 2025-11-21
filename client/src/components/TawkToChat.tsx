@@ -111,7 +111,27 @@ export default function TawkToChat() {
           return;
         }
         
-        console.log('📥 Loading Tawk.to widget...');
+        // Initialize Tawk API objects before loading script
+        window.Tawk_API = window.Tawk_API || {};
+        window.Tawk_LoadStart = new Date();
+        
+        // Set widget position to bottom-left
+        window.Tawk_API.customStyle = {
+          visibility: {
+            desktop: {
+              position: 'bl', // bottom-left
+              xOffset: 20,
+              yOffset: 20
+            },
+            mobile: {
+              position: 'bl', // bottom-left on mobile
+              xOffset: 10,
+              yOffset: 10
+            }
+          }
+        };
+        
+        console.log('📥 Loading Tawk.to widget at bottom-left position...');
         const script = document.createElement('script');
         script.src = scriptSrc;
         script.async = true;
@@ -126,7 +146,7 @@ export default function TawkToChat() {
           script.onload = () => {
             scriptLoadedRef.current = true;
             lastEnabledState.current = true;
-            console.log('✅ Tawk.to Live Chat loaded successfully');
+            console.log('✅ Tawk.to Live Chat loaded successfully at bottom-left');
           };
           
           script.onerror = () => {

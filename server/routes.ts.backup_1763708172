@@ -19901,41 +19901,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         WHERE id = $1
       `, [documentId]);
 
-      // Check if file is in S3 (starts with procedure-documents/)
-      if (document.file_path.startsWith('procedure-documents/')) {
-        // File is in S3 - download from S3
-        try {
-          const s3Service = getAwsS3Service();
-          const fileBuffer = await s3Service.getFile(document.file_path);
-          
-          res.setHeader('Content-Disposition', `attachment; filename="${document.file_name}"`);
-          res.setHeader('Content-Type', document.file_type || 'application/octet-stream');
-          res.setHeader('Content-Length', fileBuffer.length);
-          
-          res.send(fileBuffer);
-        } catch (s3Error: any) {
-          console.error("Error downloading from S3:", s3Error);
-          return res.status(500).json({ 
-            success: false, 
-            message: "Failed to download document from S3. Please check AWS permissions." 
-          });
-        }
-      } else {
-        // File is local - use original logic
-        let filePath = document.file_path;
-        if (!path.isAbsolute(filePath)) {
-          filePath = path.resolve(process.cwd(), filePath);
-        }
-
-        if (!fs.existsSync(filePath)) {
-          return res.status(404).json({ success: false, message: "File not found on server" });
-        }
-
-        res.setHeader('Content-Disposition', `attachment; filename="${document.file_name}"`);
-        res.setHeader('Content-Type', document.file_type || 'application/octet-stream');
-        
-        res.sendFile(filePath);
+      // Handle both absolute and relative paths
+      let filePath = document.file_path;
+      if (!path.isAbsolute(filePath)) {
+        filePath = path.resolve(process.cwd(), filePath);
       }
+
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ success: false, message: "File not found on server" });
+      }
+
+      res.setHeader('Content-Disposition', `attachment; filename="${document.file_name}"`);
+      res.setHeader('Content-Type', document.file_type || 'application/octet-stream');
+      
+      res.sendFile(filePath);
 
     } catch (error) {
       console.error("Error downloading document:", error);
