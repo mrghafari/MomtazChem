@@ -1,0 +1,12 @@
+bcf25f7493d39eb0ed3c80550c2edba099ef436d commit	refs/heads/main
+be2bb2bf6040bfaf4a8dcace3adb4fad18da060e commit	refs/heads/replit-agent
+564232835b4f1c42cfd57f0462cc0b655c77c266 commit	refs/notes/commits
+12f25ee2588b37ef367b7d54b3c36bd2c647ad1a commit	refs/original/refs/notes/commits
+64e75961face7154e58d678f4233aea9211c5d3b commit	refs/original/refs/remotes/origin/main
+6cfd2ca2c139c8f143133b5747066dababae998e commit	refs/original/refs/remotes/origin/replit-agent
+bcf25f7493d39eb0ed3c80550c2edba099ef436d commit	refs/remotes/gitsafe-backup/HEAD
+bcf25f7493d39eb0ed3c80550c2edba099ef436d commit	refs/remotes/gitsafe-backup/main
+d68527eb4b0d29acd3bae84301d55a9ff2eeea59 commit	refs/remotes/origin/HEAD
+d68527eb4b0d29acd3bae84301d55a9ff2eeea59 commit	refs/remotes/origin/main
+5556bd745a3faecf7472127d8f0ab3b9d75a15d2 commit	refs/remotes/origin/replit-agent
+be2bb2bf6040bfaf4a8dcace3adb4fad18da060e commit	refs/replit/agent-ledger
