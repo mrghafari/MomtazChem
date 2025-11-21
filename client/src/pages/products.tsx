@@ -194,7 +194,7 @@ export default function ProductsPage() {
   const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
   
   // Fetch vendor session if in vendor mode
-  const { data: vendorSession } = useQuery<{ vendorId: number; vendorName: string }>({
+  const { data: vendorSession, isLoading: isLoadingVendorSession } = useQuery<{ vendorId: number; vendorName: string }>({
     queryKey: ["/api/vendors/session"],
     enabled: isVendorMode,
     staleTime: 5 * 60 * 1000,
@@ -1330,12 +1330,12 @@ export default function ProductsPage() {
     if (!authLoading && !isAuthenticated && !isVendorMode) {
       setLocation("/admin/login");
     }
-    if (isVendorMode && !vendorSession && !authLoading) {
+    if (isVendorMode && !isLoadingVendorSession && !vendorSession) {
       setLocation("/vendor/login");
     }
-  }, [authLoading, isAuthenticated, isVendorMode, vendorSession, setLocation]);
+  }, [authLoading, isAuthenticated, isVendorMode, vendorSession, isLoadingVendorSession, setLocation]);
 
-  if (authLoading) {
+  if (authLoading || (isVendorMode && isLoadingVendorSession)) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 

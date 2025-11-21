@@ -276,6 +276,46 @@ export function createVendorRouter() {
     }
   });
 
+  // Get vendor session (simple endpoint for product page)
+  router.get("/session", requireVendorAuth, async (req, res) => {
+    try {
+      if (!req.session?.vendorUserId) {
+        return res.status(401).json({
+          success: false,
+          message: "Not authenticated"
+        });
+      }
+
+      // Load vendor data
+      const vendorUser = await vendorStorage.getVendorUserById(Number(req.session.vendorUserId));
+      if (!vendorUser) {
+        return res.status(404).json({
+          success: false,
+          message: "Vendor user not found"
+        });
+      }
+
+      const vendor = await vendorStorage.getVendorById(vendorUser.vendorId);
+      if (!vendor) {
+        return res.status(404).json({
+          success: false,
+          message: "Vendor not found"
+        });
+      }
+
+      res.json({
+        vendorId: vendorUser.vendorId,
+        vendorName: vendor.vendorName
+      });
+    } catch (error: any) {
+      console.error("Error getting vendor session:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error getting session"
+      });
+    }
+  });
+
   // ==========================================================================
   // VENDOR MANAGEMENT ROUTES (for logged-in vendors)
   // ==========================================================================
