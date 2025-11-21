@@ -43,7 +43,6 @@ const vendorRegistrationSchema = z.object({
   
   // User Account Information
   username: z.string().min(3, "نام کاربری باید حداقل 3 حرف باشد"),
-  email: z.string().email("ایمیل معتبر وارد کنید"),
   password: z.string().min(6, "رمز عبور باید حداقل 6 حرف باشد"),
   firstName: z.string().min(2, "نام باید حداقل 2 حرف باشد"),
   lastName: z.string().min(2, "نام خانوادگی باید حداقل 2 حرف باشد"),
@@ -84,7 +83,6 @@ export default function VendorRegistration() {
       iban: "",
       // User account fields
       username: "",
-      email: "",
       password: "",
       firstName: "",
       lastName: "",
@@ -108,7 +106,7 @@ export default function VendorRegistration() {
 
       const userData = {
         username: data.username,
-        email: data.email,
+        email: data.contactEmail, // استفاده از ایمیل شرکت
         password: data.password,
         firstName: data.firstName,
         lastName: data.lastName,
@@ -659,12 +657,12 @@ export default function VendorRegistration() {
                     />
                     <FormField
                       control={form.control}
-                      name="email"
+                      name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>ایمیل حساب کاربری <span className="text-red-500">*</span></FormLabel>
+                          <FormLabel>رمز عبور <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
-                            <Input type="email" placeholder="email@example.com" {...field} data-testid="input-user-email" />
+                            <Input type="password" placeholder="حداقل 6 کاراکتر" {...field} data-testid="input-password" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -700,20 +698,6 @@ export default function VendorRegistration() {
                       )}
                     />
                   </div>
-
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>رمز عبور <span className="text-red-500">*</span></FormLabel>
-                        <FormControl>
-                          <Input type="password" placeholder="حداقل 6 کاراکتر" {...field} data-testid="input-password" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
 
                 {/* Submit Button */}
