@@ -4380,13 +4380,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
       }
-
       console.log(`✅ New batch registration: Barcode ${barcode} + Batch ${productData.batchNumber || 'No Batch'} + Stock ${productData.stockQuantity || 0}`);
       
+      // Detect vendor_id from session (for vendor marketplace)
+      let vendorId: number | null = null;
+      if (req.session?.vendorUserId && !req.session?.isSuperAdmin) {
+        // Regular vendor creating their product
+        vendorId = Number(req.session.vendorUserId);
+        console.log(`🏪 [VENDOR PRODUCT] Creating product for vendor ID: ${vendorId}`);
+      }
+      // Super admin or normal admin: vendorId stays null (company products)
       
       // Create product in showcase_products table (کاردکس)
       const showcaseProductData = {
         name: productData.name,
+        vendorId: vendorId,
         category: productData.category,
         description: productData.description || "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
         shortDescription: productData.shortDescription || productData.description,

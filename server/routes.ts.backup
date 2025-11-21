@@ -53,6 +53,7 @@ import { secureObjectStorageService } from "./secureObjectStorage";
 import { fileSecurityService, productImageSecurityService } from "./fileSecurityService";
 import { ObjectStorageService } from "./objectStorage";
 import { getAwsS3Service } from './aws-s3-service';
+import { sendOrderConfirmationEmail } from "./order-confirmation-email";
 
 import { 
   vehicleTemplates, 
@@ -167,7 +168,7 @@ declare module "express-session" {
   interface SessionData {
     adminId?: number;
     customerId?: number;
-    customUserId?: number;
+    customUserId?: string | number;
     customUserEmail?: string;
     customUserName?: string;
     customUserRole?: string;
@@ -453,6 +454,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.error('❌ [SYNC SERVICE] Failed to start sync service:', error);
   }
   console.log("🚀 REGISTERING ROUTES - Vehicle optimization endpoints loading...");
+  
+  // Mount OAuth routes
+  const authRoutes = (await import('./auth-routes')).default;
+  app.use('/api/auth', authRoutes);
+  console.log('✅ [OAUTH] Authentication routes registered at /api/auth');
   
   // Import department auth functions
   const { attachUserDepartments, requireDepartment } = await import("./department-auth");
@@ -3731,7 +3737,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data: {
           msdsUrl: product.msdsUrl,
           msdsFileName: product.msdsFileName || 'MSDS.pdf',
-          msdsUploadDate: product.msdsUploadDate
+          msdsUploadDate: product.msdsUploadDate,
+              displayMode: product.displayMode,
+              model3dKey: product.model3dKey,
+              model3dFileName: product.model3dFileName,
+              model3dUploadDate: product.model3dUploadDate
         }
       });
     } catch (error) {
@@ -5001,7 +5011,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               catalogFileName: product.catalogFileName,
               msdsFileName: product.msdsFileName,
               catalogUploadDate: product.catalogUploadDate,
-              msdsUploadDate: product.msdsUploadDate
+              msdsUploadDate: product.msdsUploadDate,
+              displayMode: product.displayMode,
+              model3dKey: product.model3dKey,
+              model3dFileName: product.model3dFileName,
+              model3dUploadDate: product.model3dUploadDate
             };
             
             await shopStorage.createShopProduct(shopProductData);
@@ -5047,7 +5061,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               catalogFileName: product.catalogFileName || existingShopProduct.catalogFileName,
               msdsFileName: product.msdsFileName || existingShopProduct.msdsFileName,
               catalogUploadDate: product.catalogUploadDate || existingShopProduct.catalogUploadDate,
-              msdsUploadDate: product.msdsUploadDate || existingShopProduct.msdsUploadDate
+              msdsUploadDate: product.msdsUploadDate || existingShopProduct.msdsUploadDate,
+              displayMode: product.displayMode || existingShopProduct.displayMode,
+              model3dKey: product.model3dKey || existingShopProduct.model3dKey,
+              model3dFileName: product.model3dFileName || existingShopProduct.model3dFileName,
+              model3dUploadDate: product.model3dUploadDate || existingShopProduct.model3dUploadDate
             };
             
             await shopStorage.updateShopProduct(existingShopProduct.id, updateData);
@@ -6849,8 +6867,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'marketing_module',
       'aws_s3_settings',
       'whatsapp_crm',
-      'blog'
-      // Total: 36 modules - automatically synced with Site Management
+      'blog',
+      'marketplace_management',
+      // Total: 37 modules - automatically synced with Site Management
     ];
   };
 
@@ -17081,11 +17100,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         await crmStorage.createOrUpdateCustomerFromOrder(crmOrderData);
         console.log(`✅ Customer auto-captured in CRM for order ${orderNumber}`);
+
       } catch (crmError) {
         console.error("❌ Error auto-capturing customer in CRM:", crmError);
         // Don't fail the order if CRM capture fails
       }
 
+
+      // 📧 Send order confirmation email to customer (async, non-blocking)
+      // Moved outside CRM try-catch to ensure it always runs
+      (async () => {
+        try {
+          console.log(`📧 [EMAIL] Preparing order confirmation email for order ${orderNumber}...`);
+          
+          // Get order items for email
+          const orderItems = await customerStorage.getOrderItems(order.id);
+          
+          // Get grace period from shop settings
+          let gracePeriodDays = 3; // default
+          try {
+            const { pool } = await import('./db');
+            const gracePeriodResult = await pool.query(`
+              SELECT setting_value FROM shop_settings 
+              WHERE setting_key = 'bank_transfer_grace_period_days' AND is_active = true
+            `);
+            if (gracePeriodResult.rows.length > 0) {
+              gracePeriodDays = parseInt(gracePeriodResult.rows[0].setting_value) || 3;
+            }
+          } catch (err) {
+            console.log('⚠️ Could not fetch grace period from settings, using default 3 days');
+          }
+          
+          // Extract customer email and name from CRM (single source of truth)
+          let customerEmail = customerInfo.email || '';
+          let customerName = customerInfo.name || 'مشتری عزیز';
+          
+          // If no email in customerInfo, get from CRM database
+          if (!customerEmail && finalCustomerId) {
+            try {
+              const crmCustomer = await crmStorage.getCrmCustomerById(finalCustomerId);
+              customerEmail = crmCustomer?.email || '';
+              if (crmCustomer?.firstName && crmCustomer?.lastName) {
+                customerName = `${crmCustomer.firstName} ${crmCustomer.lastName}`;
+              }
+            } catch (err) {
+              console.log('⚠️ Could not fetch customer email from CRM database');
+            }
+          }
+          
+          if (!customerEmail) {
+            console.log('⚠️ [EMAIL] No customer email found, skipping confirmation email');
+            return;
+          }
+          
+          // Send email
+          await sendOrderConfirmationEmail({
+            customerEmail,
+            customerName,
+            orderNumber: order.orderNumber || orderNumber,
+            orderDate: new Date().toLocaleDateString('fa-IR', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            }),
+            totalAmount: parseFloat(order.totalAmount),
+            paymentMethod: finalPaymentMethod,
+            paymentStatus: finalPaymentStatus,
+            orderItems: orderItems.map(item => ({
+              productName: item.productName,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              totalPrice: item.totalPrice
+            })),
+            gracePeriodDays
+          });
+          
+          console.log(`✅ [EMAIL] Order confirmation email sent successfully for order ${orderNumber}`);
+        } catch (emailError) {
+          console.error(`❌ [EMAIL] Failed to send confirmation email for order ${orderNumber}:`, emailError);
+          // Don't fail the order if email fails
+        }
+      })();
       // Create order_management record for workflow routing
       try {
         // CRITICAL: Route pure wallet payments directly to warehouse
@@ -19884,20 +19979,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         WHERE id = $1
       `, [documentId]);
 
-      // Handle both absolute and relative paths
-      let filePath = document.file_path;
-      if (!path.isAbsolute(filePath)) {
-        filePath = path.resolve(process.cwd(), filePath);
-      }
+      // Check if file is in S3 (starts with procedure-documents/)
+      if (document.file_path.startsWith('procedure-documents/')) {
+        // File is in S3 - download from S3
+        try {
+          const s3Service = getAwsS3Service();
+          const fileBuffer = await s3Service.getFile(document.file_path);
+          
+          res.setHeader('Content-Disposition', `attachment; filename="${document.file_name}"`);
+          res.setHeader('Content-Type', document.file_type || 'application/octet-stream');
+          res.setHeader('Content-Length', fileBuffer.length);
+          
+          res.send(fileBuffer);
+        } catch (s3Error: any) {
+          console.error("Error downloading from S3:", s3Error);
+          return res.status(500).json({ 
+            success: false, 
+            message: "Failed to download document from S3. Please check AWS permissions." 
+          });
+        }
+      } else {
+        // File is local - use original logic
+        let filePath = document.file_path;
+        if (!path.isAbsolute(filePath)) {
+          filePath = path.resolve(process.cwd(), filePath);
+        }
 
-      if (!fs.existsSync(filePath)) {
-        return res.status(404).json({ success: false, message: "File not found on server" });
-      }
+        if (!fs.existsSync(filePath)) {
+          return res.status(404).json({ success: false, message: "File not found on server" });
+        }
 
-      res.setHeader('Content-Disposition', `attachment; filename="${document.file_name}"`);
-      res.setHeader('Content-Type', document.file_type || 'application/octet-stream');
-      
-      res.sendFile(filePath);
+        res.setHeader('Content-Disposition', `attachment; filename="${document.file_name}"`);
+        res.setHeader('Content-Type', document.file_type || 'application/octet-stream');
+        
+        res.sendFile(filePath);
+      }
 
     } catch (error) {
       console.error("Error downloading document:", error);
@@ -20830,6 +20946,30 @@ Momtaz Chemical Technical Team`,
   });
 
   // Shop/E-commerce API endpoints - Inventory-based product management
+  
+  // Admin endpoint - Get ALL shop products including out of stock (for inventory management)
+  app.get("/api/admin/shop-products", requireAuth, async (req, res) => {
+    try {
+      const products = await shopStorage.getAllShopProducts();
+      
+      // Map database fields to frontend expected format
+      const mappedProducts = products.map(product => ({
+        ...product,
+        imageUrl: product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : null,
+        imageUrls: product.imageUrls || [],
+        unitPrice: product.price,
+        currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit,
+        weight: product.weight,
+        weightUnit: product.weightUnit
+      }));
+      
+      res.json(mappedProducts);
+    } catch (error) {
+      console.error("Error fetching all shop products for admin:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch products" });
+    }
+  });
+
   app.get("/api/shop/products", async (req, res) => {
     try {
       const products = await shopStorage.getShopProducts();
@@ -22284,7 +22424,11 @@ Momtaz Chemical Technical Team`,
           isActive: true,
           isFeatured: false,
           metaTitle: showcaseProduct.name,
-          metaDescription: showcaseProduct.description
+          metaDescription: showcaseProduct.description,
+          displayMode: showcaseProduct.displayMode,
+          model3dKey: showcaseProduct.model3dKey,
+          model3dFileName: showcaseProduct.model3dFileName,
+          model3dUploadDate: showcaseProduct.model3dUploadDate
         };
         
         await shopStorage.createShopProduct(shopProductData);
@@ -24062,7 +24206,8 @@ Leading Chemical Solutions Provider
         username,
         password,
         fromName,
-        fromEmail
+        fromEmail,
+        useForOtp
       } = req.body;
 
       if (!host || !username || !password || !fromName || !fromEmail) {
@@ -24080,7 +24225,8 @@ Leading Chemical Solutions Provider
         password: password.toString(),
         fromName: fromName.toString(),
         fromEmail: fromEmail.toString(),
-        categoryId: parseInt(categoryId)
+        categoryId: parseInt(categoryId),
+        useForOtp: Boolean(useForOtp),
       };
 
       console.log("Processed SMTP data:", smtpData);
@@ -31679,9 +31825,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "accounting_management", "finance", "wallet_management", "geography_analytics",
           "ai_settings", "refresh_control", "content_management", "ticketing_system",
           "remote_desktop", "server_config", "company_information", "user_guide",
-          "marketing_module", "aws_s3_settings", "whatsapp_crm", "blog"
+          "marketing_module", "aws_s3_settings", "whatsapp_crm", "blog", "marketplace_management"
         ];
         
+        console.log("🔍 [CRITICAL DEBUG] marketplace_management included:", allModules.includes("marketplace_management"));
         console.log('🔍 [DEBUG] allModules array contains:', allModules.length, 'modules');
         console.log('🔍 [DEBUG] whatsapp_crm included?', allModules.includes('whatsapp_crm'));
         console.log('🔍 [DEBUG] blog included?', allModules.includes('blog'));
@@ -52208,7 +52355,8 @@ momtazchem.com
         settings: {
           ...settings,
           accessKeyId: settings.accessKeyId ? '••••••••' : '',
-          secretAccessKey: settings.secretAccessKey ? '••••••••' : ''
+          secretAccessKey: settings.secretAccessKey ? '••••••••' : '',
+          encryptionKey: process.env.AWS_CREDENTIALS_ENCRYPTION_KEY ? '••••••••' : ''
         }
       });
     } catch (error: any) {
@@ -52223,7 +52371,7 @@ momtazchem.com
   // Save/Update AWS S3 settings
   app.post("/api/admin/aws-s3/settings", requireAuth, async (req, res) => {
     try {
-      const { accessKeyId, secretAccessKey, region, bucketName, isActive, endpoint, usePathStyle, publicUrl, description } = req.body;
+      const { accessKeyId, secretAccessKey, region, bucketName, encryptionKey, isActive, endpoint, usePathStyle, publicUrl, description } = req.body;
 
       // Check if settings already exist
       const existingSettings = await storage.getActiveAwsS3Settings();
@@ -52266,6 +52414,7 @@ momtazchem.com
           isActive: isActive !== undefined ? isActive : existingSettings.isActive,
           endpoint: endpoint !== undefined ? endpoint : existingSettings.endpoint,
           usePathStyle: usePathStyle !== undefined ? usePathStyle : existingSettings.usePathStyle,
+          encryptionKey: encryptionKey !== undefined ? encryptionKey : existingSettings.encryptionKey,
           publicUrl: publicUrl !== undefined ? publicUrl : existingSettings.publicUrl,
           description: description !== undefined ? description : existingSettings.description
         });
@@ -52280,7 +52429,8 @@ momtazchem.com
           endpoint: endpoint || undefined,
           usePathStyle: usePathStyle || false,
           publicUrl: publicUrl || undefined,
-          description: description || undefined
+          description: description || undefined,
+                    encryptionKey: encryptionKey || undefined
         });
       }
 
@@ -52950,6 +53100,335 @@ momtazchem.com
   });
 
   // Register FIB payment routes
+
+  // ========================================
+  // Tawk.to Live Chat Management Routes  
+  // ========================================
+
+  // GET /api/admin/tawk-support - Get Tawk.to settings (Admin only)
+  app.get('/api/admin/tawk-support', requireAdmin, async (req, res) => {
+    try {
+      const [settings] = await db
+        .select()
+        .from(schema.tawkSupportChat)
+        .orderBy(desc(schema.tawkSupportChat.id))
+        .limit(1);
+      
+      if (!settings) {
+        const [newSettings] = await db
+          .insert(schema.tawkSupportChat)
+          .values({
+            isEnabled: false,
+            scriptCode: '',
+            notes: 'Initial setup - add your Tawk.to script code here'
+          })
+          .returning();
+        
+        return res.json({ success: true, data: {
+          id: newSettings.id,
+          isEnabled: newSettings.isEnabled,
+          scriptCode: newSettings.scriptCode,
+          propertyId: newSettings.propertyId,
+          widgetId: newSettings.widgetId,
+          notes: newSettings.notes
+        }});
+      }
+      
+      res.json({ success: true, data: {
+        id: settings.id,
+        isEnabled: settings.isEnabled,
+        scriptCode: settings.scriptCode,
+        propertyId: settings.propertyId,
+        widgetId: settings.widgetId,
+        notes: settings.notes
+      }});
+    } catch (error) {
+      console.error('Error fetching Tawk.to settings:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to fetch Tawk.to settings' 
+      });
+    }
+  });
+
+
+
+  // PUT /api/admin/tawk-support - Update Tawk.to settings (Admin only)
+  app.put('/api/admin/tawk-support', requireAdmin, async (req, res) => {
+    try {
+      // Support both camelCase (new) and snake_case (legacy)
+      const { isEnabled, scriptCode, notes, is_enabled, script_code } = req.body;
+      
+      const enabled = isEnabled !== undefined ? isEnabled : is_enabled;
+      const script = scriptCode !== undefined ? scriptCode : script_code;
+      
+      console.log('📝 [TAWK] Saving:', { isEnabled: enabled, hasScript: !!script });
+      
+      let propertyId = null;
+      let widgetId = null;
+      
+      if (script) {
+        const match = script.match(/tawk\.to\/([^/]+)\/([^'"]+)/);
+        if (match) {
+          propertyId = match[1];
+          widgetId = match[2];
+        }
+      }
+      
+      const [existing] = await db
+        .select()
+        .from(schema.tawkSupportChat)
+        .orderBy(desc(schema.tawkSupportChat.id))
+        .limit(1);
+      
+      let result;
+      
+      if (existing) {
+        [result] = await db
+          .update(schema.tawkSupportChat)
+          .set({
+            isEnabled: enabled,
+            scriptCode: script || '',
+            propertyId,
+            widgetId,
+            notes,
+            updatedAt: new Date()
+          })
+          .where(eq(schema.tawkSupportChat.id, existing.id))
+          .returning();
+      } else {
+        [result] = await db
+          .insert(schema.tawkSupportChat)
+          .values({
+            isEnabled: enabled,
+            scriptCode: script || '',
+            propertyId,
+            widgetId,
+            notes
+          })
+          .returning();
+      }
+      
+      console.log('✅ [TAWK] Saved successfully:', { id: result.id, isEnabled: result.isEnabled });
+      res.json({ success: true, data: result });
+    } catch (error) {
+      console.error('❌ [TAWK] Error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to update Tawk.to settings' 
+      });
+    }
+  });
+
+  // GET /api/tawk-support - Public API for frontend widget
+  app.get('/api/tawk-support', async (req, res) => {
+    try {
+      const [settings] = await db
+        .select({
+          isEnabled: schema.tawkSupportChat.isEnabled,
+          scriptCode: schema.tawkSupportChat.scriptCode
+        })
+        .from(schema.tawkSupportChat)
+        .orderBy(desc(schema.tawkSupportChat.id))
+        .limit(1);
+      
+      if (!settings) {
+        return res.json({ success: false, data: null });
+      }
+      
+      res.json({ success: true, data: settings });
+    } catch (error) {
+      console.error('Error fetching public Tawk.to settings:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to fetch Tawk.to settings' 
+      });
+    }
+  });
+
+  // ===== PUBLIC VENDOR REGISTRATION ENDPOINT =====
+  // POST /api/vendors/register - Public endpoint for vendor registration
+  app.post('/api/vendors/register', upload.single('logo'), async (req, res) => {
+    try {
+      console.log('📝 [VENDOR REGISTRATION] New registration request received');
+      
+      const {
+        vendorName,
+        vendorNameEn,
+        vendorNameAr,
+        vendorNameKu,
+        vendorNameTr,
+        contactEmail,
+        contactPhone,
+        businessLicense,
+        taxId,
+        description,
+        descriptionEn,
+        descriptionAr,
+        descriptionKu,
+        descriptionTr,
+        address,
+        city,
+        country,
+        postalCode,
+        bankName,
+        bankAccountNumber,
+        bankAccountName,
+        iban,
+      } = req.body;
+
+      // Validate required fields
+      if (!vendorName || !contactEmail || !contactPhone || !description || !address || !city) {
+        return res.status(400).json({
+          success: false,
+          message: 'لطفاً تمام فیلدهای الزامی را پر کنید'
+        });
+      }
+
+      // Check if email already exists
+      const existingVendor = await db
+        .select()
+        .from(schema.vendors)
+        .where(eq(schema.vendors.contactEmail, contactEmail))
+        .limit(1);
+
+      if (existingVendor.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'این ایمیل قبلاً ثبت شده است'
+        });
+      }
+
+      // Upload logo to S3 if provided
+      let logoUrl = null;
+      if (req.file) {
+        try {
+          const fileExtension = req.file.originalname.split('.').pop();
+          const fileName = `vendor-logos/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExtension}`;
+          
+          await s3Service.uploadFile(
+            req.file.buffer,
+            fileName,
+            req.file.mimetype
+          );
+          
+          logoUrl = fileName;
+          console.log('✅ [VENDOR REGISTRATION] Logo uploaded:', fileName);
+        } catch (uploadError) {
+          console.error('❌ [VENDOR REGISTRATION] Logo upload failed:', uploadError);
+          // Continue registration even if logo upload fails
+        }
+      }
+
+      // Prepare bank account info (encrypt if provided)
+      let bankAccountInfo = null;
+      if (bankName || bankAccountNumber || bankAccountName || iban) {
+        bankAccountInfo = {
+          bankName: bankName || '',
+          bankAccountNumber: bankAccountNumber || '',
+          bankAccountName: bankAccountName || '',
+          iban: iban || '',
+        };
+      }
+
+      // Create vendor record with pending approval status
+      const [newVendor] = await db
+        .insert(schema.vendors)
+        .values({
+          vendorName,
+          vendorNameEn: vendorNameEn || null,
+          vendorNameAr: vendorNameAr || null,
+          vendorNameKu: vendorNameKu || null,
+          vendorNameTr: vendorNameTr || null,
+          contactEmail,
+          contactPhone,
+          businessLicense: businessLicense || null,
+          taxId: taxId || null,
+          logoUrl,
+          description,
+          descriptionEn: descriptionEn || null,
+          descriptionAr: descriptionAr || null,
+          descriptionKu: descriptionKu || null,
+          descriptionTr: descriptionTr || null,
+          address,
+          city,
+          country: country || 'Iraq',
+          postalCode: postalCode || null,
+          bankAccountInfo,
+          isActive: false,
+          isApproved: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning();
+
+      console.log('✅ [VENDOR REGISTRATION] Vendor registered:', newVendor.id);
+
+      // Send notification email to admin
+      try {
+        await sendEmail({
+          to: process.env.SMTP_USER || 'admin@momtazchem.com',
+          subject: `🏪 درخواست ثبت نام فروشنده جدید - ${vendorName}`,
+          html: `
+            <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+              <h2 style="color: #7c3aed; text-align: center;">درخواست ثبت نام فروشنده جدید</h2>
+              
+              <div style="background: #f3f4f6; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                <h3 style="margin-top: 0;">اطلاعات شرکت:</h3>
+                <p><strong>نام شرکت:</strong> ${vendorName}</p>
+                <p><strong>ایمیل:</strong> ${contactEmail}</p>
+                <p><strong>تلفن:</strong> ${contactPhone}</p>
+                <p><strong>شهر:</strong> ${city}, ${country}</p>
+              </div>
+
+              <div style="background: #fff3cd; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                <p style="margin: 0;"><strong>توضیحات:</strong></p>
+                <p style="margin: 10px 0 0 0;">${description}</p>
+              </div>
+
+              ${businessLicense ? `<p><strong>شماره جواز کسب:</strong> ${businessLicense}</p>` : ''}
+              ${taxId ? `<p><strong>شماره مالیاتی:</strong> ${taxId}</p>` : ''}
+
+              <div style="text-align: center; margin-top: 30px;">
+                <a href="${process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}/site-management` : 'http://localhost:5000/site-management'}" 
+                   style="display: inline-block; background: #7c3aed; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                  مشاهده و تایید در پنل مدیریت
+                </a>
+              </div>
+
+              <p style="color: #6b7280; font-size: 12px; text-align: center; margin-top: 20px;">
+                این ایمیل به صورت خودکار از سیستم Momtazchem ارسال شده است.
+              </p>
+            </div>
+          `,
+        });
+        console.log('✅ [VENDOR REGISTRATION] Admin notification email sent');
+      } catch (emailError) {
+        console.error('❌ [VENDOR REGISTRATION] Failed to send admin notification:', emailError);
+        // Continue even if email fails
+      }
+
+      res.json({
+        success: true,
+        message: 'درخواست شما با موفقیت ثبت شد. پس از بررسی، از طریق ایمیل با شما تماس خواهیم گرفت.',
+        data: {
+          id: newVendor.id,
+          vendorName: newVendor.vendorName,
+          contactEmail: newVendor.contactEmail,
+        }
+      });
+
+    } catch (error) {
+      console.error('❌ [VENDOR REGISTRATION] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در ثبت درخواست. لطفاً دوباره تلاش کنید.'
+      });
+    }
+  });
+
+
+
   registerFibRoutes(app);
   app.all('/api/*', (req, res) => {
     console.log(`❌ 404 - Unmatched API route: ${req.method} ${req.originalUrl}`);

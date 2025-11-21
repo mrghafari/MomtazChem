@@ -503,8 +503,8 @@ export function createVendorRouter() {
     }
   });
 
-  // Create new shop product (vendor must have manage_products permission)
-  router.post("/products/shop", ...vendorProductAuth, async (req, res) => {
+  // Create new product (uses main products table like admin does)
+  router.post("/products", ...vendorProductAuth, async (req, res) => {
     try {
       if (!req.vendorUser) {
         return res.status(401).json({
@@ -513,32 +513,22 @@ export function createVendorRouter() {
         });
       }
 
-      // Validate product data with Zod schema
-      const { insertShopProductSchema } = await import("@shared/shop-schema");
+      const { db } = await import("./db");
+      const { showcaseProducts: products } = await import("@shared/showcase-schema");
       
-      const validationResult = insertShopProductSchema.safeParse(req.body);
-      
-      if (!validationResult.success) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid product data",
-          errors: validationResult.error.errors
-        });
-      }
-
-      // Import shop storage
-      const { shopStorage } = await import("./shop-storage");
-      
-      // Add vendorId to product data
+      // Add vendor_id to product data
       const productData = {
-        ...validationResult.data,
-        vendorId: req.vendorUser.vendorId
+        ...req.body,
+        vendorId: req.vendorUser.role === "super_admin" ? null : req.vendorUser.vendorId,
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
 
-      const product = await shopStorage.createShopProduct(productData);
-
-      // Update vendor product count
-      await vendorStorage.updateVendorStats(req.vendorUser.vendorId);
+      // Insert into main products table
+      const [product] = await db
+        .insert(products)
+        .values(productData)
+        .returning();
 
       res.json({
         success: true,
@@ -546,10 +536,10 @@ export function createVendorRouter() {
         product
       });
     } catch (error: any) {
-      console.error("Error creating shop product:", error);
+      console.error("Error creating product:", error);
       res.status(500).json({
         success: false,
-        message: "Error creating product"
+        message: error.message || "Error creating product"
       });
     }
   });
