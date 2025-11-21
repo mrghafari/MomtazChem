@@ -12,7 +12,7 @@ import { Store, Loader2, ArrowRight } from "lucide-react";
 import { Link, useLocation } from "wouter";
 
 const loginSchema = z.object({
-  email: z.string().email("ایمیل معتبر وارد کنید"),
+  username: z.string().min(3, "نام کاربری یا ایمیل را وارد کنید"),
   password: z.string().min(6, "رمز عبور باید حداقل 6 کاراکتر باشد"),
 });
 
@@ -25,7 +25,7 @@ export default function VendorLogin() {
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
     },
   });
@@ -76,16 +76,16 @@ export default function VendorLogin() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="email"
+                name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>ایمیل</FormLabel>
+                    <FormLabel>ایمیل / نام کاربری</FormLabel>
                     <FormControl>
                       <Input
-                        type="email"
+                        type="text"
                         placeholder="vendor@example.com"
                         {...field}
-                        data-testid="input-email"
+                        data-testid="input-username"
                       />
                     </FormControl>
                     <FormMessage />

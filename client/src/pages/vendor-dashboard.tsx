@@ -42,18 +42,33 @@ export default function VendorDashboard() {
   const { data: productsData, isLoading: isLoadingProducts } = useQuery({
     queryKey: ["/api/vendor/products"],
     enabled: !!vendorData?.vendor,
+    queryFn: async () => {
+      const response = await fetch("/api/vendor/products");
+      if (!response.ok) throw new Error("خطا در دریافت محصولات");
+      return response.json();
+    },
   });
 
   // Fetch vendor orders
   const { data: ordersData, isLoading: isLoadingOrders } = useQuery({
     queryKey: ["/api/vendor/orders"],
     enabled: !!vendorData?.vendor,
+    queryFn: async () => {
+      const response = await fetch("/api/vendor/orders");
+      if (!response.ok) throw new Error("خطا در دریافت سفارشات");
+      return response.json();
+    },
   });
 
   // Fetch stats
   const { data: statsData } = useQuery({
     queryKey: ["/api/vendor/stats"],
     enabled: !!vendorData?.vendor,
+    queryFn: async () => {
+      const response = await fetch("/api/vendor/stats");
+      if (!response.ok) throw new Error("خطا در دریافت آمار");
+      return response.json();
+    },
   });
 
   const handleLogout = async () => {
@@ -89,9 +104,9 @@ export default function VendorDashboard() {
   }
 
   const vendor = vendorData.vendor;
-  const products = (productsData as any)?.products || [];
-  const orders = (ordersData as any)?.orders || [];
-  const stats = (statsData as any)?.stats || {
+  const products = productsData?.products || productsData?.data || [];
+  const orders = ordersData?.orders || ordersData?.data || [];
+  const stats = statsData?.stats || statsData?.data || {
     totalProducts: 0,
     activeProducts: 0,
     totalOrders: 0,
