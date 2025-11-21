@@ -259,6 +259,7 @@ function Router() {
           <Route path="/site-management" component={SiteManagementFixed} />
           <Route path="/admin/site-management" component={SiteManagementFixed} />
           <Route path="/admin/products" component={ProductsPage} />
+          <Route path="/vendor/products" component={ProductsPage} />
           <Route path="/admin/product-variants" component={ProductVariants} />
           <Route path="/admin/geographic-reports" component={GeographicReports} />
           <Route path="/admin/geographic-analytics" component={GeographicAnalytics} />

@@ -194,7 +194,7 @@ export default function ProductsPage() {
   const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
   
   // Fetch vendor session if in vendor mode
-  const { data: vendorSession } = useQuery({
+  const { data: vendorSession } = useQuery<{ vendorId: number; vendorName: string }>({
     queryKey: ["/api/vendors/session"],
     enabled: isVendorMode,
     staleTime: 5 * 60 * 1000,
@@ -1325,18 +1325,26 @@ export default function ProductsPage() {
     return () => clearTimeout(timer);
   }, [form.watch("barcode"), dialogOpen]); // Added dialogOpen dependency
 
-  // Redirect if not authenticated
+  // Redirect if not authenticated (admin or vendor)
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    if (!authLoading && !isAuthenticated && !isVendorMode) {
       setLocation("/admin/login");
     }
-  }, [authLoading, isAuthenticated, setLocation]);
+    if (isVendorMode && !vendorSession && !authLoading) {
+      setLocation("/vendor/login");
+    }
+  }, [authLoading, isAuthenticated, isVendorMode, vendorSession, setLocation]);
 
   if (authLoading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
-  if (!isAuthenticated) {
+  // Allow both admin and vendor access
+  if (!isAuthenticated && !isVendorMode) {
+    return null;
+  }
+  
+  if (isVendorMode && !vendorSession) {
     return null;
   }
 

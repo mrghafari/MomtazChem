@@ -418,7 +418,34 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
       message: "احراز هویت مدیریت مورد نیاز است" 
     });
   }
+};  // End of requireAuth
+
+
+// Product Manager Auth Middleware - accepts both admin and vendor sessions
+const requireProductManagerAuth = async (req: Request, res: Response, next: NextFunction) => {
+  console.log(`🛡️ [PRODUCT AUTH] ${req.method} ${req.path}`);
+  
+  // Check if admin session exists
+  if (req.session?.isAuthenticated && req.session?.adminId) {
+    console.log(`✅ [PRODUCT AUTH] Admin access granted: ${req.session.adminId}`);
+    return next();
+  }
+  
+  // Check if vendor session exists
+  if (req.session?.vendorUserId) {
+    console.log(`✅ [PRODUCT AUTH] Vendor access granted: ${req.session.vendorUserId}`);
+    return next();
+  }
+  
+  console.log('❌ [PRODUCT AUTH] Access denied - no valid admin or vendor session');
+  res.status(401).json({ 
+    success: false, 
+    message: "دسترسی به مدیریت محصولات نیاز به ورود مدیر یا فروشنده دارد" 
+  });
 };
+
+// Customer authentication middleware with improved error handling
+
 
 // Customer authentication middleware with improved error handling  
 const requireCustomerAuth = (req: Request, res: Response, next: NextFunction) => {
