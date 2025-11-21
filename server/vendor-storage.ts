@@ -251,18 +251,30 @@ export class VendorStorage implements IVendorStorage {
   }
   
   async verifyVendorUserPassword(username: string, password: string): Promise<VendorUser | null> {
+    console.log("🔍 [VENDOR AUTH] Looking up user:", username);
     const user = await this.getVendorUserByUsername(username);
     
-    if (!user || !user.isActive) {
+    if (!user) {
+      console.log("❌ [VENDOR AUTH] User not found");
+      return null;
+    }
+    
+    console.log("✅ [VENDOR AUTH] User found:", { id: user.id, isActive: user.isActive });
+    
+    if (!user.isActive) {
+      console.log("❌ [VENDOR AUTH] User is not active");
       return null;
     }
     
     // Check if user is locked
     if (user.lockedUntil && new Date(user.lockedUntil) > new Date()) {
+      console.log("❌ [VENDOR AUTH] User is locked until:", user.lockedUntil);
       return null;
     }
     
+    console.log("🔐 [VENDOR AUTH] Comparing passwords...");
     const isValid = await bcrypt.compare(password, user.password);
+    console.log("🔐 [VENDOR AUTH] Password valid:", isValid);
     
     if (!isValid) {
       await this.incrementFailedLoginAttempts(user.id);

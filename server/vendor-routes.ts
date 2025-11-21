@@ -135,6 +135,7 @@ export function createVendorRouter() {
   router.post("/auth/login", async (req, res) => {
     try {
       const { username, password } = req.body;
+      console.log("🔐 [VENDOR LOGIN] Attempt:", { username, hasPassword: !!password });
 
       if (!username || !password) {
         return res.status(400).json({
@@ -145,6 +146,7 @@ export function createVendorRouter() {
 
       // First, try to verify as vendor user
       const vendorUser = await vendorStorage.verifyVendorUserPassword(username, password);
+      console.log("🔐 [VENDOR LOGIN] Verification result:", vendorUser ? "SUCCESS" : "FAILED");
 
       if (vendorUser) {
         // Load vendor information
