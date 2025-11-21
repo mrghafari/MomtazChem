@@ -53,6 +53,7 @@ import { secureObjectStorageService } from "./secureObjectStorage";
 import { fileSecurityService, productImageSecurityService } from "./fileSecurityService";
 import { ObjectStorageService } from "./objectStorage";
 import { getAwsS3Service } from './aws-s3-service';
+import { sendOrderConfirmationEmail } from "./order-confirmation-email";
 
 import { 
   vehicleTemplates, 
@@ -17098,6 +17099,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         await crmStorage.createOrUpdateCustomerFromOrder(crmOrderData);
         console.log(`✅ Customer auto-captured in CRM for order ${orderNumber}`);
+
+      // 📧 Send order confirmation email to customer (async, non-blocking)
+      (async () => {
+        try {
+          console.log(`📧 [EMAIL] Preparing order confirmation email for order ${orderNumber}...`);
+          
+          // Get order items for email
+          const orderItems = await customerStorage.getOrderItems(order.id);
+          
+          // Get grace period from shop settings
+          let gracePeriodDays = 3; // default
+          try {
+            const { pool } = await import('./db');
+            const gracePeriodResult = await pool.query(`
+              SELECT setting_value FROM shop_settings 
+              WHERE setting_key = 'bank_transfer_grace_period_days' AND is_active = true
+            `);
+            if (gracePeriodResult.rows.length > 0) {
+              gracePeriodDays = parseInt(gracePeriodResult.rows[0].setting_value) || 3;
+            }
+          } catch (err) {
+            console.log('⚠️ Could not fetch grace period from settings, using default 3 days');
+          }
+          
+          // Extract customer email and name
+          let customerEmail = customerInfo.email || '';
+          let customerName = customerInfo.name || 'مشتری عزیز';
+          
+          // If no email in customerInfo, try to get from customer record
+          if (!customerEmail && finalCustomerId) {
+            try {
+              const customer = await customerStorage.getCustomerById(finalCustomerId);
+              customerEmail = customer?.email || '';
+            } catch (err) {
+              console.log('⚠️ Could not fetch customer email from database');
+            }
+          }
+          
+          if (!customerEmail) {
+            console.log('⚠️ [EMAIL] No customer email found, skipping confirmation email');
+            return;
+          }
+          
+          // Send email
+          await sendOrderConfirmationEmail({
+            customerEmail,
+            customerName,
+            orderNumber: order.orderNumber || orderNumber,
+            orderDate: new Date().toLocaleDateString('fa-IR', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            }),
+            totalAmount: parseFloat(order.totalAmount),
+            paymentMethod: finalPaymentMethod,
+            paymentStatus: finalPaymentStatus,
+            orderItems: orderItems.map(item => ({
+              productName: item.productName,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              totalPrice: item.totalPrice
+            })),
+            gracePeriodDays
+          });
+          
+          console.log(`✅ [EMAIL] Order confirmation email sent successfully for order ${orderNumber}`);
+        } catch (emailError) {
+          console.error(`❌ [EMAIL] Failed to send confirmation email for order ${orderNumber}:`, emailError);
+          // Don't fail the order if email fails
+        }
+      })();
+
       } catch (crmError) {
         console.error("❌ Error auto-capturing customer in CRM:", crmError);
         // Don't fail the order if CRM capture fails
