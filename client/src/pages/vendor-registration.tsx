@@ -15,6 +15,7 @@ import { Store, Upload, CheckCircle2, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 
 const vendorRegistrationSchema = z.object({
+  // Vendor Information
   vendorName: z.string().min(2, "اسم شرکت باید حداقل 2 حرف باشد"),
   vendorNameEn: z.string().optional(),
   vendorNameAr: z.string().optional(),
@@ -37,6 +38,14 @@ const vendorRegistrationSchema = z.object({
   bankAccountNumber: z.string().optional(),
   bankAccountName: z.string().optional(),
   iban: z.string().optional(),
+  
+  // User Account Information
+  username: z.string().min(3, "نام کاربری باید حداقل 3 حرف باشد"),
+  email: z.string().email("ایمیل معتبر وارد کنید"),
+  password: z.string().min(6, "رمز عبور باید حداقل 6 حرف باشد"),
+  firstName: z.string().min(2, "نام باید حداقل 2 حرف باشد"),
+  lastName: z.string().min(2, "نام خانوادگی باید حداقل 2 حرف باشد"),
+  phone: z.string().min(10, "شماره تلفن معتبر وارد کنید"),
 });
 
 type VendorRegistrationForm = z.infer<typeof vendorRegistrationSchema>;
@@ -72,28 +81,43 @@ export default function VendorRegistration() {
       bankAccountNumber: "",
       bankAccountName: "",
       iban: "",
+      // User account fields
+      username: "",
+      email: "",
+      password: "",
+      firstName: "",
+      lastName: "",
+      phone: "",
     },
   });
 
   const registerMutation = useMutation({
     mutationFn: async (data: VendorRegistrationForm) => {
-      const formData = new FormData();
-      
-      // Add all text fields (including empty strings for required validation)
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          formData.append(key, String(value));
-        }
-      });
+      // Separate vendor data from user data
+      const vendorData = {
+        vendorName: data.vendorName,
+        contactEmail: data.contactEmail,
+        contactPhone: data.contactPhone,
+        businessLicense: data.businessLicense,
+        taxId: data.taxId,
+        description: data.description,
+        address: data.address,
+        city: data.city,
+        country: data.country,
+      };
 
-      // Add logo file if selected
-      if (logoFile) {
-        formData.append("logo", logoFile);
-      }
+      const userData = {
+        username: data.username,
+        email: data.email,
+        password: data.password,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+      };
 
       return apiRequest("/api/vendors/register", {
         method: "POST",
-        body: formData,
+        body: JSON.stringify({ vendorData, userData }),
       });
     },
     onSuccess: () => {
@@ -593,6 +617,101 @@ export default function VendorRegistration() {
                           <FormLabel>شماره شبا (IBAN)</FormLabel>
                           <FormControl>
                             <Input placeholder="IQ XX XXXX XXXX XXXX XXXX" {...field} data-testid="input-iban" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* User Account Information */}
+                <div className="space-y-4 pt-6 border-t">
+                  <h3 className="text-lg font-semibold">اطلاعات حساب کاربری *</h3>
+                  <p className="text-sm text-muted-foreground">
+                    این اطلاعات برای ورود به پنل فروشنده استفاده می‌شود
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>نام کاربری *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="نام کاربری برای ورود" {...field} data-testid="input-username" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>ایمیل حساب کاربری *</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="email@example.com" {...field} data-testid="input-user-email" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>نام *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="نام" {...field} data-testid="input-first-name" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>نام خانوادگی *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="نام خانوادگی" {...field} data-testid="input-last-name" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>رمز عبور *</FormLabel>
+                          <FormControl>
+                            <Input type="password" placeholder="حداقل 6 کاراکتر" {...field} data-testid="input-password" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>شماره تلفن کاربر *</FormLabel>
+                          <FormControl>
+                            <Input type="tel" placeholder="+964XXXXXXXXXX" {...field} data-testid="input-user-phone" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

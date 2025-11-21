@@ -199,7 +199,7 @@ export function createVendorRouter() {
           // Create special session for super admin
           req.session.vendorUserId = `admin_${customUser.id}`;
           req.session.isSuperAdmin = true;
-          req.session.customUserId = customUser.id;
+          req.session.customUserId = String(customUser.id);
 
           return res.json({
             success: true,
