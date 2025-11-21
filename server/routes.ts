@@ -53286,7 +53286,7 @@ momtazchem.com
       } = req.body;
 
       // Validate required fields
-      if (!vendorName || !contactEmail || !contactPhone || !description || !address || !city) {
+      if (!vendorName || !contactEmail || !contactPhone || !businessLicense || !taxId || !description || !address || !city || !country) {
         return res.status(400).json({
           success: false,
           message: 'لطفاً تمام فیلدهای الزامی را پر کنید'
