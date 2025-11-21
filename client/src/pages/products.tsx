@@ -147,6 +147,9 @@ const getStockLevelIndicator = (current: number, min: number, max: number) => {
 export default function ProductsPage() {
   const { language, t, direction } = useLanguage();
   
+  // Check if vendor mode (from URL parameter)
+  const isVendorMode = window.location.search.includes('vendor=true');
+  
   // Inventory status label helper - uses translation context
   const getInventoryStatusLabel = (status: string) => {
     switch (status) {
@@ -189,6 +192,13 @@ export default function ProductsPage() {
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { toast } = useToast();
   const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
+  
+  // Fetch vendor session if in vendor mode
+  const { data: vendorSession } = useQuery({
+    queryKey: ["/api/vendors/session"],
+    enabled: isVendorMode,
+    staleTime: 5 * 60 * 1000,
+  });
 
   // Fetch categories from API
   const { data: categoriesData = [] } = useQuery({
@@ -741,6 +751,8 @@ export default function ProductsPage() {
       inventoryAddition: Number(data.inventoryAddition) || 0,
       // CRITICAL: Only send newBatchNumber if creating a NEW batch, not updating existing one
       newBatchNumber: (selectedBatchId === 'new' && data.newBatchNumber?.trim()) ? data.newBatchNumber.trim() : null,
+      // Auto-inject vendorId if in vendor mode
+      vendorId: isVendorMode && vendorSession ? vendorSession.vendorId : (data as any).vendorId,
       // Convert string fields to arrays for backend compatibility
       features: typeof data.features === 'string' && data.features.trim() 
         ? data.features.split('\n').map(f => f.trim()).filter(f => f.length > 0)
@@ -1201,9 +1213,16 @@ export default function ProductsPage() {
   // Get consolidated products by barcode
   const consolidatedProducts = products ? consolidateProductsByBarcode(products) : [];
 
-  // Filter consolidated products based on category, inventory status, visibility, and search
+  // Filter consolidated products based on category, inventory status, visibility, search, and vendor
   const filteredProducts = consolidatedProducts.filter((productGroup) => {
     const product = productGroup.mainProduct;
+    
+    // If in vendor mode, only show products belonging to this vendor
+    if (isVendorMode && vendorSession) {
+      const matchesVendor = product.vendorId === vendorSession.vendorId;
+      if (!matchesVendor) return false;
+    }
+    
     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
     const matchesSearch = !searchQuery || 
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
