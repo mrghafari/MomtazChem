@@ -47,7 +47,6 @@ const vendorRegistrationSchema = z.object({
   password: z.string().min(6, "رمز عبور باید حداقل 6 حرف باشد"),
   firstName: z.string().min(2, "نام باید حداقل 2 حرف باشد"),
   lastName: z.string().min(2, "نام خانوادگی باید حداقل 2 حرف باشد"),
-  phone: z.string().min(10, "شماره تلفن معتبر وارد کنید"),
 });
 
 type VendorRegistrationForm = z.infer<typeof vendorRegistrationSchema>;
@@ -89,7 +88,6 @@ export default function VendorRegistration() {
       password: "",
       firstName: "",
       lastName: "",
-      phone: "",
     },
   });
 
@@ -114,7 +112,7 @@ export default function VendorRegistration() {
         password: data.password,
         firstName: data.firstName,
         lastName: data.lastName,
-        phone: data.phone,
+        phone: data.contactPhone, // استفاده از شماره تماس شرکت
       };
 
       return apiRequest("/api/vendors/register", {
@@ -703,34 +701,19 @@ export default function VendorRegistration() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>رمز عبور <span className="text-red-500">*</span></FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="حداقل 6 کاراکتر" {...field} data-testid="input-password" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>شماره تلفن کاربر <span className="text-red-500">*</span></FormLabel>
-                          <FormControl>
-                            <Input type="tel" placeholder="+964XXXXXXXXXX" {...field} data-testid="input-user-phone" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>رمز عبور <span className="text-red-500">*</span></FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="حداقل 6 کاراکتر" {...field} data-testid="input-password" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 {/* Submit Button */}
