@@ -259,6 +259,29 @@ const Footer = () => {
               </ul>
             </div>
           )}
+
+          {/* Vendor Links - Static */}
+          <div>
+            <h3 className="text-sm font-semibold mb-3">
+              {language === 'ar' ? 'للبائعين' : language === 'ku' ? 'بۆ فرۆشیاران' : language === 'tr' ? 'Satıcılar İçin' : 'For Vendors'}
+            </h3>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/vendor-registration">
+                  <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer text-sm">
+                    {language === 'ar' ? 'انضم كبائع' : language === 'ku' ? 'وەکو فرۆشیار بەشداری بکە' : language === 'tr' ? 'Satıcı Olun' : 'Become a Vendor'}
+                  </span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/vendor/login">
+                  <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer text-sm">
+                    {language === 'ar' ? 'تسجيل دخول البائع' : language === 'ku' ? 'چوونەژوورەوەی فرۆشیار' : language === 'tr' ? 'Satıcı Girişi' : 'Vendor Login'}
+                  </span>
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
 
         {/* Compact Bottom Section */}
