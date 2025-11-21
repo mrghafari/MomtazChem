@@ -415,7 +415,7 @@ export function createVendorRouter() {
   // VENDOR PRODUCT MANAGEMENT ROUTES
   // ==========================================================================
 
-  // Get vendor's products (both showcase and shop)
+  // Get vendor's products from main products table
   router.get("/products", ...vendorAuth, async (req, res) => {
     try {
       if (!req.vendorUser) {
@@ -425,16 +425,39 @@ export function createVendorRouter() {
         });
       }
 
-      const showcaseProducts = await vendorStorage.getVendorShowcaseProducts(req.vendorUser.vendorId);
-      const shopProducts = await vendorStorage.getVendorShopProducts(req.vendorUser.vendorId);
+      const { db } = await import("./db");
+      const { showcaseProducts: products } = await import("@shared/showcase-schema");
+      const { eq, isNull, or } = await import("drizzle-orm");
+
+      // Super admin sees ALL products (company + all vendors)
+      // Regular vendor sees only their products
+      let allProducts;
+      if (req.vendorUser.role === "super_admin") {
+        // Super admin: show all products
+        allProducts = await db
+          .select()
+          .from(products)
+          .orderBy(products.createdAt);
+      } else {
+        // Regular vendor: show only their products
+        allProducts = await db
+          .select()
+          .from(products)
+          .where(eq(products.vendorId, req.vendorUser.vendorId))
+          .orderBy(products.createdAt);
+      }
+
+      // Separate company products (vendor_id = null) from vendor products
+      const companyProducts = allProducts.filter(p => p.vendorId === null);
+      const vendorProducts = allProducts.filter(p => p.vendorId !== null);
 
       res.json({
         success: true,
         products: {
-          showcase: showcaseProducts,
-          shop: shopProducts
+          showcase: companyProducts, // Company products
+          shop: vendorProducts // Vendor products
         },
-        totalCount: showcaseProducts.length + shopProducts.length
+        totalCount: allProducts.length
       });
     } catch (error: any) {
       console.error("Error getting vendor products:", error);
