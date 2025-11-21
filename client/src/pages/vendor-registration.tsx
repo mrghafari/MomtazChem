@@ -10,9 +10,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Store, Upload, CheckCircle2, Loader2 } from "lucide-react";
 import { Link } from "wouter";
+import { countries } from "@shared/countries";
 
 const vendorRegistrationSchema = z.object({
   // Vendor Information
@@ -32,7 +34,7 @@ const vendorRegistrationSchema = z.object({
   descriptionTr: z.string().optional(),
   address: z.string().min(10, "آدرس کامل وارد کنید"),
   city: z.string().min(2, "شهر را وارد کنید"),
-  country: z.string().default("Iraq"),
+  country: z.string().min(1, "لطفاً کشور را انتخاب کنید"),
   postalCode: z.string().optional(),
   bankName: z.string().optional(),
   bankAccountNumber: z.string().optional(),
@@ -75,7 +77,7 @@ export default function VendorRegistration() {
       descriptionTr: "",
       address: "",
       city: "",
-      country: "Iraq",
+      country: "IQ",
       postalCode: "",
       bankName: "",
       bankAccountNumber: "",
@@ -537,9 +539,20 @@ export default function VendorRegistration() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>کشور <span className="text-red-500">*</span></FormLabel>
-                        <FormControl>
-                          <Input {...field} data-testid="input-country" />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-country">
+                              <SelectValue placeholder="انتخاب کشور" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="max-h-[300px]">
+                            {countries.map((country) => (
+                              <SelectItem key={country.value} value={country.value}>
+                                {country.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
