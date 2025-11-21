@@ -21,7 +21,7 @@ export function createVendorRouter() {
   // ==========================================================================
 
   // Vendor registration
-  router.post("/auth/register", async (req, res) => {
+  router.post("/register", async (req, res) => {
     try {
       console.log("📝 [VENDOR REGISTRATION] New registration request received");
       console.log("📦 [REQUEST BODY EXISTS]:", !!req.body);

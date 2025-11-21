@@ -1,0 +1,921 @@
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+[Intervention] Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+/~:1 The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+/~:1 The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+/~:1 The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+e9c814d8241b4128.js:2 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+e9c814d8241b4128.js:2 Download the Apollo DevTools for a better development experience: https://chrome.google.com/webstore/detail/apollo-client-developer-t/jdkknkkbebbapilgoeccciglkfbmbnfm
+e9c814d8241b4128.js:2 [Coframe] Replit Enterprise watcher loaded
+e9c814d8241b4128.js:2 [LaunchDarkly] LaunchDarkly client initialized
+/repls:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+ed1e693c96a75807.js:2 Unrecognized feature: 'ambient-light-sensor'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'battery'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'execution-while-not-rendered'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'execution-while-out-of-viewport'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'layout-animations'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'legacy-image-formats'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'navigation-override'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'oversized-images'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'publickey-credentials'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'speaker-selection'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'unoptimized-images'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'unsized-media'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'pointer-lock'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Allow attribute will take precedence over 'allowfullscreen'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Allow attribute will take precedence over 'allowpaymentrequest'.
+z @ ed1e693c96a75807.js:2
+324ccdd4d183a391.js:2 WebSocket is already in CLOSING or CLOSED state.
+value @ 324ccdd4d183a391.js:2
+e9c814d8241b4128.js:2 task queue exceeded allotted deadline by 52ms
+(anonymous) @ e9c814d8241b4128.js:2
+WebSocket connection to '<URL>' failed: WebSocket is closed before the connection is established.
+WebSocket connection to '<URL>' failed: WebSocket is closed before the connection is established.
+WebSocket connection to '<URL>' failed: WebSocket is closed before the connection is established.
+WebSocket connection to '<URL>' failed: WebSocket is closed before the connection is established.
+WebSocket connection to '<URL>' failed: WebSocket is closed before the connection is established.
+WebSocket connection to '<URL>' failed: WebSocket is closed before the connection is established.
+WebSocket connection to '<URL>' failed: WebSocket is closed before the connection is established.
+WebSocket connection to '<URL>' failed: WebSocket is closed before the connection is established.
+WebSocket connection to '<URL>' failed: WebSocket is closed before the connection is established.
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Afetch%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A8e033f43&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=9a23c410-3145-4b69-9e6a-b8b5600a4584:1  Failed to load resource: net::ERR_CONNECTION_TIMED_OUT
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Axhr%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A8e033f43&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=8aa4f982-e694-43f4-85dd-f3371dabed75:1  Failed to load resource: net::ERR_CONNECTION_TIMED_OUT
+05d0eee9f164d5c2.js:2 WebSocket connection to 'wss://replit.com/graphql_subscriptions' failed: 
+(anonymous) @ 05d0eee9f164d5c2.js:2
+05d0eee9f164d5c2.js:2 WebSocket connection to 'wss://replit.com/graphql_subscriptions' failed: 
+(anonymous) @ 05d0eee9f164d5c2.js:2
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Afetch%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A8e033f43&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=e9b27d6e-6e6a-4714-9680-ef939d5bacbf:1  Failed to load resource: net::ERR_CONNECTION_TIMED_OUT
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Axhr%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A8e033f43&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=1855941c-dc4a-4830-a289-c0cd7a9a4076:1  Failed to load resource: net::ERR_CONNECTION_TIMED_OUT
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Afetch%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A8e033f43&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=4eb9866d-ad28-43c1-8e6d-c82162d737d1:1  Failed to load resource: net::ERR_TIMED_OUT
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Axhr%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A8e033f43&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=dc54157d-74c3-4c75-b40d-9ba5b1aa1d86:1  Failed to load resource: net::ERR_DNS_NO_MATCHING_SUPPORTED_ALPN
+05d0eee9f164d5c2.js:2 WebSocket connection to 'wss://replit.com/graphql_subscriptions' failed: 
+(anonymous) @ 05d0eee9f164d5c2.js:2
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Afetch%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A8e033f43&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=8be3b2fe-7547-4567-8457-8d0d953c59c2:1  Failed to load resource: net::ERR_CONNECTION_TIMED_OUT
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Axhr%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A8e033f43&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=8ef456e6-fd69-41b2-868d-b34d9f4f012d:1  Failed to load resource: net::ERR_CONNECTION_TIMED_OUT
+d3ebe8d1cbd1d969.js:2 WebSocket connection to 'wss://eval.picard.platform.replit.com/wsv2/v2.public.Q2dZSXdhK0N5UVlTQmdqZ3k0TEpCaUlHY0dsallYSmtNQUE2NFFFS0pEZzJNVGt5Tm1ZMkxUZzFZelV0TkdVNU15MWlZamxpTFRkbE1XRXpaRGhpWkRnM09CSURibWw0R2hoeVpYQnNhWFF0Y21Wd2JDMW1hV3hsY3kxd2FXTmhjbVFpRVUxdmJYUmhla05vWlcxWFpXSnphWFJsS2dsaFpHMXBiak14TVRsQ1ZBb1pjbVZ3YkdsMExYSmxjR3d0WW14dlkydHpMWEJwWTJGeVpCSVhjbVZ3YkdsMExYSmxjR3d0YldWMFlTMXdhV05oY21RYUhuSmxjR3hwZEMxdFlYSm5ZWEpwYm1VdFlteHZZMnR6TFhCcFkyRnlaRW9IQ05PLzZSUVFBVkFBV2dobGVIQnNiM0psY2xvUGFXNTBaVzUwWDNCbGNuTnZibUZzZUFCU0pRZ0...TFJVNXlUMWhaUmtGRloxUWxNa1pLVldad09WSnZWMVp4WjI1RlZIUnlOM1JtYjJsNE1HRnFhVkJ5T1VoWFVXVklOR1ZJTjNSaGFYcE5VbUp3TlhOYWEyRnNjRmh3ZG1FM2IxaHBkMU5LVUhoSVRUaERTa0oyTjB0TU9XODRaekJ5VUZRMlozZHJRMWhLVVd0bWRtMWlZVTlhYm10RGFFaGFPRlZFYUdjM1pYWlFiVXROVm1OYVVHRmlOV0psTVZCQ2EwdHRaV1Z1SlRKR1oxaFFXbE5NUW1VeGFqWkljVXMwT1dGdmIzTTFXbXhpV0dscmJHbGtiRGxTWWxseE9IWmpaMjVPWldsRWNrZ3dVRGhFV0dwUFZsaEJKVE5FSlRORR4glzDuYXkB3yFs7YoExddeVyyjBUGkfSXbFjgUzIbjgxPfQ_8ja3VT4a5qp8LLJdHLOwCFg6nswIE6-2140Q8.Q2dad2NtOWtPak1pQ25KbGNHeHBkQzVqYjIwPQ' failed: 
+(anonymous) @ d3ebe8d1cbd1d969.js:2
+05d0eee9f164d5c2.js:2 WebSocket connection to 'wss://replit.com/graphql_subscriptions' failed: 
+(anonymous) @ 05d0eee9f164d5c2.js:2
+workspace_iframe.html?initialPath=%2F&id=%3Arnf%3A:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html?initialPath=%2F&id=%3Arnf%3A:32 Unrecognized feature: 'battery'.
+workspace_iframe.html?initialPath=%2F&id=%3Arnf%3A:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html?initialPath=%2F&id=%3Arnf%3A:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html?initialPath=%2F&id=%3Arnf%3A:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html?initialPath=%2F&id=%3Arnf%3A:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html?initialPath=%2F&id=%3Arnf%3A:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html?initialPath=%2F&id=%3Arnf%3A:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Arnf%3A:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html?initialPath=%2F&id=%3Arnf%3A:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html?initialPath=%2F&id=%3Arnf%3A:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Arnf%3A:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html?initialPath=%2F&id=%3Arnf%3A:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html?initialPath=%2F&id=%3Arnf%3A:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:37 📥 Loading Tawk.to widget at bottom-left position...
+injected.js:37 ✅ Tawk.to Live Chat loaded successfully at bottom-left
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/vendors/register:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/vendors/register:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+injected.js:214  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/vendors/register 400 (Bad Request)
+apply @ injected.js:214
+apiRequest @ queryClient.ts:54
+mutationFn @ vendor-registration.tsx:118
+fn @ @tanstack_react-query.js?v=0c8b293d:1189
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+execute @ @tanstack_react-query.js?v=0c8b293d:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=0c8b293d:2630
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3295
+onSubmit @ vendor-registration.tsx:164
+(anonymous) @ chunk-4BFJKWC4.js?v=0c8b293d:1465
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=0c8b293d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=0c8b293d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=0c8b293d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=0c8b293d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=0c8b293d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=0c8b293d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=0c8b293d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=0c8b293d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=0c8b293d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=0c8b293d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=0c8b293d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=0c8b293d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=0c8b293d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=0c8b293d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=0c8b293d:5449
+injected.js:214  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/vendors/register 400 (Bad Request)
+apply @ injected.js:214
+apiRequest @ queryClient.ts:54
+mutationFn @ vendor-registration.tsx:118
+fn @ @tanstack_react-query.js?v=0c8b293d:1189
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+execute @ @tanstack_react-query.js?v=0c8b293d:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=0c8b293d:2630
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3295
+onSubmit @ vendor-registration.tsx:164
+(anonymous) @ chunk-4BFJKWC4.js?v=0c8b293d:1465
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=0c8b293d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=0c8b293d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=0c8b293d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=0c8b293d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=0c8b293d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=0c8b293d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=0c8b293d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=0c8b293d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=0c8b293d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=0c8b293d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=0c8b293d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=0c8b293d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=0c8b293d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=0c8b293d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=0c8b293d:5449
+injected.js:214  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+apply @ injected.js:214
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=0c8b293d:840
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:2245
+injected.js:214  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+apply @ injected.js:214
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=0c8b293d:840
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=0c8b293d:2243
+updateTimers_fn @ @tanstack_react-query.js?v=0c8b293d:2250
+onQueryUpdate @ @tanstack_react-query.js?v=0c8b293d:2206
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:998
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:997
+batch @ @tanstack_react-query.js?v=0c8b293d:583
+dispatch_fn @ @tanstack_react-query.js?v=0c8b293d:996
+setData @ @tanstack_react-query.js?v=0c8b293d:696
+onSuccess @ @tanstack_react-query.js?v=0c8b293d:897
+resolve @ @tanstack_react-query.js?v=0c8b293d:456
+Promise.then
+run @ @tanstack_react-query.js?v=0c8b293d:498
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:2245
+injected.js:214  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+apply @ injected.js:214
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=0c8b293d:840
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+fetch @ @tanstack_react-query.js?v=0c8b293d:2011
+refetch @ @tanstack_react-query.js?v=0c8b293d:2001
+onFocus @ @tanstack_react-query.js?v=0c8b293d:749
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:1112
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:1111
+batch @ @tanstack_react-query.js?v=0c8b293d:583
+onFocus @ @tanstack_react-query.js?v=0c8b293d:1110
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:313
+onFocus @ @tanstack_react-query.js?v=0c8b293d:312
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:299
+listener @ @tanstack_react-query.js?v=0c8b293d:270
+injected.js:214  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+apply @ injected.js:214
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=0c8b293d:840
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+fetch @ @tanstack_react-query.js?v=0c8b293d:2011
+refetch @ @tanstack_react-query.js?v=0c8b293d:2001
+onFocus @ @tanstack_react-query.js?v=0c8b293d:749
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:1112
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:1111
+batch @ @tanstack_react-query.js?v=0c8b293d:583
+onFocus @ @tanstack_react-query.js?v=0c8b293d:1110
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:313
+onFocus @ @tanstack_react-query.js?v=0c8b293d:312
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:299
+listener @ @tanstack_react-query.js?v=0c8b293d:270
+injected.js:37 [vite] server connection lost. Polling for restart...
+workspace_iframe.html?initialPath=%2F&id=%3Ar13v%3A:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar13v%3A:32 Unrecognized feature: 'battery'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar13v%3A:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar13v%3A:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar13v%3A:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar13v%3A:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar13v%3A:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar13v%3A:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar13v%3A:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar13v%3A:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar13v%3A:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar13v%3A:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar13v%3A:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar13v%3A:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+injected.js:214  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+apply @ injected.js:214
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=0c8b293d:840
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+onSubscribe @ @tanstack_react-query.js?v=0c8b293d:1898
+subscribe @ @tanstack_react-query.js?v=0c8b293d:24
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=0c8b293d:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=0c8b293d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=0c8b293d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=0c8b293d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=0c8b293d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=0c8b293d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=0c8b293d:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=0c8b293d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=0c8b293d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=0c8b293d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18718
+workLoop @ chunk-RPCDYKBN.js?v=0c8b293d:197
+flushWork @ chunk-RPCDYKBN.js?v=0c8b293d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=0c8b293d:384
+injected.js:214  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+apply @ injected.js:214
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=0c8b293d:840
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+onSubscribe @ @tanstack_react-query.js?v=0c8b293d:1898
+subscribe @ @tanstack_react-query.js?v=0c8b293d:24
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=0c8b293d:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=0c8b293d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=0c8b293d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=0c8b293d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=0c8b293d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=0c8b293d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=0c8b293d:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=0c8b293d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=0c8b293d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=0c8b293d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18718
+workLoop @ chunk-RPCDYKBN.js?v=0c8b293d:197
+flushWork @ chunk-RPCDYKBN.js?v=0c8b293d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=0c8b293d:384
+injected.js:37 📥 Loading Tawk.to widget at bottom-left position...
+injected.js:37 ✅ Tawk.to Live Chat loaded successfully at bottom-left
+via.placeholder.com/128x128?text=WeChat+QR:1  GET https://via.placeholder.com/128x128?text=WeChat+QR net::ERR_NAME_NOT_RESOLVED
+Image
+commitMount @ chunk-RPCDYKBN.js?v=0c8b293d:8412
+commitLayoutEffectOnFiber @ chunk-RPCDYKBN.js?v=0c8b293d:17102
+commitLayoutMountEffects_complete @ chunk-RPCDYKBN.js?v=0c8b293d:17980
+commitLayoutEffects_begin @ chunk-RPCDYKBN.js?v=0c8b293d:17969
+commitLayoutEffects @ chunk-RPCDYKBN.js?v=0c8b293d:17920
+commitRootImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19353
+commitRoot @ chunk-RPCDYKBN.js?v=0c8b293d:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=0c8b293d:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=0c8b293d:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=0c8b293d:555
+flush @ @tanstack_react-query.js?v=0c8b293d:569
+batch @ @tanstack_react-query.js?v=0c8b293d:587
+dispatch_fn @ @tanstack_react-query.js?v=0c8b293d:996
+setData @ @tanstack_react-query.js?v=0c8b293d:696
+onSuccess @ @tanstack_react-query.js?v=0c8b293d:897
+resolve @ @tanstack_react-query.js?v=0c8b293d:456
+Promise.then
+run @ @tanstack_react-query.js?v=0c8b293d:498
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+onSubscribe @ @tanstack_react-query.js?v=0c8b293d:1898
+subscribe @ @tanstack_react-query.js?v=0c8b293d:24
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=0c8b293d:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=0c8b293d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=0c8b293d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=0c8b293d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=0c8b293d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=0c8b293d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=0c8b293d:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=0c8b293d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=0c8b293d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=0c8b293d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18718
+workLoop @ chunk-RPCDYKBN.js?v=0c8b293d:197
+flushWork @ chunk-RPCDYKBN.js?v=0c8b293d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=0c8b293d:384
+injected.js:214  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+apply @ injected.js:214
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=0c8b293d:840
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=0c8b293d:2243
+updateTimers_fn @ @tanstack_react-query.js?v=0c8b293d:2250
+onQueryUpdate @ @tanstack_react-query.js?v=0c8b293d:2206
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:998
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:997
+batch @ @tanstack_react-query.js?v=0c8b293d:583
+dispatch_fn @ @tanstack_react-query.js?v=0c8b293d:996
+setData @ @tanstack_react-query.js?v=0c8b293d:696
+onSuccess @ @tanstack_react-query.js?v=0c8b293d:897
+resolve @ @tanstack_react-query.js?v=0c8b293d:456
+Promise.then
+run @ @tanstack_react-query.js?v=0c8b293d:498
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+onSubscribe @ @tanstack_react-query.js?v=0c8b293d:1898
+subscribe @ @tanstack_react-query.js?v=0c8b293d:24
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=0c8b293d:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=0c8b293d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=0c8b293d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=0c8b293d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=0c8b293d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=0c8b293d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=0c8b293d:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=0c8b293d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=0c8b293d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=0c8b293d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18718
+workLoop @ chunk-RPCDYKBN.js?v=0c8b293d:197
+flushWork @ chunk-RPCDYKBN.js?v=0c8b293d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=0c8b293d:384
+injected.js:214  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/vendors/register 400 (Bad Request)
+apply @ injected.js:214
+apiRequest @ queryClient.ts:54
+mutationFn @ vendor-registration.tsx:116
+fn @ @tanstack_react-query.js?v=0c8b293d:1189
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+execute @ @tanstack_react-query.js?v=0c8b293d:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=0c8b293d:2630
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3295
+onSubmit @ vendor-registration.tsx:162
+(anonymous) @ chunk-4BFJKWC4.js?v=0c8b293d:1465
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=0c8b293d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=0c8b293d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=0c8b293d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=0c8b293d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=0c8b293d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=0c8b293d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=0c8b293d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=0c8b293d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=0c8b293d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=0c8b293d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=0c8b293d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=0c8b293d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=0c8b293d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=0c8b293d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=0c8b293d:5449
+injected.js:214  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/vendors/register 400 (Bad Request)
+apply @ injected.js:214
+apiRequest @ queryClient.ts:54
+mutationFn @ vendor-registration.tsx:116
+fn @ @tanstack_react-query.js?v=0c8b293d:1189
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+execute @ @tanstack_react-query.js?v=0c8b293d:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=0c8b293d:2630
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3295
+onSubmit @ vendor-registration.tsx:162
+(anonymous) @ chunk-4BFJKWC4.js?v=0c8b293d:1465
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=0c8b293d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=0c8b293d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=0c8b293d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=0c8b293d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=0c8b293d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=0c8b293d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=0c8b293d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=0c8b293d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=0c8b293d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=0c8b293d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=0c8b293d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=0c8b293d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=0c8b293d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=0c8b293d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=0c8b293d:5449
+injected.js:214  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/vendors/register 400 (Bad Request)
+apply @ injected.js:214
+apiRequest @ queryClient.ts:54
+mutationFn @ vendor-registration.tsx:116
+fn @ @tanstack_react-query.js?v=0c8b293d:1189
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+execute @ @tanstack_react-query.js?v=0c8b293d:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=0c8b293d:2630
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3295
+onSubmit @ vendor-registration.tsx:162
+(anonymous) @ chunk-4BFJKWC4.js?v=0c8b293d:1465
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=0c8b293d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=0c8b293d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=0c8b293d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=0c8b293d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=0c8b293d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=0c8b293d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=0c8b293d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=0c8b293d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=0c8b293d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=0c8b293d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=0c8b293d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=0c8b293d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=0c8b293d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=0c8b293d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=0c8b293d:5449
+injected.js:214  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+apply @ injected.js:214
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=0c8b293d:840
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=0c8b293d:2243
+updateTimers_fn @ @tanstack_react-query.js?v=0c8b293d:2250
+onQueryUpdate @ @tanstack_react-query.js?v=0c8b293d:2206
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:998
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:997
+batch @ @tanstack_react-query.js?v=0c8b293d:583
+dispatch_fn @ @tanstack_react-query.js?v=0c8b293d:996
+setData @ @tanstack_react-query.js?v=0c8b293d:696
+onSuccess @ @tanstack_react-query.js?v=0c8b293d:897
+resolve @ @tanstack_react-query.js?v=0c8b293d:456
+Promise.then
+run @ @tanstack_react-query.js?v=0c8b293d:498
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=0c8b293d:2243
+updateTimers_fn @ @tanstack_react-query.js?v=0c8b293d:2250
+onQueryUpdate @ @tanstack_react-query.js?v=0c8b293d:2206
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:998
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:997
+batch @ @tanstack_react-query.js?v=0c8b293d:583
+dispatch_fn @ @tanstack_react-query.js?v=0c8b293d:996
+setData @ @tanstack_react-query.js?v=0c8b293d:696
+onSuccess @ @tanstack_react-query.js?v=0c8b293d:897
+resolve @ @tanstack_react-query.js?v=0c8b293d:456
+Promise.then
+run @ @tanstack_react-query.js?v=0c8b293d:498
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+onSubscribe @ @tanstack_react-query.js?v=0c8b293d:1898
+subscribe @ @tanstack_react-query.js?v=0c8b293d:24
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=0c8b293d:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=0c8b293d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=0c8b293d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=0c8b293d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=0c8b293d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=0c8b293d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=0c8b293d:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=0c8b293d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=0c8b293d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=0c8b293d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18718
+workLoop @ chunk-RPCDYKBN.js?v=0c8b293d:197
+flushWork @ chunk-RPCDYKBN.js?v=0c8b293d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=0c8b293d:384
+injected.js:214  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+apply @ injected.js:214
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=0c8b293d:840
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=0c8b293d:2243
+updateTimers_fn @ @tanstack_react-query.js?v=0c8b293d:2250
+onQueryUpdate @ @tanstack_react-query.js?v=0c8b293d:2206
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:998
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:997
+batch @ @tanstack_react-query.js?v=0c8b293d:583
+dispatch_fn @ @tanstack_react-query.js?v=0c8b293d:996
+setData @ @tanstack_react-query.js?v=0c8b293d:696
+onSuccess @ @tanstack_react-query.js?v=0c8b293d:897
+resolve @ @tanstack_react-query.js?v=0c8b293d:456
+Promise.then
+run @ @tanstack_react-query.js?v=0c8b293d:498
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=0c8b293d:2243
+updateTimers_fn @ @tanstack_react-query.js?v=0c8b293d:2250
+onQueryUpdate @ @tanstack_react-query.js?v=0c8b293d:2206
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:998
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:997
+batch @ @tanstack_react-query.js?v=0c8b293d:583
+dispatch_fn @ @tanstack_react-query.js?v=0c8b293d:996
+setData @ @tanstack_react-query.js?v=0c8b293d:696
+onSuccess @ @tanstack_react-query.js?v=0c8b293d:897
+resolve @ @tanstack_react-query.js?v=0c8b293d:456
+Promise.then
+run @ @tanstack_react-query.js?v=0c8b293d:498
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=0c8b293d:2243
+updateTimers_fn @ @tanstack_react-query.js?v=0c8b293d:2250
+onQueryUpdate @ @tanstack_react-query.js?v=0c8b293d:2206
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:998
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:997
+batch @ @tanstack_react-query.js?v=0c8b293d:583
+dispatch_fn @ @tanstack_react-query.js?v=0c8b293d:996
+setData @ @tanstack_react-query.js?v=0c8b293d:696
+onSuccess @ @tanstack_react-query.js?v=0c8b293d:897
+resolve @ @tanstack_react-query.js?v=0c8b293d:456
+Promise.then
+run @ @tanstack_react-query.js?v=0c8b293d:498
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+onSubscribe @ @tanstack_react-query.js?v=0c8b293d:1898
+subscribe @ @tanstack_react-query.js?v=0c8b293d:24
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=0c8b293d:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=0c8b293d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=0c8b293d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=0c8b293d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=0c8b293d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=0c8b293d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=0c8b293d:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=0c8b293d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=0c8b293d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=0c8b293d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18718
+workLoop @ chunk-RPCDYKBN.js?v=0c8b293d:197
+flushWork @ chunk-RPCDYKBN.js?v=0c8b293d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=0c8b293d:384
+injected.js:37 [vite] server connection lost. Polling for restart...
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1fj%3A:32 Unrecognized feature: 'ambient-light-sensor'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1fj%3A:32 Unrecognized feature: 'battery'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1fj%3A:32 Unrecognized feature: 'execution-while-not-rendered'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1fj%3A:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1fj%3A:32 Unrecognized feature: 'layout-animations'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1fj%3A:32 Unrecognized feature: 'legacy-image-formats'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1fj%3A:32 Unrecognized feature: 'navigation-override'.
+861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1fj%3A:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1fj%3A:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1fj%3A:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1fj%3A:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1fj%3A:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1fj%3A:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1fj%3A:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+injected.js:214  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+apply @ injected.js:214
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=0c8b293d:840
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+onSubscribe @ @tanstack_react-query.js?v=0c8b293d:1898
+subscribe @ @tanstack_react-query.js?v=0c8b293d:24
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=0c8b293d:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=0c8b293d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=0c8b293d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=0c8b293d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=0c8b293d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=0c8b293d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=0c8b293d:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=0c8b293d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=0c8b293d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=0c8b293d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18718
+workLoop @ chunk-RPCDYKBN.js?v=0c8b293d:197
+flushWork @ chunk-RPCDYKBN.js?v=0c8b293d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=0c8b293d:384
+injected.js:214  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+apply @ injected.js:214
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=0c8b293d:840
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+onSubscribe @ @tanstack_react-query.js?v=0c8b293d:1898
+subscribe @ @tanstack_react-query.js?v=0c8b293d:24
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=0c8b293d:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=0c8b293d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=0c8b293d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=0c8b293d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=0c8b293d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=0c8b293d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=0c8b293d:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=0c8b293d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=0c8b293d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=0c8b293d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18718
+workLoop @ chunk-RPCDYKBN.js?v=0c8b293d:197
+flushWork @ chunk-RPCDYKBN.js?v=0c8b293d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=0c8b293d:384
+injected.js:37 📥 Loading Tawk.to widget at bottom-left position...
+injected.js:37 ✅ Tawk.to Live Chat loaded successfully at bottom-left
+via.placeholder.com/128x128?text=WeChat+QR:1  GET https://via.placeholder.com/128x128?text=WeChat+QR net::ERR_NAME_NOT_RESOLVED
+Image
+commitMount @ chunk-RPCDYKBN.js?v=0c8b293d:8412
+commitLayoutEffectOnFiber @ chunk-RPCDYKBN.js?v=0c8b293d:17102
+commitLayoutMountEffects_complete @ chunk-RPCDYKBN.js?v=0c8b293d:17980
+commitLayoutEffects_begin @ chunk-RPCDYKBN.js?v=0c8b293d:17969
+commitLayoutEffects @ chunk-RPCDYKBN.js?v=0c8b293d:17920
+commitRootImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19353
+commitRoot @ chunk-RPCDYKBN.js?v=0c8b293d:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=0c8b293d:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=0c8b293d:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=0c8b293d:555
+flush @ @tanstack_react-query.js?v=0c8b293d:569
+batch @ @tanstack_react-query.js?v=0c8b293d:587
+dispatch_fn @ @tanstack_react-query.js?v=0c8b293d:996
+setData @ @tanstack_react-query.js?v=0c8b293d:696
+onSuccess @ @tanstack_react-query.js?v=0c8b293d:897
+resolve @ @tanstack_react-query.js?v=0c8b293d:456
+Promise.then
+run @ @tanstack_react-query.js?v=0c8b293d:498
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+onSubscribe @ @tanstack_react-query.js?v=0c8b293d:1898
+subscribe @ @tanstack_react-query.js?v=0c8b293d:24
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=0c8b293d:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=0c8b293d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=0c8b293d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=0c8b293d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=0c8b293d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=0c8b293d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=0c8b293d:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=0c8b293d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=0c8b293d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=0c8b293d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18718
+workLoop @ chunk-RPCDYKBN.js?v=0c8b293d:197
+flushWork @ chunk-RPCDYKBN.js?v=0c8b293d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=0c8b293d:384
+injected.js:214  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+apply @ injected.js:214
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=0c8b293d:840
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=0c8b293d:2243
+updateTimers_fn @ @tanstack_react-query.js?v=0c8b293d:2250
+onQueryUpdate @ @tanstack_react-query.js?v=0c8b293d:2206
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:998
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:997
+batch @ @tanstack_react-query.js?v=0c8b293d:583
+dispatch_fn @ @tanstack_react-query.js?v=0c8b293d:996
+setData @ @tanstack_react-query.js?v=0c8b293d:696
+onSuccess @ @tanstack_react-query.js?v=0c8b293d:897
+resolve @ @tanstack_react-query.js?v=0c8b293d:456
+Promise.then
+run @ @tanstack_react-query.js?v=0c8b293d:498
+start @ @tanstack_react-query.js?v=0c8b293d:536
+fetch @ @tanstack_react-query.js?v=0c8b293d:926
+executeFetch_fn @ @tanstack_react-query.js?v=0c8b293d:2211
+onSubscribe @ @tanstack_react-query.js?v=0c8b293d:1898
+subscribe @ @tanstack_react-query.js?v=0c8b293d:24
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=0c8b293d:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=0c8b293d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=0c8b293d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=0c8b293d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=0c8b293d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=0c8b293d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=0c8b293d:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=0c8b293d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=0c8b293d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=0c8b293d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=0c8b293d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=0c8b293d:18718
+workLoop @ chunk-RPCDYKBN.js?v=0c8b293d:197
+flushWork @ chunk-RPCDYKBN.js?v=0c8b293d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=0c8b293d:384
+injected.js:214  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/vendors/register 404 (Not Found)
+apply @ injected.js:214
+apiRequest @ queryClient.ts:54
+mutationFn @ vendor-registration.tsx:116
+fn @ @tanstack_react-query.js?v=0c8b293d:1189
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+execute @ @tanstack_react-query.js?v=0c8b293d:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=0c8b293d:2630
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3295
+onSubmit @ vendor-registration.tsx:162
+(anonymous) @ chunk-4BFJKWC4.js?v=0c8b293d:1465
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=0c8b293d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=0c8b293d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=0c8b293d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=0c8b293d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=0c8b293d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=0c8b293d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=0c8b293d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=0c8b293d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=0c8b293d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=0c8b293d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=0c8b293d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=0c8b293d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=0c8b293d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=0c8b293d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=0c8b293d:5449
+injected.js:214  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/vendors/register 404 (Not Found)
+apply @ injected.js:214
+apiRequest @ queryClient.ts:54
+mutationFn @ vendor-registration.tsx:116
+fn @ @tanstack_react-query.js?v=0c8b293d:1189
+run @ @tanstack_react-query.js?v=0c8b293d:494
+start @ @tanstack_react-query.js?v=0c8b293d:536
+execute @ @tanstack_react-query.js?v=0c8b293d:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=0c8b293d:2630
+(anonymous) @ @tanstack_react-query.js?v=0c8b293d:3295
+onSubmit @ vendor-registration.tsx:162
+(anonymous) @ chunk-4BFJKWC4.js?v=0c8b293d:1465
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=0c8b293d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=0c8b293d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=0c8b293d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=0c8b293d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=0c8b293d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=0c8b293d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=0c8b293d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=0c8b293d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=0c8b293d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=0c8b293d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=0c8b293d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=0c8b293d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=0c8b293d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=0c8b293d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=0c8b293d:5449

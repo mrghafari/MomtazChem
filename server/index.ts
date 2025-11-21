@@ -340,7 +340,7 @@ app.use((req, res, next) => {
 
     // Register vendor routes with dedicated session middleware
     const vendorRouter = createVendorRouter();
-    app.use('/api/vendor', vendorSessionMiddleware, vendorRouter);
+    app.use('/api/vendors', vendorSessionMiddleware, vendorRouter);
     log('🏪 [VENDOR] Vendor marketplace routes registered');
 
     // Register admin vendor management routes (uses unified session middleware)
