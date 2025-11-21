@@ -147,6 +147,7 @@ import AdminAbandonedOrders from "@/pages/admin-abandoned-orders";
 import FooterManagement from "@/pages/admin/footer-management";
 import ShopManagement from "@/pages/admin/shop-management";
 import MarketplaceManagement from "@/pages/admin/marketplace-management";
+import VendorRegistration from "@/pages/vendor-registration";
 import VehicleHistoryPage from "@/pages/admin/vehicle-history";
 import BlogManagement from "@/pages/admin/blog-management";
 import Blog from "@/pages/blog";
@@ -168,6 +169,8 @@ function Router() {
           <Route path="/user-guide" component={UserGuide} />
           <Route path="/help" component={UserGuide} />
           <Route path="/shop" component={Shop} />
+          <Route path="/vendor-registration" component={VendorRegistration} />
+          <Route path="/become-vendor" component={VendorRegistration} />
           <Route path="/blog" component={Blog} />
           <Route path="/blog/:slug" component={BlogPost} />
           <Route path="/payment-options" component={PaymentOptionsPage} />
