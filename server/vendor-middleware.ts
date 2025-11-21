@@ -57,14 +57,14 @@ export async function loadVendorUser(
       });
     }
 
-    // Check if it's a super admin session
-    if (req.session?.isSuperAdmin) {
+    // Check if it's a super admin session (vendorUserId starts with "admin_")
+    if (req.session?.isSuperAdmin || (typeof vendorUserId === 'string' && vendorUserId.startsWith('admin_'))) {
       // Super admin has full access - create a virtual vendor user object
       req.vendorUser = {
         id: 0,
         vendorId: 0,
         username: "Super Admin",
-        email: "admin@momtazchem.com",
+        email: req.session?.customUserId ? "mr.ghafari@gmail.com" : "admin@momtazchem.com",
         role: "super_admin",
         permissions: ["all"]
       };
@@ -72,7 +72,7 @@ export async function loadVendorUser(
     }
 
     // Load vendor user from database
-    const vendorUser = await vendorStorage.getVendorUserById(vendorUserId);
+    const vendorUser = await vendorStorage.getVendorUserById(vendorUserId as number);
 
     if (!vendorUser || !vendorUser.isActive) {
       // Clear invalid session

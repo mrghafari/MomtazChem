@@ -261,6 +261,29 @@ export function createVendorRouter() {
         });
       }
 
+      // Handle super admin separately
+      if (req.vendorUser.role === "super_admin") {
+        return res.json({
+          success: true,
+          user: {
+            id: 0,
+            username: "Super Admin",
+            email: req.vendorUser.email,
+            firstName: "Super",
+            lastName: "Admin",
+            phone: null,
+            role: "super_admin",
+            permissions: ["all"],
+            vendorId: 0,
+            vendorName: "Momtazchem",
+            vendorEmail: req.vendorUser.email,
+            vendorApproved: true,
+            vendorActive: true,
+            isSuperAdmin: true
+          }
+        });
+      }
+
       // Load full vendor user data
       const vendorUser = await vendorStorage.getVendorUserById(req.vendorUser.id);
       const vendor = await vendorStorage.getVendorById(req.vendorUser.vendorId);
@@ -287,7 +310,8 @@ export function createVendorRouter() {
           vendorName: vendor.vendorName,
           vendorEmail: vendor.contactEmail,
           vendorApproved: vendor.isApproved,
-          vendorActive: vendor.isActive
+          vendorActive: vendor.isActive,
+          isSuperAdmin: false
         }
       });
     } catch (error: any) {
