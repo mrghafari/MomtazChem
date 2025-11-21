@@ -1778,5 +1778,103 @@ export const insertCustomersOtpSchema = createInsertSchema(customersOtp).omit({
 export type InsertCustomersOtp = z.infer<typeof insertCustomersOtpSchema>;
 export type CustomersOtp = typeof customersOtp.$inferSelect;
 
+// =============================================================================
+// MARKETPLACE MULTI-VENDOR SYSTEM
+// =============================================================================
+
+// Vendors table - stores vendor company information
+export const vendors = pgTable("vendors", {
+  id: serial("id").primaryKey(),
+  vendorName: text("vendor_name").notNull(), // Company/vendor name
+  vendorNameEn: text("vendor_name_en"), // English name
+  vendorNameAr: text("vendor_name_ar"), // Arabic name
+  vendorNameKu: text("vendor_name_ku"), // Kurdish name
+  vendorNameTr: text("vendor_name_tr"), // Turkish name
+  contactEmail: text("contact_email").notNull().unique(),
+  contactPhone: text("contact_phone"),
+  businessLicense: text("business_license"), // رخصة العمل - Business registration number
+  taxId: text("tax_id"), // الرقم الضريبي - Tax identification number
+  logoUrl: text("logo_url"), // Vendor logo stored in S3
+  description: text("description"), // Company description
+  descriptionEn: text("description_en"),
+  descriptionAr: text("description_ar"),
+  descriptionKu: text("description_ku"),
+  descriptionTr: text("description_tr"),
+  // Address information
+  address: text("address"),
+  city: text("city"),
+  country: text("country").default("Iraq"),
+  postalCode: text("postal_code"),
+  // Commission and payment settings
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default("10.00"), // Platform commission percentage
+  paymentMethod: text("payment_method").default("bank_transfer"), // bank_transfer, wallet, etc.
+  bankAccountInfo: json("bank_account_info"), // Encrypted bank details
+  // Status and settings
+  isActive: boolean("is_active").default(false), // Admin approval required
+  isApproved: boolean("is_approved").default(false), // Admin must approve new vendors
+  approvedBy: integer("approved_by"), // Admin user ID who approved
+  approvedAt: timestamp("approved_at"),
+  rejectionReason: text("rejection_reason"),
+  // Statistics
+  totalProducts: integer("total_products").default(0),
+  totalSales: decimal("total_sales", { precision: 12, scale: 2 }).default("0.00"),
+  rating: decimal("rating", { precision: 3, scale: 2 }).default("0.00"), // Average rating from customers
+  totalReviews: integer("total_reviews").default(0),
+  // Metadata
+  notes: text("notes"), // Admin notes
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Vendor Users table - authentication and access control for vendor portal
+export const vendorUsers = pgTable("vendor_users", {
+  id: serial("id").primaryKey(),
+  vendorId: integer("vendor_id").notNull().references(() => vendors.id, { onDelete: "cascade" }),
+  username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(), // Hashed with bcrypt
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  phone: text("phone"),
+  // Role-based access control
+  role: text("role").notNull().default("vendor_manager"), // vendor_owner, vendor_manager, vendor_staff
+  permissions: json("permissions"), // Array of permission strings
+  // Status
+  isActive: boolean("is_active").default(true),
+  emailVerified: boolean("email_verified").default(false),
+  lastLoginAt: timestamp("last_login_at"),
+  // Session management
+  lastLoginIp: text("last_login_ip"),
+  failedLoginAttempts: integer("failed_login_attempts").default(0),
+  lockedUntil: timestamp("locked_until"),
+  // Metadata
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Insert schemas
+export const insertVendorSchema = createInsertSchema(vendors).omit({
+  id: true,
+  totalProducts: true,
+  totalSales: true,
+  rating: true,
+  totalReviews: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertVendorUserSchema = createInsertSchema(vendorUsers).omit({
+  id: true,
+  failedLoginAttempts: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Export types
+export type InsertVendor = z.infer<typeof insertVendorSchema>;
+export type Vendor = typeof vendors.$inferSelect;
+export type InsertVendorUser = z.infer<typeof insertVendorUserSchema>;
+export type VendorUser = typeof vendorUsers.$inferSelect;
+
 // Re-export marketing schema
 export * from './marketing-schema';

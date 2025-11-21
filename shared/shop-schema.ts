@@ -111,6 +111,8 @@ export const shopProducts = pgTable("shop_products", {
   quantityDiscounts: json("quantity_discounts"), // [{minQty: 10, discount: 0.05}, {minQty: 50, discount: 0.10}]
   isActive: boolean("is_active").default(true),
   isFeatured: boolean("is_featured").default(false),
+  // Marketplace vendor field
+  vendorId: integer("vendor_id"), // Reference to vendor (null = owned by Momtazchem)
   visibleInShop: boolean("visible_in_shop").default(true), // کنترل نمایش در فروشگاه
   showWhenOutOfStock: boolean("show_when_out_of_stock").default(false), // نمایش در فروشگاه حتی با موجودی صفر
   metaTitle: text("meta_title"),

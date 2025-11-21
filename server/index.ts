@@ -6,6 +6,7 @@ import { registerRoutes } from "./routes";
 import backupRoutes from "./backup-routes";
 import otpRoutes from "./otp-routes";
 import s3ManagementRoutes from "./s3-management-routes";
+import { createVendorRouter } from "./vendor-routes";
 import InventoryAlertService from "./inventory-alerts";
 import { expiredOrdersCleanup } from "./expired-orders-cleanup";
 import { abandonedCartCleanup } from "./abandoned-cart-cleanup";
@@ -39,6 +40,11 @@ const adminSessionStore = new MemoryStoreSession({
 
 // Customer Session Store
 const customerSessionStore = new MemoryStoreSession({
+  checkPeriod: 86400000 // prune expired entries every 24h
+});
+
+// Vendor Session Store
+const vendorSessionStore = new MemoryStoreSession({
   checkPeriod: 86400000 // prune expired entries every 24h
 });
 
@@ -114,6 +120,24 @@ const generalSessionMiddleware = session({
     domain: undefined
   },
   name: 'momtazchem.general.sid'
+});
+
+// Session middleware for vendor routes
+const vendorSessionMiddleware = session({
+  secret: process.env.SESSION_SECRET || "momtazchem-vendor-secret-key",
+  store: vendorSessionStore,
+  resave: false,
+  saveUninitialized: false,
+  rolling: true,
+  cookie: {
+    secure: false,
+    httpOnly: false,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax',
+    path: '/api/vendor',
+    domain: undefined
+  },
+  name: 'momtazchem.vendor.sid'
 });
 
 // Use single unified session middleware for all routes
@@ -312,6 +336,11 @@ app.use((req, res, next) => {
     // Register S3 management routes (admin only)
     app.use(s3ManagementRoutes);
     log('📦 [S3 MGMT] S3 management routes registered');
+
+    // Register vendor routes with dedicated session middleware
+    const vendorRouter = createVendorRouter();
+    app.use('/api/vendor', vendorSessionMiddleware, vendorRouter);
+    log('🏪 [VENDOR] Vendor marketplace routes registered');
 
     // Register routes BEFORE Vite middleware to ensure API routes take precedence
     const server = await registerRoutes(app);
