@@ -1669,10 +1669,13 @@ const Shop = () => {
                             <Button
                               className="w-full"
                               onClick={() => addToCart(product.id)}
-                              disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
+                              disabled={
+                                !product.inStock || 
+                                (cart[product.id] || 0) + getProductQuantity(product.id) > product.stockQuantity
+                              }
                             >
                               <ShoppingCart className="w-4 h-4 mr-2" />
-                              {!product.inStock || product.stockQuantity <= 0 ? t.shop.notAvailable : cart[product.id] && cart[product.id] > 0 ? t.shop.addMore : t.shop.addToCart}
+                              {!product.inStock || ((cart[product.id] || 0) >= product.stockQuantity) ? t.shop.notAvailable : cart[product.id] && cart[product.id] > 0 ? t.shop.addMore : t.shop.addToCart}
                             </Button>
                           </div>
                         </CardContent>
@@ -2118,10 +2121,13 @@ const Shop = () => {
                                 <Button
                                   className="w-full"
                                   onClick={() => addToCart(product.id)}
-                                  disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
+                                  disabled={
+                                    !product.inStock || 
+                                    (cart[product.id] || 0) + getProductQuantity(product.id) > product.stockQuantity
+                                  }
                                 >
                                   <ShoppingCart className="w-4 h-4 mr-2" />
-                                  {!product.inStock || product.stockQuantity <= 0 ? t.shop.notAvailable : cart[product.id] && cart[product.id] > 0 ? t.shop.addMore : t.shop.addToCart}
+                                  {!product.inStock || ((cart[product.id] || 0) >= product.stockQuantity) ? t.shop.notAvailable : cart[product.id] && cart[product.id] > 0 ? t.shop.addMore : t.shop.addToCart}
                                 </Button>
                               </div>
                             </div>
