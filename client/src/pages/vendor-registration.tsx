@@ -79,9 +79,11 @@ export default function VendorRegistration() {
     mutationFn: async (data: VendorRegistrationForm) => {
       const formData = new FormData();
       
-      // Add all text fields
+      // Add all text fields (including empty strings for required validation)
       Object.entries(data).forEach(([key, value]) => {
-        if (value) formData.append(key, value);
+        if (value !== null && value !== undefined) {
+          formData.append(key, String(value));
+        }
       });
 
       // Add logo file if selected
