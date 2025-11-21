@@ -4375,7 +4375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Protected admin routes for product management (کاردکس)
-  app.post("/api/products", requireAuth, async (req, res) => {
+  app.post("/api/products", requireProductManagerAuth, async (req, res) => {
     try {
       const productData = req.body;
       
@@ -4589,7 +4589,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update product (PATCH method)
-  app.patch("/api/products/:id", requireAuth, async (req, res) => {
+  app.patch("/api/products/:id", requireProductManagerAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -4819,7 +4819,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update product (PUT method - for compatibility)
-  app.put("/api/products/:id", requireAuth, async (req, res) => {
+  app.put("/api/products/:id", requireProductManagerAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -5210,7 +5210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/products/:id", requireAuth, async (req, res) => {
+  app.delete("/api/products/:id", requireProductManagerAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {

@@ -147,8 +147,8 @@ const getStockLevelIndicator = (current: number, min: number, max: number) => {
 export default function ProductsPage() {
   const { language, t, direction } = useLanguage();
   
-  // Check if vendor mode (from URL parameter)
-  const isVendorMode = window.location.search.includes('vendor=true');
+  // Check if vendor mode (from URL path)
+  const isVendorMode = window.location.pathname.startsWith('/vendor/');
   
   // Inventory status label helper - uses translation context
   const getInventoryStatusLabel = (status: string) => {
