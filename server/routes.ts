@@ -53256,184 +53256,184 @@ momtazchem.com
 
   // ===== PUBLIC VENDOR REGISTRATION ENDPOINT =====
   // POST /api/vendors/register - Public endpoint for vendor registration
-  app.post('/api/vendors/register', upload.single('logo'), async (req, res) => {
-    try {
-      console.log('📝 [VENDOR REGISTRATION] New registration request received');
-      
-      const {
-        vendorName,
-        vendorNameEn,
-        vendorNameAr,
-        vendorNameKu,
-        vendorNameTr,
-        contactEmail,
-        contactPhone,
-        businessLicense,
-        taxId,
-        description,
-        descriptionEn,
-        descriptionAr,
-        descriptionKu,
-        descriptionTr,
-        address,
-        city,
-        country,
-        postalCode,
-        bankName,
-        bankAccountNumber,
-        bankAccountName,
-        iban,
-      } = req.body;
-
-      // Validate required fields
-      if (!vendorName || !contactEmail || !contactPhone || !businessLicense || !taxId || !description || !address || !city || !country) {
-        return res.status(400).json({
-          success: false,
-          message: 'لطفاً تمام فیلدهای الزامی را پر کنید'
-        });
-      }
-
-      // Check if email already exists
-      const existingVendor = await db
-        .select()
-        .from(schema.vendors)
-        .where(eq(schema.vendors.contactEmail, contactEmail))
-        .limit(1);
-
-      if (existingVendor.length > 0) {
-        return res.status(400).json({
-          success: false,
-          message: 'این ایمیل قبلاً ثبت شده است'
-        });
-      }
-
-      // Upload logo to S3 if provided
-      let logoUrl = null;
-      if (req.file) {
-        try {
-          const fileExtension = req.file.originalname.split('.').pop();
-          const fileName = `vendor-logos/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExtension}`;
-          
-          await s3Service.uploadFile(
-            req.file.buffer,
-            fileName,
-            req.file.mimetype
-          );
-          
-          logoUrl = fileName;
-          console.log('✅ [VENDOR REGISTRATION] Logo uploaded:', fileName);
-        } catch (uploadError) {
-          console.error('❌ [VENDOR REGISTRATION] Logo upload failed:', uploadError);
-          // Continue registration even if logo upload fails
-        }
-      }
-
-      // Prepare bank account info (encrypt if provided)
-      let bankAccountInfo = null;
-      if (bankName || bankAccountNumber || bankAccountName || iban) {
-        bankAccountInfo = {
-          bankName: bankName || '',
-          bankAccountNumber: bankAccountNumber || '',
-          bankAccountName: bankAccountName || '',
-          iban: iban || '',
-        };
-      }
-
-      // Create vendor record with pending approval status
-      const [newVendor] = await db
-        .insert(schema.vendors)
-        .values({
-          vendorName,
-          vendorNameEn: vendorNameEn || null,
-          vendorNameAr: vendorNameAr || null,
-          vendorNameKu: vendorNameKu || null,
-          vendorNameTr: vendorNameTr || null,
-          contactEmail,
-          contactPhone,
-          businessLicense: businessLicense || null,
-          taxId: taxId || null,
-          logoUrl,
-          description,
-          descriptionEn: descriptionEn || null,
-          descriptionAr: descriptionAr || null,
-          descriptionKu: descriptionKu || null,
-          descriptionTr: descriptionTr || null,
-          address,
-          city,
-          country: country || 'Iraq',
-          postalCode: postalCode || null,
-          bankAccountInfo,
-          isActive: false,
-          isApproved: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .returning();
-
-      console.log('✅ [VENDOR REGISTRATION] Vendor registered:', newVendor.id);
-
-      // Send notification email to admin
-      try {
-        await sendEmail({
-          to: process.env.SMTP_USER || 'admin@momtazchem.com',
-          subject: `🏪 درخواست ثبت نام فروشنده جدید - ${vendorName}`,
-          html: `
-            <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-              <h2 style="color: #7c3aed; text-align: center;">درخواست ثبت نام فروشنده جدید</h2>
-              
-              <div style="background: #f3f4f6; padding: 15px; border-radius: 6px; margin: 20px 0;">
-                <h3 style="margin-top: 0;">اطلاعات شرکت:</h3>
-                <p><strong>نام شرکت:</strong> ${vendorName}</p>
-                <p><strong>ایمیل:</strong> ${contactEmail}</p>
-                <p><strong>تلفن:</strong> ${contactPhone}</p>
-                <p><strong>شهر:</strong> ${city}, ${country}</p>
-              </div>
-
-              <div style="background: #fff3cd; padding: 15px; border-radius: 6px; margin: 20px 0;">
-                <p style="margin: 0;"><strong>توضیحات:</strong></p>
-                <p style="margin: 10px 0 0 0;">${description}</p>
-              </div>
-
-              ${businessLicense ? `<p><strong>شماره جواز کسب:</strong> ${businessLicense}</p>` : ''}
-              ${taxId ? `<p><strong>شماره مالیاتی:</strong> ${taxId}</p>` : ''}
-
-              <div style="text-align: center; margin-top: 30px;">
-                <a href="${process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}/site-management` : 'http://localhost:5000/site-management'}" 
-                   style="display: inline-block; background: #7c3aed; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
-                  مشاهده و تایید در پنل مدیریت
-                </a>
-              </div>
-
-              <p style="color: #6b7280; font-size: 12px; text-align: center; margin-top: 20px;">
-                این ایمیل به صورت خودکار از سیستم Momtazchem ارسال شده است.
-              </p>
-            </div>
-          `,
-        });
-        console.log('✅ [VENDOR REGISTRATION] Admin notification email sent');
-      } catch (emailError) {
-        console.error('❌ [VENDOR REGISTRATION] Failed to send admin notification:', emailError);
-        // Continue even if email fails
-      }
-
-      res.json({
-        success: true,
-        message: 'درخواست شما با موفقیت ثبت شد. پس از بررسی، از طریق ایمیل با شما تماس خواهیم گرفت.',
-        data: {
-          id: newVendor.id,
-          vendorName: newVendor.vendorName,
-          contactEmail: newVendor.contactEmail,
-        }
-      });
-
-    } catch (error) {
-      console.error('❌ [VENDOR REGISTRATION] Error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطا در ثبت درخواست. لطفاً دوباره تلاش کنید.'
-      });
-    }
-  });
+//   app.post('/api/vendors/register', upload.single('logo'), async (req, res) => {
+//     try {
+//       console.log('📝 [VENDOR REGISTRATION] New registration request received');
+//       
+//       const {
+//         vendorName,
+//         vendorNameEn,
+//         vendorNameAr,
+//         vendorNameKu,
+//         vendorNameTr,
+//         contactEmail,
+//         contactPhone,
+//         businessLicense,
+//         taxId,
+//         description,
+//         descriptionEn,
+//         descriptionAr,
+//         descriptionKu,
+//         descriptionTr,
+//         address,
+//         city,
+//         country,
+//         postalCode,
+//         bankName,
+//         bankAccountNumber,
+//         bankAccountName,
+//         iban,
+//       } = req.body;
+// 
+//       // Validate required fields
+//       if (!vendorName || !contactEmail || !contactPhone || !businessLicense || !taxId || !description || !address || !city || !country) {
+//         return res.status(400).json({
+//           success: false,
+//           message: 'لطفاً تمام فیلدهای الزامی را پر کنید'
+//         });
+//       }
+// 
+//       // Check if email already exists
+//       const existingVendor = await db
+//         .select()
+//         .from(schema.vendors)
+//         .where(eq(schema.vendors.contactEmail, contactEmail))
+//         .limit(1);
+// 
+//       if (existingVendor.length > 0) {
+//         return res.status(400).json({
+//           success: false,
+//           message: 'این ایمیل قبلاً ثبت شده است'
+//         });
+//       }
+// 
+//       // Upload logo to S3 if provided
+//       let logoUrl = null;
+//       if (req.file) {
+//         try {
+//           const fileExtension = req.file.originalname.split('.').pop();
+//           const fileName = `vendor-logos/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExtension}`;
+//           
+//           await s3Service.uploadFile(
+//             req.file.buffer,
+//             fileName,
+//             req.file.mimetype
+//           );
+//           
+//           logoUrl = fileName;
+//           console.log('✅ [VENDOR REGISTRATION] Logo uploaded:', fileName);
+//         } catch (uploadError) {
+//           console.error('❌ [VENDOR REGISTRATION] Logo upload failed:', uploadError);
+//           // Continue registration even if logo upload fails
+//         }
+//       }
+// 
+//       // Prepare bank account info (encrypt if provided)
+//       let bankAccountInfo = null;
+//       if (bankName || bankAccountNumber || bankAccountName || iban) {
+//         bankAccountInfo = {
+//           bankName: bankName || '',
+//           bankAccountNumber: bankAccountNumber || '',
+//           bankAccountName: bankAccountName || '',
+//           iban: iban || '',
+//         };
+//       }
+// 
+//       // Create vendor record with pending approval status
+//       const [newVendor] = await db
+//         .insert(schema.vendors)
+//         .values({
+//           vendorName,
+//           vendorNameEn: vendorNameEn || null,
+//           vendorNameAr: vendorNameAr || null,
+//           vendorNameKu: vendorNameKu || null,
+//           vendorNameTr: vendorNameTr || null,
+//           contactEmail,
+//           contactPhone,
+//           businessLicense: businessLicense || null,
+//           taxId: taxId || null,
+//           logoUrl,
+//           description,
+//           descriptionEn: descriptionEn || null,
+//           descriptionAr: descriptionAr || null,
+//           descriptionKu: descriptionKu || null,
+//           descriptionTr: descriptionTr || null,
+//           address,
+//           city,
+//           country: country || 'Iraq',
+//           postalCode: postalCode || null,
+//           bankAccountInfo,
+//           isActive: false,
+//           isApproved: false,
+//           createdAt: new Date(),
+//           updatedAt: new Date(),
+//         })
+//         .returning();
+// 
+//       console.log('✅ [VENDOR REGISTRATION] Vendor registered:', newVendor.id);
+// 
+//       // Send notification email to admin
+//       try {
+//         await sendEmail({
+//           to: process.env.SMTP_USER || 'admin@momtazchem.com',
+//           subject: `🏪 درخواست ثبت نام فروشنده جدید - ${vendorName}`,
+//           html: `
+//             <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+//               <h2 style="color: #7c3aed; text-align: center;">درخواست ثبت نام فروشنده جدید</h2>
+//               
+//               <div style="background: #f3f4f6; padding: 15px; border-radius: 6px; margin: 20px 0;">
+//                 <h3 style="margin-top: 0;">اطلاعات شرکت:</h3>
+//                 <p><strong>نام شرکت:</strong> ${vendorName}</p>
+//                 <p><strong>ایمیل:</strong> ${contactEmail}</p>
+//                 <p><strong>تلفن:</strong> ${contactPhone}</p>
+//                 <p><strong>شهر:</strong> ${city}, ${country}</p>
+//               </div>
+// 
+//               <div style="background: #fff3cd; padding: 15px; border-radius: 6px; margin: 20px 0;">
+//                 <p style="margin: 0;"><strong>توضیحات:</strong></p>
+//                 <p style="margin: 10px 0 0 0;">${description}</p>
+//               </div>
+// 
+//               ${businessLicense ? `<p><strong>شماره جواز کسب:</strong> ${businessLicense}</p>` : ''}
+//               ${taxId ? `<p><strong>شماره مالیاتی:</strong> ${taxId}</p>` : ''}
+// 
+//               <div style="text-align: center; margin-top: 30px;">
+//                 <a href="${process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}/site-management` : 'http://localhost:5000/site-management'}" 
+//                    style="display: inline-block; background: #7c3aed; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+//                   مشاهده و تایید در پنل مدیریت
+//                 </a>
+//               </div>
+// 
+//               <p style="color: #6b7280; font-size: 12px; text-align: center; margin-top: 20px;">
+//                 این ایمیل به صورت خودکار از سیستم Momtazchem ارسال شده است.
+//               </p>
+//             </div>
+//           `,
+//         });
+//         console.log('✅ [VENDOR REGISTRATION] Admin notification email sent');
+//       } catch (emailError) {
+//         console.error('❌ [VENDOR REGISTRATION] Failed to send admin notification:', emailError);
+//         // Continue even if email fails
+//       }
+// 
+//       res.json({
+//         success: true,
+//         message: 'درخواست شما با موفقیت ثبت شد. پس از بررسی، از طریق ایمیل با شما تماس خواهیم گرفت.',
+//         data: {
+//           id: newVendor.id,
+//           vendorName: newVendor.vendorName,
+//           contactEmail: newVendor.contactEmail,
+//         }
+//       });
+// 
+//     } catch (error) {
+//       console.error('❌ [VENDOR REGISTRATION] Error:', error);
+//       res.status(500).json({
+//         success: false,
+//         message: 'خطا در ثبت درخواست. لطفاً دوباره تلاش کنید.'
+//       });
+//     }
+//   });
 
 
 
