@@ -30,6 +30,7 @@ interface ShopProduct {
   sku: string;
   stockQuantity: number;
   lowStockThreshold: number;
+  minStockLevel?: number;
   inStock: boolean;
   price: string;
   priceUnit: string;
@@ -40,8 +41,8 @@ export default function InventoryAlerts() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: products = [], isLoading } = useQuery({
-    queryKey: ["/api/shop/products"],
+  const { data: products = [], isLoading } = useQuery<ShopProduct[]>({
+    queryKey: ["/api/admin/shop-products"],
   });
 
   const checkAllInventoryMutation = useMutation({
@@ -51,7 +52,7 @@ export default function InventoryAlerts() {
         title: "Inventory Check Complete",
         description: "All products checked and alerts sent if needed.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/shop-products"] });
     },
     onError: () => {
       toast({

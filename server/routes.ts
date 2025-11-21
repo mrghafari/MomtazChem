@@ -20945,6 +20945,30 @@ Momtaz Chemical Technical Team`,
   });
 
   // Shop/E-commerce API endpoints - Inventory-based product management
+  
+  // Admin endpoint - Get ALL shop products including out of stock (for inventory management)
+  app.get("/api/admin/shop-products", requireAuth, async (req, res) => {
+    try {
+      const products = await shopStorage.getAllShopProducts();
+      
+      // Map database fields to frontend expected format
+      const mappedProducts = products.map(product => ({
+        ...product,
+        imageUrl: product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : null,
+        imageUrls: product.imageUrls || [],
+        unitPrice: product.price,
+        currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit,
+        weight: product.weight,
+        weightUnit: product.weightUnit
+      }));
+      
+      res.json(mappedProducts);
+    } catch (error) {
+      console.error("Error fetching all shop products for admin:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch products" });
+    }
+  });
+
   app.get("/api/shop/products", async (req, res) => {
     try {
       const products = await shopStorage.getShopProducts();
