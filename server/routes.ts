@@ -17134,11 +17134,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
           let customerEmail = customerInfo.email || '';
           let customerName = customerInfo.name || 'مشتری عزیز';
           
-          // If no email in customerInfo, try to get from customer record
+          // If no email in customerInfo, try to get from customer or CRM record
           if (!customerEmail && finalCustomerId) {
             try {
               const customer = await customerStorage.getCustomerById(finalCustomerId);
               customerEmail = customer?.email || '';
+              if (!customerEmail) {
+                // Try CRM database if not in customers table
+                const crmCustomer = await crmStorage.getCrmCustomerById(finalCustomerId);
+                customerEmail = crmCustomer?.email || '';
+                if (crmCustomer?.firstName && crmCustomer?.lastName) {
+                  customerName = `${crmCustomer.firstName} ${crmCustomer.lastName}`;
+                }
+              }
+            } catch (err) {
+              console.log('⚠️ Could not fetch customer email from database');
+            }
+          }
+          // Extract customer email and name
+          let customerEmail = customerInfo.email || '';
+          let customerName = customerInfo.name || 'مشتری عزیز';
+          
+          // If no email in customerInfo, try to get from customer or CRM record
+          if (!customerEmail && finalCustomerId) {
+            try {
+              const customer = await customerStorage.getCustomerById(finalCustomerId);
+              customerEmail = customer?.email || '';
+              if (!customerEmail) {
+                // Try CRM database if not in customers table
+                const crmCustomer = await crmStorage.getCrmCustomerById(finalCustomerId);
+                customerEmail = crmCustomer?.email || '';
+                if (crmCustomer?.firstName && crmCustomer?.lastName) {
+                  customerName = `${crmCustomer.firstName} ${crmCustomer.lastName}`;
+                }
+              }
             } catch (err) {
               console.log('⚠️ Could not fetch customer email from database');
             }
