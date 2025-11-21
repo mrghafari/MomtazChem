@@ -451,10 +451,13 @@ export function createVendorRouter() {
       const { db } = await import("./db");
       const { showcaseProducts: products } = await import("@shared/showcase-schema");
       
-      // Add vendor_id to product data - always use vendor's ID
+      // Extract product data from body and IGNORE any vendorId sent by client
+      const { vendorId: _ignored, ...bodyData } = req.body;
+      
+      // Always use vendorId from authenticated session - cannot be spoofed
       const productData = {
-        ...req.body,
-        vendorId: req.vendorUser.vendorId,
+        ...bodyData,
+        vendorId: req.vendorUser.vendorId, // Always from session, never from client
         createdAt: new Date(),
         updatedAt: new Date()
       };
