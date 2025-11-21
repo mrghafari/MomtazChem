@@ -146,6 +146,7 @@ import OrderSuccess from "@/pages/order-success";
 import AdminAbandonedOrders from "@/pages/admin-abandoned-orders";
 import FooterManagement from "@/pages/admin/footer-management";
 import ShopManagement from "@/pages/admin/shop-management";
+import MarketplaceManagement from "@/pages/admin/marketplace-management";
 import VehicleHistoryPage from "@/pages/admin/vehicle-history";
 import BlogManagement from "@/pages/admin/blog-management";
 import Blog from "@/pages/blog";
@@ -273,6 +274,7 @@ function Router() {
           <Route path="/content-management" component={ContentManagement} />
           <Route path="/admin/footer-management" component={FooterManagement} />
           <Route path="/admin/shop-management" component={ShopManagement} />
+          <Route path="/admin/marketplace-management" component={MarketplaceManagement} />
           <Route path="/admin/email-templates" component={EmailTemplatesFixed} />
           <Route path="/admin/email-templates-fixed" component={EmailTemplatesFixed} />
           <Route path="/admin/email-templates-central" component={EmailTemplatesCentral} />

@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, DollarSign, BookOpen, Truck, Box, CreditCard, Wallet, MapPin, Barcode, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain, Monitor as RemoteMonitor, FileText, Server, MessageCircle, Cloud, PenTool } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, DollarSign, BookOpen, Truck, Box, CreditCard, Wallet, MapPin, Barcode, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain, Monitor as RemoteMonitor, FileText, Server, MessageCircle, Cloud, PenTool, Store } from "lucide-react";
 import { KardexSyncPanel } from "@/components/KardexSyncPanel";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -236,6 +236,14 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("content-management", () => setLocation("/content-management")),
       className: "border-lime-300 text-lime-600 hover:bg-lime-50 hover:text-lime-800",
       moduleId: "content_management"
+    },
+    {
+      id: "marketplace-management",
+      label: "Marketplace Management",
+      icon: Store,
+      onClick: () => trackButtonClick("marketplace-management", () => setLocation("/admin/marketplace-management")),
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50 hover:text-purple-800",
+      moduleId: "marketplace_management"
     },
     {
       id: "company-information",
