@@ -39,7 +39,7 @@ import { sql, eq, and, or, ne, isNull, isNotNull, desc, gte, inArray } from "dri
 import { findCorruptedOrders, getDataIntegrityStats, validateOrderIntegrity, markCorruptedOrderAsDeleted } from './data-integrity-tools';
 import { z } from "zod";
 import * as schema from "@shared/schema";
-const { crmCustomers, iraqiProvinces, iraqiCities, abandonedOrders, contentItems, footerSettings, paymentMethodSettings, shopSettings, aiApiSettings, insertAiApiSettingsSchema } = schema;
+const { crmCustomers, iraqiProvinces, iraqiCities, abandonedOrders, contentItems, footerSettings, paymentMethodSettings, shopSettings, aiApiSettings, insertAiApiSettingsSchema, vendors } = schema;
 import { webrtcRooms, roomParticipants, chatMessages } from "@shared/webrtc-schema";
 import { orderManagement, shippingRates, deliveryMethods, paymentReceipts } from "@shared/order-management-schema";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
@@ -4462,10 +4462,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         products = await storage.getProducts();
       }
       
-      // Products from showcase_products are already in the correct format
-      const mappedProducts = products;
+      // Enrich products with vendor information
+      const enrichedProducts = await Promise.all(
+        products.map(async (product) => {
+          let vendorName = null;
+          
+          // If product has a vendorId, fetch vendor name from vendors table
+          if (product.vendorId) {
+            try {
+              const vendor = await db
+                .select()
+                .from(vendors)
+                .where(eq(vendors.id, product.vendorId))
+                .limit(1);
+              
+              if (vendor && vendor.length > 0) {
+                vendorName = vendor[0].vendorName;
+              }
+            } catch (vendorError) {
+              console.error(`Error fetching vendor for product ${product.id}:`, vendorError);
+              // Continue with null vendorName if there's an error
+            }
+          }
+          
+          // Return product with vendorName field
+          return {
+            ...product,
+            vendorName
+          };
+        })
+      );
       
-      res.json(mappedProducts);
+      res.json(enrichedProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
       res.status(500).json({ 
