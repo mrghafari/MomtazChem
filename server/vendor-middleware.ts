@@ -40,6 +40,7 @@ export function requireVendorAuth(
 /**
  * Middleware to load vendor user information into request
  * Must be used after requireVendorAuth
+ * Supports both vendor users and super admins
  */
 export async function loadVendorUser(
   req: Request,
@@ -54,6 +55,20 @@ export async function loadVendorUser(
         success: false,
         message: "Vendor authentication required"
       });
+    }
+
+    // Check if it's a super admin session
+    if (req.session?.isSuperAdmin) {
+      // Super admin has full access - create a virtual vendor user object
+      req.vendorUser = {
+        id: 0,
+        vendorId: 0,
+        username: "Super Admin",
+        email: "admin@momtazchem.com",
+        role: "super_admin",
+        permissions: ["all"]
+      };
+      return next();
     }
 
     // Load vendor user from database
@@ -224,9 +239,11 @@ export const vendorOwnerAuth = [
   requireVendorRole("vendor_owner")
 ];
 
-// Extend Express Session to include vendorUserId
+// Extend Express Session to include vendorUserId and super admin flag
 declare module "express-session" {
   interface SessionData {
-    vendorUserId?: number;
+    vendorUserId?: number | string;
+    isSuperAdmin?: boolean;
+    customUserId?: string;
   }
 }

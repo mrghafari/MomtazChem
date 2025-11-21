@@ -9,7 +9,10 @@ import {
   ensureOwnVendor
 } from "./vendor-middleware";
 import { z } from "zod";
-import { insertVendorSchema, insertVendorUserSchema } from "@shared/schema";
+import { insertVendorSchema, insertVendorUserSchema, customUsers } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 
 export function createVendorRouter() {
   const router = Router();
@@ -122,7 +125,7 @@ export function createVendorRouter() {
     }
   });
 
-  // Vendor login
+  // Vendor login (supports both vendor users and super admins)
   router.post("/auth/login", async (req, res) => {
     try {
       const { username, password } = req.body;
@@ -134,59 +137,92 @@ export function createVendorRouter() {
         });
       }
 
-      // Verify credentials
+      // First, try to verify as vendor user
       const vendorUser = await vendorStorage.verifyVendorUserPassword(username, password);
 
-      if (!vendorUser) {
-        return res.status(401).json({
-          success: false,
-          message: "Invalid username or password"
-        });
-      }
+      if (vendorUser) {
+        // Load vendor information
+        const vendor = await vendorStorage.getVendorById(vendorUser.vendorId);
 
-      // Load vendor information
-      const vendor = await vendorStorage.getVendorById(vendorUser.vendorId);
-
-      if (!vendor) {
-        return res.status(500).json({
-          success: false,
-          message: "Vendor not found"
-        });
-      }
-
-      if (!vendor.isApproved) {
-        return res.status(403).json({
-          success: false,
-          message: "Your vendor account is pending admin approval"
-        });
-      }
-
-      if (!vendor.isActive) {
-        return res.status(403).json({
-          success: false,
-          message: "Your vendor account is inactive. Please contact support."
-        });
-      }
-
-      // Update login info
-      const clientIp = req.ip || req.headers['x-forwarded-for']?.toString() || "unknown";
-      await vendorStorage.updateVendorUserLoginInfo(vendorUser.id, clientIp);
-
-      // Create session
-      req.session.vendorUserId = vendorUser.id;
-
-      res.json({
-        success: true,
-        message: "Login successful",
-        user: {
-          id: vendorUser.id,
-          username: vendorUser.username,
-          email: vendorUser.email,
-          role: vendorUser.role,
-          vendorId: vendorUser.vendorId,
-          vendorName: vendor.vendorName
+        if (!vendor) {
+          return res.status(500).json({
+            success: false,
+            message: "Vendor not found"
+          });
         }
+
+        if (!vendor.isApproved) {
+          return res.status(403).json({
+            success: false,
+            message: "Your vendor account is pending admin approval"
+          });
+        }
+
+        if (!vendor.isActive) {
+          return res.status(403).json({
+            success: false,
+            message: "Your vendor account is inactive. Please contact support."
+          });
+        }
+
+        // Update login info
+        const clientIp = req.ip || req.headers['x-forwarded-for']?.toString() || "unknown";
+        await vendorStorage.updateVendorUserLoginInfo(vendorUser.id, clientIp);
+
+        // Create session
+        req.session.vendorUserId = vendorUser.id;
+
+        return res.json({
+          success: true,
+          message: "Login successful",
+          user: {
+            id: vendorUser.id,
+            username: vendorUser.username,
+            email: vendorUser.email,
+            role: vendorUser.role,
+            vendorId: vendorUser.vendorId,
+            vendorName: vendor.vendorName
+          }
+        });
+      }
+
+      // If not a vendor user, check if it's a super admin (custom_user)
+      // Try to find by email (username could be email)
+      const customUser = await db.query.customUsers.findFirst({
+        where: eq(customUsers.email, username),
       });
+
+      if (customUser && customUser.passwordHash) {
+        const isValidPassword = await bcrypt.compare(password, customUser.passwordHash);
+        
+        if (isValidPassword) {
+          // Create special session for super admin
+          req.session.vendorUserId = `admin_${customUser.id}`;
+          req.session.isSuperAdmin = true;
+          req.session.customUserId = customUser.id;
+
+          return res.json({
+            success: true,
+            message: "Super admin login successful",
+            user: {
+              id: customUser.id,
+              username: customUser.email,
+              email: customUser.email,
+              role: "super_admin",
+              isSuperAdmin: true,
+              vendorId: null,
+              vendorName: "Super Admin"
+            }
+          });
+        }
+      }
+
+      // If neither vendor nor super admin, return error
+      return res.status(401).json({
+        success: false,
+        message: "Invalid username or password"
+      });
+
     } catch (error: any) {
       console.error("Error in vendor login:", error);
       res.status(500).json({
