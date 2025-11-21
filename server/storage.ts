@@ -210,8 +210,12 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    // Validate that the category exists
-    const categoryExists = await this.getCategoryBySlug(insertProduct.category);
+    // Validate that the category exists (accept both name and slug)
+    let categoryExists = await this.getCategoryBySlug(insertProduct.category);
+    if (!categoryExists) {
+      // Try by name if slug didn't work
+      categoryExists = await this.getCategoryByName(insertProduct.category);
+    }
     if (!categoryExists) {
       throw new Error(`Category '${insertProduct.category}' does not exist. Please create the category first.`);
     }
