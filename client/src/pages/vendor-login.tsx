@@ -34,7 +34,7 @@ export default function VendorLogin() {
     mutationFn: async (data: LoginForm) => {
       return apiRequest("/api/vendor/auth/login", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: data,
       });
     },
     onSuccess: (data) => {
