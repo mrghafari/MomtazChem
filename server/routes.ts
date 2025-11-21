@@ -3427,7 +3427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/upload", requireAuth, (req, res) => {
+  app.post("/api/upload", requireProductManagerAuth, (req, res) => {
     const upload = uploadFlexible.fields([
       { name: 'file', maxCount: 1 },
       { name: 'image', maxCount: 1 }
@@ -3490,7 +3490,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
-  app.post("/api/upload/image", requireAuth, uploadImage.single('image'), async (req, res) => {
+  app.post("/api/upload/image", requireProductManagerAuth, uploadImage.single('image'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
@@ -3536,7 +3536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  app.post("/api/upload/catalog", requireAuth, uploadCatalog.single('catalog'), async (req, res) => {
+  app.post("/api/upload/catalog", requireProductManagerAuth, uploadCatalog.single('catalog'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
@@ -3578,7 +3578,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // MSDS upload endpoint
-  app.post("/api/upload/msds", requireAuth, uploadMsds.single('msds'), async (req, res) => {
+  app.post("/api/upload/msds", requireProductManagerAuth, uploadMsds.single('msds'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
@@ -3620,7 +3620,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // 3D Model upload endpoint
-  app.post("/api/upload/model3d", requireAuth, uploadModel3d.single('model3d'), async (req, res) => {
+  app.post("/api/upload/model3d", requireProductManagerAuth, uploadModel3d.single('model3d'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
@@ -3660,7 +3660,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   // Company logo upload endpoint
-  app.post("/api/upload/company-logo", requireAuth, uploadLogo.single('file'), async (req, res) => {
+  app.post("/api/upload/company-logo", requireProductManagerAuth, uploadLogo.single('file'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
@@ -25608,7 +25608,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // =============================================================================
 
   // Get all categories
-  app.get("/api/admin/categories", requireAuth, async (req, res) => {
+  app.get("/api/admin/categories", requireProductManagerAuth, async (req, res) => {
     try {
       const { shopStorage } = await import('./shop-storage');
       const categories = await shopStorage.getCategories();
@@ -25620,7 +25620,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   });
 
   // Get category by ID
-  app.get("/api/admin/categories/:id", requireAuth, async (req, res) => {
+  app.get("/api/admin/categories/:id", requireProductManagerAuth, async (req, res) => {
     try {
       const { shopStorage } = await import('./shop-storage');
       const id = parseInt(req.params.id);
@@ -25739,7 +25739,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   });
 
   // Get products by category
-  app.get("/api/admin/categories/:id/products", requireAuth, async (req, res) => {
+  app.get("/api/admin/categories/:id/products", requireProductManagerAuth, async (req, res) => {
     try {
       const { shopStorage } = await import('./shop-storage');
       const id = parseInt(req.params.id);
@@ -38425,7 +38425,7 @@ momtazchem.com
   });
 
   // Check if 5-digit product code is unique
-  app.get("/api/barcode/check-product-code/:productCode", requireAuth, async (req: Request, res: Response) => {
+  app.get("/api/barcode/check-product-code/:productCode", requireProductManagerAuth, async (req: Request, res: Response) => {
     try {
       const { productCode } = req.params;
       
