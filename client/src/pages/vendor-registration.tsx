@@ -249,7 +249,7 @@ export default function VendorRegistration() {
 
                 {/* Company Name - Multilingual Tabs */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">نام شرکت *</label>
+                  <label className="text-sm font-medium">نام شرکت <span className="text-red-500">*</span></label>
                   <Tabs defaultValue="main" className="w-full">
                     <TabsList className="grid w-full grid-cols-5">
                       <TabsTrigger value="main">اصلی</TabsTrigger>
@@ -338,7 +338,7 @@ export default function VendorRegistration() {
                     name="contactEmail"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>ایمیل تماس *</FormLabel>
+                        <FormLabel>ایمیل تماس <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                           <Input type="email" placeholder="info@company.com" {...field} data-testid="input-contact-email" />
                         </FormControl>
@@ -351,7 +351,7 @@ export default function VendorRegistration() {
                     name="contactPhone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>شماره تلفن *</FormLabel>
+                        <FormLabel>شماره تلفن <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="+964 XXX XXX XXXX" {...field} data-testid="input-contact-phone" />
                         </FormControl>
@@ -368,7 +368,7 @@ export default function VendorRegistration() {
                     name="businessLicense"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>شماره جواز کسب (اختیاری)</FormLabel>
+                        <FormLabel>شماره جواز کسب <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="BL-XXXXX" {...field} data-testid="input-business-license" />
                         </FormControl>
@@ -381,7 +381,7 @@ export default function VendorRegistration() {
                     name="taxId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>شماره مالیاتی (اختیاری)</FormLabel>
+                        <FormLabel>شماره مالیاتی <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="TAX-XXXXX" {...field} data-testid="input-tax-id" />
                         </FormControl>
@@ -393,7 +393,7 @@ export default function VendorRegistration() {
 
                 {/* Description - Multilingual Tabs */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">توضیحات شرکت *</label>
+                  <label className="text-sm font-medium">توضیحات شرکت <span className="text-red-500">*</span></label>
                   <Tabs defaultValue="main" className="w-full">
                     <TabsList className="grid w-full grid-cols-5">
                       <TabsTrigger value="main">اصلی</TabsTrigger>
@@ -507,7 +507,7 @@ export default function VendorRegistration() {
                     name="address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>آدرس کامل *</FormLabel>
+                        <FormLabel>آدرس کامل <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="خیابان، کوچه، پلاک" {...field} data-testid="input-address" />
                         </FormControl>
@@ -520,7 +520,7 @@ export default function VendorRegistration() {
                     name="city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>شهر *</FormLabel>
+                        <FormLabel>شهر <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="بغداد، اربیل، ..." {...field} data-testid="input-city" />
                         </FormControl>
@@ -536,7 +536,7 @@ export default function VendorRegistration() {
                     name="country"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>کشور *</FormLabel>
+                        <FormLabel>کشور <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                           <Input {...field} data-testid="input-country" />
                         </FormControl>
@@ -627,7 +627,7 @@ export default function VendorRegistration() {
 
                 {/* User Account Information */}
                 <div className="space-y-4 pt-6 border-t">
-                  <h3 className="text-lg font-semibold">اطلاعات حساب کاربری *</h3>
+                  <h3 className="text-lg font-semibold">اطلاعات حساب کاربری <span className="text-red-500">*</span></h3>
                   <p className="text-sm text-muted-foreground">
                     این اطلاعات برای ورود به پنل فروشنده استفاده می‌شود
                   </p>
@@ -638,7 +638,7 @@ export default function VendorRegistration() {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>نام کاربری *</FormLabel>
+                          <FormLabel>نام کاربری <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
                             <Input placeholder="نام کاربری برای ورود" {...field} data-testid="input-username" />
                           </FormControl>
@@ -651,7 +651,7 @@ export default function VendorRegistration() {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>ایمیل حساب کاربری *</FormLabel>
+                          <FormLabel>ایمیل حساب کاربری <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
                             <Input type="email" placeholder="email@example.com" {...field} data-testid="input-user-email" />
                           </FormControl>
@@ -667,7 +667,7 @@ export default function VendorRegistration() {
                       name="firstName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>نام *</FormLabel>
+                          <FormLabel>نام <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
                             <Input placeholder="نام" {...field} data-testid="input-first-name" />
                           </FormControl>
@@ -680,7 +680,7 @@ export default function VendorRegistration() {
                       name="lastName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>نام خانوادگی *</FormLabel>
+                          <FormLabel>نام خانوادگی <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
                             <Input placeholder="نام خانوادگی" {...field} data-testid="input-last-name" />
                           </FormControl>
@@ -696,7 +696,7 @@ export default function VendorRegistration() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>رمز عبور *</FormLabel>
+                          <FormLabel>رمز عبور <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
                             <Input type="password" placeholder="حداقل 6 کاراکتر" {...field} data-testid="input-password" />
                           </FormControl>
@@ -709,7 +709,7 @@ export default function VendorRegistration() {
                       name="phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>شماره تلفن کاربر *</FormLabel>
+                          <FormLabel>شماره تلفن کاربر <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
                             <Input type="tel" placeholder="+964XXXXXXXXXX" {...field} data-testid="input-user-phone" />
                           </FormControl>
