@@ -852,11 +852,11 @@ export default function ProductsPage() {
     }
 
     // Validate file format - now includes GIF support
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
     if (!allowedTypes.includes(file.type)) {
       toast({
         title: "Invalid Format", 
-        description: "Only JPEG, PNG, and GIF images are allowed.",
+        description: "Only JPEG, PNG, WEBP, and GIF images are allowed.",
         variant: "destructive",
       });
       return;
@@ -3083,12 +3083,12 @@ export default function ProductsPage() {
                                   <div className="py-2">
                                     <Image className="mx-auto h-8 w-8 text-gray-400" />
                                     <p className="mt-1 text-xs text-gray-600">{t.productManagement.selectImage}</p>
-                                    <p className="text-xs text-gray-500">JPG, PNG, GIF</p>
+                                    <p className="text-xs text-gray-500">JPG, PNG, WEBP, GIF</p>
                                   </div>
                                 )}
                                 <input
                                   type="file"
-                                  accept="image/jpeg,image/jpg,image/png,image/gif"
+                                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                   onChange={(e) => {
                                     const file = e.target.files?.[0];
