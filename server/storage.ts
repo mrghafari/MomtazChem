@@ -166,11 +166,40 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0;
   }
 
+  // Barcode validation helper for showcase products
+  async checkBarcodeExists(barcode: string, excludeId?: number): Promise<boolean> {
+    if (!barcode || barcode.trim() === '') return false;
+    
+    const trimmedBarcode = barcode.trim();
+    let whereCondition = eq(showcaseProducts.barcode, trimmedBarcode);
+    
+    if (excludeId) {
+      whereCondition = and(
+        eq(showcaseProducts.barcode, trimmedBarcode),
+        sql`${showcaseProducts.id} != ${excludeId}`
+      ) as any;
+    }
+    
+    const result = await showcaseDb
+      .select({ id: showcaseProducts.id })
+      .from(showcaseProducts)
+      .where(whereCondition)
+      .limit(1);
+      
+    return result.length > 0;
+  }
+
   // Showcase Product management methods
   async createProduct(insertProduct: InsertShowcaseProduct): Promise<ShowcaseProduct> {
     // بررسی الزامی بودن بارکد
     if (!insertProduct.barcode || insertProduct.barcode.trim() === '') {
       throw new Error('خطا: بارکد الزامی است. محصولات بدون بارکد مجاز نیستند.');
+    }
+    
+    // بررسی بارکد تکراری قبل از ایجاد محصول
+    const barcodeExists = await this.checkBarcodeExists(insertProduct.barcode);
+    if (barcodeExists) {
+      throw new Error(`خطا: بارکد "${insertProduct.barcode}" قبلاً استفاده شده است. هر محصول باید بارکد منحصر به فرد داشته باشد.`);
     }
     
     // بررسی SKU تکراری قبل از ایجاد محصول
@@ -246,6 +275,14 @@ export class DatabaseStorage implements IStorage {
     // بررسی الزامی بودن بارکد در بروزرسانی (اگر مقدار داده شده)
     if (productUpdate.hasOwnProperty('barcode') && (!productUpdate.barcode || productUpdate.barcode.trim() === '')) {
       throw new Error('خطا: بارکد الزامی است. نمی‌توان بارکد را خالی گذاشت.');
+    }
+    
+    // بررسی بارکد تکراری قبل از بروزرسانی محصول
+    if (productUpdate.barcode && productUpdate.barcode.trim() !== '') {
+      const barcodeExists = await this.checkBarcodeExists(productUpdate.barcode, id);
+      if (barcodeExists) {
+        throw new Error(`خطا: بارکد "${productUpdate.barcode}" قبلاً استفاده شده است. هر محصول باید بارکد منحصر به فرد داشته باشد.`);
+      }
     }
     
     // بررسی SKU تکراری قبل از بروزرسانی محصول
