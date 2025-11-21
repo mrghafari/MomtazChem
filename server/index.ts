@@ -7,6 +7,7 @@ import backupRoutes from "./backup-routes";
 import otpRoutes from "./otp-routes";
 import s3ManagementRoutes from "./s3-management-routes";
 import { createVendorRouter } from "./vendor-routes";
+import { createAdminVendorRouter } from "./admin-vendor-routes";
 import InventoryAlertService from "./inventory-alerts";
 import { expiredOrdersCleanup } from "./expired-orders-cleanup";
 import { abandonedCartCleanup } from "./abandoned-cart-cleanup";
@@ -341,6 +342,11 @@ app.use((req, res, next) => {
     const vendorRouter = createVendorRouter();
     app.use('/api/vendor', vendorSessionMiddleware, vendorRouter);
     log('🏪 [VENDOR] Vendor marketplace routes registered');
+
+    // Register admin vendor management routes (uses unified session middleware)
+    const adminVendorRouter = createAdminVendorRouter();
+    app.use('/api/admin/vendors', adminVendorRouter);
+    log('👨‍💼 [ADMIN-VENDOR] Admin vendor management routes registered');
 
     // Register routes BEFORE Vite middleware to ensure API routes take precedence
     const server = await registerRoutes(app);

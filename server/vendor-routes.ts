@@ -420,6 +420,167 @@ export function createVendorRouter() {
     }
   });
 
+  // Create new shop product (vendor must have manage_products permission)
+  router.post("/products/shop", ...vendorProductAuth, async (req, res) => {
+    try {
+      if (!req.vendorUser) {
+        return res.status(401).json({
+          success: false,
+          message: "Not authenticated"
+        });
+      }
+
+      // Validate product data with Zod schema
+      const { insertShopProductSchema } = await import("@shared/shop-schema");
+      
+      const validationResult = insertShopProductSchema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid product data",
+          errors: validationResult.error.errors
+        });
+      }
+
+      // Import shop storage
+      const { shopStorage } = await import("./shop-storage");
+      
+      // Add vendorId to product data
+      const productData = {
+        ...validationResult.data,
+        vendorId: req.vendorUser.vendorId
+      };
+
+      const product = await shopStorage.createShopProduct(productData);
+
+      // Update vendor product count
+      await vendorStorage.updateVendorStats(req.vendorUser.vendorId);
+
+      res.json({
+        success: true,
+        message: "Product created successfully",
+        product
+      });
+    } catch (error: any) {
+      console.error("Error creating shop product:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error creating product"
+      });
+    }
+  });
+
+  // Update shop product (vendor must own the product)
+  router.patch("/products/shop/:id", ...vendorProductAuth, async (req, res) => {
+    try {
+      if (!req.vendorUser) {
+        return res.status(401).json({
+          success: false,
+          message: "Not authenticated"
+        });
+      }
+
+      const productId = parseInt(req.params.id);
+      const { shopStorage } = await import("./shop-storage");
+
+      // Verify product belongs to this vendor
+      const existingProduct = await shopStorage.getShopProductById(productId);
+      
+      if (!existingProduct) {
+        return res.status(404).json({
+          success: false,
+          message: "Product not found"
+        });
+      }
+
+      if (existingProduct.vendorId !== req.vendorUser.vendorId) {
+        return res.status(403).json({
+          success: false,
+          message: "You can only update your own products"
+        });
+      }
+
+      // Validate product data with Zod schema (partial update)
+      const { insertShopProductSchema } = await import("@shared/shop-schema");
+      
+      const validationResult = insertShopProductSchema.partial().safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid product data",
+          errors: validationResult.error.errors
+        });
+      }
+
+      // Don't allow changing vendorId
+      const { vendorId, ...updateData } = validationResult.data;
+
+      const product = await shopStorage.updateShopProduct(productId, updateData);
+
+      res.json({
+        success: true,
+        message: "Product updated successfully",
+        product
+      });
+    } catch (error: any) {
+      console.error("Error updating shop product:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error updating product"
+      });
+    }
+  });
+
+  // Delete shop product (vendor must own the product and have vendor_owner role)
+  router.delete("/products/shop/:id", ...vendorOwnerAuth, async (req, res) => {
+    try {
+      if (!req.vendorUser) {
+        return res.status(401).json({
+          success: false,
+          message: "Not authenticated"
+        });
+      }
+
+      const productId = parseInt(req.params.id);
+      const { shopStorage } = await import("./shop-storage");
+
+      // Verify product belongs to this vendor
+      const existingProduct = await shopStorage.getShopProductById(productId);
+      
+      if (!existingProduct) {
+        return res.status(404).json({
+          success: false,
+          message: "Product not found"
+        });
+      }
+
+      if (existingProduct.vendorId !== req.vendorUser.vendorId) {
+        return res.status(403).json({
+          success: false,
+          message: "You can only delete your own products"
+        });
+      }
+
+      await shopStorage.deleteShopProduct(productId);
+
+      // Update vendor product count
+      await vendorStorage.updateVendorStats(req.vendorUser.vendorId);
+
+      res.json({
+        success: true,
+        message: "Product deleted successfully"
+      });
+    } catch (error: any) {
+      console.error("Error deleting shop product:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error deleting product"
+      });
+    }
+  });
+
   // Get vendor statistics
   router.get("/statistics", ...vendorAuth, async (req, res) => {
     try {
