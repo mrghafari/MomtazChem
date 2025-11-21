@@ -233,7 +233,7 @@ export default function VendorDashboard() {
                       مدیریت و ویرایش محصولات فروشگاه
                     </CardDescription>
                   </div>
-                  <Link href="/admin/products">
+                  <Link href="/vendor/products/new">
                     <Button data-testid="button-add-product">
                       <Plus className="w-4 h-4 mr-2" />
                       افزودن محصول
