@@ -237,29 +237,6 @@ export function createVendorRouter() {
         });
       }
 
-      // Handle super admin separately
-      if (req.vendorUser.role === "super_admin") {
-        return res.json({
-          success: true,
-          user: {
-            id: 0,
-            username: "Super Admin",
-            email: req.vendorUser.email,
-            firstName: "Super",
-            lastName: "Admin",
-            phone: null,
-            role: "super_admin",
-            permissions: ["all"],
-            vendorId: 0,
-            vendorName: "Momtazchem",
-            vendorEmail: req.vendorUser.email,
-            vendorApproved: true,
-            vendorActive: true,
-            isSuperAdmin: true
-          }
-        });
-      }
-
       // Load full vendor user data
       const vendorUser = await vendorStorage.getVendorUserById(req.vendorUser.id);
       const vendor = await vendorStorage.getVendorById(req.vendorUser.vendorId);
@@ -403,37 +380,19 @@ export function createVendorRouter() {
 
       const { db } = await import("./db");
       const { showcaseProducts: products } = await import("@shared/showcase-schema");
-      const { eq, isNull, or } = await import("drizzle-orm");
+      const { eq } = await import("drizzle-orm");
 
-      // Super admin sees ALL products (company + all vendors)
-      // Regular vendor sees only their products
-      let allProducts;
-      if (req.vendorUser.role === "super_admin") {
-        // Super admin: show all products
-        allProducts = await db
-          .select()
-          .from(products)
-          .orderBy(products.createdAt);
-      } else {
-        // Regular vendor: show only their products
-        allProducts = await db
-          .select()
-          .from(products)
-          .where(eq(products.vendorId, req.vendorUser.vendorId))
-          .orderBy(products.createdAt);
-      }
-
-      // Separate company products (vendor_id = null) from vendor products
-      const companyProducts = allProducts.filter(p => p.vendorId === null);
-      const vendorProducts = allProducts.filter(p => p.vendorId !== null);
+      // Vendor sees ONLY their own products (filtered by vendorId)
+      const vendorProducts = await db
+        .select()
+        .from(products)
+        .where(eq(products.vendorId, req.vendorUser.vendorId))
+        .orderBy(products.createdAt);
 
       res.json({
         success: true,
-        products: {
-          showcase: companyProducts, // Company products
-          shop: vendorProducts // Vendor products
-        },
-        totalCount: allProducts.length
+        products: vendorProducts,
+        totalCount: vendorProducts.length
       });
     } catch (error: any) {
       console.error("Error getting vendor products:", error);
@@ -492,10 +451,10 @@ export function createVendorRouter() {
       const { db } = await import("./db");
       const { showcaseProducts: products } = await import("@shared/showcase-schema");
       
-      // Add vendor_id to product data
+      // Add vendor_id to product data - always use vendor's ID
       const productData = {
         ...req.body,
-        vendorId: req.vendorUser.role === "super_admin" ? null : req.vendorUser.vendorId,
+        vendorId: req.vendorUser.vendorId,
         createdAt: new Date(),
         updatedAt: new Date()
       };
