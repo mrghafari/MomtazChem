@@ -104,8 +104,16 @@ export default function VendorDashboard() {
   }
 
   const vendor = vendorData.user;
-  const products = productsData?.products || productsData?.data || [];
-  const orders = ordersData?.orders || ordersData?.data || [];
+  const products = Array.isArray(productsData?.products) 
+    ? productsData.products 
+    : Array.isArray(productsData?.data) 
+      ? productsData.data 
+      : [];
+  const orders = Array.isArray(ordersData?.orders)
+    ? ordersData.orders
+    : Array.isArray(ordersData?.data)
+      ? ordersData.data
+      : [];
   const stats = statsData?.stats || statsData?.data || {
     totalProducts: 0,
     activeProducts: 0,
