@@ -1,0 +1,49 @@
+
+nothing to commit, working tree clean
+Enumerating objects: 563, done.
+Counting objects: 100% (563/563), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (521/521), done.
+Writing objects: 100% (523/523), 2.49 MiB | 5.67 MiB/s, done.
+Total 523 (delta 445), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (445/445), completed with 33 local objects.
+remote: error: GH013: Repository rule violations found for refs/heads/main.
+remote: 
+remote: - GITHUB PUSH PROTECTION
+remote:   —————————————————————————————————————————
+remote:     Resolve the following violations before pushing again
+remote: 
+remote:     - Push cannot contain secrets
+remote: 
+remote:     
+remote:      (?) Learn how to resolve a blocked push
+remote:      https://docs.github.com/code-security/secret-scanning/working-with-secret-scanning-and-push-protection/working-with-push-protection-from-the-command-line#resolving-a-blocked-push
+remote:     
+remote:     
+remote:       —— Amazon AWS Access Key ID ——————————————————————————
+remote:        locations:
+remote:          - commit: faeaf11e7d2143c7a19555a55473030550738cec
+remote:            path: server/update-aws-credentials.ts:16
+remote:          - commit: 108d407b48c8f718d6c84ef68abbc0017083c80f
+remote:            path: server/update-final-aws-credentials.ts:16
+remote:     
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.
+remote:        https://github.com/mrghafari/MomtazChem/security/secret-scanning/unblock-secret/35jT70xcsth9WbjKSmvOcjl5Ko6
+remote:     
+remote:     
+remote:       —— Amazon AWS Secret Access Key ——————————————————————
+remote:        locations:
+remote:          - commit: faeaf11e7d2143c7a19555a55473030550738cec
+remote:            path: server/update-aws-credentials.ts:17
+remote:          - commit: 108d407b48c8f718d6c84ef68abbc0017083c80f
+remote:            path: server/update-final-aws-credentials.ts:17
+remote:     
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.
+remote:        https://github.com/mrghafari/MomtazChem/security/secret-scanning/unblock-secret/35jT71bx7HJiYJ54mZIYtjO62xU
+remote:     
+remote: 
+remote: 
+To https://github.com/mrghafari/MomtazChem
+ ! [remote rejected]   main -> main (push declined due to repository rule violations)
+error: failed to push some refs to 'https://github.com/mrghafari/MomtazChem'
+~/workspace$ ^C
