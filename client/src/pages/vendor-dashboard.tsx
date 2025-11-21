@@ -49,10 +49,10 @@ export default function VendorDashboard() {
     },
   });
 
-  // Fetch vendor orders
+  // Fetch vendor orders - disabled for now (not implemented yet)
   const { data: ordersData, isLoading: isLoadingOrders } = useQuery({
     queryKey: ["/api/vendor/orders"],
-    enabled: !!vendorData?.user,
+    enabled: false, // Disabled - endpoint not implemented yet
     queryFn: async () => {
       const response = await fetch("/api/vendor/orders");
       if (!response.ok) throw new Error("خطا در دریافت سفارشات");
@@ -62,10 +62,10 @@ export default function VendorDashboard() {
 
   // Fetch stats
   const { data: statsData } = useQuery({
-    queryKey: ["/api/vendor/stats"],
+    queryKey: ["/api/vendor/statistics"],
     enabled: !!vendorData?.user,
     queryFn: async () => {
-      const response = await fetch("/api/vendor/stats");
+      const response = await fetch("/api/vendor/statistics");
       if (!response.ok) throw new Error("خطا در دریافت آمار");
       return response.json();
     },

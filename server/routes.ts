@@ -168,7 +168,7 @@ declare module "express-session" {
   interface SessionData {
     adminId?: number;
     customerId?: number;
-    customUserId?: number;
+    customUserId?: string | number;
     customUserEmail?: string;
     customUserName?: string;
     customUserRole?: string;

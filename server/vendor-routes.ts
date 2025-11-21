@@ -234,7 +234,7 @@ export function createVendorRouter() {
 
   // Vendor logout
   router.post("/auth/logout", requireVendorAuth, (req, res) => {
-    req.session.vendorUserId = null;
+    delete req.session.vendorUserId;
     req.session.destroy((err) => {
       if (err) {
         console.error("Error destroying session:", err);

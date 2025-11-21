@@ -76,7 +76,7 @@ export async function loadVendorUser(
 
     if (!vendorUser || !vendorUser.isActive) {
       // Clear invalid session
-      req.session.vendorUserId = null;
+      delete req.session.vendorUserId;
       return res.status(401).json({
         success: false,
         message: "Vendor user not found or inactive"
@@ -244,6 +244,6 @@ declare module "express-session" {
   interface SessionData {
     vendorUserId?: number | string;
     isSuperAdmin?: boolean;
-    customUserId?: string;
+    customUserId?: string | number;
   }
 }
