@@ -24,9 +24,9 @@ export default function VendorDashboard() {
 
   // Fetch vendor profile
   const { data: vendorData, isLoading: isLoadingVendor } = useQuery({
-    queryKey: ["/api/vendor/me"],
+    queryKey: ["/api/vendor/auth/me"],
     queryFn: async () => {
-      const response = await fetch("/api/vendor/me");
+      const response = await fetch("/api/vendor/auth/me");
       if (!response.ok) {
         if (response.status === 401) {
           setLocation("/vendor/login");
